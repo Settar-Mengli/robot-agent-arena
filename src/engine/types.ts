@@ -1,5 +1,57 @@
 export type Seed = number | string;
 
+export type AgentId = string;
+export type SkillId = string;
+
+export type AgentModule =
+  | "coreIdentity"
+  | "memory"
+  | "sigilSecurity"
+  | "rules"
+  | "strategy";
+
+export interface AgentModules {
+  coreIdentity: string;
+  memory: string;
+  sigilSecurity: string;
+  rules: string;
+  strategy: string;
+}
+
+export interface AgentConfig {
+  agentId: AgentId;
+  displayName: string;
+  modules: AgentModules;
+  skillIds: SkillId[];
+}
+
+export interface SkillDefinition {
+  skillId: SkillId;
+  displayName: string;
+  module: AgentModule;
+  summary: string;
+}
+
+export interface PlayerUseSkillAction {
+  type: "use-skill";
+  skillId: SkillId;
+}
+
+export type PlayerAction = PlayerUseSkillAction;
+
+export type BattleSessionStatus = "awaiting-player-action" | "completed";
+
+export interface BattleSession {
+  sessionId: string;
+  seed: Seed;
+  turn: number;
+  maxTurns: number;
+  status: BattleSessionStatus;
+  player: AgentConfig;
+  cpu: AgentConfig;
+  lastPlayerAction?: PlayerAction;
+}
+
 export interface RngState {
   seed: Seed;
   state: number;
