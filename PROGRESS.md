@@ -2,9 +2,9 @@
 
 ## Status Snapshot
 - Date: 2026-06-04
-- Phase: Planning and governance setup
-- Overall status: Pre-implementation by design
-- Code status: No app code started yet
+- Phase: Milestone 1 minimal engine scaffold complete
+- Overall status: M1 implemented, verified, and pushed
+- Code status: Minimal engine foundation scaffold in place
 
 ## Completed
 - Repository baseline exists.
@@ -16,24 +16,27 @@
 - Technology direction is locked.
 - Engine-first architecture is locked.
 - MVP scope and exclusions are locked.
+- Milestone 1 minimal engine scaffold was completed and pushed.
+- Commit: 095fa5f
+- Message: chore: add minimal engine scaffold
+- npm install succeeded.
+- npm run typecheck passed.
+- npm test passed.
+- 2 test files passed.
+- 7 tests passed total.
+- package-lock.json was created.
+- 1 critical npm audit vulnerability was reported but not fixed yet.
+- Working tree was clean after push.
 
 ## In Progress
-- Drafting and approval flow for foundational project memory files.
+- Milestone 2 planning preparation.
 
 ## Exact Next Step
-Create the approved project memory files only:
-- ROADMAP.md
-- PROGRESS.md
-- DECISIONS.md
-- AGENT_RULES.md
+Plan the next small engine increment: domain types for AgentConfig, SkillDefinition, BattleSession, and PlayerAction. Plan first only; no edits.
 
-Do not create app code yet.
-Do not install packages yet.
-Do not modify README.md yet.
-
-## Next (After Files Exist)
-1. Keep implementation paused until explicit approval to start app code.
-2. Start engine-first task breakdown from ROADMAP milestones.
+## Next
+1. Keep architecture boundaries locked to pure TypeScript engine work.
+2. Draft the smallest possible type-only increment plan before implementation.
 
 ## Blockers
 - None currently.
@@ -42,3 +45,5 @@ Do not modify README.md yet.
 - 2026-06-04: Initial project constraints and direction captured.
 - 2026-06-04: Foundational memory files drafted and approved.
 - 2026-06-04: Root memory files created.
+- 2026-06-04: Minimal engine scaffold implemented and verified via npm install, npm run typecheck, and npm test.
+- 2026-06-04: Commit 095fa5f (chore: add minimal engine scaffold) pushed to main; working tree clean after push.
