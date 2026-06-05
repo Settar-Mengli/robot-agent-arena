@@ -2,9 +2,9 @@
 
 ## Status Snapshot
 - Date: 2026-06-05
-- Phase: Milestone 2 lifecycle API increment complete
-- Overall status: M2 lifecycle API increment implemented, verified, and pushed
-- Code status: Engine session lifecycle API shape is in place
+- Phase: Milestone 2 lifecycle and validation increments complete
+- Overall status: M2 validation increment implemented, verified, and pushed
+- Code status: Engine session lifecycle API shape and validation guards are in place
 
 ## Completed
 - Repository baseline exists.
@@ -24,11 +24,14 @@
 - M2 lifecycle API increment was completed and pushed.
 - Commit: 35d743a
 - Message: feat: add engine session lifecycle api
+- Validation increment was completed and pushed.
+- Commit: 0d37d5a
+- Message: feat: add engine session validation guards
 - npm install succeeded.
 - npm run typecheck passed.
 - npm test passed.
 - 3 test files passed.
-- 19 tests passed total.
+- 26 tests passed total.
 - package-lock.json was created.
 - Pre-implementation audit completed.
 - Repository assessed as safe to proceed after documentation sync.
@@ -36,14 +39,14 @@
 - Working tree was clean after push.
 
 ## In Progress
-- Planning the next small engine increment after M2 lifecycle API completion.
+- Planning the next small engine increment after validation guard completion.
 
 ## Exact Next Step
-Plan the next small engine increment: add minimal validation for BattleSession inputs and AgentConfig shape. Plan first only; no edits.
+Plan the next small engine increment: add skill catalog data shape and minimal validation for SkillDefinition. Plan first only; no edits.
 
 ## Next
 1. Keep architecture boundaries locked to pure TypeScript engine work.
-2. Draft the smallest possible validation-only engine plan before implementation.
+2. Draft the smallest possible SkillDefinition validation plan before implementation.
 
 ## Blockers
 - None currently.
@@ -58,3 +61,4 @@ Plan the next small engine increment: add minimal validation for BattleSession i
 - 2026-06-05: Pre-implementation audit completed; repo marked safe to proceed after documentation sync.
 - 2026-06-05: Critical npm audit vulnerability remains tracked for later investigation (no fix applied).
 - 2026-06-05: M2 lifecycle API increment completed and pushed in commit 35d743a (feat: add engine session lifecycle api); npm run typecheck and npm test passed with 3 test files and 19 total tests; working tree clean after push.
+- 2026-06-05: Validation increment completed and pushed in commit 0d37d5a (feat: add engine session validation guards); npm run typecheck and npm test passed with 3 test files and 26 total tests; working tree clean after push.
