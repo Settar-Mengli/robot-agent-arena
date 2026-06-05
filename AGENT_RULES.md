@@ -4,10 +4,11 @@
 Operational rules for all contributors and coding agents working in this repository.
 
 ## Current Phase Lock
-Until explicit owner approval to start implementation:
-- Do not create app code.
+Engine implementation has started for the pure TypeScript engine scope.
+Until explicit owner approval to start UI/app implementation:
+- Do not create UI or app code.
 - Do not install packages.
-- Do not create React or Vite project files.
+- Do not create React screens/components, app wiring, or browser-facing workflow code.
 - Do not modify README.md.
 - Do not expand MVP scope.
 - Do not run terminal commands unless the owner is asked first and approves.
