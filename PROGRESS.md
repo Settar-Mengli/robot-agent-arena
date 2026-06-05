@@ -2,9 +2,9 @@
 
 ## Status Snapshot
 - Date: 2026-06-05
-- Phase: Milestone 1 engine scaffold and domain types complete; M2 planning prep
-- Overall status: Safe to proceed after documentation sync
-- Code status: Engine foundation scaffold and core domain types are in place
+- Phase: Milestone 2 lifecycle API increment complete
+- Overall status: M2 lifecycle API increment implemented, verified, and pushed
+- Code status: Engine session lifecycle API shape is in place
 
 ## Completed
 - Repository baseline exists.
@@ -21,11 +21,14 @@
 - Message: chore: add minimal engine scaffold
 - Domain types for AgentConfig, SkillDefinition, BattleSession, and PlayerAction already exist and were pushed.
 - Commit: 3935314
+- M2 lifecycle API increment was completed and pushed.
+- Commit: 35d743a
+- Message: feat: add engine session lifecycle api
 - npm install succeeded.
 - npm run typecheck passed.
 - npm test passed.
-- 2 test files passed.
-- 7 tests passed total.
+- 3 test files passed.
+- 19 tests passed total.
 - package-lock.json was created.
 - Pre-implementation audit completed.
 - Repository assessed as safe to proceed after documentation sync.
@@ -33,14 +36,14 @@
 - Working tree was clean after push.
 
 ## In Progress
-- Milestone 2 planning preparation after documentation sync.
+- Planning the next small engine increment after M2 lifecycle API completion.
 
 ## Exact Next Step
-Plan the smallest M2 engine increment: session lifecycle API shape for initBattle, submitPlayerAction, isBattleOver, finalizeBattle, and resolveBattle. Plan first only; no edits.
+Plan the next small engine increment: add minimal validation for BattleSession inputs and AgentConfig shape. Plan first only; no edits.
 
 ## Next
 1. Keep architecture boundaries locked to pure TypeScript engine work.
-2. Draft the smallest possible session lifecycle API shape plan before implementation.
+2. Draft the smallest possible validation-only engine plan before implementation.
 
 ## Blockers
 - None currently.
@@ -54,3 +57,4 @@ Plan the smallest M2 engine increment: session lifecycle API shape for initBattl
 - 2026-06-05: Domain types already confirmed present and previously pushed in commit 3935314.
 - 2026-06-05: Pre-implementation audit completed; repo marked safe to proceed after documentation sync.
 - 2026-06-05: Critical npm audit vulnerability remains tracked for later investigation (no fix applied).
+- 2026-06-05: M2 lifecycle API increment completed and pushed in commit 35d743a (feat: add engine session lifecycle api); npm run typecheck and npm test passed with 3 test files and 19 total tests; working tree clean after push.
