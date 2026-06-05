@@ -7,7 +7,7 @@ import {
   resolveBattle,
   submitPlayerAction
 } from "../engine";
-import type { AgentConfig } from "../engine/types";
+import type { AgentConfig, BattleSession } from "../engine/types";
 
 const playerConfig: AgentConfig = {
   agentId: "agent-player-1",
@@ -111,5 +111,71 @@ describe("session lifecycle API shape", () => {
     expect(resolvedA.status).toBe("completed");
     expect(resolvedA.turn).toBe(resolvedA.maxTurns);
     expect(isBattleOver(resolvedA)).toBe(true);
+  });
+});
+
+describe("session lifecycle validation", () => {
+  it("throws when initBattle receives an empty configA.agentId", () => {
+    const invalidConfigA: AgentConfig = {
+      ...playerConfig,
+      agentId: ""
+    };
+
+    expect(() => initBattle(invalidConfigA, cpuConfig, "seed-invalid-a")).toThrow(TypeError);
+  });
+
+  it("throws when initBattle receives an invalid configB.modules shape", () => {
+    const invalidConfigB = {
+      ...cpuConfig,
+      modules: {
+        ...cpuConfig.modules,
+        strategy: 42
+      }
+    } as unknown as AgentConfig;
+
+    expect(() => initBattle(playerConfig, invalidConfigB, "seed-invalid-b")).toThrow(TypeError);
+  });
+
+  it("throws when initBattle receives empty skillIds entries", () => {
+    const invalidConfigA: AgentConfig = {
+      ...playerConfig,
+      skillIds: ["skill-signal-burst", ""]
+    };
+
+    expect(() => initBattle(invalidConfigA, cpuConfig, "seed-invalid-c")).toThrow(TypeError);
+  });
+
+  it("throws when submitPlayerAction receives an empty skillId", () => {
+    const session = initBattle(playerConfig, cpuConfig, "seed-invalid-d");
+
+    expect(() => submitPlayerAction(session, "")).toThrow(TypeError);
+  });
+
+  it("throws when submitPlayerAction receives an invalid session turn/maxTurns relationship", () => {
+    const invalidSession = {
+      ...initBattle(playerConfig, cpuConfig, "seed-invalid-e"),
+      turn: 3,
+      maxTurns: 2
+    } as BattleSession;
+
+    expect(() => submitPlayerAction(invalidSession, "skill-signal-burst")).toThrow(RangeError);
+  });
+
+  it("throws when isBattleOver receives an invalid status", () => {
+    const invalidSession = {
+      ...initBattle(playerConfig, cpuConfig, "seed-invalid-f"),
+      status: "invalid-status"
+    } as unknown as BattleSession;
+
+    expect(() => isBattleOver(invalidSession)).toThrow(TypeError);
+  });
+
+  it("throws when finalizeBattle receives an invalid session shape", () => {
+    const invalidSession = {
+      ...initBattle(playerConfig, cpuConfig, "seed-invalid-g"),
+      player: null
+    } as unknown as BattleSession;
+
+    expect(() => finalizeBattle(invalidSession)).toThrow(TypeError);
   });
 });
