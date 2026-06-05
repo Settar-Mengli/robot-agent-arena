@@ -5,9 +5,11 @@ import {
   initBattle,
   isBattleOver,
   resolveBattle,
-  submitPlayerAction
+  submitPlayerAction,
+  validateSkillCatalogInput,
+  validateSkillDefinitionInput
 } from "../engine";
-import type { AgentConfig, BattleSession } from "../engine/types";
+import type { AgentConfig, BattleSession, SkillDefinition } from "../engine/types";
 
 const playerConfig: AgentConfig = {
   agentId: "agent-player-1",
@@ -177,5 +179,71 @@ describe("session lifecycle validation", () => {
     } as unknown as BattleSession;
 
     expect(() => finalizeBattle(invalidSession)).toThrow(TypeError);
+  });
+});
+
+describe("skill definition validation", () => {
+  const validSkill: SkillDefinition = {
+    skillId: "skill-signal-burst",
+    displayName: "Signal Burst",
+    module: "strategy",
+    summary: "Applies focused pressure for one turn."
+  };
+
+  it("accepts a minimal valid SkillDefinition", () => {
+    expect(() => validateSkillDefinitionInput(validSkill)).not.toThrow();
+  });
+
+  it("throws when skillId is empty", () => {
+    expect(() =>
+      validateSkillDefinitionInput({
+        ...validSkill,
+        skillId: ""
+      })
+    ).toThrow(TypeError);
+  });
+
+  it("throws when displayName is empty", () => {
+    expect(() =>
+      validateSkillDefinitionInput({
+        ...validSkill,
+        displayName: ""
+      })
+    ).toThrow(TypeError);
+  });
+
+  it("throws when summary is empty", () => {
+    expect(() =>
+      validateSkillDefinitionInput({
+        ...validSkill,
+        summary: ""
+      })
+    ).toThrow(TypeError);
+  });
+
+  it("throws when module is invalid", () => {
+    expect(() =>
+      validateSkillDefinitionInput({
+        ...validSkill,
+        module: "invalid-module"
+      } as unknown as SkillDefinition)
+    ).toThrow(TypeError);
+  });
+
+  it("throws when catalog skills is not an array", () => {
+    expect(() => validateSkillCatalogInput({ skills: {} })).toThrow(TypeError);
+  });
+
+  it("throws when catalog contains invalid skill entries", () => {
+    expect(() =>
+      validateSkillCatalogInput({
+        skills: [
+          {
+            ...validSkill,
+            skillId: ""
+          }
+        ]
+      })
+    ).toThrow(TypeError);
   });
 });

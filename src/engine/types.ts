@@ -32,6 +32,10 @@ export interface SkillDefinition {
   summary: string;
 }
 
+export interface SkillCatalog {
+  skills: SkillDefinition[];
+}
+
 export interface PlayerUseSkillAction {
   type: "use-skill";
   skillId: SkillId;
