@@ -4,7 +4,6 @@ import {
   finalizeBattle,
   initBattle,
   isBattleOver,
-  resolveBattle,
   submitPlayerAction
 } from "../engine";
 import type { AgentConfig, BattleSession } from "../engine/types";
@@ -103,15 +102,6 @@ describe("session lifecycle API shape", () => {
     expect(completedAgain).toEqual(completed);
   });
 
-  it("returns a deterministic completed stub session from resolveBattle", () => {
-    const resolvedA = resolveBattle(playerConfig, cpuConfig, "seed-6", 4);
-    const resolvedB = resolveBattle(playerConfig, cpuConfig, "seed-6", 4);
-
-    expect(resolvedA).toEqual(resolvedB);
-    expect(resolvedA.status).toBe("completed");
-    expect(resolvedA.turn).toBe(resolvedA.maxTurns);
-    expect(isBattleOver(resolvedA)).toBe(true);
-  });
 });
 
 describe("session lifecycle validation", () => {

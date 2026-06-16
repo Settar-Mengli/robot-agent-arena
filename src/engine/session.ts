@@ -3,8 +3,8 @@ import { MVP_SKILL_CATALOG } from "./skills";
 import type { AgentConfig, BattleSession, Seed, SkillId } from "./types";
 import {
   validateAgentConfigInput,
+  validateAgentSkillIdInput,
   validateBattleSessionInput,
-  validateSkillIdInput
 } from "./validation";
 
 function toMaxTurns(maxTurns: number | undefined): number {
@@ -49,7 +49,7 @@ export function initBattle(
 
 export function submitPlayerAction(session: BattleSession, skillId: SkillId): BattleSession {
   validateBattleSessionInput(session, MVP_SKILL_CATALOG);
-  validateSkillIdInput(skillId);
+  validateAgentSkillIdInput(session.player, skillId);
 
   const nextSession: BattleSession = {
     ...session,
@@ -85,18 +85,4 @@ export function finalizeBattle(session: BattleSession): BattleSession {
   validateBattleSessionInput(finalizedSession, MVP_SKILL_CATALOG);
 
   return finalizedSession;
-}
-
-export function resolveBattle(
-  configA: AgentConfig,
-  configB: AgentConfig,
-  seed: Seed,
-  maxTurns?: number
-): BattleSession {
-  const session = initBattle(configA, configB, seed, maxTurns);
-
-  return finalizeBattle({
-    ...session,
-    turn: Math.max(session.turn, session.maxTurns)
-  });
 }

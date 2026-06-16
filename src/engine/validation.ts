@@ -88,6 +88,18 @@ export function validateSkillIdInput(
   assertNonEmptyString(skillId, label);
 }
 
+export function validateAgentSkillIdInput(
+  agent: AgentConfig,
+  skillId: unknown,
+  label = "skillId"
+): asserts skillId is SkillId {
+  validateSkillIdInput(skillId, label);
+
+  if (!agent.skillIds.includes(skillId)) {
+    throw new TypeError(`${label} must reference a skill ID loaded by the agent.`);
+  }
+}
+
 export function validateAgentConfigInput(
   agent: unknown,
   catalog: SkillCatalog,
@@ -179,6 +191,10 @@ export function validateBattleSessionInput(
       throw new TypeError("battleSession.lastPlayerAction.type must be 'use-skill'.");
     }
 
-    validateSkillIdInput(session.lastPlayerAction.skillId, "battleSession.lastPlayerAction.skillId");
+    validateAgentSkillIdInput(
+      session.player,
+      session.lastPlayerAction.skillId,
+      "battleSession.lastPlayerAction.skillId"
+    );
   }
 }

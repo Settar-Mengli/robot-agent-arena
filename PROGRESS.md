@@ -2,9 +2,9 @@
 
 ## Status Snapshot
 - Date: 2026-06-16
-- Baseline commit before this task: 106a684 (`feat: add skill catalog validation helpers`)
-- Current state: documentation records consolidated; canonical MVP skill catalog implemented; catalog-aware agent config validation integrated into `initBattle`
-- Verification: `npm run typecheck` passed; `npm test` passed with 4 test files and 37 tests
+- Baseline commit before M3: b099800 (`feat: add validated mvp skill catalog`)
+- Current state: deterministic full-match simulation implemented; `resolveBattle` now owns simulation behavior from `src/engine/simulation.ts`
+- Verification: `npm run typecheck` passed; `npm test` passed with 5 test files and 43 tests
 - Audit verdict: no critical architecture conflict found
 
 ## Completed
@@ -21,9 +21,12 @@
 - Runtime validation ownership was centralized in `src/engine/validation.ts`.
 - `initBattle` now validates agent configs against the canonical catalog.
 - Catalog and agent config validation tests were added.
+- M3 deterministic simulation was implemented using the existing session lifecycle and seeded placeholder player action selection.
+- `session.ts` now stays lifecycle-only; `resolveBattle` moved to simulation ownership.
+- Simulation tests were added for determinism, turn caps, completion, invalid configs, empty loadouts, and manual lifecycle consistency.
 
 ## Current Work
-- Final diff audit, commit, and push for the validated MVP skill catalog milestone.
+- Final diff audit, commit, and push for the M3 deterministic full-match simulation milestone.
 
 ## Blockers
 - None.
@@ -33,19 +36,13 @@
 - Do not run `npm audit fix` or upgrade dependencies during the current engine milestone.
 
 ## Changed Files In Current Work
-- ROADMAP.md
 - PROGRESS.md
-- DECISIONS.md
-- AGENT_RULES.md
-- src/engine/constants.ts
 - src/engine/index.ts
 - src/engine/session.ts
-- src/engine/skills.ts
-- src/engine/types.ts
+- src/engine/simulation.ts
 - src/engine/validation.ts
-- src/__tests__/constants.test.ts
 - src/__tests__/session-lifecycle.test.ts
-- src/__tests__/skill-catalog.test.ts
+- src/__tests__/simulation.test.ts
 
 ## Exact Next Step
-After commit and push, plan M3 deterministic full-match simulation without adding UI, reports, CPU strategy, damage math, or non-MVP systems beyond the approved simulation scope.
+After commit and push, plan the next small engine increment for explicit turn/action progression semantics before adding CPU strategy, damage math, winner logic, reports, or UI.
