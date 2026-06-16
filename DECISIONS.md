@@ -119,3 +119,16 @@ Separate ownership avoids duplicated validators and prevents data definitions fr
 
 Consequences:
 Canonical catalog data remains data-only, validation stays pure TypeScript, and session code delegates shape/catalog checks before creating or transitioning sessions.
+
+## D-010 Combat Engine Rules
+Date: 2026-06-16
+Status: Accepted
+
+Decision:
+Use deterministic combat rules for the M4 engine slice: unaffordable selected skills resolve as `fallback-stabilize`, actions resolve in player-then-CPU order, CPU action is skipped if the player action completes the battle, turn-limit outcomes compare health first and energy second before declaring a draw, and combat module ownership stays split across session lifecycle, combat resolution, outcome determination, simulation orchestration, and validation.
+
+Rationale:
+The combat slice needs complete deterministic battle resolution without introducing CPU strategy, UI, reports, damage variants, or non-MVP systems.
+
+Consequences:
+`session.ts` remains lifecycle-only, `combat.ts` owns action resolution helpers, `outcome.ts` owns completion and winner rules, `simulation.ts` owns orchestration, and `validation.ts` owns guards for catalog and config shapes.

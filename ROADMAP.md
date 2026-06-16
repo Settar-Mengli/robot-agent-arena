@@ -44,12 +44,17 @@
 - Add unit tests for deterministic behavior, boundary cases, and battle completion.
 - Validate consistency between session flow and simulation flow.
 
-### M4: UI Integration Layer
+### M4: Combat Engine Vertical Slice
+- Implement deterministic combatant state, action resolution, and outcome rules.
+- Resolve complete battle simulations into ordered turn histories.
+- Keep combat, outcome, simulation, validation, and session lifecycle ownership separate.
+
+### M5: UI Integration Layer
 - Build state/store integration with strict separation from engine logic.
 - Implement 4 MVP screens and core interaction loops.
 - Ensure UI calls store and lib functions only for workflows.
 
-### M5: Persistence and Reporting
+### M6: Persistence and Reporting
 - Add one local save slot using localStorage.
 - Implement post-match report content with fictional vocabulary.
 - Validate complete MVP flow from Home to Report.
