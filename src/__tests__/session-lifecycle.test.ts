@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MAX_TURNS, MAX_TURNS } from "../engine/constants";
 import {
+  advanceBattleTurn,
   finalizeBattle,
   initBattle,
   isBattleOver,
@@ -66,12 +67,21 @@ describe("session lifecycle API shape", () => {
     expect(session.lastPlayerAction).toBeUndefined();
   });
 
-  it("does not enforce one-action-per-step yet", () => {
+  it("rejects duplicate player actions before turn advancement", () => {
     const session = initBattle(playerConfig, cpuConfig, "seed-3");
     const first = submitPlayerAction(session, "skill-core-identity");
-    const second = submitPlayerAction(first, "skill-null-pulse");
 
-    expect(second.lastPlayerAction?.skillId).toBe("skill-null-pulse");
+    expect(() => submitPlayerAction(first, "skill-null-pulse")).toThrow(RangeError);
+  });
+
+  it("advances the turn and clears the player action", () => {
+    const session = initBattle(playerConfig, cpuConfig, "seed-3b", 3);
+    const submitted = submitPlayerAction(session, "skill-core-identity");
+    const advanced = advanceBattleTurn(submitted);
+
+    expect(advanced.turn).toBe(2);
+    expect(advanced.lastPlayerAction).toBeUndefined();
+    expect(submitted.lastPlayerAction?.skillId).toBe("skill-core-identity");
   });
 
   it("checks battle completion using status or max turn cap", () => {
@@ -100,6 +110,12 @@ describe("session lifecycle API shape", () => {
 
     expect(completed.status).toBe("completed");
     expect(completedAgain).toEqual(completed);
+  });
+
+  it("rejects player actions after completion", () => {
+    const session = finalizeBattle(initBattle(playerConfig, cpuConfig, "seed-5b"));
+
+    expect(() => submitPlayerAction(session, "skill-core-identity")).toThrow(RangeError);
   });
 
 });
@@ -167,5 +183,14 @@ describe("session lifecycle validation", () => {
     } as unknown as BattleSession;
 
     expect(() => finalizeBattle(invalidSession)).toThrow(TypeError);
+  });
+
+  it("throws when advanceBattleTurn would exceed maxTurns", () => {
+    const session = submitPlayerAction(
+      initBattle(playerConfig, cpuConfig, "seed-invalid-h", 1),
+      "skill-core-identity"
+    );
+
+    expect(() => advanceBattleTurn(session)).toThrow(RangeError);
   });
 });

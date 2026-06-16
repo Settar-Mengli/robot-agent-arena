@@ -51,6 +51,14 @@ export function submitPlayerAction(session: BattleSession, skillId: SkillId): Ba
   validateBattleSessionInput(session, MVP_SKILL_CATALOG);
   validateAgentSkillIdInput(session.player, skillId);
 
+  if (session.status === "completed") {
+    throw new RangeError("completed battle sessions cannot accept player actions.");
+  }
+
+  if (session.lastPlayerAction !== undefined) {
+    throw new RangeError("battleSession already has a player action for the current turn.");
+  }
+
   const nextSession: BattleSession = {
     ...session,
     lastPlayerAction: {
@@ -85,4 +93,26 @@ export function finalizeBattle(session: BattleSession): BattleSession {
   validateBattleSessionInput(finalizedSession, MVP_SKILL_CATALOG);
 
   return finalizedSession;
+}
+
+export function advanceBattleTurn(session: BattleSession): BattleSession {
+  validateBattleSessionInput(session, MVP_SKILL_CATALOG);
+
+  if (session.status === "completed") {
+    throw new RangeError("completed battle sessions cannot advance turns.");
+  }
+
+  if (session.turn >= session.maxTurns) {
+    throw new RangeError("battleSession.turn cannot advance beyond battleSession.maxTurns.");
+  }
+
+  const nextSession: BattleSession = {
+    ...session,
+    turn: session.turn + 1,
+    lastPlayerAction: undefined
+  };
+
+  validateBattleSessionInput(nextSession, MVP_SKILL_CATALOG);
+
+  return nextSession;
 }

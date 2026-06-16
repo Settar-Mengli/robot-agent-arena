@@ -1,29 +1,51 @@
 import { createSeededRng } from "./rng";
 import {
+  applyTurnEnergyRecovery,
+  createInitialCombatantState,
+  findSkillDefinition,
+  resolveAction
+} from "./combat";
+import {
+  determineBattleOutcome,
+  determineHealthOutcome
+} from "./outcome";
+import {
+  advanceBattleTurn,
   finalizeBattle,
   initBattle,
-  isBattleOver,
   submitPlayerAction
 } from "./session";
-import type { AgentConfig, BattleSession, Seed, SeededRng, SkillId } from "./types";
+import { MVP_SKILL_CATALOG } from "./skills";
+import type {
+  AgentConfig,
+  BattleAction,
+  BattleResult,
+  CombatantState,
+  Seed,
+  SeededRng,
+  SkillId,
+  TurnRecord
+} from "./types";
 
-function selectSimulationSkillId(agent: AgentConfig, rng: SeededRng): SkillId {
+function selectSimulationSkillId(
+  agent: AgentConfig,
+  combatant: CombatantState,
+  rng: SeededRng
+): SkillId {
   if (agent.skillIds.length === 0) {
     throw new RangeError("agent.skillIds must contain at least one skill for simulation.");
   }
 
-  return agent.skillIds[rng.nextInt(agent.skillIds.length)];
-}
+  const affordableSkillIds = agent.skillIds.filter((skillId) => {
+    const skill = findSkillDefinition(MVP_SKILL_CATALOG, skillId);
+    return skill !== undefined && skill.energyCost <= combatant.energy;
+  });
 
-function advanceSimulationTurn(session: BattleSession): BattleSession {
-  if (session.turn >= session.maxTurns) {
-    return session;
+  if (affordableSkillIds.length > 0) {
+    return affordableSkillIds[rng.nextInt(affordableSkillIds.length)];
   }
 
-  return {
-    ...session,
-    turn: session.turn + 1
-  };
+  return agent.skillIds[0];
 }
 
 export function resolveBattle(
@@ -31,15 +53,77 @@ export function resolveBattle(
   configB: AgentConfig,
   seed: Seed,
   maxTurns?: number
-): BattleSession {
+): BattleResult {
   let session = initBattle(configA, configB, seed, maxTurns);
   const rng = createSeededRng(seed);
+  let player = createInitialCombatantState(configA, "player");
+  let cpu = createInitialCombatantState(configB, "cpu");
+  const turns: TurnRecord[] = [];
 
-  while (!isBattleOver(session)) {
-    const playerSkillId = selectSimulationSkillId(session.player, rng);
+  while (session.status !== "completed") {
+    const turn = session.turn;
+    const startedPlayer = player;
+    const startedCpu = cpu;
+    const actions = [];
+
+    const playerSkillId = selectSimulationSkillId(session.player, player, rng);
     session = submitPlayerAction(session, playerSkillId);
-    session = advanceSimulationTurn(session);
+
+    const playerAction: BattleAction = {
+      actor: "player",
+      skillId: playerSkillId
+    };
+    const resolvedPlayerAction = resolveAction(player, cpu, playerAction, configA);
+    player = resolvedPlayerAction.actor;
+    cpu = resolvedPlayerAction.target;
+    actions.push(resolvedPlayerAction.resolvedAction);
+
+    let outcome = determineHealthOutcome(player, cpu);
+
+    if (outcome === undefined) {
+      const cpuSkillId = selectSimulationSkillId(session.cpu, cpu, rng);
+      const cpuAction: BattleAction = {
+        actor: "cpu",
+        skillId: cpuSkillId
+      };
+      const resolvedCpuAction = resolveAction(cpu, player, cpuAction, configB);
+      cpu = resolvedCpuAction.actor;
+      player = resolvedCpuAction.target;
+      actions.push(resolvedCpuAction.resolvedAction);
+      outcome = determineHealthOutcome(player, cpu);
+    }
+
+    if (outcome === undefined) {
+      player = applyTurnEnergyRecovery(player);
+      cpu = applyTurnEnergyRecovery(cpu);
+      outcome = determineBattleOutcome(player, cpu, turn, session.maxTurns);
+    }
+
+    turns.push({
+      turn,
+      startedPlayer,
+      startedCpu,
+      actions,
+      endedPlayer: player,
+      endedCpu: cpu,
+      outcome
+    });
+
+    if (outcome !== undefined) {
+      const finalSession = finalizeBattle(session);
+      return {
+        finalSession,
+        finalPlayer: player,
+        finalCpu: cpu,
+        turns,
+        outcome,
+        seed,
+        totalTurns: turns.length
+      };
+    }
+
+    session = advanceBattleTurn(session);
   }
 
-  return finalizeBattle(session);
+  throw new Error("resolveBattle reached a completed session without an outcome.");
 }

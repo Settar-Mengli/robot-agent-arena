@@ -1,73 +1,101 @@
 import { describe, expect, it } from "vitest";
 import { MAX_TURNS } from "../engine/constants";
-import { createSeededRng } from "../engine/rng";
-import {
-  finalizeBattle,
-  initBattle,
-  isBattleOver,
-  resolveBattle,
-  submitPlayerAction
-} from "../engine";
-import type { AgentConfig } from "../engine/types";
+import { resolveBattle } from "../engine";
+import type { AgentConfig, BattleResult } from "../engine/types";
+
+const modules = {
+  coreIdentity: "Steady Vanguard",
+  memory: "Pattern Recall",
+  sigilSecurity: "Aegis Layer",
+  rules: "Never Skip Verification",
+  strategy: "Measured Pressure"
+};
 
 const playerConfig: AgentConfig = {
   agentId: "agent-player-1",
   displayName: "PLAYER-UNIT",
-  modules: {
-    coreIdentity: "Steady Vanguard",
-    memory: "Pattern Recall",
-    sigilSecurity: "Aegis Layer",
-    rules: "Never Skip Verification",
-    strategy: "Measured Pressure"
-  },
-  skillIds: ["skill-core-identity", "skill-null-pulse"]
+  modules,
+  skillIds: ["skill-override-pulse", "skill-logic-storm"]
 };
 
 const cpuConfig: AgentConfig = {
   agentId: "agent-cpu-1",
   displayName: "SENTINEL-X",
-  modules: {
-    coreIdentity: "Counter Logic",
-    memory: "Adaptive Recall",
-    sigilSecurity: "Echo Shield",
-    rules: "Fail Closed",
-    strategy: "Reactive Pressure"
-  },
-  skillIds: ["skill-sigil-rule", "skill-logic-storm"]
+  modules,
+  skillIds: ["skill-sigil-rule", "skill-signal-exposure"]
 };
 
+function historySignature(result: BattleResult): string {
+  return result.turns
+    .map((turn) =>
+      turn.actions
+        .map((action) => `${action.actor}:${action.selectedSkillId}:${action.resolvedSkillId}`)
+        .join("|")
+    )
+    .join(";");
+}
+
+function findDifferentHistorySeedPair(): [string, string] {
+  const seeds = [
+    "combat-seed-a",
+    "combat-seed-b",
+    "combat-seed-c",
+    "combat-seed-d",
+    "combat-seed-e"
+  ];
+
+  for (let left = 0; left < seeds.length; left += 1) {
+    for (let right = left + 1; right < seeds.length; right += 1) {
+      const leftResult = resolveBattle(playerConfig, cpuConfig, seeds[left], 5);
+      const rightResult = resolveBattle(playerConfig, cpuConfig, seeds[right], 5);
+
+      if (historySignature(leftResult) !== historySignature(rightResult)) {
+        return [seeds[left], seeds[right]];
+      }
+    }
+  }
+
+  throw new Error("Expected at least one candidate seed pair to produce different histories.");
+}
+
 describe("resolveBattle", () => {
-  it("returns deterministic completed sessions for identical configs and seeds", () => {
+  it("returns deeply equal BattleResults for identical configs and seeds", () => {
     const resolvedA = resolveBattle(playerConfig, cpuConfig, "simulation-seed-1", 4);
     const resolvedB = resolveBattle(playerConfig, cpuConfig, "simulation-seed-1", 4);
 
     expect(resolvedA).toEqual(resolvedB);
-    expect(resolvedA.status).toBe("completed");
-    expect(resolvedA.turn).toBe(resolvedA.maxTurns);
-    expect(isBattleOver(resolvedA)).toBe(true);
+    expect(resolvedA.finalSession.status).toBe("completed");
+    expect(resolvedA.totalTurns).toBe(resolvedA.turns.length);
   });
 
-  it("respects the MAX_TURNS cap", () => {
-    const resolved = resolveBattle(playerConfig, cpuConfig, "simulation-seed-2", MAX_TURNS + 5);
+  it("can produce different valid histories for different seeds", () => {
+    const [seedA, seedB] = findDifferentHistorySeedPair();
+    const resolvedA = resolveBattle(playerConfig, cpuConfig, seedA, 5);
+    const resolvedB = resolveBattle(playerConfig, cpuConfig, seedB, 5);
 
-    expect(resolved.maxTurns).toBe(MAX_TURNS);
-    expect(resolved.turn).toBe(MAX_TURNS);
-    expect(resolved.status).toBe("completed");
+    expect(historySignature(resolvedA)).not.toBe(historySignature(resolvedB));
+    expect(resolvedA.finalSession.status).toBe("completed");
+    expect(resolvedB.finalSession.status).toBe("completed");
   });
 
-  it("finalizes maxTurns 1 without selecting an action", () => {
-    const resolved = resolveBattle(playerConfig, cpuConfig, "simulation-seed-3", 1);
+  it("contains ordered turn history", () => {
+    const result = resolveBattle(playerConfig, cpuConfig, "simulation-seed-2", 4);
 
-    expect(resolved.turn).toBe(1);
-    expect(resolved.status).toBe("completed");
-    expect(resolved.lastPlayerAction).toBeUndefined();
+    expect(result.turns.length).toBeGreaterThan(0);
+    expect(result.turns.map((turn) => turn.turn)).toEqual(
+      Array.from({ length: result.turns.length }, (_, index) => index + 1)
+    );
+    expect(result.turns[0].startedPlayer.side).toBe("player");
+    expect(result.turns[0].actions[0].actor).toBe("player");
   });
 
-  it("keeps the final simulated action inside the player loadout", () => {
-    const resolved = resolveBattle(playerConfig, cpuConfig, "simulation-seed-4", 4);
+  it("respects requested turn limits and MAX_TURNS", () => {
+    const limited = resolveBattle(playerConfig, cpuConfig, "simulation-seed-3", 3);
+    const capped = resolveBattle(playerConfig, cpuConfig, "simulation-seed-3", MAX_TURNS + 5);
 
-    expect(resolved.lastPlayerAction).toBeDefined();
-    expect(playerConfig.skillIds).toContain(resolved.lastPlayerAction?.skillId);
+    expect(limited.turns.length).toBeLessThanOrEqual(3);
+    expect(capped.finalSession.maxTurns).toBe(MAX_TURNS);
+    expect(capped.turns.length).toBeLessThanOrEqual(MAX_TURNS);
   });
 
   it("rejects invalid configs with unknown catalog skill IDs", () => {
@@ -76,33 +104,39 @@ describe("resolveBattle", () => {
       skillIds: ["skill-core-identity", "skill-unknown"]
     };
 
-    expect(() => resolveBattle(invalidPlayerConfig, cpuConfig, "simulation-seed-5", 4)).toThrow(
+    expect(() => resolveBattle(invalidPlayerConfig, cpuConfig, "simulation-seed-4", 4)).toThrow(
       TypeError
     );
   });
 
-  it("rejects empty player loadouts when simulation needs a selection", () => {
+  it("rejects empty player loadouts", () => {
     const emptyPlayerConfig: AgentConfig = {
       ...playerConfig,
       skillIds: []
     };
 
-    expect(() => resolveBattle(emptyPlayerConfig, cpuConfig, "simulation-seed-6", 2)).toThrow(
+    expect(() => resolveBattle(emptyPlayerConfig, cpuConfig, "simulation-seed-5", 2)).toThrow(
       RangeError
     );
   });
 
-  it("matches manual lifecycle composition for a one-step simulation", () => {
-    const seed = "simulation-seed-7";
-    const rng = createSeededRng(seed);
-    const selectedSkillId = playerConfig.skillIds[rng.nextInt(playerConfig.skillIds.length)];
-    const initialized = initBattle(playerConfig, cpuConfig, seed, 2);
-    const submitted = submitPlayerAction(initialized, selectedSkillId);
-    const manual = finalizeBattle({
-      ...submitted,
-      turn: 2
-    });
+  it("records both actions unless player action completes the battle", () => {
+    const result = resolveBattle(
+      {
+        ...playerConfig,
+        skillIds: ["skill-logic-storm"]
+      },
+      {
+        ...cpuConfig,
+        skillIds: ["skill-signal-exposure"]
+      },
+      "simulation-seed-6",
+      MAX_TURNS
+    );
+    const finalTurn = result.turns[result.turns.length - 1];
 
-    expect(resolveBattle(playerConfig, cpuConfig, seed, 2)).toEqual(manual);
+    expect(result.outcome.reason).toBe("cpu-health-zero");
+    expect(finalTurn.actions).toHaveLength(1);
+    expect(finalTurn.actions[0].actor).toBe("player");
   });
 });
