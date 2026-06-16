@@ -10,6 +10,7 @@ import type {
   BattleSession,
   SkillCatalog,
   SkillDefinition,
+  SkillEffect,
   SkillId
 } from "./types";
 
@@ -29,8 +30,49 @@ function assertPositiveInteger(value: unknown, fieldName: string): asserts value
   }
 }
 
+function assertNonNegativeFiniteNumber(value: unknown, fieldName: string): asserts value is number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    throw new RangeError(`${fieldName} must be a non-negative finite number.`);
+  }
+}
+
+function assertPositiveFiniteNumber(value: unknown, fieldName: string): asserts value is number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    throw new RangeError(`${fieldName} must be a positive finite number.`);
+  }
+}
+
 function isAgentModule(value: unknown): value is AgentModule {
   return typeof value === "string" && AGENT_MODULES.includes(value as AgentModule);
+}
+
+function validateSkillEffectInput(
+  effect: unknown,
+  label: string
+): asserts effect is SkillEffect {
+  if (!isRecord(effect)) {
+    throw new TypeError(`${label} must be an object.`);
+  }
+
+  switch (effect.category) {
+    case "attack":
+      assertPositiveFiniteNumber(effect.basePower, `${label}.basePower`);
+      return;
+    case "defense":
+      assertPositiveFiniteNumber(effect.defenseAmount, `${label}.defenseAmount`);
+      return;
+    case "recovery":
+      assertPositiveFiniteNumber(effect.recoveryAmount, `${label}.recoveryAmount`);
+      return;
+    case "disrupt":
+      assertPositiveFiniteNumber(effect.basePower, `${label}.basePower`);
+      assertPositiveFiniteNumber(effect.energyDamage, `${label}.energyDamage`);
+      return;
+    default:
+      throw new TypeError(
+        `${label}.category must be one of: attack, defense, recovery, disrupt.`
+      );
+  }
 }
 
 export function validateSkillDefinitionInput(
@@ -44,6 +86,8 @@ export function validateSkillDefinitionInput(
   assertNonEmptyString(skill.skillId, `${label}.skillId`);
   assertNonEmptyString(skill.displayName, `${label}.displayName`);
   assertNonEmptyString(skill.summary, `${label}.summary`);
+  assertNonNegativeFiniteNumber(skill.energyCost, `${label}.energyCost`);
+  validateSkillEffectInput(skill.effect, `${label}.effect`);
 
   if (!isAgentModule(skill.module)) {
     throw new TypeError(`${label}.module must be one of: ${AGENT_MODULES.join(", ")}.`);

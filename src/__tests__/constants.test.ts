@@ -1,17 +1,28 @@
 import { describe, expect, it } from "vitest";
 import {
   AGENT_MODULES,
+  COMBATANT_MAX_ENERGY,
+  COMBATANT_MAX_HEALTH,
+  COMBATANT_STARTING_ENERGY,
   CPU_OPPONENT_COUNT,
   DEFAULT_MAX_TURNS,
+  FALLBACK_ACTION_ID,
+  FALLBACK_DEFENSE_GAIN,
+  FALLBACK_ENERGY_RECOVERY,
   FICTIONAL_TERMS,
+  MAX_DEFENSE,
   MAX_TURNS,
   MVP_SKILL_COUNT,
-  MVP_SKILL_SLOT_LIMIT
+  MVP_SKILL_SLOT_LIMIT,
+  TURN_ENERGY_RECOVERY
 } from "../engine/constants";
 import type {
   AgentConfig,
+  BattleResult,
   BattleSession,
+  CombatantState,
   PlayerAction,
+  ResolvedAction,
   SkillDefinition
 } from "../engine/types";
 
@@ -22,6 +33,17 @@ describe("engine constants", () => {
     expect(MVP_SKILL_COUNT).toBe(8);
     expect(MVP_SKILL_SLOT_LIMIT).toBe(2);
     expect(CPU_OPPONENT_COUNT).toBe(2);
+  });
+
+  it("defines locked combat constants", () => {
+    expect(COMBATANT_MAX_HEALTH).toBe(30);
+    expect(COMBATANT_MAX_ENERGY).toBe(10);
+    expect(COMBATANT_STARTING_ENERGY).toBe(6);
+    expect(TURN_ENERGY_RECOVERY).toBe(2);
+    expect(MAX_DEFENSE).toBe(12);
+    expect(FALLBACK_ACTION_ID).toBe("fallback-stabilize");
+    expect(FALLBACK_ENERGY_RECOVERY).toBe(2);
+    expect(FALLBACK_DEFENSE_GAIN).toBe(2);
   });
 
   it("defines the supported agent modules", () => {
@@ -66,7 +88,34 @@ describe("engine domain type contracts", () => {
     skillId: "skill-logic-storm",
     displayName: "Logic Storm",
     module: "strategy",
-    summary: "Applies coordinated strategic pressure for the current turn."
+    summary: "Applies coordinated strategic pressure for the current turn.",
+    energyCost: 5,
+    effect: {
+      category: "attack",
+      basePower: 9
+    }
+  };
+
+  const samplePlayerState: CombatantState = {
+    side: "player",
+    agentId: "agent-player-1",
+    displayName: "PLAYER-UNIT",
+    health: 30,
+    maxHealth: 30,
+    energy: 6,
+    maxEnergy: 10,
+    defense: 0
+  };
+
+  const sampleCpuState: CombatantState = {
+    side: "cpu",
+    agentId: "agent-cpu-1",
+    displayName: "SENTINEL-X",
+    health: 30,
+    maxHealth: 30,
+    energy: 6,
+    maxEnergy: 10,
+    defense: 0
   };
 
   it("accepts minimal AgentConfig fixtures", () => {
@@ -75,9 +124,10 @@ describe("engine domain type contracts", () => {
     expect(sampleAgent.skillIds.length).toBe(2);
   });
 
-  it("accepts minimal SkillDefinition fixtures", () => {
+  it("accepts combat-ready SkillDefinition fixtures", () => {
     expect(sampleSkill.module).toBe("strategy");
-    expect(sampleSkill.skillId).toBe("skill-logic-storm");
+    expect(sampleSkill.effect.category).toBe("attack");
+    expect(sampleSkill.energyCost).toBe(5);
   });
 
   it("accepts minimal BattleSession fixtures", () => {
@@ -125,5 +175,80 @@ describe("engine domain type contracts", () => {
     expect(actionLabel({ type: "use-skill", skillId: "skill-core-identity" })).toBe(
       "use:skill-core-identity"
     );
+  });
+
+  it("accepts minimal combat result fixtures", () => {
+    const resolvedAction: ResolvedAction = {
+      actor: "player",
+      target: "cpu",
+      selectedSkillId: "skill-logic-storm",
+      resolvedSkillId: "skill-logic-storm",
+      effectCategory: "attack",
+      fallback: false,
+      energySpent: 5,
+      damageDealt: 9,
+      defenseReduced: 0,
+      defenseGained: 0,
+      healthRecovered: 0,
+      energyRecovered: 0,
+      energyReduced: 0
+    };
+
+    const finalSession: BattleSession = {
+      sessionId: "session-1",
+      seed: "arena-seed-01",
+      turn: 1,
+      maxTurns: 1,
+      status: "completed",
+      player: sampleAgent,
+      cpu: {
+        ...sampleAgent,
+        agentId: "agent-cpu-1",
+        displayName: "SENTINEL-X"
+      },
+      lastPlayerAction: {
+        type: "use-skill",
+        skillId: "skill-logic-storm"
+      }
+    };
+
+    const result: BattleResult = {
+      finalSession,
+      finalPlayer: samplePlayerState,
+      finalCpu: {
+        ...sampleCpuState,
+        health: 21
+      },
+      turns: [
+        {
+          turn: 1,
+          startedPlayer: samplePlayerState,
+          startedCpu: sampleCpuState,
+          actions: [resolvedAction],
+          endedPlayer: samplePlayerState,
+          endedCpu: {
+            ...sampleCpuState,
+            health: 21
+          },
+          outcome: {
+            result: "player-victory",
+            reason: "cpu-health-zero",
+            winnerSide: "player",
+            winnerAgentId: "agent-player-1"
+          }
+        }
+      ],
+      outcome: {
+        result: "player-victory",
+        reason: "cpu-health-zero",
+        winnerSide: "player",
+        winnerAgentId: "agent-player-1"
+      },
+      seed: "arena-seed-01",
+      totalTurns: 1
+    };
+
+    expect(result.turns[0].actions[0].resolvedSkillId).toBe("skill-logic-storm");
+    expect(result.finalSession.status).toBe("completed");
   });
 });

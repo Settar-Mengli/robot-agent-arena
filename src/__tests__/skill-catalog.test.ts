@@ -86,6 +86,25 @@ describe("MVP skill catalog", () => {
 
     expect(() => validateSkillDefinitionInput(invalidSkill)).toThrow(TypeError);
   });
+
+  it("rejects invalid combat effect values", () => {
+    const invalidCatalog = catalogWithSkillPatch(0, {
+      effect: {
+        category: "defense",
+        defenseAmount: 0
+      }
+    });
+
+    expect(() => validateSkillCatalogInput(invalidCatalog)).toThrow(RangeError);
+  });
+
+  it("rejects negative energy costs", () => {
+    const invalidCatalog = catalogWithSkillPatch(0, {
+      energyCost: -1
+    });
+
+    expect(() => validateSkillCatalogInput(invalidCatalog)).toThrow(RangeError);
+  });
 });
 
 describe("agent config validation", () => {

@@ -1,4 +1,6 @@
+export * from "./combat";
 export * from "./constants";
+export * from "./outcome";
 export * from "./rng";
 export * from "./session";
 export * from "./simulation";
