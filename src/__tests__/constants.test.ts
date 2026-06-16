@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  AGENT_MODULES,
   CPU_OPPONENT_COUNT,
   DEFAULT_MAX_TURNS,
   FICTIONAL_TERMS,
   MAX_TURNS,
-  MVP_SKILL_COUNT
+  MVP_SKILL_COUNT,
+  MVP_SKILL_SLOT_LIMIT
 } from "../engine/constants";
 import type {
   AgentConfig,
@@ -18,7 +20,18 @@ describe("engine constants", () => {
     expect(MAX_TURNS).toBe(20);
     expect(DEFAULT_MAX_TURNS).toBe(MAX_TURNS);
     expect(MVP_SKILL_COUNT).toBe(8);
+    expect(MVP_SKILL_SLOT_LIMIT).toBe(2);
     expect(CPU_OPPONENT_COUNT).toBe(2);
+  });
+
+  it("defines the supported agent modules", () => {
+    expect(AGENT_MODULES).toEqual([
+      "coreIdentity",
+      "memory",
+      "sigilSecurity",
+      "rules",
+      "strategy"
+    ]);
   });
 
   it("defines the approved fictional terminology list", () => {
@@ -46,14 +59,14 @@ describe("engine domain type contracts", () => {
       rules: "Never Skip Verification",
       strategy: "Measured Pressure"
     },
-    skillIds: ["skill-signal-burst", "skill-shield-matrix"]
+    skillIds: ["skill-core-identity", "skill-null-pulse"]
   };
 
   const sampleSkill: SkillDefinition = {
-    skillId: "skill-signal-burst",
-    displayName: "Signal Burst",
+    skillId: "skill-logic-storm",
+    displayName: "Logic Storm",
     module: "strategy",
-    summary: "Applies focused pressure for one turn."
+    summary: "Applies coordinated strategic pressure for the current turn."
   };
 
   it("accepts minimal AgentConfig fixtures", () => {
@@ -64,7 +77,7 @@ describe("engine domain type contracts", () => {
 
   it("accepts minimal SkillDefinition fixtures", () => {
     expect(sampleSkill.module).toBe("strategy");
-    expect(sampleSkill.skillId).toBe("skill-signal-burst");
+    expect(sampleSkill.skillId).toBe("skill-logic-storm");
   });
 
   it("accepts minimal BattleSession fixtures", () => {
@@ -82,7 +95,7 @@ describe("engine domain type contracts", () => {
       },
       lastPlayerAction: {
         type: "use-skill",
-        skillId: "skill-signal-burst"
+        skillId: "skill-core-identity"
       }
     };
 
@@ -94,11 +107,11 @@ describe("engine domain type contracts", () => {
   it("accepts PlayerAction fixtures", () => {
     const action: PlayerAction = {
       type: "use-skill",
-      skillId: "skill-shield-matrix"
+      skillId: "skill-null-pulse"
     };
 
     expect(action.type).toBe("use-skill");
-    expect(action.skillId).toBe("skill-shield-matrix");
+    expect(action.skillId).toBe("skill-null-pulse");
   });
 
   it("handles PlayerAction with an exhaustive discriminant switch", () => {
@@ -109,8 +122,8 @@ describe("engine domain type contracts", () => {
       }
     };
 
-    expect(actionLabel({ type: "use-skill", skillId: "skill-signal-burst" })).toBe(
-      "use:skill-signal-burst"
+    expect(actionLabel({ type: "use-skill", skillId: "skill-core-identity" })).toBe(
+      "use:skill-core-identity"
     );
   });
 });

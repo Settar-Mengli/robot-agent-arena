@@ -1,14 +1,11 @@
+import { AGENT_MODULES } from "./constants";
+
 export type Seed = number | string;
 
 export type AgentId = string;
 export type SkillId = string;
 
-export type AgentModule =
-  | "coreIdentity"
-  | "memory"
-  | "sigilSecurity"
-  | "rules"
-  | "strategy";
+export type AgentModule = (typeof AGENT_MODULES)[number];
 
 export interface AgentModules {
   coreIdentity: string;
@@ -33,7 +30,7 @@ export interface SkillDefinition {
 }
 
 export interface SkillCatalog {
-  skills: SkillDefinition[];
+  skills: readonly SkillDefinition[];
 }
 
 export interface PlayerUseSkillAction {

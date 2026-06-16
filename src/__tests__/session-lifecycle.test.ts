@@ -5,11 +5,9 @@ import {
   initBattle,
   isBattleOver,
   resolveBattle,
-  submitPlayerAction,
-  validateSkillCatalogInput,
-  validateSkillDefinitionInput
+  submitPlayerAction
 } from "../engine";
-import type { AgentConfig, BattleSession, SkillDefinition } from "../engine/types";
+import type { AgentConfig, BattleSession } from "../engine/types";
 
 const playerConfig: AgentConfig = {
   agentId: "agent-player-1",
@@ -21,7 +19,7 @@ const playerConfig: AgentConfig = {
     rules: "Never Skip Verification",
     strategy: "Measured Pressure"
   },
-  skillIds: ["skill-signal-burst", "skill-shield-matrix"]
+  skillIds: ["skill-core-identity", "skill-null-pulse"]
 };
 
 const cpuConfig: AgentConfig = {
@@ -34,7 +32,7 @@ const cpuConfig: AgentConfig = {
     rules: "Fail Closed",
     strategy: "Reactive Pressure"
   },
-  skillIds: ["skill-null-pulse", "skill-override-pulse"]
+  skillIds: ["skill-sigil-rule", "skill-logic-storm"]
 };
 
 describe("session lifecycle API shape", () => {
@@ -59,22 +57,22 @@ describe("session lifecycle API shape", () => {
 
   it("sets lastPlayerAction on submitPlayerAction and returns a new session", () => {
     const session = initBattle(playerConfig, cpuConfig, "seed-2");
-    const next = submitPlayerAction(session, "skill-signal-burst");
+    const next = submitPlayerAction(session, "skill-core-identity");
 
     expect(next).not.toBe(session);
     expect(next.lastPlayerAction).toEqual({
       type: "use-skill",
-      skillId: "skill-signal-burst"
+      skillId: "skill-core-identity"
     });
     expect(session.lastPlayerAction).toBeUndefined();
   });
 
   it("does not enforce one-action-per-step yet", () => {
     const session = initBattle(playerConfig, cpuConfig, "seed-3");
-    const first = submitPlayerAction(session, "skill-signal-burst");
-    const second = submitPlayerAction(first, "skill-shield-matrix");
+    const first = submitPlayerAction(session, "skill-core-identity");
+    const second = submitPlayerAction(first, "skill-null-pulse");
 
-    expect(second.lastPlayerAction?.skillId).toBe("skill-shield-matrix");
+    expect(second.lastPlayerAction?.skillId).toBe("skill-null-pulse");
   });
 
   it("checks battle completion using status or max turn cap", () => {
@@ -141,7 +139,7 @@ describe("session lifecycle validation", () => {
   it("throws when initBattle receives empty skillIds entries", () => {
     const invalidConfigA: AgentConfig = {
       ...playerConfig,
-      skillIds: ["skill-signal-burst", ""]
+      skillIds: ["skill-core-identity", ""]
     };
 
     expect(() => initBattle(invalidConfigA, cpuConfig, "seed-invalid-c")).toThrow(TypeError);
@@ -160,7 +158,7 @@ describe("session lifecycle validation", () => {
       maxTurns: 2
     } as BattleSession;
 
-    expect(() => submitPlayerAction(invalidSession, "skill-signal-burst")).toThrow(RangeError);
+    expect(() => submitPlayerAction(invalidSession, "skill-core-identity")).toThrow(RangeError);
   });
 
   it("throws when isBattleOver receives an invalid status", () => {
@@ -179,71 +177,5 @@ describe("session lifecycle validation", () => {
     } as unknown as BattleSession;
 
     expect(() => finalizeBattle(invalidSession)).toThrow(TypeError);
-  });
-});
-
-describe("skill definition validation", () => {
-  const validSkill: SkillDefinition = {
-    skillId: "skill-signal-burst",
-    displayName: "Signal Burst",
-    module: "strategy",
-    summary: "Applies focused pressure for one turn."
-  };
-
-  it("accepts a minimal valid SkillDefinition", () => {
-    expect(() => validateSkillDefinitionInput(validSkill)).not.toThrow();
-  });
-
-  it("throws when skillId is empty", () => {
-    expect(() =>
-      validateSkillDefinitionInput({
-        ...validSkill,
-        skillId: ""
-      })
-    ).toThrow(TypeError);
-  });
-
-  it("throws when displayName is empty", () => {
-    expect(() =>
-      validateSkillDefinitionInput({
-        ...validSkill,
-        displayName: ""
-      })
-    ).toThrow(TypeError);
-  });
-
-  it("throws when summary is empty", () => {
-    expect(() =>
-      validateSkillDefinitionInput({
-        ...validSkill,
-        summary: ""
-      })
-    ).toThrow(TypeError);
-  });
-
-  it("throws when module is invalid", () => {
-    expect(() =>
-      validateSkillDefinitionInput({
-        ...validSkill,
-        module: "invalid-module"
-      } as unknown as SkillDefinition)
-    ).toThrow(TypeError);
-  });
-
-  it("throws when catalog skills is not an array", () => {
-    expect(() => validateSkillCatalogInput({ skills: {} })).toThrow(TypeError);
-  });
-
-  it("throws when catalog contains invalid skill entries", () => {
-    expect(() =>
-      validateSkillCatalogInput({
-        skills: [
-          {
-            ...validSkill,
-            skillId: ""
-          }
-        ]
-      })
-    ).toThrow(TypeError);
   });
 });

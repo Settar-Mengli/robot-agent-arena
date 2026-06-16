@@ -2,10 +2,9 @@
 
 ## Status Snapshot
 - Date: 2026-06-16
-- Latest pushed commit: 106a684 (`feat: add skill catalog validation helpers`)
-- Working tree before this task: clean
-- Current state: engine scaffold, session lifecycle API, runtime session validation, SkillCatalog validation helpers, and SkillDefinition validation helpers exist
-- Baseline verification: `npm run typecheck` passed; `npm test` passed with 3 test files and 33 tests
+- Baseline commit before this task: 106a684 (`feat: add skill catalog validation helpers`)
+- Current state: documentation records consolidated; canonical MVP skill catalog implemented; catalog-aware agent config validation integrated into `initBattle`
+- Verification: `npm run typecheck` passed; `npm test` passed with 4 test files and 37 tests
 - Audit verdict: no critical architecture conflict found
 
 ## Completed
@@ -17,11 +16,14 @@
 - Session validation guards were completed and pushed in commit 0d37d5a.
 - Skill catalog validation helpers were completed and pushed in commit 106a684.
 - package-lock.json exists from npm install.
+- Documentation ownership was consolidated across ROADMAP, PROGRESS, DECISIONS, and AGENT_RULES.
+- Canonical 8-skill MVP catalog was added as data-only engine content.
+- Runtime validation ownership was centralized in `src/engine/validation.ts`.
+- `initBattle` now validates agent configs against the canonical catalog.
+- Catalog and agent config validation tests were added.
 
 ## Current Work
-- Consolidate memory files so ROADMAP, PROGRESS, DECISIONS, and AGENT_RULES have distinct ownership.
-- Add the canonical MVP skill catalog and integrate catalog-aware agent config validation into `initBattle`.
-- Preserve README unchanged.
+- Final diff audit, commit, and push for the validated MVP skill catalog milestone.
 
 ## Blockers
 - None.
@@ -31,8 +33,19 @@
 - Do not run `npm audit fix` or upgrade dependencies during the current engine milestone.
 
 ## Changed Files In Current Work
-- Documentation consolidation in progress.
-- Engine and test changes not yet applied.
+- ROADMAP.md
+- PROGRESS.md
+- DECISIONS.md
+- AGENT_RULES.md
+- src/engine/constants.ts
+- src/engine/index.ts
+- src/engine/session.ts
+- src/engine/skills.ts
+- src/engine/types.ts
+- src/engine/validation.ts
+- src/__tests__/constants.test.ts
+- src/__tests__/session-lifecycle.test.ts
+- src/__tests__/skill-catalog.test.ts
 
 ## Exact Next Step
-Implement the canonical 8-skill MVP catalog, centralize validation ownership in `src/engine/validation.ts`, and update tests.
+After commit and push, plan M3 deterministic full-match simulation without adding UI, reports, CPU strategy, damage math, or non-MVP systems beyond the approved simulation scope.
