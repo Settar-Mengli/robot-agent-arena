@@ -34,7 +34,7 @@ Date: 2026-06-04
 Status: Accepted
 
 Decision:
-Keep src/engine pure TypeScript with no React, browser APIs, or Zustand imports. Keep game logic out of React components. Keep UI responsibilities limited to rendering state and calling lib/store functions.
+Keep `src/engine` pure TypeScript with no React, browser APIs, Zustand imports, DOM access, storage APIs, or network APIs.
 
 Rationale:
 Strict separation improves maintainability, testability, and portability.
@@ -47,19 +47,13 @@ Date: 2026-06-04
 Status: Accepted
 
 Decision:
-Use a session-based battle engine to support one chosen player action per turn.
-Required engine concept:
-- initBattle(configA, configB, seed)
-- submitPlayerAction(session, skillId)
-- isBattleOver(session)
-- finalizeBattle(session)
-- resolveBattle(configA, configB, seed) for tests and simulations
+Use a session-based battle engine with `initBattle`, `submitPlayerAction`, `isBattleOver`, `finalizeBattle`, and deterministic simulation support.
 
 Rationale:
 Interactive turn flow requires persisted session state between actions.
 
 Consequences:
-Session lifecycle, transition rules, and deterministic state updates become core engine contracts.
+Session lifecycle, transition rules, and deterministic state updates are core engine contracts.
 
 ## D-005 Technology Stack Lock
 Date: 2026-06-04  
@@ -112,3 +106,16 @@ The project must remain educational, fictional, and safe.
 
 Consequences:
 Player-facing text must be reviewed for vocabulary compliance before release.
+
+## D-009 Engine Ownership Boundaries
+Date: 2026-06-16  
+Status: Accepted
+
+Decision:
+Keep canonical engine data in dedicated data files, runtime validation in `validation.ts`, and session lifecycle transitions in `session.ts`.
+
+Rationale:
+Separate ownership avoids duplicated validators and prevents data definitions from accumulating battle-resolution behavior.
+
+Consequences:
+Canonical catalog data remains data-only, validation stays pure TypeScript, and session code delegates shape/catalog checks before creating or transitioning sessions.
