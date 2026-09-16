@@ -84,7 +84,7 @@ describe("session lifecycle API shape", () => {
     expect(submitted.lastPlayerAction?.skillId).toBe("skill-core-identity");
   });
 
-  it("checks battle completion using status or max turn cap", () => {
+  it("checks battle completion using status only", () => {
     const base = initBattle(playerConfig, cpuConfig, "seed-4", 3);
 
     expect(isBattleOver(base)).toBe(false);
@@ -100,7 +100,7 @@ describe("session lifecycle API shape", () => {
         turn: 3,
         status: "awaiting-player-action"
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("returns a completed session from finalizeBattle and stays idempotent", () => {

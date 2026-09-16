@@ -75,7 +75,7 @@ export function submitPlayerAction(session: BattleSession, skillId: SkillId): Ba
 export function isBattleOver(session: BattleSession): boolean {
   validateBattleSessionInput(session, MVP_SKILL_CATALOG);
 
-  return session.status === "completed" || session.turn >= session.maxTurns;
+  return session.status === "completed";
 }
 
 export function finalizeBattle(session: BattleSession): BattleSession {
