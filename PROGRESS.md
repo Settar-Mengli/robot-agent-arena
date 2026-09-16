@@ -1,11 +1,11 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-06-16
-- Baseline commit before M4: 6fcb852 (`feat: add deterministic battle simulation`)
-- Current state: M4 deterministic combat engine vertical slice is implemented and verified locally
-- Verification: `npm run typecheck` passed; `npm test` passed with 7 test files and 73 tests
-- Audit verdict: no critical architecture conflict found
+- Date: 2026-09-16
+- HEAD: 6d2c014 (`fix(engine): require at least one skill in agent validation (F8)`)
+- Current state: Engine convergence pass complete on `main` — `resolveTurn` is the shared per-turn orchestrator; F2 (status-only `isBattleOver`) and F8 (min-1 skill validation) are fixed; suite includes seam parity tests
+- Verification: `npm run typecheck` passed; `npm test` passed with 8 test files and 76 tests
+- Working tree: clean on `main`, up to date with `origin/main`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -23,36 +23,22 @@
 - `resolveBattle` now returns `BattleResult` with final session state, final combatants, ordered turn records, outcome, seed, and total turn count.
 - Session lifecycle remains separate from combat resolution; `session.ts` owns lifecycle transitions only.
 - Combat, outcome, lifecycle, validation, and deterministic simulation tests were added or updated.
+- Shared `resolveTurn` was extracted from `resolveBattle` (commit 5dea82e).
+- F2 fixed: battle completion is status-only via `isBattleOver`; turn-cap outcomes apply after the final turn plays; seam parity tests added (commit 5e41922).
+- F8 fixed: `validateAgentConfigInput` requires at least one skill so empty loadouts fail at the validation boundary (commit 6d2c014).
 
 ## Current Work
-- M4 deterministic combat engine vertical slice is complete and ready for commit and push.
+- None. Convergence pass is complete and pushed to `origin/main`.
 
 ## Blockers
 - None.
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
-- Do not run `npm audit fix` or upgrade dependencies during the current engine milestone.
+- Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 
 ## Changed Files In Current Work
-- ROADMAP.md
-- PROGRESS.md
-- DECISIONS.md
-- src/engine/constants.ts
-- src/engine/types.ts
-- src/engine/skills.ts
-- src/engine/validation.ts
-- src/engine/session.ts
-- src/engine/simulation.ts
-- src/engine/combat.ts
-- src/engine/outcome.ts
-- src/engine/index.ts
-- src/__tests__/constants.test.ts
-- src/__tests__/skill-catalog.test.ts
-- src/__tests__/session-lifecycle.test.ts
-- src/__tests__/simulation.test.ts
-- src/__tests__/combat.test.ts
-- src/__tests__/outcome.test.ts
+- None.
 
 ## Exact Next Step
-After commit and push, plan M5 UI integration using the completed deterministic engine API, while keeping React, Zustand, browser APIs, persistence, reports, and other UI concerns outside `src/engine`.
+Infra sprint first (CI + ESLint + branch/PR flow + ARCHITECTURE.md/README), then plan M5 UI integration. UI packages (React, Tailwind, Zustand) are not installed yet; the CPU opponent catalog (FRACTURE and SENTINEL-X) is not built. Keep React, Zustand, browser APIs, persistence, reports, and other UI concerns outside `src/engine`.

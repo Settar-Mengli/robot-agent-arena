@@ -13,7 +13,7 @@ Ask before installing packages, deleting files, renaming files or folders, chang
 - Do not publish or rename publicly to ARCZOLVEX until legal finalization is confirmed.
 
 ## Safety Rules
-- Do not reference Tekken in public-facing files.
+- Do not reference other commercial fighting-game franchises or their characters, moves, or assets.
 - Do not copy existing game assets, characters, moves, names, UI, music, or story.
 - Keep security-related gameplay language fictional, educational, and safe.
 - Avoid real hacking, jailbreak, and prompt-injection terminology in player-facing text.

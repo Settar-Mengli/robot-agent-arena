@@ -132,3 +132,42 @@ The combat slice needs complete deterministic battle resolution without introduc
 
 Consequences:
 `session.ts` remains lifecycle-only, `combat.ts` owns action resolution helpers, `outcome.ts` owns completion and winner rules, `simulation.ts` owns orchestration, and `validation.ts` owns guards for catalog and config shapes.
+
+## D-011 Battle Completion Authority
+Date: 2026-09-16  
+Status: Accepted
+
+Decision:
+Battle completion is authoritative via `outcome.ts` (`determineBattleOutcome`) and `finalizeBattle` after the final turn plays. `isBattleOver` returns true only when `session.status === "completed"`. This supersedes the earlier pre-play `turn >= maxTurns` check. Complements D-010 turn-limit outcome rules.
+
+Rationale:
+A UI looping on `isBattleOver` must not skip the final capped turn; turn-limit outcomes are decided after that turn resolves.
+
+Consequences:
+Interactive and simulation paths both play turn `maxTurns` when needed; status-only `isBattleOver` gates the interactive loop; turn-cap logic stays in `outcome.ts`.
+
+## D-012 Shared Turn Orchestrator
+Date: 2026-09-16  
+Status: Accepted
+
+Decision:
+`resolveTurn` is the single shared per-turn orchestrator. Both `resolveBattle` and any future interactive or UI turn path must call it. Do not implement a second turn-resolution path.
+
+Rationale:
+One orchestrator prevents session and simulation combat semantics from diverging.
+
+Consequences:
+CPU skill selection is injected lazily into `resolveTurn`; combatants and turn records remain caller-owned state alongside the session.
+
+## D-013 Minimum Skill Loadout
+Date: 2026-09-16  
+Status: Accepted
+
+Decision:
+`validateAgentConfigInput` requires `skillIds.length >= 1`. Empty configs are rejected at the validation boundary so all entry points (`initBattle`, `resolveBattle`, and future UI) fail identically. The minimum is 1 (correctness floor), not a designed loadout size.
+
+Rationale:
+Previously empty loadouts passed validation but failed mid-simulation; front-door rejection is consistent and fail-fast.
+
+Consequences:
+`MVP_SKILL_SLOT_LIMIT` remains the maximum; no new minimum-loadout constant is introduced; the empty-array guard in simulation stays as defense-in-depth.
