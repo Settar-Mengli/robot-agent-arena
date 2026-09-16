@@ -171,6 +171,10 @@ export function validateAgentConfigInput(
     throw new TypeError(`${label}.skillIds must be an array.`);
   }
 
+  if (agent.skillIds.length < 1) {
+    throw new RangeError(`${label}.skillIds must contain at least one skill.`);
+  }
+
   if (agent.skillIds.length > MVP_SKILL_SLOT_LIMIT) {
     throw new RangeError(
       `${label}.skillIds cannot contain more than ${MVP_SKILL_SLOT_LIMIT} skills.`
