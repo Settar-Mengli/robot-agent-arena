@@ -49,5 +49,23 @@ export default tseslint.config(
         }
       ]
     }
+  },
+  {
+    files: ["src/agent/baselines/**/*.ts"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "Math",
+          property: "random",
+          message: "agent baselines must be deterministic — no Math.random"
+        },
+        {
+          object: "Date",
+          property: "now",
+          message: "agent baselines must be pure — no clock access"
+        }
+      ]
+    }
   }
 );
