@@ -63,7 +63,8 @@ export function resolveTurn(params: {
   turnRecord: TurnRecord;
   outcome?: BattleOutcome;
 } {
-  let { session, player, cpu, playerSkillId, selectCpuSkillId } = params;
+  let { session, player, cpu } = params;
+  const { playerSkillId, selectCpuSkillId } = params;
 
   const turn = session.turn;
   const startedPlayer = player;
@@ -146,7 +147,7 @@ export function resolveBattle(
       player,
       cpu,
       playerSkillId,
-      selectCpuSkillId: (cpuState, _playerState) =>
+      selectCpuSkillId: (cpuState) =>
         selectSimulationSkillId(session.cpu, cpuState, rng)
     });
 
