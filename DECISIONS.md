@@ -249,3 +249,17 @@ Preserves the tested backbone and save/resume guarantees while still allowing in
 
 Consequences:
 Invalid LLM outputs fall back to the deterministic bot; recorded eval fixtures can pin selection where needed for reproducibility.
+
+## D-020 Agent-Design Teaching Sandbox Positioning
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+Reposition the project as an interactive agent-design sandbox that teaches AI-agent engineering through measurable consequence. The deterministic battle/game is the environment, not the point. Users configure an agent (identity, memory, tools/skills, guardrails/rules, strategy), run it against opponents/scenarios, and see how those choices change outcomes — backed by real evals, decision traces, and honest failure analysis. Tagline framing: a tool that teaches AI-agent design, built by doing real AI engineering; the medium demonstrates the maker’s skill. This is positioning only: it does not redesign the engine, the `selectCpuSkillId` seam, the AI milestone spine (M-INF → M-AGENT → M-TOOLS → M-EVAL → M-COACH → M-UI), or the determinism boundary (D-019). All prior decisions stand.
+
+Rationale:
+Higher and more durable value than a fighting game alone — it targets what AI engineers actually want (seeing how agent-design choices move real eval metrics) and reinforces the maker’s AI-engineering credibility. Plays directly to the engine’s strength as a controllable, measurable environment.
+
+Consequences:
+Framing and copy shift toward agent-design/teaching. The five agent modules and the post-match report are the teaching surface (modules as real design levers; the report as an explanatory lesson of which design choice caused the result). The eval harness (M-EVAL) is elevated as core evidence, not optional. No change to the engine, seam, determinism, or milestone spine.
+Anti-scope (so this framing does not balloon): this remains a focused sandbox/demo — not a course, curriculum, LMS, or content platform. Teaching happens through consequence plus a concise report, not lessons/text. No new heavy “educational” infrastructure (no CMS, no accounts, no backend beyond the planned minimal serverless proxy). Prior review anti-scope still holds: no agent framework, no vector DB/RAG, no multi-agent debate, no LLM judges, no real backend/leaderboard. Scope stays one configurable agent vs opponents, a few scenarios, and a live eval/decision readout — depth over breadth.

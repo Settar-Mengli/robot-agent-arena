@@ -1,12 +1,12 @@
 # AGENT ARENA
 
-Build configurable AI-agent robots. Win 1v1 turn-based battles that resolve deterministically.
+Configure an AI agent’s design choices. Run them in a deterministic battle environment. See measurable consequences.
 
-**Status:** Engine complete and fully tested. UI milestone is next (not started in-repo).
+**Status:** Engine and multi-provider inference client complete and tested. Agent layer, evals, and UI are in progress (not started as product UI in-repo).
 
 ## What it is
 
-AGENT ARENA is an educational robot fighting game. You design an agent’s modules and skills; the pure TypeScript engine resolves battles with a seeded RNG so identical setups produce identical outcomes. Gameplay consequences teach sound agent design without real-world attack, jailbreak, or prompt-injection content.
+AGENT ARENA is an interactive agent-design sandbox that teaches AI-agent engineering by making design choices produce measurable outcomes. You configure identity, memory, tools/skills, guardrails/rules, and strategy; the pure TypeScript battle engine is the environment (seeded RNG, identical setups → identical resolution). Evals, decision traces, and an explanatory post-match report show which choices moved the result — not a course or LMS, just consequence plus a concise readout (D-020). Fictional vocabulary only; no real-world attack, jailbreak, or prompt-injection content.
 
 Temporary product title: **AGENT ARENA**. Repository name: `robot-agent-arena`. See [DECISIONS.md](DECISIONS.md) for naming policy.
 
@@ -81,9 +81,9 @@ For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Status / roadmap
 
-1. **Done:** Pure TypeScript battle engine, validation, seeded simulation, shared `resolveTurn`, CI + lint + coverage
-2. **Next:** M5 UI (screens, store, React/Tailwind/Zustand) — packages not installed yet; CPU opponent catalog not built yet
-3. **Later:** Deploy (Vercel or Netlify — deferred in D-005)
+1. **Done:** Pure TypeScript battle engine, validation, seeded simulation, shared `resolveTurn`, CPU catalog, CI + lint + coverage, multi-provider inference client (M-INF)
+2. **Next:** M-AGENT (LLM strategy behind `selectCpuSkillId`) and start M-EVAL baseline alongside; UI remains later (M-UI)
+3. **Later:** M-TOOLS, M-COACH, M-UI (React/Tailwind/Zustand not installed yet); deploy deferred in D-005
 
 Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md).
 

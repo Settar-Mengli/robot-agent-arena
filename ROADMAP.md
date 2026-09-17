@@ -7,6 +7,7 @@
 - ARCZOLVEX must remain a candidate only until legal finalization is complete.
 - AGENT ARENA is a 1v1 turn-based robot fighting game where players build, name, and configure robot agents.
 - **Strategic direction (D-014):** the product is an agentic-AI system whose environment is this deterministic game. The pure engine stays the untouched, tested backbone. AI is a strategy provider behind the existing `selectCpuSkillId` seam; UI showcases the agents after the AI layer and evals are proven (headless-first).
+- **Positioning (D-020):** an interactive agent-design sandbox that teaches AI-agent engineering through measurable consequence. The battle is the environment, not the point; the five modules and post-match report are the teaching surface; M-EVAL is core evidence. Focused sandbox/demo only — not a course, LMS, or content platform. Does not change the engine, seam, determinism (D-019), or the AI milestone spine below.
 
 ## MVP Scope
 Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + localStorage; turn-based; fictional vocabulary). Sequencing is updated: AI layer and evals before UI.
@@ -15,14 +16,14 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Pure TypeScript battle engine (DONE).
 - Session-based 1v1 battle flow + interactive `startBattle` / `stepBattle` driver (DONE).
 - 4 screens: Home, Builder, Arena, Report — **re-sequenced to M-UI** (after M-EVAL); still in scope, later.
-- 5 modules: Core Identity, Memory, Sigil and Security, Rules, Strategy.
+- 5 modules: Core Identity, Memory, Sigil and Security, Rules, Strategy (framed as the agent-design teaching surface — D-020).
 - 8 canonical skills.
 - Player agent naming.
 - 2 CPU opponents: FRACTURE and SENTINEL-X (catalog DONE).
 - 1 localStorage save slot (PLANNED with UI / persistence).
 - Max 20 turns.
 - Seeded RNG (DONE; restore-from-state DONE).
-- Post-match report output using fictional vocabulary only (PLANNED; coach surfaces in Report later).
+- Post-match report: explanatory lesson of which design choice caused the result, fictional vocabulary only (PLANNED; coach surfaces in Report later — D-020).
 - **PLANNED:** LLM strategy provider + serverless inference proxy + eval harness (see AI milestone spine).
 
 ## Milestones
