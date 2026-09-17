@@ -32,3 +32,36 @@ export type { BestResponseOptions, BestResponseResult } from "./oracle";
 
 export { generateSnapshots } from "./snapshots";
 export type { DecisionSnapshot, SnapshotSuite } from "./snapshots";
+
+export { runMatch, runSuite } from "./match";
+export type { MatchResult, MatchTurnRecord, RunSuiteOptions } from "./match";
+
+export {
+  createMemoryStore,
+  createRecordingFetch,
+  createReplayFetch,
+  fixtureKey
+} from "./transport";
+export type { FixtureRecord, FixtureStore } from "./transport";
+
+export {
+  aggregateLlm,
+  aggregateMatches,
+  metricsForChosenMoves,
+  percentile,
+  randomPolicyExpectation,
+  wilsonInterval
+} from "./metrics";
+export type {
+  LlmAggregate,
+  MatchAggregate,
+  SnapshotPolicyMetrics,
+  WilsonInterval
+} from "./metrics";
+
+export {
+  evalGreedySnapshots,
+  evalLlmSnapshots,
+  evalRandomSnapshots
+} from "./snapshot-eval";
+export type { SnapshotEvalResult } from "./snapshot-eval";
