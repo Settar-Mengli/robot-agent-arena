@@ -105,6 +105,13 @@ export interface CombatantState {
   defense: number;
 }
 
+/**
+ * Sync CPU picker. Called with post-player-action state (CPU first).
+ * Not called if the player's action ends the battle.
+ * May return an equipped-but-unaffordable id; the engine resolves that as fallback-stabilize.
+ */
+export type SelectCpuSkillId = (cpu: CombatantState, player: CombatantState) => SkillId;
+
 export interface BattleAction {
   actor: CombatantSide;
   skillId: SkillId;

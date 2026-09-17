@@ -185,6 +185,8 @@ Building UI before a proven agent strategy wastes work; the existing `selectCpuS
 Consequences:
 Roadmap priority is M-INF → M-AGENT → M-TOOLS → M-EVAL → M-COACH → M-UI. React/Tailwind/Zustand remain locked for UI but stay uninstalled until M-UI.
 
+Amended (2026-09-17): Milestone order superseded by D-021 (M-EVAL before M-TOOLS).
+
 ## D-015 AI Strategy Provider Seam
 Date: 2026-09-17  
 Status: Accepted
@@ -211,6 +213,8 @@ A static frontend cannot hold secrets; a full backend is over-engineering while 
 Consequences:
 M-INF delivers serverless endpoint(s) + env-based keys. No app database in the near-term spine.
 
+Amended (2026-09-17): M-INF delivered the multi-provider client under `src/inference/` only. The serverless proxy is deferred until the UI needs browser-safe key handling (M-UI). The agent layer runs as a local Node module for now.
+
 ## D-017 Multi-Provider Free-Tier LLM Client
 Date: 2026-09-17  
 Status: Accepted
@@ -223,6 +227,8 @@ Free tiers change; fallback across providers keeps the agent usable without cost
 
 Consequences:
 Client must support timeout, retry, structured output, and provider fallback. Rate limits and final provider list are verified when M-INF is implemented.
+
+Amended (2026-09-17): Current default order lives in `src/inference/providers.ts` (`groq`, `cloudflare`, `gemini`, `mistral`, `openrouter`). Cerebras dropped (now requires a card). Provider lists are volatile and re-verified before live use.
 
 ## D-018 Eval Harness First-Class
 Date: 2026-09-17  
@@ -250,6 +256,8 @@ Preserves the tested backbone and save/resume guarantees while still allowing in
 Consequences:
 Invalid LLM outputs fall back to the deterministic bot; recorded eval fixtures can pin selection where needed for reproducibility.
 
+Amended (2026-09-17): Replace reliance on a hardcoded "~88 tests" count with "the full engine test suite" (see current PROGRESS / CI coverage run).
+
 ## D-020 Agent-Design Teaching Sandbox Positioning
 Date: 2026-09-17  
 Status: Accepted
@@ -263,3 +271,35 @@ Higher and more durable value than a fighting game alone — it targets what AI 
 Consequences:
 Framing and copy shift toward agent-design/teaching. The five agent modules and the post-match report are the teaching surface (modules as real design levers; the report as an explanatory lesson of which design choice caused the result). The eval harness (M-EVAL) is elevated as core evidence, not optional. No change to the engine, seam, determinism, or milestone spine.
 Anti-scope (so this framing does not balloon): this remains a focused sandbox/demo — not a course, curriculum, LMS, or content platform. Teaching happens through consequence plus a concise report, not lessons/text. No new heavy “educational” infrastructure (no CMS, no accounts, no backend beyond the planned minimal serverless proxy). Prior review anti-scope still holds: no agent framework, no vector DB/RAG, no multi-agent debate, no LLM judges, no real backend/leaderboard. Scope stays one configurable agent vs opponents, a few scenarios, and a live eval/decision readout — depth over breadth.
+
+## D-021 Milestone Order (Eval Before Tools)
+Date: 2026-09-17
+Status: Accepted
+
+Decision:
+Roadmap priority is M-INF → M-AGENT → M-EVAL → M-TOOLS → M-COACH → M-UI.
+
+Rationale:
+Grounding and memory (M-TOOLS) must be proven by ablation against an eval baseline, so evals come first. Supersedes the M-TOOLS-before-M-EVAL order recorded in D-014.
+
+Consequences:
+PROGRESS / ROADMAP follow this order. M-AGENT may start a minimal M-EVAL baseline alongside the agent turn; M-TOOLS stays after measurable agent quality exists.
+
+## D-022 Agent Turn Contract
+Date: 2026-09-17
+Status: Accepted
+
+Decision:
+The LLM opponent turn lives in `src/agent/` and:
+- Uses a pure post-player probe (`observePostPlayerState`) for observation without keeping the probe step.
+- Calls the async LLM outside the engine under one end-to-end budget (external `AbortSignal`; abort is terminal).
+- Validates model output; equipped-but-unaffordable skill ids are accepted (engine owns fallback-stabilize).
+- On any LLM/validation/budget/cancel failure, executes plain `stepBattle` (default seeded picker, D-015).
+- Emits a JSON-serializable `DecisionTrace`.
+- Provides a deterministic greedy baseline selector for evals.
+
+Rationale:
+Keeps the engine sync and deterministic while making agent behavior measurable and abortable.
+
+Consequences:
+ESLint layer rules: engine imports neither agent nor inference; inference imports neither engine nor agent; agent may import both.

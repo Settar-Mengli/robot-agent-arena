@@ -24,7 +24,46 @@ export default tseslint.config(
       "no-restricted-imports": [
         "error",
         {
-          patterns: ["react", "react-dom", "zustand", "**/store/**", "**/components/**"]
+          patterns: [
+            "react",
+            "react-dom",
+            "zustand",
+            "**/store/**",
+            "**/components/**",
+            "**/agent",
+            "**/agent/**",
+            "**/inference",
+            "**/inference/**"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/inference/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: ["**/engine", "**/engine/**", "**/agent", "**/agent/**"]
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/agent/baselines/**/*.ts"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "Math",
+          property: "random",
+          message: "agent baselines must be deterministic — no Math.random"
+        },
+        {
+          object: "Date",
+          property: "now",
+          message: "agent baselines must be pure — no clock access"
         }
       ]
     }

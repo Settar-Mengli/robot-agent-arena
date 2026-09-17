@@ -7,6 +7,7 @@ export {
   resolveActiveProviders
 } from "./providers";
 export type {
+  AttemptInfo,
   ChatMessage,
   ChatRole,
   CompleteChatOptions,

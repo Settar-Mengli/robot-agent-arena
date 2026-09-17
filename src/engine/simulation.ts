@@ -26,6 +26,7 @@ import type {
   CombatantState,
   Seed,
   SeededRng,
+  SelectCpuSkillId,
   SkillId,
   TurnRecord
 } from "./types";
@@ -56,7 +57,7 @@ export function resolveTurn(params: {
   player: CombatantState;
   cpu: CombatantState;
   playerSkillId: SkillId;
-  selectCpuSkillId: (cpu: CombatantState, player: CombatantState) => SkillId;
+  selectCpuSkillId: SelectCpuSkillId;
 }): {
   session: BattleSession;
   player: CombatantState;
@@ -192,7 +193,8 @@ export function startBattle(
 
 export function stepBattle(
   runtime: BattleRuntime,
-  playerSkillId: SkillId
+  playerSkillId: SkillId,
+  selectCpuSkillId?: SelectCpuSkillId
 ): {
   runtime: BattleRuntime;
   turnRecord: TurnRecord;
@@ -204,8 +206,9 @@ export function stepBattle(
     player: runtime.player,
     cpu: runtime.cpu,
     playerSkillId,
-    selectCpuSkillId: (cpuState) =>
-      selectSimulationSkillId(runtime.session.cpu, cpuState, rng)
+    selectCpuSkillId:
+      selectCpuSkillId ??
+      ((cpuState) => selectSimulationSkillId(runtime.session.cpu, cpuState, rng))
   });
 
   return {

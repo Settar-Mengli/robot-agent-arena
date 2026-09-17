@@ -24,7 +24,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Max 20 turns.
 - Seeded RNG (DONE; restore-from-state DONE).
 - Post-match report: explanatory lesson of which design choice caused the result, fictional vocabulary only (PLANNED; coach surfaces in Report later — D-020).
-- **PLANNED:** LLM strategy provider + serverless inference proxy + eval harness (see AI milestone spine).
+- **PLANNED:** Eval harness (M-EVAL); grounding/memory tools (M-TOOLS); serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-021).
 
 ## Milestones
 
@@ -34,30 +34,31 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Interactive driver (`startBattle` / `stepBattle`) + RNG restore — DONE.
 - Infra: ESLint (engine-purity), coverage, CI, ARCHITECTURE + README — DONE.
 - CPU opponent catalog (FRACTURE, SENTINEL-X) — DONE.
+- M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred to M-UI per D-016 amendment).
+- M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE pending merge (PR #9).
 
 ### M5 / M6 (re-sequenced)
 Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**. They land as **M-UI** (and related persistence) after the AI spine below so no UI is thrown away when agents land.
 
-### PLANNED — AI milestone spine (headless-first)
+### AI milestone spine (headless-first, D-021)
 
-#### M-INF — Inference layer
-Serverless endpoint(s) + multi-provider free-tier LLM client: structured output, timeout, retry, provider fallback, API keys in server env only. Candidate providers confirmed at build time (e.g. Groq, Google Gemini, Cerebras, OpenRouter, and similar free tiers) — no hardcoded rate limits in planning docs.
+#### M-INF — Inference layer (client DONE)
+Multi-provider free-tier LLM client: structured output, timeout, retry, provider fallback, external abort + per-attempt hook. Default order in `src/inference/providers.ts`: groq, cloudflare, gemini, mistral, openrouter. Serverless proxy deferred to M-UI (D-016 amendment).
 
-#### M-AGENT — LLM agent
-Battle-state + personality → validated LEGAL move; deterministic bot (`selectSimulationSkillId`) is fallback when the LLM is unavailable or invalid. Plugs into the existing `selectCpuSkillId` seam; engine resolution stays deterministic.
+#### M-AGENT — LLM agent (DONE pending merge)
+Battle-state + personality → validated legal move via `playAgentTurn`; plain `stepBattle` seeded picker is fallback (D-015/D-022). Deterministic greedy baseline for evals. Optional `selectCpuSkillId` on `stepBattle`.
+
+#### M-EVAL — Eval harness (signature piece) — NEXT
+Headless agent-vs-bot batches reporting win rate, decision-validity %, latency, and fallback stats; used to compare prompts/models. Free-tier-safe via caching, recorded fixtures, and small batches. First-class deliverable, not optional.
 
 #### M-TOOLS — Grounding + memory
-Grounding tool (computed affordable/threat facts so the agent decides on real state, not hallucination) + per-match memory of player tendencies.
-
-#### M-EVAL — Eval harness (signature piece)
-Headless agent-vs-bot batches reporting win rate, decision-validity %, latency, and fallback stats; used to compare prompts/models. Free-tier-safe via caching, recorded fixtures, and small batches. First-class deliverable, not optional.
+Grounding tool (computed affordable/threat facts so the agent decides on real state, not hallucination) + per-match memory of player tendencies. Proven by ablation against the M-EVAL baseline.
 
 #### M-COACH — Post-battle coach
 LLM post-battle coach: turns the battle log into tailored advice (surfaces in the Report screen in M-UI).
 
-#### M-UI — Minimal functional UI
-Minimal functional UI built to showcase the agents; visual polish optional afterward. Uses store/lib over the engine; React/Tailwind/Zustand installed then.
-
+#### M-UI — Minimal functional UI (+ deferred serverless proxy)
+Minimal functional UI built to showcase the agents; visual polish optional afterward. Uses store/lib over the engine; React/Tailwind/Zustand installed then. Serverless inference proxy lands here when the browser needs secret-safe calls.
 ### Stretch (optional)
 - Natural-language robot builder (NL → validated `AgentConfig`).
 - An agent that adapts across matches (bandit/RL). Revisit a heavier backend/DB only if cross-match learning, leaderboards, or stored eval runs require real persistence beyond localStorage.

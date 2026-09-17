@@ -5,12 +5,27 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface AttemptInfo {
+  provider: string;
+  model: string;
+  /** 1-based attempt index within the current provider. */
+  attempt: number;
+  ok: boolean;
+  durationMs: number;
+  status?: number;
+  reason?: string;
+}
+
 export interface CompleteChatOptions {
   json?: boolean;
   temperature?: number;
   timeoutMs?: number;
   maxProviders?: number;
   maxRetries?: number;
+  /** Caller-owned end-to-end abort; abort is terminal (no retry / no next provider). */
+  signal?: AbortSignal;
+  /** Invoked after every attempt (success or failure). Thrown errors are swallowed. */
+  onAttempt?: (info: AttemptInfo) => void;
   /** Override process.env (tests). */
   env?: NodeJS.ProcessEnv | Record<string, string | undefined>;
   /** Override fetch (tests). */
@@ -33,6 +48,10 @@ export interface CompleteChatResult {
 export interface ProviderAttemptFailure {
   provider: string;
   reason: string;
+  model?: string;
+  attempt?: number;
+  status?: number;
+  durationMs?: number;
 }
 
 export class AllProvidersFailedError extends Error {
