@@ -7,6 +7,7 @@ import {
   resolveActiveProviders
 } from "./providers";
 import type {
+  AttemptInfo,
   ChatMessage,
   CompleteChatOptions,
   CompleteChatResult,
@@ -38,6 +39,22 @@ function isTransientFailure(reason: string, status?: number): boolean {
   );
 }
 
+/** Fresh read each call — AbortSignal.aborted can change after await. */
+function isExternallyAborted(signal: AbortSignal | undefined): boolean {
+  return signal !== undefined && signal.aborted;
+}
+
+function notifyAttempt(opts: CompleteChatOptions, info: AttemptInfo): void {
+  if (opts.onAttempt === undefined) {
+    return;
+  }
+  try {
+    opts.onAttempt(info);
+  } catch {
+    // Hook must never change control flow.
+  }
+}
+
 async function attemptProvider(
   provider: ResolvedProvider,
   messages: ChatMessage[],
@@ -45,8 +62,13 @@ async function attemptProvider(
   timeoutMs: number,
   fetchImpl: typeof fetch
 ): Promise<CompleteChatResult> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutController = new AbortController();
+  const timer = setTimeout(() => timeoutController.abort(), timeoutMs);
+  const externalSignal = opts.signal;
+  const signal =
+    externalSignal === undefined
+      ? timeoutController.signal
+      : AbortSignal.any([timeoutController.signal, externalSignal]);
 
   const body: Record<string, unknown> = {
     model: provider.model,
@@ -68,7 +90,7 @@ async function attemptProvider(
         ...(provider.extraHeaders ?? {})
       },
       body: JSON.stringify(body),
-      signal: controller.signal
+      signal
     });
 
     if (!response.ok) {
@@ -97,6 +119,9 @@ async function attemptProvider(
     };
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
+      if (isExternallyAborted(externalSignal)) {
+        throw new Error("aborted", { cause: error });
+      }
       throw new Error("timeout", { cause: error });
     }
     throw error;
@@ -131,35 +156,112 @@ export async function completeChat(
     opts.maxProviders ?? readPositiveIntEnv(env, "INFERENCE_MAX_PROVIDERS", DEFAULT_MAX_PROVIDERS);
   const maxRetries =
     opts.maxRetries ?? readNonNegativeIntEnv(env, "INFERENCE_MAX_RETRIES", DEFAULT_MAX_RETRIES);
+  const externalSignal = opts.signal;
 
   const providers = resolveActiveProviders(env).slice(0, maxProviders);
   if (providers.length === 0) {
+    if (isExternallyAborted(externalSignal)) {
+      throw new AllProvidersFailedError([
+        { provider: "(none)", reason: "aborted" }
+      ]);
+    }
     throw new AllProvidersFailedError([
       { provider: "(none)", reason: "no providers with required env vars configured" }
+    ]);
+  }
+
+  if (isExternallyAborted(externalSignal)) {
+    throw new AllProvidersFailedError([
+      { provider: "(none)", reason: "aborted" }
     ]);
   }
 
   const failures: ProviderAttemptFailure[] = [];
 
   for (const provider of providers) {
+    if (isExternallyAborted(externalSignal)) {
+      failures.push({ provider: provider.name, model: provider.model, reason: "aborted" });
+      throw new AllProvidersFailedError(failures);
+    }
+
     let lastReason = "unknown error";
+    let lastStatus: number | undefined;
+    let lastDurationMs: number | undefined;
+    let lastAttempt = 0;
     const attempts = 1 + maxRetries;
 
     for (let attempt = 0; attempt < attempts; attempt += 1) {
+      if (isExternallyAborted(externalSignal)) {
+        failures.push({
+          provider: provider.name,
+          model: provider.model,
+          attempt: attempt + 1,
+          reason: "aborted"
+        });
+        throw new AllProvidersFailedError(failures);
+      }
+
+      const attemptNumber = attempt + 1;
+      const started = performance.now();
       try {
-        return await attemptProvider(provider, messages, opts, timeoutMs, fetchImpl);
+        const result = await attemptProvider(provider, messages, opts, timeoutMs, fetchImpl);
+        const durationMs = performance.now() - started;
+        notifyAttempt(opts, {
+          provider: provider.name,
+          model: provider.model,
+          attempt: attemptNumber,
+          ok: true,
+          durationMs
+        });
+        return result;
       } catch (error) {
+        const durationMs = performance.now() - started;
         const { reason, status } = failureReason(error);
         lastReason = reason;
+        lastStatus = status;
+        lastDurationMs = durationMs;
+        lastAttempt = attemptNumber;
 
-        const canRetry = attempt < maxRetries && isTransientFailure(reason, status);
+        notifyAttempt(opts, {
+          provider: provider.name,
+          model: provider.model,
+          attempt: attemptNumber,
+          ok: false,
+          durationMs,
+          status,
+          reason
+        });
+
+        if (isExternallyAborted(externalSignal)) {
+          failures.push({
+            provider: provider.name,
+            model: provider.model,
+            attempt: attemptNumber,
+            status,
+            durationMs,
+            reason: "aborted"
+          });
+          throw new AllProvidersFailedError(failures);
+        }
+
+        const canRetry =
+          attempt < maxRetries &&
+          !isExternallyAborted(externalSignal) &&
+          isTransientFailure(reason, status);
         if (!canRetry) {
           break;
         }
       }
     }
 
-    failures.push({ provider: provider.name, reason: lastReason });
+    failures.push({
+      provider: provider.name,
+      model: provider.model,
+      attempt: lastAttempt > 0 ? lastAttempt : undefined,
+      status: lastStatus,
+      durationMs: lastDurationMs,
+      reason: lastReason
+    });
   }
 
   throw new AllProvidersFailedError(failures);
