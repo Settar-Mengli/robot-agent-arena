@@ -1,4 +1,4 @@
-import { createSeededRng } from "./rng";
+import { createSeededRng, createSeededRngFromState } from "./rng";
 import {
   applyTurnEnergyRecovery,
   createInitialCombatantState,
@@ -21,6 +21,7 @@ import type {
   BattleAction,
   BattleOutcome,
   BattleResult,
+  BattleRuntime,
   BattleSession,
   CombatantState,
   Seed,
@@ -170,4 +171,52 @@ export function resolveBattle(
   }
 
   throw new Error("resolveBattle reached a completed session without an outcome.");
+}
+
+export function startBattle(
+  configA: AgentConfig,
+  configB: AgentConfig,
+  seed: Seed,
+  maxTurns?: number
+): BattleRuntime {
+  const session = initBattle(configA, configB, seed, maxTurns);
+
+  return {
+    session,
+    player: createInitialCombatantState(configA, "player"),
+    cpu: createInitialCombatantState(configB, "cpu"),
+    rng: createSeededRng(seed).snapshot(),
+    turns: []
+  };
+}
+
+export function stepBattle(
+  runtime: BattleRuntime,
+  playerSkillId: SkillId
+): {
+  runtime: BattleRuntime;
+  turnRecord: TurnRecord;
+  outcome?: BattleOutcome;
+} {
+  const rng = createSeededRngFromState(runtime.rng);
+  const turnResult = resolveTurn({
+    session: runtime.session,
+    player: runtime.player,
+    cpu: runtime.cpu,
+    playerSkillId,
+    selectCpuSkillId: (cpuState) =>
+      selectSimulationSkillId(runtime.session.cpu, cpuState, rng)
+  });
+
+  return {
+    runtime: {
+      session: turnResult.session,
+      player: turnResult.player,
+      cpu: turnResult.cpu,
+      rng: rng.snapshot(),
+      turns: [...runtime.turns, turnResult.turnRecord]
+    },
+    turnRecord: turnResult.turnRecord,
+    outcome: turnResult.outcome
+  };
 }

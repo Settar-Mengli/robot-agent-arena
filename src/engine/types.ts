@@ -153,6 +153,14 @@ export interface BattleResult {
   totalTurns: number;
 }
 
+export interface BattleRuntime {
+  session: BattleSession;
+  player: CombatantState;
+  cpu: CombatantState;
+  rng: RngState;
+  turns: TurnRecord[];
+}
+
 export interface RngState {
   seed: Seed;
   state: number;

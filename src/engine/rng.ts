@@ -1,4 +1,4 @@
-import type { Seed, SeededRng } from "./types";
+import type { RngState, Seed, SeededRng } from "./types";
 
 const UINT32_MAX_PLUS_ONE = 0x1_0000_0000;
 const EMPTY_SEED_FALLBACK = 0x9e3779b9;
@@ -34,9 +34,10 @@ function nextUint32(state: number): number {
   return next;
 }
 
-export function createSeededRng(seed: Seed): SeededRng {
-  let state = seedToUint32(seed);
-  let calls = 0;
+export function createSeededRngFromState(rngState: RngState): SeededRng {
+  let state = rngState.state;
+  let calls = rngState.calls;
+  const seed = rngState.seed;
 
   const nextFloat = (): number => {
     state = nextUint32(state);
@@ -63,4 +64,12 @@ export function createSeededRng(seed: Seed): SeededRng {
     nextInt,
     snapshot
   };
+}
+
+export function createSeededRng(seed: Seed): SeededRng {
+  return createSeededRngFromState({
+    seed,
+    state: seedToUint32(seed),
+    calls: 0
+  });
 }
