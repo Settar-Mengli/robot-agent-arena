@@ -26,3 +26,9 @@ export type {
   CpuPolicyId,
   PlayerPolicy
 } from "./policies";
+
+export { bestResponse, regret } from "./oracle";
+export type { BestResponseOptions, BestResponseResult } from "./oracle";
+
+export { generateSnapshots } from "./snapshots";
+export type { DecisionSnapshot, SnapshotSuite } from "./snapshots";
