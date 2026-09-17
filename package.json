@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "eval": "node scripts/run-ts.mjs src/eval/cli.ts --mode baseline",
+    "eval:report": "node scripts/run-ts.mjs src/eval/cli.ts --mode baseline --write-report",
+    "eval:replay": "node scripts/run-ts.mjs src/eval/cli.ts --mode replay",
+    "eval:record": "node scripts/run-ts.mjs src/eval/cli.ts --mode record"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

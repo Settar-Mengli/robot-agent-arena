@@ -65,3 +65,11 @@ export {
   evalRandomSnapshots
 } from "./snapshot-eval";
 export type { SnapshotEvalResult } from "./snapshot-eval";
+
+export {
+  buildEvalMarkdownShell,
+  extractBaselineBlock,
+  renderBaselineBlock,
+  upsertBaselineBlock
+} from "./report";
+export type { BaselineReport, BaselineSplitReport } from "./report";

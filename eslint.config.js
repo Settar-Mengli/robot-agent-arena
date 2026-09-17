@@ -6,6 +6,15 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly"
+      }
+    }
+  },
+  {
     files: ["src/engine/**/*.ts"],
     rules: {
       "no-restricted-properties": [
@@ -33,7 +42,9 @@ export default tseslint.config(
             "**/agent",
             "**/agent/**",
             "**/inference",
-            "**/inference/**"
+            "**/inference/**",
+            "**/eval",
+            "**/eval/**"
           ]
         }
       ]
@@ -45,7 +56,25 @@ export default tseslint.config(
       "no-restricted-imports": [
         "error",
         {
-          patterns: ["**/engine", "**/engine/**", "**/agent", "**/agent/**"]
+          patterns: [
+            "**/engine",
+            "**/engine/**",
+            "**/agent",
+            "**/agent/**",
+            "**/eval",
+            "**/eval/**"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/agent/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: ["**/eval", "**/eval/**"]
         }
       ]
     }
