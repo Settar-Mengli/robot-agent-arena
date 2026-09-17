@@ -51,3 +51,4 @@
 
 ## Exact Next Step
 **M-AGENT — LLM agent** (+ start **M-EVAL** baseline alongside): battle-state + personality → validated legal move behind the existing `selectCpuSkillId` seam; deterministic bot fallback. Begin a minimal headless eval baseline for win rate / validity / latency / fallback. UI remains deferred until after M-EVAL evidence. Keep the pure engine and its tests untouched.
+- M-AGENT commit 1: `SelectCpuSkillId` type + optional selector on `stepBattle`; default unchanged.

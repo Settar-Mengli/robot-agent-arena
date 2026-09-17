@@ -67,7 +67,7 @@ This boundary is enforced by tooling as well as convention: [eslint.config.js](e
 | `session.ts` | Lifecycle: `initBattle`, `submitPlayerAction`, `isBattleOver`, `finalizeBattle`, `advanceBattleTurn` |
 | `combat.ts` | Combatant setup, single-action resolution, turn energy recovery, fallback stabilize |
 | `outcome.ts` | Health and turn-limit winner/draw rules |
-| `simulation.ts` | `resolveTurn` orchestrator and full-match `resolveBattle` |
+| `simulation.ts` | `resolveTurn` orchestrator, full-match `resolveBattle`, and interactive driver (`startBattle` / `stepBattle`) |
 | `index.ts` | Public re-exports of the engine surface |
 
 ## Core data types
@@ -87,11 +87,11 @@ MVP numbers from `src/engine/constants.ts` (source of truth): **5** modules, **8
 
 ## Battle flow
 
-**Session API (interactive path — lifecycle only today):**
+**Session API (interactive path):**
 
-1. `initBattle(configA, configB, seed, maxTurns?)` → `BattleSession`
-2. While `!isBattleOver(session)`: choose a player skill, call `resolveTurn` (PLANNED UI wiring; parity tests already exercise this seam)
-3. When `resolveTurn` produces an outcome, session is finalized (`status: "completed"`)
+1. `startBattle(configA, configB, seed, maxTurns?)` → `BattleRuntime`
+2. While the battle is open: choose a player skill, call `stepBattle(runtime, playerSkillId, selectCpuSkillId?)` (optional sync CPU selector; default is the seeded simulation picker)
+3. `BattleRuntime` is JSON-serializable for save/resume; when `stepBattle` produces an outcome, the session is finalized (`status: "completed"`)
 
 **Auto-simulation:**
 
