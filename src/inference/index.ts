@@ -1,0 +1,19 @@
+export { completeChat } from "./client";
+export { extractJson } from "./json";
+export {
+  DEFAULT_MAX_PROVIDERS,
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_TIMEOUT_MS,
+  resolveActiveProviders
+} from "./providers";
+export type {
+  ChatMessage,
+  ChatRole,
+  CompleteChatOptions,
+  CompleteChatResult,
+  EnvMap,
+  ProviderAttemptFailure,
+  ResolvedProvider,
+  TokenUsage
+} from "./types";
+export { AllProvidersFailedError } from "./types";
