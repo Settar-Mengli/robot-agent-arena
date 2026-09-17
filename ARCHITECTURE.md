@@ -4,19 +4,22 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine is complete and covered by an automated test suite (including seam-parity coverage between simulation and the interactive turn path). The UI milestone (screens, store, React) is next and is not present in this repository yet.
+**Status today:** the battle engine, inference client, and agent layer (LLM turn + greedy baseline) are complete and covered by automated tests. Headless-first per D-014 / D-021: **M-EVAL is next**; UI (screens, store, React) remains later and is not present in this repository yet.
 
 ## Layered architecture and dependency rule
 
 **Intended layering** (engine-first, UI later):
 
 ```
-types / data  →  engine  →  (lib bridge)  →  store  →  components / screens
+data  →  engine
+         ↑
+inference (standalone)  →  agent  →  (lib bridge)  →  store  →  components / screens
+         ↑__________________|
 ```
 
 Dependencies should point inward toward the engine. Game logic must not live in React components. Browser APIs, persistence, and UI state stay outside `src/engine`.
 
-**What exists today** (all under `src/engine/`):
+**What exists today:**
 
 | Concern | Location |
 | --- | --- |
@@ -25,12 +28,16 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 | Canonical skill catalog (data) | `src/engine/skills.ts` |
 | Validation | `src/engine/validation.ts` |
 | Session lifecycle, combat, outcome, RNG, simulation | other `src/engine/*.ts` files |
+| CPU opponent catalog | `src/data/opponents.ts` |
+| Multi-provider LLM client | `src/inference/` |
+| LLM opponent turn + greedy baseline | `src/agent/` |
 | Tests | `src/__tests__/` |
 
-There are **no** top-level `src/types/`, `src/data/`, `src/store/`, `src/components/`, or `src/lib/` directories yet.
+`src/data/` exists (opponents). There are **no** top-level `src/types/`, `src/store/`, `src/components/`, or `src/lib/` directories yet.
+
+**Layer rules (ESLint-enforced):** `src/inference/` is standalone (must not import engine or agent). `src/agent/` may import engine and inference. `src/engine/` must import neither agent nor inference.
 
 **PLANNED for the UI milestone:** Zustand store, React components/screens (Home, Builder, Arena, Report), and a thin `lib` bridge so UI calls store/lib workflows rather than engine internals directly. React, Tailwind, and Zustand are locked in [DECISIONS.md](DECISIONS.md) (D-005) but are **not installed** yet.
-
 ## Determinism and the engine contract
 
 The engine is pure TypeScript:
@@ -100,6 +107,10 @@ MVP numbers from `src/engine/constants.ts` (source of truth): **5** modules, **8
 3. Returns a `BattleResult` with ordered turn history
 
 Player actions resolve before CPU. If the player action ends the battle, the CPU action is skipped. Unaffordable skills resolve as `fallback-stabilize`.
+
+## Agent turn (D-022)
+
+`playAgentTurn` in `src/agent/` probes post-player state, calls `completeChat` under an end-to-end budget (`AbortSignal`), validates the JSON proposal, then either injects the skill into `stepBattle` or falls back to the default seeded picker. Emits a JSON-serializable `DecisionTrace`. Deterministic `createGreedySelector` supports evals. LLM failures never throw past the agent boundary; only engine errors propagate.
 
 ## Testing and verification
 

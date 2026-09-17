@@ -2,7 +2,7 @@
 
 Configure an AI agent’s design choices. Run them in a deterministic battle environment. See measurable consequences.
 
-**Status:** Engine and multi-provider inference client complete and tested. Agent layer, evals, and UI are in progress (not started as product UI in-repo).
+**Status:** Engine, multi-provider inference client, and agent layer (LLM turn + greedy baseline, mocked-tested) are complete. Evals are next; UI remains later.
 
 ## What it is
 
@@ -25,7 +25,7 @@ _Screenshots coming with the UI._
 - TypeScript (strict)
 - Vite
 - Vitest (+ `@vitest/coverage-v8`)
-- ESLint 10 (flat config, engine-purity rules on `src/engine/**`)
+- ESLint 10 (flat config, engine-purity and layer-boundary rules)
 
 **PLANNED for UI (not installed yet)**
 
@@ -41,6 +41,8 @@ git clone https://github.com/Settar-Mengli/robot-agent-arena.git
 cd robot-agent-arena
 npm install
 ```
+
+Optional local LLM keys: copy [`.env.example`](.env.example) to `.env` and fill values. **Tests do not need keys** — they inject `env` and `fetch` via options.
 
 Useful scripts (from `package.json`):
 
@@ -58,6 +60,9 @@ npm run dev         # vite (no app UI yet)
 ```
 src/
   engine/          # Pure battle engine (types, constants, skills, validation, combat, …)
+  data/            # CPU opponent catalog (FRACTURE, SENTINEL-X)
+  inference/       # Multi-provider OpenAI-compatible LLM client
+  agent/           # LLM opponent turn, validation, decision trace, greedy baseline
   __tests__/       # Vitest suite
 ARCHITECTURE.md    # Design reference (read this for depth)
 DECISIONS.md       # Locked decisions and rationale
@@ -75,17 +80,17 @@ npm test
 npm run coverage
 ```
 
-The engine is covered by a comprehensive Vitest suite, including seam-parity tests that prove the interactive turn path matches full-match simulation. GitHub Actions CI runs `typecheck`, `lint`, and `coverage` on every pull request and on pushes to `main`.
+The engine is covered by a comprehensive Vitest suite, including seam-parity tests that prove the interactive turn path matches full-match simulation. Agent/inference tests inject mocks (no live network). GitHub Actions CI runs `typecheck`, `lint`, and `coverage` on every pull request and on pushes to `main`.
 
 For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Status / roadmap
 
-1. **Done:** Pure TypeScript battle engine, validation, seeded simulation, shared `resolveTurn`, CPU catalog, CI + lint + coverage, multi-provider inference client (M-INF)
-2. **Next:** M-AGENT (LLM strategy behind `selectCpuSkillId`) and start M-EVAL baseline alongside; UI remains later (M-UI)
-3. **Later:** M-TOOLS, M-COACH, M-UI (React/Tailwind/Zustand not installed yet); deploy deferred in D-005
+1. **Done:** Pure TypeScript battle engine, inference client (M-INF), agent turn + greedy baseline (M-AGENT, D-022)
+2. **Next:** M-EVAL (headless eval harness)
+3. **Later:** M-TOOLS, M-COACH, M-UI (React/Tailwind/Zustand not installed yet; serverless proxy deferred to M-UI)
 
-Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md).
+Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md). Order locked in [D-021](DECISIONS.md).
 
 ## Original work / theme
 
@@ -93,7 +98,7 @@ All robots, skills, and lore are original. Security-related gameplay uses safe f
 
 ## License
 
-License: TBD
+[MIT](LICENSE)
 
 ## Further reading
 

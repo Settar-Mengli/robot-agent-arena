@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-17
-- HEAD: c30851b (`chore: add MIT license (#7)`) on `main` at branch cut
-- Current state: Engine, data, infra, and multi-provider inference client (M-INF) are on `main`. Deterministic seeded engine; shared `resolveTurn`; interactive `startBattle` / `stepBattle` with JSON save/resume; RNG restore; FRACTURE + SENTINEL-X catalog; ESLint engine-purity rules; coverage; CI; ARCHITECTURE + README + MIT LICENSE. No UI yet. Agentic re-scope (D-014–D-019) stands; positioning as agent-design teaching sandbox recorded as D-020 (docs-only; no engine/spine change).
-- Verification: `npm run typecheck` / `lint` / `coverage` green; suite ~100 tests
-- Working tree: branch `docs/positioning` for this docs-only update
+- Branch: `feat/m-agent` (PR #9); HEAD after docs commit (see `git log -1`)
+- Current state: Engine, data, infra, inference client (M-INF), and agent layer (M-AGENT: LLM turn + greedy baseline + decision trace) are on this branch. Deterministic seeded engine; optional `selectCpuSkillId` on `stepBattle`; ESLint engine-purity + layer boundaries; coverage; CI. No UI yet. Milestone order D-021; agent turn contract D-022.
+- Verification: `npm run typecheck` / `lint` / `coverage` green; suite **152** tests; lines ~94% (latest local coverage run)
+- Working tree: `feat/m-agent`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -30,11 +30,13 @@
 - Infra: ESLint 10 flat config with engine-purity rules, v8 coverage, CI workflow (PR #1).
 - Interactive driver: `createSeededRngFromState`, `BattleRuntime`, `startBattle` / `stepBattle` (PR #3).
 - CPU opponent catalog: FRACTURE and SENTINEL-X in `src/data/opponents.ts` (PR #4).
-- Multi-provider OpenAI-compatible inference client under `src/inference/` (M-INF, PR #6).
+- Multi-provider OpenAI-compatible inference client under `src/inference/` (M-INF, PR #6); external abort + per-attempt hook (M-AGENT c2).
 - MIT LICENSE (PR #7).
+- D-020 positioning docs.
+- M-AGENT (PR #9): `SelectCpuSkillId` seam; `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
 
 ## Current Work
-- Docs-only: record D-020 agent-design teaching sandbox positioning (this branch).
+- M-AGENT complete on `feat/m-agent` pending PR #9 merge.
 
 ## Blockers
 - None.
@@ -44,11 +46,7 @@
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 
 ## Changed Files In Current Work
-- DECISIONS.md
-- README.md
-- ROADMAP.md
-- PROGRESS.md
+- See PR #9 commits (seam, inference signal, agent turn, greedy, docs).
 
 ## Exact Next Step
-**M-AGENT — LLM agent** (+ start **M-EVAL** baseline alongside): battle-state + personality → validated legal move behind the existing `selectCpuSkillId` seam; deterministic bot fallback. Begin a minimal headless eval baseline for win rate / validity / latency / fallback. UI remains deferred until after M-EVAL evidence. Keep the pure engine and its tests untouched.
-- M-AGENT commit 1: `SelectCpuSkillId` type + optional selector on `stepBattle`; default unchanged.
+**M-EVAL** — headless eval harness (win rate / validity / latency / fallback) using the agent turn + greedy baseline. UI remains deferred until after M-EVAL evidence.
