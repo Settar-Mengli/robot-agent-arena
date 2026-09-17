@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-17
-- HEAD: 96f911c (`Merge pull request #4 from Settar-Mengli/feat/cpu-catalog`) on `main`
-- Current state: Engine, data, and infra are complete on `main`. Deterministic seeded engine; shared `resolveTurn`; interactive `startBattle` / `stepBattle` with JSON save/resume; RNG restore; FRACTURE + SENTINEL-X catalog; ESLint engine-purity rules; coverage; CI; ARCHITECTURE + README. No UI yet. Strategic re-scope to agentic-AI (game as environment) recorded in ROADMAP / DECISIONS (D-014–D-019).
-- Verification: `npm run typecheck` / `lint` / `coverage` green; suite ~88 tests (11 files)
-- Working tree: branch `docs/ai-direction` for this docs-only update
+- HEAD: c30851b (`chore: add MIT license (#7)`) on `main` at branch cut
+- Current state: Engine, data, infra, and multi-provider inference client (M-INF) are on `main`. Deterministic seeded engine; shared `resolveTurn`; interactive `startBattle` / `stepBattle` with JSON save/resume; RNG restore; FRACTURE + SENTINEL-X catalog; ESLint engine-purity rules; coverage; CI; ARCHITECTURE + README + MIT LICENSE. No UI yet. Agentic re-scope (D-014–D-019) stands; positioning as agent-design teaching sandbox recorded as D-020 (docs-only; no engine/spine change).
+- Verification: `npm run typecheck` / `lint` / `coverage` green; suite ~100 tests
+- Working tree: branch `docs/positioning` for this docs-only update
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -30,9 +30,11 @@
 - Infra: ESLint 10 flat config with engine-purity rules, v8 coverage, CI workflow (PR #1).
 - Interactive driver: `createSeededRngFromState`, `BattleRuntime`, `startBattle` / `stepBattle` (PR #3).
 - CPU opponent catalog: FRACTURE and SENTINEL-X in `src/data/opponents.ts` (PR #4).
+- Multi-provider OpenAI-compatible inference client under `src/inference/` (M-INF, PR #6).
+- MIT LICENSE (PR #7).
 
 ## Current Work
-- Docs-only: record agentic-AI re-scope and AI milestone spine (this branch).
+- Docs-only: record D-020 agent-design teaching sandbox positioning (this branch).
 
 ## Blockers
 - None.
@@ -42,9 +44,10 @@
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 
 ## Changed Files In Current Work
+- DECISIONS.md
+- README.md
 - ROADMAP.md
 - PROGRESS.md
-- DECISIONS.md
 
 ## Exact Next Step
-**M-INF — Inference layer:** build the minimal serverless multi-provider free-tier LLM client (structured output, timeout, retry, provider fallback) with API keys server-side only. Confirm concrete providers at build time; do not hardcode rate limits in docs. UI remains deferred until after **M-EVAL**. Keep the pure engine and its tests untouched; AI plugs in only via the `selectCpuSkillId` seam.
+**M-AGENT — LLM agent** (+ start **M-EVAL** baseline alongside): battle-state + personality → validated legal move behind the existing `selectCpuSkillId` seam; deterministic bot fallback. Begin a minimal headless eval baseline for win rate / validity / latency / fallback. UI remains deferred until after M-EVAL evidence. Keep the pure engine and its tests untouched.
