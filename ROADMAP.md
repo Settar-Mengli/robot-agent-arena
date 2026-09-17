@@ -24,7 +24,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Max 20 turns.
 - Seeded RNG (DONE; restore-from-state DONE).
 - Post-match report: explanatory lesson of which design choice caused the result, fictional vocabulary only (PLANNED; coach surfaces in Report later — D-020).
-- **PLANNED:** Eval harness (M-EVAL); grounding/memory tools (M-TOOLS); serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-021).
+- **PLANNED:** Grounding/memory tools (M-TOOLS); serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-021). Eval harness (M-EVAL) is DONE pending merge.
 
 ## Milestones
 
@@ -35,7 +35,8 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Infra: ESLint (engine-purity), coverage, CI, ARCHITECTURE + README — DONE.
 - CPU opponent catalog (FRACTURE, SENTINEL-X) — DONE.
 - M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred to M-UI per D-016 amendment).
-- M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE pending merge (PR #9).
+- M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
+- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — DONE pending merge (PR #10); LLM measurement pending a local `eval:record` run.
 
 ### M5 / M6 (re-sequenced)
 Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**. They land as **M-UI** (and related persistence) after the AI spine below so no UI is thrown away when agents land.
@@ -45,13 +46,13 @@ Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**.
 #### M-INF — Inference layer (client DONE)
 Multi-provider free-tier LLM client: structured output, timeout, retry, provider fallback, external abort + per-attempt hook. Default order in `src/inference/providers.ts`: groq, cloudflare, gemini, mistral, openrouter. Serverless proxy deferred to M-UI (D-016 amendment).
 
-#### M-AGENT — LLM agent (DONE pending merge)
+#### M-AGENT — LLM agent (DONE)
 Battle-state + personality → validated legal move via `playAgentTurn`; plain `stepBattle` seeded picker is fallback (D-015/D-022). Deterministic greedy baseline for evals. Optional `selectCpuSkillId` on `stepBattle`.
 
-#### M-EVAL — Eval harness (signature piece) — NEXT
-Headless agent-vs-bot batches reporting win rate, decision-validity %, latency, and fallback stats; used to compare prompts/models. Free-tier-safe via caching, recorded fixtures, and small batches. First-class deliverable, not optional.
+#### M-EVAL — Eval harness (signature piece) — DONE pending merge
+Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). LLM numbers pending local record/replay. Next: **M-TOOLS** (ablation vs this baseline).
 
-#### M-TOOLS — Grounding + memory
+#### M-TOOLS — Grounding + memory — NEXT
 Grounding tool (computed affordable/threat facts so the agent decides on real state, not hallucination) + per-match memory of player tendencies. Proven by ablation against the M-EVAL baseline.
 
 #### M-COACH — Post-battle coach
