@@ -24,7 +24,28 @@ export default tseslint.config(
       "no-restricted-imports": [
         "error",
         {
-          patterns: ["react", "react-dom", "zustand", "**/store/**", "**/components/**"]
+          patterns: [
+            "react",
+            "react-dom",
+            "zustand",
+            "**/store/**",
+            "**/components/**",
+            "**/agent",
+            "**/agent/**",
+            "**/inference",
+            "**/inference/**"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/inference/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: ["**/engine", "**/engine/**", "**/agent", "**/agent/**"]
         }
       ]
     }
