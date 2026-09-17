@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-17
-- Branch: `feat/m-agent` (PR #9); HEAD after docs commit (see `git log -1`)
-- Current state: Engine, data, infra, inference client (M-INF), and agent layer (M-AGENT: LLM turn + greedy baseline + decision trace) are on this branch. Deterministic seeded engine; optional `selectCpuSkillId` on `stepBattle`; ESLint engine-purity + layer boundaries; coverage; CI. No UI yet. Milestone order D-021; agent turn contract D-022.
-- Verification: `npm run typecheck` / `lint` / `coverage` green; suite **152** tests; lines ~94% (latest local coverage run)
-- Working tree: `feat/m-agent`
+- Branch: `feat/m-eval` (PR #10); HEAD after docs commit (see `git log -1`)
+- Current state: Engine, data, infra, inference (M-INF), agent (M-AGENT), and eval harness (M-EVAL: scenarios, oracle, snapshots, match runner, fixture transport, CLI, EVAL.md baseline) are on this branch. Deterministic seeded engine; ESLint layer boundaries including eval isolation; coverage; CI. No UI yet. Decisions D-021–D-023 in force.
+- Verification: `npm run typecheck` / `lint` / `coverage` green; suite **178** tests; lines ~87% (latest local coverage run; eval CLI paths mostly exercised via `npm run eval` / `eval:report`)
+- Working tree: `feat/m-eval`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -34,9 +34,10 @@
 - MIT LICENSE (PR #7).
 - D-020 positioning docs.
 - M-AGENT (PR #9): `SelectCpuSkillId` seam; `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
+- M-EVAL (PR #10): `src/eval/` harness, snapshot suites, recorded fixtures, Vite `runnerImport` CLI, committed EVAL.md baseline, D-023.
 
 ## Current Work
-- M-AGENT complete on `feat/m-agent` pending PR #9 merge.
+- M-EVAL harness complete on `feat/m-eval` pending PR #10 merge.
 
 ## Blockers
 - None.
@@ -46,7 +47,7 @@
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 
 ## Changed Files In Current Work
-- See PR #9 commits (seam, inference signal, agent turn, greedy, docs).
+- See PR #10 commits (scenarios/policies, oracle/snapshots, match/transport/metrics, CLI/report, docs).
 
 ## Exact Next Step
-**M-EVAL** — headless eval harness (win rate / validity / latency / fallback) using the agent turn + greedy baseline. UI remains deferred until after M-EVAL evidence.
+Local LLM record run (`npm run eval:record` then `eval:replay`) to fill EVAL.md LLM section; then **M-TOOLS** (ablation vs this baseline). UI remains deferred.

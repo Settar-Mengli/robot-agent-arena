@@ -131,3 +131,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Eval harness outputs (committed suites/fixtures live under evals/)
+evals/out/

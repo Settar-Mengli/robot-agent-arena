@@ -303,3 +303,21 @@ Keeps the engine sync and deterministic while making agent behavior measurable a
 
 Consequences:
 ESLint layer rules: engine imports neither agent nor inference; inference imports neither engine nor agent; agent may import both.
+
+## D-023 Eval Methodology
+Date: 2026-09-17
+Status: Accepted
+
+Decision:
+M-EVAL methodology is locked as follows:
+- Exact memoized best-response oracle vs a fixed player policy, with a node cap (`exact: false` when exceeded). Not a game-theoretic equilibrium.
+- Dev / held-out splits with disjoint seeds; match suites (120 scenarios each) plus decision-snapshot suites (20 per split, drawn from greedy-CPU play on a bounded scenario scan).
+- Recorded-fixture replay is the CI / committed LLM path; live and record modes are local-only and refuse `CI`.
+- Zero new runtime deps: Vite `runnerImport` via `scripts/run-ts.mjs`.
+- Drift guards on committed snapshot suites and the EVAL.md baseline block.
+
+Rationale:
+Makes agent quality measurable without paid quota, keeps results reproducible, and prevents silent suite/report drift when the engine or policies change.
+
+Consequences:
+`src/eval/`, `evals/`, `EVAL.md`, and npm `eval*` scripts are first-class. LLM measurement still requires a local record run before replay numbers appear in EVAL.md.

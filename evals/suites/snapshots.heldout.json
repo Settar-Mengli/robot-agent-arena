@@ -1,0 +1,2345 @@
+{
+  "scenariosScanned": 12,
+  "snapshots": [
+    {
+      "id": "bulwark__greedy__fracture__s101__t1",
+      "scenarioId": "bulwark__greedy__fracture__s101",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:101",
+          "seed": 101,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 101,
+          "state": 101,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s101__t2",
+      "scenarioId": "bulwark__greedy__fracture__s101",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:101",
+          "seed": 101,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 101,
+          "state": 101,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s102__t1",
+      "scenarioId": "bulwark__greedy__fracture__s102",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:102",
+          "seed": 102,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 102,
+          "state": 102,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s102__t2",
+      "scenarioId": "bulwark__greedy__fracture__s102",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:102",
+          "seed": 102,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 102,
+          "state": 102,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s103__t1",
+      "scenarioId": "bulwark__greedy__fracture__s103",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:103",
+          "seed": 103,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 103,
+          "state": 103,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s103__t2",
+      "scenarioId": "bulwark__greedy__fracture__s103",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:103",
+          "seed": 103,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 103,
+          "state": 103,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s104__t1",
+      "scenarioId": "bulwark__greedy__fracture__s104",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:104",
+          "seed": 104,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 104,
+          "state": 104,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s104__t2",
+      "scenarioId": "bulwark__greedy__fracture__s104",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:104",
+          "seed": 104,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 104,
+          "state": 104,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s105__t1",
+      "scenarioId": "bulwark__greedy__fracture__s105",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:105",
+          "seed": 105,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 105,
+          "state": 105,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s105__t2",
+      "scenarioId": "bulwark__greedy__fracture__s105",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:105",
+          "seed": 105,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 105,
+          "state": 105,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s106__t1",
+      "scenarioId": "bulwark__greedy__fracture__s106",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:106",
+          "seed": 106,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 106,
+          "state": 106,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s106__t2",
+      "scenarioId": "bulwark__greedy__fracture__s106",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:106",
+          "seed": 106,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 106,
+          "state": 106,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s107__t1",
+      "scenarioId": "bulwark__greedy__fracture__s107",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:107",
+          "seed": 107,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 107,
+          "state": 107,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s107__t2",
+      "scenarioId": "bulwark__greedy__fracture__s107",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:107",
+          "seed": 107,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 107,
+          "state": 107,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s108__t1",
+      "scenarioId": "bulwark__greedy__fracture__s108",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:108",
+          "seed": 108,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 108,
+          "state": 108,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s108__t2",
+      "scenarioId": "bulwark__greedy__fracture__s108",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:108",
+          "seed": 108,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 108,
+          "state": 108,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s109__t1",
+      "scenarioId": "bulwark__greedy__fracture__s109",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:109",
+          "seed": 109,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 109,
+          "state": 109,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s109__t2",
+      "scenarioId": "bulwark__greedy__fracture__s109",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:109",
+          "seed": 109,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 109,
+          "state": 109,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s110__t1",
+      "scenarioId": "bulwark__greedy__fracture__s110",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:110",
+          "seed": 110,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 110,
+          "state": 110,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    },
+    {
+      "id": "bulwark__greedy__fracture__s110__t2",
+      "scenarioId": "bulwark__greedy__fracture__s110",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-bulwark:cpu-fracture:110",
+          "seed": 110,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-bulwark",
+            "displayName": "BULWARK",
+            "modules": {
+              "coreIdentity": "Stone Kernel",
+              "memory": "Hold Pattern",
+              "sigilSecurity": "Thick Ward",
+              "rules": "Absorb First",
+              "strategy": "Guard Then Counter"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-bulwark",
+          "displayName": "BULWARK",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 110,
+          "state": 110,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1000,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true
+    }
+  ]
+}

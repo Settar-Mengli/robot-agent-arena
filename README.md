@@ -2,7 +2,7 @@
 
 Configure an AI agent’s design choices. Run them in a deterministic battle environment. See measurable consequences.
 
-**Status:** Engine, multi-provider inference client, and agent layer (LLM turn + greedy baseline, mocked-tested) are complete. Evals are next; UI remains later.
+**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), and eval harness (match/snapshot suites, oracle, recorded fixtures, CLI) are complete. LLM eval numbers pending a local record run; UI remains later.
 
 ## What it is
 
@@ -53,7 +53,15 @@ npm test            # vitest run
 npm run coverage    # vitest run --coverage
 npm run test:watch  # vitest
 npm run dev         # vite (no app UI yet)
+npm run eval        # baseline eval (no keys)
+npm run eval:report # baseline + refresh EVAL.md block
+npm run eval:replay # LLM via recorded fixtures
+npm run eval:record # local only — writes fixtures (needs keys)
 ```
+
+## Evals
+
+Headless harness under `src/eval/` (D-018 / D-023). Committed baseline lives in [EVAL.md](EVAL.md). **No API keys needed** for `npm run eval` / `eval:report` (random + greedy). LLM path uses recorded fixtures in CI; `eval:record` / live are local-only.
 
 ## Project structure
 
@@ -63,7 +71,11 @@ src/
   data/            # CPU opponent catalog (FRACTURE, SENTINEL-X)
   inference/       # Multi-provider OpenAI-compatible LLM client
   agent/           # LLM opponent turn, validation, decision trace, greedy baseline
+  eval/            # Match/snapshot suites, oracle, metrics, CLI
   __tests__/       # Vitest suite
+evals/             # Committed snapshot suites + fixture store
+scripts/           # run-ts.mjs (Vite runnerImport)
+EVAL.md            # Metric definitions + committed baseline
 ARCHITECTURE.md    # Design reference (read this for depth)
 DECISIONS.md       # Locked decisions and rationale
 ROADMAP.md         # MVP scope and milestones
