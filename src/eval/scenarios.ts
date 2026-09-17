@@ -1,0 +1,115 @@
+import { FRACTURE, SENTINEL_X } from "../data/opponents";
+import type { AgentConfig, Seed } from "../engine";
+
+/** Attack-heavy player archetype. */
+export const STRIKER: AgentConfig = {
+  agentId: "eval-striker",
+  displayName: "STRIKER",
+  modules: {
+    coreIdentity: "Blade Pattern",
+    memory: "Strike Echo",
+    sigilSecurity: "Thin Guard",
+    rules: "Commit Forward",
+    strategy: "Pressure First"
+  },
+  skillIds: ["skill-logic-storm", "skill-override-pulse"]
+};
+
+/** Disrupt-focused player archetype. */
+export const DISRUPTOR: AgentConfig = {
+  agentId: "eval-disruptor",
+  displayName: "DISRUPTOR",
+  modules: {
+    coreIdentity: "Noise Lattice",
+    memory: "Signal Drift",
+    sigilSecurity: "Soft Aegis",
+    rules: "Break Sync",
+    strategy: "Drain Then Strike"
+  },
+  skillIds: ["skill-signal-breach", "skill-signal-exposure"]
+};
+
+/** Defense plus attack player archetype. */
+export const BULWARK: AgentConfig = {
+  agentId: "eval-bulwark",
+  displayName: "BULWARK",
+  modules: {
+    coreIdentity: "Stone Kernel",
+    memory: "Hold Pattern",
+    sigilSecurity: "Thick Ward",
+    rules: "Absorb First",
+    strategy: "Guard Then Counter"
+  },
+  skillIds: ["skill-null-pulse", "skill-override-pulse"]
+};
+
+export const PLAYER_ARCHETYPES: readonly AgentConfig[] = [STRIKER, DISRUPTOR, BULWARK];
+
+export type PlayerPolicyId = "greedy" | "seeded-random";
+
+export type EvalSplit = "dev" | "heldout";
+
+export interface MatchScenario {
+  id: string;
+  playerConfig: AgentConfig;
+  cpuConfig: AgentConfig;
+  playerPolicy: PlayerPolicyId;
+  seed: Seed;
+}
+
+const OPPONENTS: readonly AgentConfig[] = [FRACTURE, SENTINEL_X];
+const POLICY_IDS: readonly PlayerPolicyId[] = ["greedy", "seeded-random"];
+
+function opponentSlug(opponent: AgentConfig): string {
+  if (opponent.agentId === FRACTURE.agentId) {
+    return "fracture";
+  }
+  if (opponent.agentId === SENTINEL_X.agentId) {
+    return "sentinel-x";
+  }
+  return opponent.agentId;
+}
+
+function archetypeSlug(archetype: AgentConfig): string {
+  if (archetype.agentId === STRIKER.agentId) {
+    return "striker";
+  }
+  if (archetype.agentId === DISRUPTOR.agentId) {
+    return "disruptor";
+  }
+  if (archetype.agentId === BULWARK.agentId) {
+    return "bulwark";
+  }
+  return archetype.agentId;
+}
+
+function seedsForSplit(split: EvalSplit): readonly number[] {
+  if (split === "dev") {
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  }
+  return [101, 102, 103, 104, 105, 106, 107, 108, 109, 110];
+}
+
+export function buildMatchSuite(split: EvalSplit): MatchScenario[] {
+  const scenarios: MatchScenario[] = [];
+
+  for (const archetype of PLAYER_ARCHETYPES) {
+    for (const playerPolicy of POLICY_IDS) {
+      for (const cpuConfig of OPPONENTS) {
+        for (const seed of seedsForSplit(split)) {
+          const id = `${archetypeSlug(archetype)}__${playerPolicy}__${opponentSlug(cpuConfig)}__s${seed}`;
+          scenarios.push({
+            id,
+            playerConfig: archetype,
+            cpuConfig,
+            playerPolicy,
+            seed
+          });
+        }
+      }
+    }
+  }
+
+  scenarios.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  return scenarios;
+}
