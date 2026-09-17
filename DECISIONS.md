@@ -171,3 +171,81 @@ Previously empty loadouts passed validation but failed mid-simulation; front-doo
 
 Consequences:
 `MVP_SKILL_SLOT_LIMIT` remains the maximum; no new minimum-loadout constant is introduced; the empty-array guard in simulation stays as defense-in-depth.
+
+## D-014 Agentic Re-Scope
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+Re-scope the product to an agentic-AI system whose environment is the deterministic game. The pure TypeScript engine remains untouched and fully tested. This supersedes UI-first sequencing after the engine: the four MVP screens still ship, but later (M-UI), in service of showcasing the agents. Headless AI layer and evals are built and proven before UI.
+
+Rationale:
+Building UI before a proven agent strategy wastes work; the existing `selectCpuSkillId` seam already isolates move selection from deterministic resolution.
+
+Consequences:
+Roadmap priority is M-INF → M-AGENT → M-TOOLS → M-EVAL → M-COACH → M-UI. React/Tailwind/Zustand remain locked for UI but stay uninstalled until M-UI.
+
+## D-015 AI Strategy Provider Seam
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+AI acts as a strategy provider behind the existing `selectCpuSkillId` injection on `resolveTurn`. The engine still resolves combat deterministically. The deterministic bot (`selectSimulationSkillId`) is the fallback when the LLM is unavailable or returns an invalid/illegal move. Complements D-012 (shared orchestrator) and D-011 (completion authority).
+
+Rationale:
+One selection seam avoids a second turn path and preserves parity with the interactive driver.
+
+Consequences:
+LLM code must not live inside combat/outcome/session resolution; it only returns a legal `SkillId` (or triggers fallback).
+
+## D-016 Minimal Serverless Inference Proxy
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+A minimal serverless backend (free host, e.g. Vercel or Netlify functions) holds LLM API keys and proxies inference — not a full service/DB/auth backend. A heavier backend/DB is reconsidered only if a later stretch goal needs real persistence (cross-match learning, leaderboards, stored eval runs). Client-side localStorage remains the MVP persistence model for battle saves.
+
+Rationale:
+A static frontend cannot hold secrets; a full backend is over-engineering while there are no users and no server persistence requirement.
+
+Consequences:
+M-INF delivers serverless endpoint(s) + env-based keys. No app database in the near-term spine.
+
+## D-017 Multi-Provider Free-Tier LLM Client
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+Use a multi-provider free-tier LLM client with fallback across providers and no paid usage. Candidate providers are confirmed at M-INF build time (examples: Groq, Google Gemini, Cerebras, OpenRouter, and similar free tiers). Do not treat any specific provider or rate limit as locked in planning docs.
+
+Rationale:
+Free tiers change; fallback across providers keeps the agent usable without cost.
+
+Consequences:
+Client must support timeout, retry, structured output, and provider fallback. Rate limits and final provider list are verified when M-INF is implemented.
+
+## D-018 Eval Harness First-Class
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+The eval harness is a first-class deliverable (M-EVAL), not optional. It runs headless agent-vs-bot batches and reports win rate, decision-validity %, latency, and fallback stats, enabling prompt/model comparison. Free-tier-safe via caching, recorded fixtures, and small batches.
+
+Rationale:
+Without measurable agent quality, UI and coach work cannot be validated.
+
+Consequences:
+M-EVAL precedes M-UI. Eval tooling must not require paid LLM quota.
+
+## D-019 Determinism Boundary With LLM Selection
+Date: 2026-09-17  
+Status: Accepted
+
+Decision:
+LLM non-determinism lives only in move selection. The engine, its tests (~88 today), and replay/resume via `BattleRuntime` / `RngState` stay deterministic. The AI layer must not modify engine combat, outcome, validation, or existing engine tests to “make AI work.”
+
+Rationale:
+Preserves the tested backbone and save/resume guarantees while still allowing intelligent opponents.
+
+Consequences:
+Invalid LLM outputs fall back to the deterministic bot; recorded eval fixtures can pin selection where needed for reproducibility.
