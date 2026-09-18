@@ -1,9 +1,14 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
+  AEGIS,
   BULWARK,
   DISRUPTOR,
+  HELDOUT_ARCHETYPES,
+  MNEMONIC,
   PLAYER_ARCHETYPES,
   STRIKER,
+  TEMPEST,
   buildMatchSuite,
   greedyPlayer,
   mix,
@@ -21,8 +26,31 @@ import {
 } from "../engine";
 import { FRACTURE } from "../data/opponents";
 
+function loadoutPairKey(skillIds: readonly string[]): string {
+  return [...skillIds].sort().join(",");
+}
+
+function hasDamagePotential(skillIds: readonly string[]): boolean {
+  return skillIds.some((skillId) => {
+    const skill = MVP_SKILL_CATALOG.skills.find((s) => s.skillId === skillId);
+    if (skill === undefined) {
+      return false;
+    }
+    const effect = skill.effect;
+    return (
+      (effect.category === "attack" || effect.category === "disrupt") &&
+      "basePower" in effect &&
+      effect.basePower > 0
+    );
+  });
+}
+
+/** sha256 of sorted buildMatchSuite("dev") ids joined by newline — byte-stable lock. */
+const DEV_SUITE_IDS_SHA256 =
+  "6556ee62815cef861dabbbae38bce93f6d7caa47aaafe76045d2cde5bdd929af";
+
 describe("eval scenarios", () => {
-  it.each(PLAYER_ARCHETYPES)(
+  it.each([...PLAYER_ARCHETYPES, ...HELDOUT_ARCHETYPES])(
     "validates archetype $displayName",
     (archetype) => {
       expect(() =>
@@ -36,6 +64,46 @@ describe("eval scenarios", () => {
     expect(STRIKER.agentId).toBe("eval-striker");
     expect(DISRUPTOR.agentId).toBe("eval-disruptor");
     expect(BULWARK.agentId).toBe("eval-bulwark");
+    expect(AEGIS.agentId).toBe("eval-aegis");
+    expect(TEMPEST.agentId).toBe("eval-tempest");
+    expect(MNEMONIC.agentId).toBe("eval-mnemonic");
+  });
+
+  it("locks buildMatchSuite(dev) scenario ids", () => {
+    const ids = buildMatchSuite("dev").map((s) => s.id);
+    expect(ids).toHaveLength(120);
+    expect(ids[0]).toBe("bulwark__greedy__fracture__s1");
+    expect(ids[ids.length - 1]).toBe(
+      "striker__seeded-random__sentinel-x__s9"
+    );
+    expect(
+      createHash("sha256").update(ids.join("\n")).digest("hex")
+    ).toBe(DEV_SUITE_IDS_SHA256);
+  });
+
+  it("heldout loadout pairs are disjoint from every dev loadout pair", () => {
+    const devPairs = new Set(
+      PLAYER_ARCHETYPES.map((a) => loadoutPairKey(a.skillIds))
+    );
+    for (const archetype of HELDOUT_ARCHETYPES) {
+      expect(devPairs.has(loadoutPairKey(archetype.skillIds))).toBe(false);
+    }
+  });
+
+  it("every archetype in both splits has damage potential", () => {
+    for (const archetype of [...PLAYER_ARCHETYPES, ...HELDOUT_ARCHETYPES]) {
+      expect(hasDamagePotential(archetype.skillIds)).toBe(true);
+    }
+  });
+
+  it("dev vs heldout stratum key sets are disjoint", () => {
+    const devKeys = new Set(buildMatchSuite("dev").map(scenarioStratumKey));
+    const heldoutKeys = new Set(
+      buildMatchSuite("heldout").map(scenarioStratumKey)
+    );
+    for (const key of heldoutKeys) {
+      expect(devKeys.has(key)).toBe(false);
+    }
   });
 
   it("builds 120 unique scenarios per split", () => {
@@ -57,6 +125,14 @@ describe("eval scenarios", () => {
     }
 
     expect(dev.map((s) => s.id)).toEqual([...dev.map((s) => s.id)].sort());
+
+    for (const scenario of heldout) {
+      expect(
+        HELDOUT_ARCHETYPES.some(
+          (a) => a.agentId === scenario.playerConfig.agentId
+        )
+      ).toBe(true);
+    }
   });
 
   it("selectDiverseScenarios yields distinct strata for n=4", () => {

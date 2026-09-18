@@ -43,7 +43,53 @@ export const BULWARK: AgentConfig = {
   skillIds: ["skill-null-pulse", "skill-override-pulse"]
 };
 
+/** Held-out: identity defense + override attack. */
+export const AEGIS: AgentConfig = {
+  agentId: "eval-aegis",
+  displayName: "AEGIS",
+  modules: {
+    coreIdentity: "Mirror Kernel",
+    memory: "Ward Echo",
+    sigilSecurity: "Prism Veil",
+    rules: "Reflect First",
+    strategy: "Anchor Then Strike"
+  },
+  skillIds: ["skill-core-identity", "skill-override-pulse"]
+};
+
+/** Held-out: storm attack + breach disrupt. */
+export const TEMPEST: AgentConfig = {
+  agentId: "eval-tempest",
+  displayName: "TEMPEST",
+  modules: {
+    coreIdentity: "Gale Pattern",
+    memory: "Storm Cache",
+    sigilSecurity: "Thin Lattice",
+    rules: "Open Breach",
+    strategy: "Flood Then Pierce"
+  },
+  skillIds: ["skill-logic-storm", "skill-signal-breach"]
+};
+
+/** Held-out: drift attack + exposure disrupt. */
+export const MNEMONIC: AgentConfig = {
+  agentId: "eval-mnemonic",
+  displayName: "MNEMONIC",
+  modules: {
+    coreIdentity: "Archive Self",
+    memory: "Recall Drift",
+    sigilSecurity: "Soft Seal",
+    rules: "Leak Then Hit",
+    strategy: "Expose Weakness"
+  },
+  skillIds: ["skill-logic-drift", "skill-signal-exposure"]
+};
+
+/** Dev-split player archetypes only. */
 export const PLAYER_ARCHETYPES: readonly AgentConfig[] = [STRIKER, DISRUPTOR, BULWARK];
+
+/** Held-out-split player archetypes only (structurally independent of dev). */
+export const HELDOUT_ARCHETYPES: readonly AgentConfig[] = [AEGIS, TEMPEST, MNEMONIC];
 
 export type PlayerPolicyId = "greedy" | "seeded-random";
 
@@ -80,6 +126,15 @@ function archetypeSlug(archetype: AgentConfig): string {
   if (archetype.agentId === BULWARK.agentId) {
     return "bulwark";
   }
+  if (archetype.agentId === AEGIS.agentId) {
+    return "aegis";
+  }
+  if (archetype.agentId === TEMPEST.agentId) {
+    return "tempest";
+  }
+  if (archetype.agentId === MNEMONIC.agentId) {
+    return "mnemonic";
+  }
   return archetype.agentId;
 }
 
@@ -90,10 +145,17 @@ function seedsForSplit(split: EvalSplit): readonly number[] {
   return [101, 102, 103, 104, 105, 106, 107, 108, 109, 110];
 }
 
+function archetypesForSplit(split: EvalSplit): readonly AgentConfig[] {
+  if (split === "dev") {
+    return PLAYER_ARCHETYPES;
+  }
+  return HELDOUT_ARCHETYPES;
+}
+
 export function buildMatchSuite(split: EvalSplit): MatchScenario[] {
   const scenarios: MatchScenario[] = [];
 
-  for (const archetype of PLAYER_ARCHETYPES) {
+  for (const archetype of archetypesForSplit(split)) {
     for (const playerPolicy of POLICY_IDS) {
       for (const cpuConfig of OPPONENTS) {
         for (const seed of seedsForSplit(split)) {
