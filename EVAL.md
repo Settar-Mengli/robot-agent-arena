@@ -92,33 +92,60 @@ npm run eval:record       # local only: call providers, reuse fixtures, write ne
 ## LLM results
 
 <!-- llm:start -->
-Measured local `eval:record` (Gemini `gemini-3.5-flash-lite`), suite `dev`, `--max-matches 4`, 20 committed dev snapshots.
+Measured local `eval:record`, suite `heldout`, `--max-matches 6` (archetype-first stratified): 6 distinct matchups — aegis / mnemonic / tempest × greedy / seeded-random vs FRACTURE. Decisions were served by a **mixture** of Gemini, OpenRouter, and Groq (failover).
 
 | metric | value |
 | --- | --- |
-| decisions | 80 (llm=80, fallback=0, skipped=0) |
+| decisions | 102 (llm=100, fallback=0, skipped=2) |
 | decision-validity | 100% |
 | fixture_miss | 0 |
-| live latency p50 / p95 (non-cached HTTP) | 733ms / 775ms |
-| tokens (prompt / completion / total) | 25948 / 2276 / 28224 |
-| snapshots[dev] optimal / mean regret / invalid | 100% / 0.00 / 0% |
-| match outcomes | 4× draw at turn limit (20 turns) |
+| live latency p50 / p95 (non-cached HTTP) | 206ms / 729ms |
+| tokens (prompt / completion / total) | 34074 / 10949 / 45023 |
+| newly recorded / cache hits / fixtures on disk | 96 / 30 / 168 |
+| snapshots[heldout] optimal / mean regret / invalid | 50% / 0.50 / 0% |
 
-Reliability and tactical correctness (valid JSON moves, zero fallback, 100% snapshot-optimal on this suite) are measured. **Match-level advantage is not established**: the sampled matchup is a stalemate for random CPU, greedy CPU, and the LLM (same draw / 20 turns / 0 HP margin).
+#### Provider attempts (failover)
+
+| provider | ok | fail |
+| --- | ---: | --- |
+| gemini | 62 | 429×78 |
+| openrouter | 32 | (no status)×6 |
+| groq | 6 | 0 |
+
+**84 failed attempts produced zero fallbacks** — failover absorbed every miss.
+
+#### Matches — random vs greedy vs LLM (same 6 scenarios)
+
+Independently verified: greedy CPU matches the LLM on **every** row (result and turn count). Random differs only on `aegis__greedy` (player-victory instead of draw). Held-out snapshot optimality: greedy 50% / 0.50 regret (identical to LLM); random 50% / 0.75.
+
+| scenario | random | greedy | LLM |
+| --- | --- | --- | --- |
+| aegis__greedy__fracture__s101 | player-victory / 20t | draw / 20t | draw / 20t |
+| mnemonic__greedy__fracture__s101 | player-victory / 20t | player-victory / 20t | player-victory / 20t |
+| tempest__greedy__fracture__s101 | player-victory / 11t | player-victory / 11t | player-victory / 11t |
+| aegis__seeded-random__fracture__s101 | cpu-victory / 20t | cpu-victory / 20t | cpu-victory / 20t |
+| mnemonic__seeded-random__fracture__s101 | player-victory / 20t | player-victory / 20t | player-victory / 20t |
+| tempest__seeded-random__fracture__s101 | player-victory / 11t | player-victory / 11t | player-victory / 11t |
+
+**Headline:** On this task the deterministic greedy bot is indistinguishable from the LLM on both tactical optimality (held-out snapshots) and match outcomes across these six matchups. **The LLM shows no measured advantage on this task today.**
 <!-- llm:end -->
 
 ## Findings
 
-- **Held-out independence (fixed):** The original held-out suite reused the same player archetypes as dev and only changed seeds. Under deterministic player policy + injected CPU, committed snapshot `{turn, player, cpu}` states overlapped **20/20** with dev — held-out numbers were not independent evidence. Held-out now uses disjoint archetypes (`aegis` / `tempest` / `mnemonic`) with regenerated `snapshots.heldout.json` (state-key overlap **0**). Prior held-out LLM claims based on the duplicated suite are invalid; fresh held-out LLM numbers await `eval:record --suite heldout`.
-- **Keyless replay + CI:** `eval:replay` derives placeholder provider env from fixture hosts (no `.env` required) and is enforced in CI after coverage.
-- **Sampling:** `--max-matches N` previously took the first N scenarios by id, so N=4 collapsed to one matchup (`bulwark__greedy__fracture` across unused seeds). Record/live now use **archetype-first** stratified selection (archetype → policy → opponent → seed). Replay still uses first-N-by-id until fixtures from a stratified record run are committed.
-- **Snapshots:** committed dev snapshots are 100% optimal for both greedy and the LLM, so they do not discriminate policies. Prefer points where greedy is suboptimal (suite regeneration deferred).
-- **Providers:** Cloudflare responses double-escape JSON; `mistral-small` is 429 on the free tier; `ministral-3b` wraps the payload; OpenRouter free models are shared-pool rate-limited. This run used Gemini `gemini-3.5-flash-lite`.
+- **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on this task today. Pre-registered next test: M-TOOLS grounding ablation (D-024).
+- **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attempt/decision attribution is now in the eval summary JSON.
+- **Held-out independence (fixed):** Earlier seed-only held-out duplicated dev snapshot states 20/20; disjoint archetypes (`aegis` / `tempest` / `mnemonic`) now yield state-key overlap **0**.
+- **Keyless replay + CI:** `eval:replay` derives placeholder provider env from fixture hosts and is enforced in CI. Default replay is first-N-by-id (dev fixtures); held-out fixtures were recorded under stratified selection — `replay --suite all` first-N heldout rows can fixture-miss until selection/fixtures align.
+- **Sampling:** Record/live use **archetype-first** stratified selection. Replay stays first-N-by-id for committed first-N fixtures.
+- **Snapshots:** Dev snapshots remain 100% greedy-optimal (non-discriminating). Held-out snapshots sit at 50% for greedy and LLM.
+- **Providers:** Cloudflare JSON double-escape; Mistral free-tier 429s / wrapping; OpenRouter free-pool limits. This held-out run used Gemini → OpenRouter → Groq failover.
 
 ## Limitations
 
 - Oracle is a fixed-policy best response, not an equilibrium.
-- Snapshot suites are small (n=20 per split).
+- Held-out LLM match sample is small (**n=6**) and all six used **FRACTURE** (archetype-first stratification varies archetype and policy before opponent, so SENTINEL-X was not sampled at n=6).
+- “The LLM” here is a **mixture of three models** via failover, not a single system under test.
+- Snapshot optimality at n=20 has **no confidence interval**.
 - Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space).
 - Free-tier model volatility can change live/record results.
 - Replay latency is not meaningful.

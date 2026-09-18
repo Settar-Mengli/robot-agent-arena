@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-17
-- Branch: `feat/m-eval` (PR #10); HEAD after docs commit (see `git log -1`)
-- Current state: Engine, data, infra, inference (M-INF), agent (M-AGENT), and eval harness (M-EVAL: scenarios, oracle, snapshots, match runner, fixture transport, CLI, EVAL.md baseline) are on this branch. Deterministic seeded engine; ESLint layer boundaries including eval isolation; coverage; CI. No UI yet. Decisions D-021–D-023 in force.
-- Verification: `npm run typecheck` / `lint` / `coverage` green; suite **178** tests; lines ~87% (latest local coverage run; eval CLI paths mostly exercised via `npm run eval` / `eval:report`)
-- Working tree: `feat/m-eval`
+- Branch: `feat/eval-heldout-results` (see open PR); base `main`
+- Current state: Engine, data, infra, inference (M-INF), agent (M-AGENT), and eval harness (M-EVAL) are on main. Held-out LLM results + per-provider attribution + fixtures in flight on this branch. Decisions D-021–D-024 in force. No UI yet.
+- Verification: `npm run typecheck` / `lint` / `coverage` (+ CI `eval:replay`) green on prior merges
+- Working tree: `feat/eval-heldout-results`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -37,7 +37,7 @@
 - M-EVAL (PR #10): `src/eval/` harness, snapshot suites, recorded fixtures, Vite `runnerImport` CLI, committed EVAL.md baseline, D-023.
 
 ## Current Work
-- M-EVAL harness complete on `feat/m-eval` pending PR #10 merge.
+- Document held-out LLM results (greedy indistinguishable from LLM on sampled matchups) and pre-register M-TOOLS hypothesis (D-024).
 
 ## Blockers
 - None.
@@ -45,9 +45,10 @@
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
+- Keyless `eval:replay --suite all` first-N heldout can fixture-miss (held-out fixtures recorded under stratified selection; replay stays first-N). Documented in EVAL.md Findings.
 
 ## Changed Files In Current Work
-- See PR #10 commits (scenarios/policies, oracle/snapshots, match/transport/metrics, CLI/report, docs).
+- See `git status` / PR diff on `feat/eval-heldout-results`.
 
 ## Exact Next Step
-Local LLM record run (`npm run eval:record` then `eval:replay`) to fill EVAL.md LLM section; then **M-TOOLS** (ablation vs this baseline). UI remains deferred.
+**M-TOOLS** ablation (grounding on vs off) against the held-out baseline in EVAL.md / D-024. UI remains deferred.

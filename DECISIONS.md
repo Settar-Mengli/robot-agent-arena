@@ -334,3 +334,25 @@ The original held-out suite reused the same archetypes as dev with only differen
 
 Consequences:
 `HELDOUT_ARCHETYPES` (aegis / tempest / mnemonic) are separate from `PLAYER_ARCHETYPES`. Held-out LLM metrics require a fresh `eval:record --suite heldout` before they can appear in EVAL.md.
+
+## D-024 M-TOOLS hypothesis (pre-registered)
+Date: 2026-09-17
+Status: Accepted
+
+Decision:
+Written **before** building M-TOOLS. Prediction: giving the agent computed grounded facts (affordability, damage-after-defense, lethality, threat) will raise held-out snapshot optimality **above the greedy baseline of 50%** and beat greedy on match outcomes.
+
+Pre-specified test:
+- Same held-out match suite and committed held-out snapshots as the measured baseline in EVAL.md.
+- Same model set / provider order as the held-out record run.
+- Ablation: grounding **on** vs grounding **off**.
+- Report: snapshot optimality, mean regret, and match outcomes (and publish both outcomes in EVAL.md).
+
+Falsifier:
+If grounded prompts do **not** beat 50% held-out snapshot optimality (and do not beat greedy on matches), the honest conclusion is that this environment is too simple for LLM strategy to add value — and that result is published in EVAL.md as well.
+
+Rationale:
+The held-out measurement shows greedy indistinguishable from the LLM mixture on both snapshots and the n=6 match sample. M-TOOLS must be judged against that baseline with a pre-registered criterion, not post-hoc narrative.
+
+Consequences:
+M-TOOLS is next on the spine; EVAL.md is the publication surface for the ablation; no claim of LLM advantage until the falsifier is passed.
