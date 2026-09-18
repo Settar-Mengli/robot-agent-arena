@@ -50,13 +50,19 @@ export { runMatch, runSuite } from "./match";
 export type { MatchResult, MatchTurnRecord, RunSuiteOptions } from "./match";
 
 export {
-  assertScenarioIdsInSuite,
-  mergeManifest,
-  readManifest,
-  selectScenariosByIds,
-  writeManifest
-} from "./manifest";
-export type { FixtureManifest, ManifestSplit } from "./manifest";
+  computeDecisionHeadroom,
+  decideDiscriminationVerdict,
+  formatDiscriminationSummary,
+  intervalsDisjoint,
+  runDiscriminationReport,
+  SPREAD_THRESHOLD
+} from "./discriminate";
+export type {
+  DecisionHeadroom,
+  DiscriminationReport,
+  DiscriminationSplitReport,
+  PolicyMatchSlice
+} from "./discriminate";
 
 export {
   createMemoryStore,

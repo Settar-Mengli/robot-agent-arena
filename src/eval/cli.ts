@@ -46,10 +46,14 @@ import {
   writeManifest,
   type FixtureManifest
 } from "./manifest";
+import {
+  formatDiscriminationSummary,
+  runDiscriminationReport
+} from "./discriminate";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
-type Mode = "baseline" | "replay" | "record" | "live";
+type Mode = "baseline" | "replay" | "record" | "live" | "discriminate";
 type SuiteChoice = "dev" | "heldout" | "all";
 
 type CliArgs = {
@@ -881,12 +885,31 @@ export async function main(argv: string[]): Promise<number> {
       return 0;
     }
 
+    if (args.mode === "discriminate") {
+      const report = await runDiscriminationReport((line) => console.log(line));
+      const outDir = join(ROOT, "evals/out");
+      await mkdir(outDir, { recursive: true });
+      const outPath = join(outDir, "discriminate.json");
+      await writeFile(
+        outPath,
+        `${JSON.stringify(report, null, 2)}\n`,
+        "utf8"
+      );
+      console.log(formatDiscriminationSummary(report));
+      console.log(`wrote ${relative(ROOT, outPath).replace(/\\/g, "/")}`);
+      return 0;
+    }
+
     if (args.mode === "replay") {
       return await runLlmMode(args, false);
     }
 
-    if (args.mode === "record" || args.mode === "live") {
+    if (args.mode === "record") {
       return await runLlmMode(args, true);
+    }
+
+    if (args.mode === "live") {
+      return await runLlmMode(args, false);
     }
 
     console.error(`unknown mode: ${args.mode}`);
