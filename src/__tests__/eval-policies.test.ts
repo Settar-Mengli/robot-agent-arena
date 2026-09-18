@@ -135,6 +135,41 @@ describe("eval scenarios", () => {
     }
   });
 
+  it("selectDiverseScenarios is archetype-first for n=3/4/6", () => {
+    const dev = buildMatchSuite("dev");
+    const heldout = buildMatchSuite("heldout");
+
+    for (const suite of [dev, heldout]) {
+      const n3 = selectDiverseScenarios(suite, 3);
+      expect(n3).toHaveLength(3);
+      expect(new Set(n3.map((s) => s.playerConfig.agentId)).size).toBe(3);
+      expect(new Set(n3.map((s) => s.playerPolicy)).size).toBe(1);
+      expect(n3.every((s) => s.playerPolicy === "greedy")).toBe(true);
+
+      const n4 = selectDiverseScenarios(suite, 4);
+      expect(n4).toHaveLength(4);
+      expect(new Set(n4.map((s) => s.playerConfig.agentId)).size).toBe(3);
+      expect(new Set(n4.map((s) => s.playerPolicy)).size).toBe(2);
+
+      const n6 = selectDiverseScenarios(suite, 6);
+      expect(n6).toHaveLength(6);
+      expect(new Set(n6.map((s) => s.playerConfig.agentId)).size).toBe(3);
+      expect(new Set(n6.map((s) => s.playerPolicy)).size).toBe(2);
+      expect(
+        n6.filter((s) => s.playerPolicy === "greedy")
+      ).toHaveLength(3);
+      expect(
+        n6.filter((s) => s.playerPolicy === "seeded-random")
+      ).toHaveLength(3);
+
+      const again = selectDiverseScenarios(suite, 6);
+      expect(again.map((s) => s.id)).toEqual(n6.map((s) => s.id));
+    }
+
+    const twelve = selectDiverseScenarios(dev, 12);
+    expect(new Set(twelve.map(scenarioStratumKey)).size).toBe(12);
+  });
+
   it("selectDiverseScenarios yields distinct strata for n=4", () => {
     const dev = buildMatchSuite("dev");
     const picked = selectDiverseScenarios(dev, 4);
@@ -144,9 +179,6 @@ describe("eval scenarios", () => {
 
     const again = selectDiverseScenarios(dev, 4);
     expect(again.map((s) => s.id)).toEqual(picked.map((s) => s.id));
-
-    const twelve = selectDiverseScenarios(dev, 12);
-    expect(new Set(twelve.map(scenarioStratumKey)).size).toBe(12);
   });
 });
 

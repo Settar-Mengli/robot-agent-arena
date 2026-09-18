@@ -182,9 +182,10 @@ export function scenarioStratumKey(scenario: MatchScenario): string {
 }
 
 /**
- * Deterministic stratified sample: round-robin across strata in lexicographic
- * key order, taking at most one scenario per stratum before revisiting any.
- * Within a stratum, scenarios are already ordered by id (lowest seed first).
+ * Deterministic stratified sample with archetype varying fastest, then policy,
+ * then opponent, then seed index. Stable orders: archetypes by first appearance
+ * in the suite, policies greedy then seeded-random, opponents by agentId,
+ * seeds ascending within each stratum cell.
  */
 export function selectDiverseScenarios(
   suite: readonly MatchScenario[],
@@ -195,7 +196,15 @@ export function selectDiverseScenarios(
   }
 
   const byStratum = new Map<string, MatchScenario[]>();
+  const archetypeOrder: string[] = [];
+  const seenArchetype = new Set<string>();
+
   for (const scenario of suite) {
+    const archetypeId = scenario.playerConfig.agentId;
+    if (!seenArchetype.has(archetypeId)) {
+      seenArchetype.add(archetypeId);
+      archetypeOrder.push(archetypeId);
+    }
     const key = scenarioStratumKey(scenario);
     const list = byStratum.get(key);
     if (list === undefined) {
@@ -206,32 +215,43 @@ export function selectDiverseScenarios(
   }
 
   for (const list of byStratum.values()) {
-    list.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    list.sort((a, b) => {
+      if (a.seed !== b.seed) {
+        return a.seed < b.seed ? -1 : 1;
+      }
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
   }
 
-  const stratumKeys = [...byStratum.keys()].sort((a, b) =>
-    a < b ? -1 : a > b ? 1 : 0
-  );
+  const policyOrder: PlayerPolicyId[] = ["greedy", "seeded-random"];
+  const opponentOrder = [
+    ...new Set(suite.map((s) => s.cpuConfig.agentId))
+  ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+
+  let maxSeeds = 0;
+  for (const list of byStratum.values()) {
+    if (list.length > maxSeeds) {
+      maxSeeds = list.length;
+    }
+  }
 
   const selected: MatchScenario[] = [];
-  let round = 0;
-  while (selected.length < n) {
-    let added = false;
-    for (const key of stratumKeys) {
-      if (selected.length >= n) {
-        break;
-      }
-      const list = byStratum.get(key)!;
-      const pick = list[round];
-      if (pick !== undefined) {
-        selected.push(pick);
-        added = true;
+  for (let seedIdx = 0; seedIdx < maxSeeds; seedIdx += 1) {
+    for (const opponentId of opponentOrder) {
+      for (const policy of policyOrder) {
+        for (const archetypeId of archetypeOrder) {
+          if (selected.length >= n) {
+            return selected;
+          }
+          const key = `${archetypeId}__${policy}__${opponentId}`;
+          const list = byStratum.get(key);
+          const pick = list?.[seedIdx];
+          if (pick !== undefined) {
+            selected.push(pick);
+          }
+        }
       }
     }
-    if (!added) {
-      break;
-    }
-    round += 1;
   }
 
   return selected;
