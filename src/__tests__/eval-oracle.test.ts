@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestResponse, regret, greedyPlayer } from "../eval";
+import { bestResponse, regret, greedyPlayer, seededRandomPlayer } from "../eval";
 import { isBattleOver, startBattle, stepBattle } from "../engine";
 import type { BattleRuntime, SkillId } from "../engine";
 import { STRIKER } from "../eval/scenarios";
@@ -151,5 +151,40 @@ describe("bestResponse oracle", () => {
     const before = structuredClone(runtime);
     bestResponse(runtime, playerSkillId, greedyPlayer(STRIKER));
     expect(runtime).toEqual(before);
+  });
+
+  it("throws when MemoScope is reused with a different identity", () => {
+    const runtime = startBattle(STRIKER, FRACTURE, "memo-id-1", 6);
+    const greedy = greedyPlayer(STRIKER);
+    const random = seededRandomPlayer(STRIKER, 1);
+    const scope = {
+      identity: "greedy|fracture",
+      map: new Map<string, number>()
+    };
+    bestResponse(runtime, greedy(runtime), greedy, { memo: scope });
+    scope.identity = "seeded|fracture";
+    expect(() =>
+      bestResponse(runtime, random(runtime), random, { memo: scope })
+    ).toThrow(/MemoScope reused with different identity/);
+  });
+
+  it("reuses MemoScope within one identity and reduces node counts", () => {
+    const runtime = startBattle(STRIKER, FRACTURE, "memo-reuse", 8);
+    const playerPolicy = greedyPlayer(STRIKER);
+    const playerSkillId = playerPolicy(runtime);
+    const scope = {
+      identity: "greedy|fracture|reuse",
+      map: new Map<string, number>()
+    };
+    const first = bestResponse(runtime, playerSkillId, playerPolicy, {
+      memo: scope
+    });
+    const second = bestResponse(runtime, playerSkillId, playerPolicy, {
+      memo: scope
+    });
+    expect(first.exact).toBe(true);
+    expect(second.exact).toBe(true);
+    expect(second.nodes).toBeLessThan(first.nodes);
+    expect(second.values).toEqual(first.values);
   });
 });

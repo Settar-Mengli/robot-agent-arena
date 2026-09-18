@@ -49,7 +49,10 @@ function valuesAreFlat(values: Record<SkillId, number>): boolean {
 function collectFromScenario(scenario: MatchScenario): DecisionSnapshot[] {
   const playerPolicy = resolvePlayerPolicy(scenario);
   const greedyCpu = createGreedySelector(scenario.cpuConfig);
-  const memo = new Map<string, number>();
+  const memo = {
+    identity: `${scenario.playerPolicy}|${scenario.cpuConfig.agentId}|${scenario.playerConfig.agentId}|maxTurns`,
+    map: new Map<string, number>()
+  };
   const found: DecisionSnapshot[] = [];
 
   let runtime = startBattle(
