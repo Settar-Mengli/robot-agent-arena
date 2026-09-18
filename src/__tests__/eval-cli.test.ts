@@ -259,7 +259,45 @@ describe("eval cli record summary", () => {
         fixtureMissCount: 0,
         latencyP50: null,
         latencyP95: null,
-        tokenTotals: { prompt: 1, completion: 2, total: 3 }
+        tokenTotals: { prompt: 1, completion: 2, total: 3 },
+        byProvider: {
+          "gemini|gemini-3.5-flash-lite": {
+            decisions: 2,
+            validOk: 1,
+            validated: 2,
+            decisionValidityRate: 0.5,
+            fallbackCount: 1,
+            latencyP50: 100,
+            latencyP95: 200,
+            tokenTotals: { prompt: 1, completion: 2, total: 3 },
+            attemptsOk: 2,
+            attemptsFailByStatus: { "429": 3 }
+          },
+          "groq|openai/gpt-oss-20b": {
+            decisions: 1,
+            validOk: 1,
+            validated: 1,
+            decisionValidityRate: 1,
+            fallbackCount: 0,
+            latencyP50: 50,
+            latencyP95: 50,
+            tokenTotals: null,
+            attemptsOk: 1,
+            attemptsFailByStatus: {}
+          },
+          "openrouter|free-model": {
+            decisions: 0,
+            validOk: 0,
+            validated: 0,
+            decisionValidityRate: null,
+            fallbackCount: 0,
+            latencyP50: null,
+            latencyP95: null,
+            tokenTotals: null,
+            attemptsOk: 0,
+            attemptsFailByStatus: { none: 1 }
+          }
+        }
       },
       recordingStats: {
         hits: 4,
@@ -275,5 +313,11 @@ describe("eval cli record summary", () => {
       "live latency p50/p95 (non-cached HTTP attempts):"
     );
     expect(text).toContain("fixture files on disk: 6");
+    expect(text).toContain("providers:");
+    expect(text).toContain("gemini|gemini-3.5-flash-lite:");
+    expect(text).toContain("fail429=3");
+    expect(text).toContain("groq|openai/gpt-oss-20b:");
+    expect(text).toContain("openrouter|free-model:");
+    expect(text).toContain("failnone=1");
   });
 });

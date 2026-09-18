@@ -539,6 +539,30 @@ export function formatLlmSummary(input: {
     );
   }
 
+  const providerKeys = Object.keys(input.llmAgg.byProvider).sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0
+  );
+  if (providerKeys.length > 0) {
+    lines.push("providers:");
+    for (const key of providerKeys) {
+      const row = input.llmAgg.byProvider[key]!;
+      const failParts = Object.entries(row.attemptsFailByStatus)
+        .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+        .map(([status, count]) => `fail${status}=${count}`);
+      const attemptsPart =
+        failParts.length > 0
+          ? `attempts ok=${row.attemptsOk} ${failParts.join(" ")}`
+          : `attempts ok=${row.attemptsOk}`;
+      const tokensPart =
+        row.tokenTotals === null
+          ? "tokens=—"
+          : `tokens=${row.tokenTotals.prompt}/${row.tokenTotals.completion}/${row.tokenTotals.total}`;
+      lines.push(
+        `  ${key}: decisions=${row.decisions} validity=${formatPct(row.decisionValidityRate)} fallback=${row.fallbackCount} ${attemptsPart} latency p50/p95=${formatMs(row.latencyP50)} / ${formatMs(row.latencyP95)} ${tokensPart}`
+      );
+    }
+  }
+
   if (input.snapshots !== undefined) {
     for (const split of Object.keys(input.snapshots).sort()) {
       const snap = input.snapshots[split]!;
