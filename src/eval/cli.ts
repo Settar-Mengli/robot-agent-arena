@@ -27,6 +27,8 @@ import {
   evalGreedySnapshots,
   evalLlmSnapshots,
   evalRandomSnapshots,
+  formatSnapshotDecisionsDigest,
+  promptVersionMismatchMessage,
   type SnapshotEvalResult
 } from "./snapshot-eval";
 import type { DecisionSnapshot } from "./snapshots";
@@ -895,6 +897,16 @@ async function runLlmMode(
         snapshots: args.snapshots ? snapshotResults : undefined
       })
     );
+    if (args.snapshots) {
+      for (const [split, snap] of Object.entries(snapshotResults)) {
+        log(formatSnapshotDecisionsDigest(`${variant}/${split}`, snap));
+        const mismatch = promptVersionMismatchMessage(variant, snap.decisions);
+        if (mismatch !== null) {
+          error(mismatch);
+          return 2;
+        }
+      }
+    }
     for (const [split, delta] of Object.entries(baselineDelta)) {
       log(
         `vs greedy heldout baseline [${variant}/${split}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)}`

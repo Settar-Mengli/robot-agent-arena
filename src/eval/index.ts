@@ -112,9 +112,16 @@ export type {
 export {
   evalGreedySnapshots,
   evalLlmSnapshots,
-  evalRandomSnapshots
+  evalRandomSnapshots,
+  decisionRecordFromChoice,
+  distinctPromptVersions,
+  formatSnapshotDecisionsDigest,
+  promptVersionMismatchMessage
 } from "./snapshot-eval";
-export type { SnapshotEvalResult } from "./snapshot-eval";
+export type {
+  SnapshotDecisionRecord,
+  SnapshotEvalResult
+} from "./snapshot-eval";
 
 export {
   buildEvalMarkdownShell,
