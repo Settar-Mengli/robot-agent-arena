@@ -471,3 +471,9 @@ An ablation that only moves scores on points the baseline already solves cannot 
 
 Consequences:
 Operator re-runs M-TOOLS with `--snapshot-suite adversarial` and pastes results into EVAL.md. Next batch remains **M-BENCH** after that publication.
+
+### Amendment (2026-09-18) — min regret 1 for measurable n
+
+- Full-split scan at `greedyRegret ≥ 100` yielded only **3 (dev) / 1 (heldout)** points — too few to measure an ablation. An earlier informal count of “~12 @≥100 in the first 12 scenarios” was incorrect: those scenarios are nearly the same matchup with inert seeds (one state repeated).
+- **`ADVERSARIAL_MIN_REGRET` is now `1`** (any point where greedy errs). Ranking remains by greedyRegret descending; target remains 20. Both splits fill n=20 (dev selected mix includes 3 points @≥100; heldout 1). Greedy optimalRate remains **0% by construction**.
+- Rationale unchanged: measure where the baseline fails; the stakes floor is what to relax when catastrophic errors are rare, not the construction.

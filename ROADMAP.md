@@ -53,7 +53,7 @@ Battle-state + personality → validated legal move via `playAgentTurn`; plain `
 Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). Held-out LLM still ties greedy on the n=6 sample. Fixture manifest + multi-provider keyless `--suite all` replay.
 
 #### M-TOOLS — Grounding + memory — DONE (adversarial ablation re-run pending)
-Grounding + memory + variant ablation harness (D-027). First standard-suite ablation was **inconclusive** (Δ0.0pp; maxRegret ≈ 1). Pivotal high-stakes suites proved greedy-saturated (D-028). Adversarial suites ranked by greedy regret (D-029; greedy 0% by construction). Operator must re-run: `eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial`.
+Grounding + memory + variant ablation harness (D-027). First standard-suite ablation was **inconclusive** (Δ0.0pp; maxRegret ≈ 1). Pivotal high-stakes suites proved greedy-saturated (D-028). Adversarial suites ranked by greedy regret (D-029; min regret 1 → n=20; greedy 0% by construction). Operator must re-run: `eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial`.
 
 #### M-BENCH — Model comparison bench — NEXT
 BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025). After adversarial ablation publication.

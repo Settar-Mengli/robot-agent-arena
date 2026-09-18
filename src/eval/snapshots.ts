@@ -48,7 +48,7 @@ export type StakeTailCounts = Record<
   number
 >;
 
-export const ADVERSARIAL_MIN_REGRET = 100;
+export const ADVERSARIAL_MIN_REGRET = 1;
 export const ADVERSARIAL_TARGET_COUNT = 20;
 export const ADVERSARIAL_REGRET_TAIL_THRESHOLDS = [1, 100, 500, 1000] as const;
 

@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `feat/eval-adversarial-snapshots` (PR open); base `main` @ `4980d03`
-- Current state: M-TOOLS code on main. Standard ablation **inconclusive** (Δ0.0pp). Pivotal suites greedy-saturated (D-028). Adversarial suites + D-029 in this PR (greedy 0% by construction). Ablation **re-run pending** on `--snapshot-suite adversarial`. Next after that: **M-BENCH**.
+- Branch: `fix/eval-adversarial-min-regret-1` (PR open); base `main` @ `83101b0`
+- Current state: Adversarial suites on main (PR #18). Follow-up: `ADVERSARIAL_MIN_REGRET=1` so both splits commit n=20 (was 3/1 at threshold 100). Ablation **re-run pending** on `--snapshot-suite adversarial`. Next after that: **M-BENCH**.
 - Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all` (standard suites)
-- Working tree: `feat/eval-adversarial-snapshots`
+- Working tree: `fix/eval-adversarial-min-regret-1`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -38,9 +38,10 @@
 - Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
 - M-TOOLS (PR #16): grounding, memory, opt-in variants, ablation harness; D-027.
 - Pivotal snapshot suites + auditable decisions + D-028 (PR #17).
+- Adversarial snapshot suites + D-029 (PR #18).
 
 ## Current Work
-- Adversarial snapshot suites ranked by greedy regret + D-029 docs.
+- Lower adversarial min regret to 1; regenerate n=20 suites; D-029 amendment.
 
 ## Blockers
 - None. Adversarial ablation numbers require a local keyed `eval:record --snapshot-suite adversarial`.
@@ -51,7 +52,7 @@
 - D-026 seed-spread remains parked.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/eval-adversarial-snapshots`.
+- See `git status` / PR diff on `fix/eval-adversarial-min-regret-1`.
 
 ## Exact Next Step
 Operator runs `npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial` and pastes results into EVAL.md. Then **M-BENCH**. UI remains deferred.

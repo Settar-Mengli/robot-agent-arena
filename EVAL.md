@@ -172,7 +172,7 @@ Protocol (D-024 / D-027 / D-028 / D-029):
 | --- | --- | --- | --- |
 | **standard** | fixtures / CI / keyless replay | every-kth non-flat exact points | often high (dev 100%; heldout 50%) — **no stakes** (maxRegret ≈ 1) |
 | **pivotal** | high-stakes probe (D-028) | spread ≥ 100, top 20 by spread | **greedy-saturated** (dev 100% / heldout 95%) — lethal rule coincides with oracle |
-| **adversarial** | ablation measurement (D-029) | greedyRegret ≥ 100, top 20 by greedyRegret | **0% by construction** |
+| **adversarial** | ablation measurement (D-029) | greedyRegret ≥ 1, top 20 by greedyRegret | **0% by construction** |
 
 ### Why the first ablation measured nothing
 
@@ -184,12 +184,12 @@ Pivotal suites correctly select high **spread** (lethal availability), but on th
 
 ### Adversarial suite baselines (ablation comparison point)
 
-Exact non-flat points with greedy regret ≥ 100, ranked by greedyRegret (D-029). Full-split scan; shortfall allowed (dev 3 / heldout 1 of target 20). `turns` retained in runtimes for memory summaries.
+Exact non-flat points with greedy regret ≥ 1 (any greedy error), ranked by greedyRegret (D-029 amended). Full-split scan fills target 20. `turns` retained in runtimes for memory summaries. Of the selected 20, a few remain catastrophic (regret ≥ 100); the rest are marginal errors — visible in min/median/max and the ≥100 column.
 
-| split | regret-tail qualifies @1/100/500/1000 | selected count | greedyRegret min/median/max | greedy optimal / mean regret | random optimal / mean regret | catalog-optimal |
-| --- | --- | ---: | --- | --- | --- | --- |
-| dev | 39 / 3 / 3 / 3 | 3 | 2001 / 2001 / 2001 | **0.00%** / 2001.00 | 50.00% / 1000.50 | 100% / 0 |
-| heldout | 38 / 1 / 1 / 1 | 1 | 2002 / 2002 / 2002 | **0.00%** / 2002.00 | 50.00% / 1001.00 | 100% / 0 |
+| split | regret-tail qualifies @1/100/500/1000 | selected count | greedyRegret min/median/max | # with regret ≥ 100 | greedy optimal / mean regret | random optimal / mean regret | catalog-optimal |
+| --- | --- | ---: | --- | ---: | --- | --- | --- |
+| dev | 39 / 3 / 3 / 3 | 20 | 2 / 2 / 2001 | 3 | **0.00%** / 301.85 | 50.00% / 150.93 | 100% / 0 |
+| heldout | 38 / 1 / 1 / 1 | 20 | 2 / 5 / 2002 | 1 | **0.00%** / 104.35 | 50.00% / 52.18 | 100% / 0 |
 
 Pivotal baselines (retained as stakes probe, not ablation):
 
@@ -214,7 +214,8 @@ Then paste numbers here. Do not invent results.
 
 ## Findings
 
-- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites are greedy-saturated (D-028); ablation measurement moves to **adversarial** suites (D-029).
+- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites are greedy-saturated (D-028); ablation measurement uses **adversarial** suites (D-029).
+- **Adversarial threshold (corrected):** An earlier count of “~12 points at regret ≥ 100 in the first 12 scenarios” was wrong — the first 12 scenarios by id are nearly the same matchup with inert seeds, so that count was one state repeated. The full-split scan found only **3 dev / 1 heldout** points with greedyRegret ≥ 100 (n too small for ablation). `ADVERSARIAL_MIN_REGRET` was therefore lowered to **1** (any greedy error); both splits now commit 20 points ranked by greedyRegret, still with greedy optimalRate **0%** by construction.
 - **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on that sample. That tie is **not** a ceiling: discrimination shows ~75 points of win-rate headroom above greedy (optimal ~83–88% vs greedy ~9–11%), so “greedy ties the LLM” means **both play poorly**, not that the task is saturated. Pre-registered grounding test remains D-024 (see Ablation section).
 - **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attribution is in the eval summary JSON.
 - **Held-out independence (fixed):** Disjoint archetypes (`aegis` / `tempest` / `mnemonic`); snapshot state-key overlap **0**.
