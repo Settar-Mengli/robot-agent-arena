@@ -5,9 +5,10 @@ import { describe, expect, it, vi } from "vitest";
 import {
   formatLlmSummary,
   resolveCliArgs,
-  runLlmModeForTest
+  runLlmModeForTest,
+  selectScenariosForLlmMode
 } from "../eval/cli";
-import { createMemoryStore } from "../eval";
+import { createMemoryStore, scenarioStratumKey } from "../eval";
 import { buildMatchSuite } from "../eval/scenarios";
 
 function envWithKeys(): Record<string, string> {
@@ -51,6 +52,25 @@ describe("eval cli args", () => {
     expect(
       resolveCliArgs(["--mode", "record", "--suite", "heldout"]).suite
     ).toBe("heldout");
+  });
+
+  it("parses --all-seeds", () => {
+    expect(resolveCliArgs(["--mode", "record", "--all-seeds"]).allSeeds).toBe(
+      true
+    );
+    expect(resolveCliArgs(["--mode", "record"]).allSeeds).toBe(false);
+  });
+
+  it("record uses stratified selection; replay stays first-N by id", () => {
+    const suite = buildMatchSuite("dev");
+    const stratified = selectScenariosForLlmMode(suite, 4, "record", false);
+    const firstN = selectScenariosForLlmMode(suite, 4, "replay", false);
+    const allSeeds = selectScenariosForLlmMode(suite, 4, "record", true);
+
+    expect(new Set(stratified.map(scenarioStratumKey)).size).toBe(4);
+    expect(firstN.map((s) => s.id)).toEqual(suite.slice(0, 4).map((s) => s.id));
+    expect(allSeeds.map((s) => s.id)).toEqual(firstN.map((s) => s.id));
+    expect(stratified.map((s) => s.id)).not.toEqual(firstN.map((s) => s.id));
   });
 });
 

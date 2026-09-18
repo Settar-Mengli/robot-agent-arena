@@ -2,7 +2,7 @@ import { readdir, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveActiveProviders, type EnvMap } from "../inference";
-import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
+import { buildMatchSuite, selectDiverseScenarios, scenarioStratumKey, type EvalSplit, type MatchScenario } from "./scenarios";
 import {
   greedyCpuPolicy,
   llmCpuPolicy,
@@ -52,6 +52,7 @@ type CliArgs = {
   budgetMs: number;
   writeReport: boolean;
   snapshots: boolean;
+  allSeeds: boolean;
 };
 
 export type LlmModeDeps = {
@@ -73,7 +74,8 @@ function parseArgs(argv: string[]): CliArgs {
     suiteExplicit: false,
     budgetMs: 10000,
     writeReport: false,
-    snapshots: true
+    snapshots: true,
+    allSeeds: false
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -106,6 +108,8 @@ function parseArgs(argv: string[]): CliArgs {
       }
     } else if (flag === "--no-snapshots") {
       args.snapshots = false;
+    } else if (flag === "--all-seeds") {
+      args.allSeeds = true;
     }
   }
 
@@ -153,6 +157,52 @@ function limitScenarios(
 ): MatchScenario[] {
   if (maxMatches === undefined) return scenarios;
   return scenarios.slice(0, maxMatches);
+}
+
+/**
+ * Select scenarios for an LLM mode run.
+ * - record/live: stratified by default (`selectDiverseScenarios`); `--all-seeds` → first-N by id.
+ * - replay: always first-N by id so committed fixtures (recorded under first-N) stay green
+ *   until a stratified record run is committed and fixtures are regenerated.
+ */
+export function selectScenariosForLlmMode(
+  suite: MatchScenario[],
+  maxMatches: number,
+  mode: Mode,
+  allSeeds: boolean
+): MatchScenario[] {
+  if (mode === "replay" || allSeeds) {
+    // Replay must stay first-N-by-id until stratified fixtures are committed.
+    return suite.slice(0, maxMatches);
+  }
+  if (mode === "record" || mode === "live") {
+    return selectDiverseScenarios(suite, maxMatches);
+  }
+  return suite.slice(0, maxMatches);
+}
+
+export function countDistinctMatchups(
+  scenarios: readonly MatchScenario[]
+): number {
+  return new Set(scenarios.map(scenarioStratumKey)).size;
+}
+
+export function identicalOutcomeWarning(
+  results: readonly MatchResult[]
+): string | undefined {
+  if (results.length === 0) {
+    return undefined;
+  }
+  const first = results[0]!;
+  const same = results.every(
+    (r) =>
+      r.outcome.result === first.outcome.result &&
+      r.totalTurns === first.totalTurns
+  );
+  if (!same) {
+    return undefined;
+  }
+  return `warning: all ${results.length} matches ended identically (${first.outcome.result}, ${first.totalTurns} turns) — this sample may not discriminate between policies`;
 }
 
 async function loadCommittedSnapshots(
@@ -409,6 +459,7 @@ async function runLlmMode(
 
   const maxMatches = args.maxMatches ?? 4;
   const allResults: MatchResult[] = [];
+  const selectedScenarios: MatchScenario[] = [];
   const inference = {
     fetch: fetchImpl,
     temperature: 0 as const,
@@ -422,7 +473,13 @@ async function runLlmMode(
   };
 
   for (const split of splitsFor(args.suite)) {
-    const scenarios = limitScenarios(buildMatchSuite(split), maxMatches);
+    const scenarios = selectScenariosForLlmMode(
+      buildMatchSuite(split),
+      maxMatches,
+      args.mode,
+      args.allSeeds
+    );
+    selectedScenarios.push(...scenarios);
     for (const scenario of scenarios) {
       log(`scenario: ${scenario.id}`);
       const results = await runSuite([scenario], llmCpuPolicy(turnOptions));
@@ -479,6 +536,15 @@ async function runLlmMode(
     })
   );
 
+  const distinct = countDistinctMatchups(selectedScenarios);
+  log(
+    `distinct matchups: ${distinct} of ${selectedScenarios.length} selected scenarios`
+  );
+  const identical = identicalOutcomeWarning(allResults);
+  if (identical !== undefined) {
+    error(identical);
+  }
+
   if (args.mode === "replay" && llmAgg.fixtureMissCount > 0) {
     error(`fixture_miss count: ${llmAgg.fixtureMissCount}`);
     return 1;
@@ -530,7 +596,8 @@ export async function computeBaselineReport(
     maxMatches: options.maxMatches,
     budgetMs: 10000,
     writeReport: false,
-    snapshots: true
+    snapshots: true,
+    allSeeds: false
   });
 }
 

@@ -113,3 +113,64 @@ export function buildMatchSuite(split: EvalSplit): MatchScenario[] {
   scenarios.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return scenarios;
 }
+
+/** Stable stratum key: archetype × playerPolicy × opponent (seed excluded). */
+export function scenarioStratumKey(scenario: MatchScenario): string {
+  return `${scenario.playerConfig.agentId}__${scenario.playerPolicy}__${scenario.cpuConfig.agentId}`;
+}
+
+/**
+ * Deterministic stratified sample: round-robin across strata in lexicographic
+ * key order, taking at most one scenario per stratum before revisiting any.
+ * Within a stratum, scenarios are already ordered by id (lowest seed first).
+ */
+export function selectDiverseScenarios(
+  suite: readonly MatchScenario[],
+  n: number
+): MatchScenario[] {
+  if (n <= 0) {
+    return [];
+  }
+
+  const byStratum = new Map<string, MatchScenario[]>();
+  for (const scenario of suite) {
+    const key = scenarioStratumKey(scenario);
+    const list = byStratum.get(key);
+    if (list === undefined) {
+      byStratum.set(key, [scenario]);
+    } else {
+      list.push(scenario);
+    }
+  }
+
+  for (const list of byStratum.values()) {
+    list.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }
+
+  const stratumKeys = [...byStratum.keys()].sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0
+  );
+
+  const selected: MatchScenario[] = [];
+  let round = 0;
+  while (selected.length < n) {
+    let added = false;
+    for (const key of stratumKeys) {
+      if (selected.length >= n) {
+        break;
+      }
+      const list = byStratum.get(key)!;
+      const pick = list[round];
+      if (pick !== undefined) {
+        selected.push(pick);
+        added = true;
+      }
+    }
+    if (!added) {
+      break;
+    }
+    round += 1;
+  }
+
+  return selected;
+}
