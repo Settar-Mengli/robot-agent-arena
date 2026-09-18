@@ -321,3 +321,16 @@ Makes agent quality measurable without paid quota, keeps results reproducible, a
 
 Consequences:
 `src/eval/`, `evals/`, `EVAL.md`, and npm `eval*` scripts are first-class. LLM measurement still requires a local record run before replay numbers appear in EVAL.md.
+
+### Amend — 2026-09-17 — Split independence and keyless replay
+
+Decision (amend):
+- Dev and held-out splits must be **structurally independent**: disjoint player archetypes (and therefore disjoint stratum keys), plus disjoint `{turn, player, cpu}` snapshot state keys. Seed separation alone is insufficient under a deterministic player policy with injected CPU (RNG does not diversify states).
+- Fixture replay is **keyless**: provider env (placeholder API key, model, order) is derived from committed fixture `request.host` / `request.model`. CI runs `npm run eval:replay` after coverage.
+- Stratified `--max-matches` sampling is **archetype-first** (archetype varies fastest, then policy, opponent, seed index).
+
+Rationale:
+The original held-out suite reused the same archetypes as dev with only different seeds; under injected CPU, snapshot states overlapped 20/20, so held-out numbers were not independent evidence. Keyless replay removes the false requirement for live API keys on the committed path.
+
+Consequences:
+`HELDOUT_ARCHETYPES` (aegis / tempest / mnemonic) are separate from `PLAYER_ARCHETYPES`. Held-out LLM metrics require a fresh `eval:record --suite heldout` before they can appear in EVAL.md.

@@ -2,27 +2,27 @@
   "scenariosScanned": 12,
   "snapshots": [
     {
-      "id": "bulwark__greedy__fracture__s101__t1",
-      "scenarioId": "bulwark__greedy__fracture__s101",
+      "id": "aegis__greedy__fracture__s101__t1",
+      "scenarioId": "aegis__greedy__fracture__s101",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:101",
+          "sessionId": "session:eval-aegis:cpu-fracture:101",
           "seed": 101,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -44,8 +44,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -72,36 +72,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s101__t2",
-      "scenarioId": "bulwark__greedy__fracture__s101",
+      "id": "aegis__greedy__fracture__s101__t2",
+      "scenarioId": "aegis__greedy__fracture__s101",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:101",
+          "sessionId": "session:eval-aegis:cpu-fracture:101",
           "seed": 101,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -123,8 +123,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -151,8 +151,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -203,8 +203,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -227,8 +227,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -236,27 +236,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s102__t1",
-      "scenarioId": "bulwark__greedy__fracture__s102",
+      "id": "aegis__greedy__fracture__s102__t1",
+      "scenarioId": "aegis__greedy__fracture__s102",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:102",
+          "sessionId": "session:eval-aegis:cpu-fracture:102",
           "seed": 102,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -278,8 +278,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -306,36 +306,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s102__t2",
-      "scenarioId": "bulwark__greedy__fracture__s102",
+      "id": "aegis__greedy__fracture__s102__t2",
+      "scenarioId": "aegis__greedy__fracture__s102",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:102",
+          "sessionId": "session:eval-aegis:cpu-fracture:102",
           "seed": 102,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -357,8 +357,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -385,8 +385,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -437,8 +437,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -461,8 +461,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -470,27 +470,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s103__t1",
-      "scenarioId": "bulwark__greedy__fracture__s103",
+      "id": "aegis__greedy__fracture__s103__t1",
+      "scenarioId": "aegis__greedy__fracture__s103",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:103",
+          "sessionId": "session:eval-aegis:cpu-fracture:103",
           "seed": 103,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -512,8 +512,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -540,36 +540,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s103__t2",
-      "scenarioId": "bulwark__greedy__fracture__s103",
+      "id": "aegis__greedy__fracture__s103__t2",
+      "scenarioId": "aegis__greedy__fracture__s103",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:103",
+          "sessionId": "session:eval-aegis:cpu-fracture:103",
           "seed": 103,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -591,8 +591,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -619,8 +619,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -671,8 +671,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -695,8 +695,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -704,27 +704,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s104__t1",
-      "scenarioId": "bulwark__greedy__fracture__s104",
+      "id": "aegis__greedy__fracture__s104__t1",
+      "scenarioId": "aegis__greedy__fracture__s104",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:104",
+          "sessionId": "session:eval-aegis:cpu-fracture:104",
           "seed": 104,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -746,8 +746,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -774,36 +774,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s104__t2",
-      "scenarioId": "bulwark__greedy__fracture__s104",
+      "id": "aegis__greedy__fracture__s104__t2",
+      "scenarioId": "aegis__greedy__fracture__s104",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:104",
+          "sessionId": "session:eval-aegis:cpu-fracture:104",
           "seed": 104,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -825,8 +825,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -853,8 +853,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -905,8 +905,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -929,8 +929,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -938,27 +938,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s105__t1",
-      "scenarioId": "bulwark__greedy__fracture__s105",
+      "id": "aegis__greedy__fracture__s105__t1",
+      "scenarioId": "aegis__greedy__fracture__s105",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:105",
+          "sessionId": "session:eval-aegis:cpu-fracture:105",
           "seed": 105,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -980,8 +980,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -1008,36 +1008,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s105__t2",
-      "scenarioId": "bulwark__greedy__fracture__s105",
+      "id": "aegis__greedy__fracture__s105__t2",
+      "scenarioId": "aegis__greedy__fracture__s105",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:105",
+          "sessionId": "session:eval-aegis:cpu-fracture:105",
           "seed": 105,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1059,8 +1059,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -1087,8 +1087,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -1139,8 +1139,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -1163,8 +1163,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -1172,27 +1172,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s106__t1",
-      "scenarioId": "bulwark__greedy__fracture__s106",
+      "id": "aegis__greedy__fracture__s106__t1",
+      "scenarioId": "aegis__greedy__fracture__s106",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:106",
+          "sessionId": "session:eval-aegis:cpu-fracture:106",
           "seed": 106,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1214,8 +1214,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -1242,36 +1242,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s106__t2",
-      "scenarioId": "bulwark__greedy__fracture__s106",
+      "id": "aegis__greedy__fracture__s106__t2",
+      "scenarioId": "aegis__greedy__fracture__s106",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:106",
+          "sessionId": "session:eval-aegis:cpu-fracture:106",
           "seed": 106,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1293,8 +1293,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -1321,8 +1321,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -1373,8 +1373,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -1397,8 +1397,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -1406,27 +1406,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s107__t1",
-      "scenarioId": "bulwark__greedy__fracture__s107",
+      "id": "aegis__greedy__fracture__s107__t1",
+      "scenarioId": "aegis__greedy__fracture__s107",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:107",
+          "sessionId": "session:eval-aegis:cpu-fracture:107",
           "seed": 107,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1448,8 +1448,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -1476,36 +1476,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s107__t2",
-      "scenarioId": "bulwark__greedy__fracture__s107",
+      "id": "aegis__greedy__fracture__s107__t2",
+      "scenarioId": "aegis__greedy__fracture__s107",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:107",
+          "sessionId": "session:eval-aegis:cpu-fracture:107",
           "seed": 107,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1527,8 +1527,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -1555,8 +1555,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -1607,8 +1607,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -1631,8 +1631,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -1640,27 +1640,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s108__t1",
-      "scenarioId": "bulwark__greedy__fracture__s108",
+      "id": "aegis__greedy__fracture__s108__t1",
+      "scenarioId": "aegis__greedy__fracture__s108",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:108",
+          "sessionId": "session:eval-aegis:cpu-fracture:108",
           "seed": 108,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1682,8 +1682,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -1710,36 +1710,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s108__t2",
-      "scenarioId": "bulwark__greedy__fracture__s108",
+      "id": "aegis__greedy__fracture__s108__t2",
+      "scenarioId": "aegis__greedy__fracture__s108",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:108",
+          "sessionId": "session:eval-aegis:cpu-fracture:108",
           "seed": 108,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1761,8 +1761,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -1789,8 +1789,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -1841,8 +1841,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -1865,8 +1865,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -1874,27 +1874,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s109__t1",
-      "scenarioId": "bulwark__greedy__fracture__s109",
+      "id": "aegis__greedy__fracture__s109__t1",
+      "scenarioId": "aegis__greedy__fracture__s109",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:109",
+          "sessionId": "session:eval-aegis:cpu-fracture:109",
           "seed": 109,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1916,8 +1916,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -1944,36 +1944,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s109__t2",
-      "scenarioId": "bulwark__greedy__fracture__s109",
+      "id": "aegis__greedy__fracture__s109__t2",
+      "scenarioId": "aegis__greedy__fracture__s109",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:109",
+          "sessionId": "session:eval-aegis:cpu-fracture:109",
           "seed": 109,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -1995,8 +1995,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -2023,8 +2023,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -2075,8 +2075,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -2099,8 +2099,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"
@@ -2108,27 +2108,27 @@
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s110__t1",
-      "scenarioId": "bulwark__greedy__fracture__s110",
+      "id": "aegis__greedy__fracture__s110__t1",
+      "scenarioId": "aegis__greedy__fracture__s110",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:110",
+          "sessionId": "session:eval-aegis:cpu-fracture:110",
           "seed": 110,
           "turn": 1,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -2150,8 +2150,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 30,
           "maxHealth": 30,
           "energy": 6,
@@ -2178,36 +2178,36 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
       },
       "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true
     },
     {
-      "id": "bulwark__greedy__fracture__s110__t2",
-      "scenarioId": "bulwark__greedy__fracture__s110",
+      "id": "aegis__greedy__fracture__s110__t2",
+      "scenarioId": "aegis__greedy__fracture__s110",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:110",
+          "sessionId": "session:eval-aegis:cpu-fracture:110",
           "seed": 110,
           "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
             "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
             },
             "skillIds": [
-              "skill-null-pulse",
+              "skill-core-identity",
               "skill-override-pulse"
             ]
           },
@@ -2229,8 +2229,8 @@
         },
         "player": {
           "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
           "health": 23,
           "maxHealth": 30,
           "energy": 4,
@@ -2257,8 +2257,8 @@
             "turn": 1,
             "startedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 30,
               "maxHealth": 30,
               "energy": 6,
@@ -2309,8 +2309,8 @@
             ],
             "endedPlayer": {
               "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
               "health": 23,
               "maxHealth": 30,
               "energy": 4,
@@ -2333,8 +2333,8 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1010
       },
       "best": [
         "skill-override-pulse"

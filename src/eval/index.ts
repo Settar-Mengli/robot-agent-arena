@@ -1,8 +1,12 @@
 export {
+  AEGIS,
   BULWARK,
   DISRUPTOR,
+  HELDOUT_ARCHETYPES,
+  MNEMONIC,
   PLAYER_ARCHETYPES,
   STRIKER,
+  TEMPEST,
   buildMatchSuite,
   scenarioStratumKey,
   selectDiverseScenarios

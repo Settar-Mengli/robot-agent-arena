@@ -15,7 +15,7 @@ npm run eval:replay       # LLM via recorded fixtures (fails on fixture_miss)
 npm run eval:record       # local only: call providers, reuse fixtures, write new ones
 ```
 
-`eval:record` / live default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id.
+`eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures; CI runs the same command). Pass `--suite heldout` / `all` only after a heldout record exists, or replay will fixture-miss. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice.
 
 ## Metric definitions
 
@@ -63,29 +63,29 @@ npm run eval:record       # local only: call providers, reuse fixtures, write ne
 
 | slice | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin (CPU−player) |
 | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| all | 120 | 17.50% [11.74%, 25.28%] | 2.50% | 80.00% | 17.88 | -4.80 |
-| cpu-fracture | 60 | 10.00% [4.66%, 20.15%] | 5.00% | 85.00% | 15.75 | -5.98 |
-| cpu-sentinel-x | 60 | 25.00% [15.78%, 37.23%] | 0.00% | 75.00% | 20.00 | -3.62 |
+| all | 120 | 6.67% [3.42%, 12.61%] | 0.00% | 93.33% | 18.60 | -5.09 |
+| cpu-fracture | 60 | 11.67% [5.77%, 22.18%] | 0.00% | 88.33% | 17.20 | -6.88 |
+| cpu-sentinel-x | 60 | 1.67% [0.29%, 8.86%] | 0.00% | 98.33% | 20.00 | -3.30 |
 
 #### Matches — greedy CPU
 
 | slice | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin (CPU−player) |
 | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| all | 120 | 10.83% [6.44%, 17.66%] | 11.67% | 77.50% | 17.89 | -4.51 |
-| cpu-fracture | 60 | 13.33% [6.91%, 24.17%] | 23.33% | 63.33% | 15.78 | -4.95 |
-| cpu-sentinel-x | 60 | 8.33% [3.61%, 18.07%] | 0.00% | 91.67% | 20.00 | -4.07 |
+| all | 120 | 9.17% [5.20%, 15.67%] | 11.67% | 79.17% | 18.60 | -4.69 |
+| cpu-fracture | 60 | 10.00% [4.66%, 20.15%] | 23.33% | 66.67% | 17.20 | -6.20 |
+| cpu-sentinel-x | 60 | 8.33% [3.61%, 18.07%] | 0.00% | 91.67% | 20.00 | -3.18 |
 
 #### Snapshots — random expectation
 
 | n | optimal rate | mean regret | max regret |
 | ---: | ---: | ---: | ---: |
-| 20 | 50.00% | 1001.0000 | 2003.0000 |
+| 20 | 50.00% | 0.7500 | 2.0000 |
 
 #### Snapshots — greedy
 
 | n | optimal rate | mean regret | max regret |
 | ---: | ---: | ---: | ---: |
-| 20 | 100.00% | 0.0000 | 0.0000 |
+| 20 | 50.00% | 0.5000 | 1.0000 |
 
 <!-- baseline:end -->
 
@@ -109,7 +109,9 @@ Reliability and tactical correctness (valid JSON moves, zero fallback, 100% snap
 
 ## Findings
 
-- **Sampling:** `--max-matches N` previously took the first N scenarios by id, so N=4 collapsed to one matchup (`bulwark__greedy__fracture` across unused seeds). Record/live now use stratified selection across archetype × playerPolicy × opponent. Replay still uses first-N-by-id until fixtures from a stratified record run are committed.
+- **Held-out independence (fixed):** The original held-out suite reused the same player archetypes as dev and only changed seeds. Under deterministic player policy + injected CPU, committed snapshot `{turn, player, cpu}` states overlapped **20/20** with dev — held-out numbers were not independent evidence. Held-out now uses disjoint archetypes (`aegis` / `tempest` / `mnemonic`) with regenerated `snapshots.heldout.json` (state-key overlap **0**). Prior held-out LLM claims based on the duplicated suite are invalid; fresh held-out LLM numbers await `eval:record --suite heldout`.
+- **Keyless replay + CI:** `eval:replay` derives placeholder provider env from fixture hosts (no `.env` required) and is enforced in CI after coverage.
+- **Sampling:** `--max-matches N` previously took the first N scenarios by id, so N=4 collapsed to one matchup (`bulwark__greedy__fracture` across unused seeds). Record/live now use **archetype-first** stratified selection (archetype → policy → opponent → seed). Replay still uses first-N-by-id until fixtures from a stratified record run are committed.
 - **Snapshots:** committed dev snapshots are 100% optimal for both greedy and the LLM, so they do not discriminate policies. Prefer points where greedy is suboptimal (suite regeneration deferred).
 - **Providers:** Cloudflare responses double-escape JSON; `mistral-small` is 429 on the free tier; `ministral-3b` wraps the payload; OpenRouter free models are shared-pool rate-limited. This run used Gemini `gemini-3.5-flash-lite`.
 

@@ -43,7 +43,53 @@ export const BULWARK: AgentConfig = {
   skillIds: ["skill-null-pulse", "skill-override-pulse"]
 };
 
+/** Held-out: identity defense + override attack. */
+export const AEGIS: AgentConfig = {
+  agentId: "eval-aegis",
+  displayName: "AEGIS",
+  modules: {
+    coreIdentity: "Mirror Kernel",
+    memory: "Ward Echo",
+    sigilSecurity: "Prism Veil",
+    rules: "Reflect First",
+    strategy: "Anchor Then Strike"
+  },
+  skillIds: ["skill-core-identity", "skill-override-pulse"]
+};
+
+/** Held-out: storm attack + breach disrupt. */
+export const TEMPEST: AgentConfig = {
+  agentId: "eval-tempest",
+  displayName: "TEMPEST",
+  modules: {
+    coreIdentity: "Gale Pattern",
+    memory: "Storm Cache",
+    sigilSecurity: "Thin Lattice",
+    rules: "Open Breach",
+    strategy: "Flood Then Pierce"
+  },
+  skillIds: ["skill-logic-storm", "skill-signal-breach"]
+};
+
+/** Held-out: drift attack + exposure disrupt. */
+export const MNEMONIC: AgentConfig = {
+  agentId: "eval-mnemonic",
+  displayName: "MNEMONIC",
+  modules: {
+    coreIdentity: "Archive Self",
+    memory: "Recall Drift",
+    sigilSecurity: "Soft Seal",
+    rules: "Leak Then Hit",
+    strategy: "Expose Weakness"
+  },
+  skillIds: ["skill-logic-drift", "skill-signal-exposure"]
+};
+
+/** Dev-split player archetypes only. */
 export const PLAYER_ARCHETYPES: readonly AgentConfig[] = [STRIKER, DISRUPTOR, BULWARK];
+
+/** Held-out-split player archetypes only (structurally independent of dev). */
+export const HELDOUT_ARCHETYPES: readonly AgentConfig[] = [AEGIS, TEMPEST, MNEMONIC];
 
 export type PlayerPolicyId = "greedy" | "seeded-random";
 
@@ -80,6 +126,15 @@ function archetypeSlug(archetype: AgentConfig): string {
   if (archetype.agentId === BULWARK.agentId) {
     return "bulwark";
   }
+  if (archetype.agentId === AEGIS.agentId) {
+    return "aegis";
+  }
+  if (archetype.agentId === TEMPEST.agentId) {
+    return "tempest";
+  }
+  if (archetype.agentId === MNEMONIC.agentId) {
+    return "mnemonic";
+  }
   return archetype.agentId;
 }
 
@@ -90,10 +145,17 @@ function seedsForSplit(split: EvalSplit): readonly number[] {
   return [101, 102, 103, 104, 105, 106, 107, 108, 109, 110];
 }
 
+function archetypesForSplit(split: EvalSplit): readonly AgentConfig[] {
+  if (split === "dev") {
+    return PLAYER_ARCHETYPES;
+  }
+  return HELDOUT_ARCHETYPES;
+}
+
 export function buildMatchSuite(split: EvalSplit): MatchScenario[] {
   const scenarios: MatchScenario[] = [];
 
-  for (const archetype of PLAYER_ARCHETYPES) {
+  for (const archetype of archetypesForSplit(split)) {
     for (const playerPolicy of POLICY_IDS) {
       for (const cpuConfig of OPPONENTS) {
         for (const seed of seedsForSplit(split)) {
@@ -120,9 +182,10 @@ export function scenarioStratumKey(scenario: MatchScenario): string {
 }
 
 /**
- * Deterministic stratified sample: round-robin across strata in lexicographic
- * key order, taking at most one scenario per stratum before revisiting any.
- * Within a stratum, scenarios are already ordered by id (lowest seed first).
+ * Deterministic stratified sample with archetype varying fastest, then policy,
+ * then opponent, then seed index. Stable orders: archetypes by first appearance
+ * in the suite, policies greedy then seeded-random, opponents by agentId,
+ * seeds ascending within each stratum cell.
  */
 export function selectDiverseScenarios(
   suite: readonly MatchScenario[],
@@ -133,7 +196,15 @@ export function selectDiverseScenarios(
   }
 
   const byStratum = new Map<string, MatchScenario[]>();
+  const archetypeOrder: string[] = [];
+  const seenArchetype = new Set<string>();
+
   for (const scenario of suite) {
+    const archetypeId = scenario.playerConfig.agentId;
+    if (!seenArchetype.has(archetypeId)) {
+      seenArchetype.add(archetypeId);
+      archetypeOrder.push(archetypeId);
+    }
     const key = scenarioStratumKey(scenario);
     const list = byStratum.get(key);
     if (list === undefined) {
@@ -144,32 +215,43 @@ export function selectDiverseScenarios(
   }
 
   for (const list of byStratum.values()) {
-    list.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    list.sort((a, b) => {
+      if (a.seed !== b.seed) {
+        return a.seed < b.seed ? -1 : 1;
+      }
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
   }
 
-  const stratumKeys = [...byStratum.keys()].sort((a, b) =>
-    a < b ? -1 : a > b ? 1 : 0
-  );
+  const policyOrder: PlayerPolicyId[] = ["greedy", "seeded-random"];
+  const opponentOrder = [
+    ...new Set(suite.map((s) => s.cpuConfig.agentId))
+  ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+
+  let maxSeeds = 0;
+  for (const list of byStratum.values()) {
+    if (list.length > maxSeeds) {
+      maxSeeds = list.length;
+    }
+  }
 
   const selected: MatchScenario[] = [];
-  let round = 0;
-  while (selected.length < n) {
-    let added = false;
-    for (const key of stratumKeys) {
-      if (selected.length >= n) {
-        break;
-      }
-      const list = byStratum.get(key)!;
-      const pick = list[round];
-      if (pick !== undefined) {
-        selected.push(pick);
-        added = true;
+  for (let seedIdx = 0; seedIdx < maxSeeds; seedIdx += 1) {
+    for (const opponentId of opponentOrder) {
+      for (const policy of policyOrder) {
+        for (const archetypeId of archetypeOrder) {
+          if (selected.length >= n) {
+            return selected;
+          }
+          const key = `${archetypeId}__${policy}__${opponentId}`;
+          const list = byStratum.get(key);
+          const pick = list?.[seedIdx];
+          if (pick !== undefined) {
+            selected.push(pick);
+          }
+        }
       }
     }
-    if (!added) {
-      break;
-    }
-    round += 1;
   }
 
   return selected;

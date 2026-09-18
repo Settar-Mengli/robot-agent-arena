@@ -16,6 +16,14 @@ function loadSuite(name: string): SnapshotSuite {
   ) as SnapshotSuite;
 }
 
+function snapshotStateKey(snap: SnapshotSuite["snapshots"][number]): string {
+  return JSON.stringify({
+    turn: snap.runtime.session.turn,
+    player: snap.runtime.player,
+    cpu: snap.runtime.cpu
+  });
+}
+
 describe("decision snapshot suites", () => {
   it(
     "drift-guard: generateSnapshots matches committed JSON",
@@ -26,7 +34,7 @@ describe("decision snapshot suites", () => {
         expect(generated).toEqual(committed);
       }
     },
-    30_000
+    60_000
   );
 
   it("each split has 20 exact discriminative snapshots with disjoint seeds", () => {
@@ -57,5 +65,18 @@ describe("decision snapshot suites", () => {
     for (const seed of devSeeds) {
       expect(heldoutSeeds.has(seed)).toBe(false);
     }
+  });
+
+  it("dev and heldout snapshot state-key sets are disjoint", () => {
+    const dev = loadSuite("snapshots.dev.json");
+    const heldout = loadSuite("snapshots.heldout.json");
+    const devKeys = new Set(dev.snapshots.map(snapshotStateKey));
+    let overlap = 0;
+    for (const snap of heldout.snapshots) {
+      if (devKeys.has(snapshotStateKey(snap))) {
+        overlap += 1;
+      }
+    }
+    expect(overlap).toBe(0);
   });
 });
