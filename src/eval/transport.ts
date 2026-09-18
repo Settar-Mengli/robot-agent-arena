@@ -23,6 +23,22 @@ export type FixtureStore = {
   write: (key: string, record: FixtureRecord) => Promise<void>;
 };
 
+export type RecordingFetchOptions = {
+  force?: boolean;
+};
+
+export type RecordingFetchStats = {
+  hits: number;
+  recorded: number;
+  skippedNon2xx: number;
+  /** Wall durations (ms) of realFetch calls only — excludes cache hits. */
+  liveLatenciesMs: number[];
+};
+
+export type RecordingFetch = typeof fetch & {
+  stats: () => RecordingFetchStats;
+};
+
 export function fixtureKey(url: string, body: Record<string, unknown>): string {
   const payload = {
     host: new URL(url).host,
@@ -74,16 +90,37 @@ export function createReplayFetch(store: FixtureStore): typeof fetch {
 
 export function createRecordingFetch(
   realFetch: typeof fetch,
-  store: FixtureStore
-): typeof fetch {
-  return async (input, init) => {
+  store: FixtureStore,
+  options: RecordingFetchOptions = {}
+): RecordingFetch {
+  const force = options.force === true;
+  const counters: RecordingFetchStats = {
+    hits: 0,
+    recorded: 0,
+    skippedNon2xx: 0,
+    liveLatenciesMs: []
+  };
+
+  const fetchImpl: typeof fetch = async (input, init) => {
     const url = String(input);
     const rawBody =
       init?.body === undefined
         ? {}
         : (JSON.parse(String(init.body)) as Record<string, unknown>);
     const key = fixtureKey(url, rawBody);
+
+    if (!force) {
+      const cached = await store.read(key);
+      if (cached !== undefined) {
+        counters.hits += 1;
+        return jsonResponse(200, cached.response);
+      }
+    }
+
+    const started = performance.now();
     const response = await realFetch(input, init);
+    counters.liveLatenciesMs.push(performance.now() - started);
+
     if (response.ok) {
       const parsed = (await response.clone().json()) as unknown;
       await store.write(key, {
@@ -95,7 +132,20 @@ export function createRecordingFetch(
         },
         response: parsed
       });
+      counters.recorded += 1;
+    } else {
+      counters.skippedNon2xx += 1;
     }
+
     return response;
   };
+
+  return Object.assign(fetchImpl, {
+    stats: (): RecordingFetchStats => ({
+      hits: counters.hits,
+      recorded: counters.recorded,
+      skippedNon2xx: counters.skippedNon2xx,
+      liveLatenciesMs: [...counters.liveLatenciesMs]
+    })
+  });
 }

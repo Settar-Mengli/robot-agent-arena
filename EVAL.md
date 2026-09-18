@@ -12,8 +12,10 @@ Measure CPU policies (random, greedy, LLM) on fixed match and decision-snapshot 
 npm run eval              # baseline (random + greedy), writes evals/out/baseline.json
 npm run eval:report       # baseline + regenerate EVAL.md baseline block
 npm run eval:replay       # LLM via recorded fixtures (fails on fixture_miss)
-npm run eval:record       # local only: call providers and write fixtures
+npm run eval:record       # local only: call providers, reuse fixtures, write new ones
 ```
+
+`eval:record` / live default to `--suite dev` (pass `--suite all` or `heldout` to widen). Fixtures are reused on cache hit (incremental; use force only via code). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip).
 
 ## Metric definitions
 

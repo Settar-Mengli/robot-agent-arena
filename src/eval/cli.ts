@@ -1,7 +1,7 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { readdir, mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveActiveProviders } from "../inference";
+import { resolveActiveProviders, type EnvMap } from "../inference";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
 import {
   greedyCpuPolicy,
@@ -9,14 +9,28 @@ import {
   randomCpuPolicy
 } from "./policies";
 import { runSuite, type MatchResult } from "./match";
-import { aggregateLlm, aggregateMatches, type MatchAggregate } from "./metrics";
+import {
+  aggregateLlm,
+  aggregateMatches,
+  percentile,
+  type MatchAggregate,
+  type SnapshotPolicyMetrics
+} from "./metrics";
 import {
   evalGreedySnapshots,
-  evalRandomSnapshots
+  evalLlmSnapshots,
+  evalRandomSnapshots,
+  type SnapshotEvalResult
 } from "./snapshot-eval";
 import type { DecisionSnapshot } from "./snapshots";
 import { createDirStore } from "./dir-store";
-import { createRecordingFetch, createReplayFetch } from "./transport";
+import {
+  createRecordingFetch,
+  createReplayFetch,
+  type FixtureStore,
+  type RecordingFetch,
+  type RecordingFetchStats
+} from "./transport";
 import {
   buildEvalMarkdownShell,
   renderBaselineBlock,
@@ -28,21 +42,38 @@ import {
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 type Mode = "baseline" | "replay" | "record" | "live";
+type SuiteChoice = "dev" | "heldout" | "all";
 
 type CliArgs = {
   mode: Mode;
-  suite: "dev" | "heldout" | "all";
+  suite: SuiteChoice;
+  suiteExplicit: boolean;
   maxMatches?: number;
   budgetMs: number;
   writeReport: boolean;
+  snapshots: boolean;
+};
+
+export type LlmModeDeps = {
+  fetch?: typeof fetch;
+  store?: FixtureStore;
+  env?: EnvMap;
+  outDir?: string;
+  fixturesDir?: string;
+  log?: (line: string) => void;
+  error?: (line: string) => void;
+  /** Skip CI / provider banner guards for unit tests. */
+  skipGuards?: boolean;
 };
 
 function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = {
     mode: "baseline",
     suite: "all",
+    suiteExplicit: false,
     budgetMs: 10000,
-    writeReport: false
+    writeReport: false,
+    snapshots: true
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -52,7 +83,8 @@ function parseArgs(argv: string[]): CliArgs {
       args.mode = next as Mode;
       i += 1;
     } else if (flag === "--suite" && next) {
-      args.suite = next as CliArgs["suite"];
+      args.suite = next as SuiteChoice;
+      args.suiteExplicit = true;
       i += 1;
     } else if (flag === "--max-matches" && next) {
       args.maxMatches = Number(next);
@@ -62,13 +94,37 @@ function parseArgs(argv: string[]): CliArgs {
       i += 1;
     } else if (flag === "--write-report") {
       args.writeReport = true;
+    } else if (flag === "--snapshots") {
+      if (next === "false" || next === "0") {
+        args.snapshots = false;
+        i += 1;
+      } else if (next === "true" || next === "1") {
+        args.snapshots = true;
+        i += 1;
+      } else {
+        args.snapshots = true;
+      }
+    } else if (flag === "--no-snapshots") {
+      args.snapshots = false;
     }
+  }
+
+  if (
+    (args.mode === "record" || args.mode === "live") &&
+    !args.suiteExplicit
+  ) {
+    args.suite = "dev";
   }
 
   return args;
 }
 
-function splitsFor(suite: CliArgs["suite"]): EvalSplit[] {
+/** Exported for tests. */
+export function resolveCliArgs(argv: string[]): CliArgs {
+  return parseArgs(argv);
+}
+
+function splitsFor(suite: SuiteChoice): EvalSplit[] {
   if (suite === "all") return ["dev", "heldout"];
   return [suite];
 }
@@ -100,9 +156,10 @@ function limitScenarios(
 }
 
 async function loadCommittedSnapshots(
-  split: EvalSplit
+  split: EvalSplit,
+  root: string = ROOT
 ): Promise<DecisionSnapshot[]> {
-  const path = join(ROOT, "evals/suites", `snapshots.${split}.json`);
+  const path = join(root, "evals/suites", `snapshots.${split}.json`);
   const raw = JSON.parse(await readFile(path, "utf8")) as {
     snapshots: DecisionSnapshot[];
   };
@@ -187,85 +244,293 @@ function tryLoadEnvFile(): void {
   }
 }
 
-async function runLlmMode(args: CliArgs, record: boolean): Promise<number> {
-  if (process.env.CI) {
-    console.error("record/live modes refuse to run under CI");
-    return 1;
+function countSources(results: readonly MatchResult[]): {
+  llm: number;
+  fallback: number;
+  skipped: number;
+  total: number;
+} {
+  let llm = 0;
+  let fallback = 0;
+  let skipped = 0;
+  for (const result of results) {
+    for (const turn of result.turns) {
+      const source = turn.trace?.source;
+      if (source === "llm") llm += 1;
+      else if (source === "fallback") fallback += 1;
+      else if (source === "skipped") skipped += 1;
+    }
+  }
+  return { llm, fallback, skipped, total: llm + fallback + skipped };
+}
+
+function snapshotLlmSuccesses(metrics: SnapshotPolicyMetrics): number {
+  const invalidRate = metrics.invalidDecisionRate;
+  if (invalidRate === undefined) {
+    return 0;
+  }
+  return Math.round(metrics.n * (1 - invalidRate));
+}
+
+async function countFixtureFiles(dir: string): Promise<number> {
+  try {
+    const entries = await readdir(dir);
+    return entries.filter((name) => name.endsWith(".json")).length;
+  } catch {
+    return 0;
+  }
+}
+
+function formatPct(rate: number | null): string {
+  if (rate === null) return "n/a";
+  return `${(Math.round(rate * 10000) / 100).toFixed(2)}%`;
+}
+
+function formatMs(value: number | null): string {
+  if (value === null) return "n/a";
+  return `${Math.round(value)}ms`;
+}
+
+export function formatLlmSummary(input: {
+  mode: Mode;
+  suite: SuiteChoice;
+  outRel: string;
+  matches: number;
+  sources: { llm: number; fallback: number; skipped: number; total: number };
+  llmAgg: ReturnType<typeof aggregateLlm>;
+  recordingStats?: RecordingFetchStats;
+  fixtureFileCount?: number;
+  snapshots?: Record<string, SnapshotEvalResult>;
+}): string {
+  const lines: string[] = [
+    "--- eval summary ---",
+    `mode: ${input.mode}`,
+    `suite: ${input.suite}`,
+    `output: ${input.outRel}`,
+    `matches: ${input.matches}`,
+    `decisions: ${input.sources.total} (llm=${input.sources.llm}, fallback=${input.sources.fallback}, skipped=${input.sources.skipped})`,
+    `decision-validity: ${formatPct(input.llmAgg.decisionValidityRate)}`,
+    `fixture_miss: ${input.llmAgg.fixtureMissCount}`
+  ];
+
+  const reasons = Object.entries(input.llmAgg.fallbackByReason).sort((a, b) =>
+    a[0] < b[0] ? -1 : 1
+  );
+  if (reasons.length > 0) {
+    lines.push(
+      `fallback reasons: ${reasons.map(([k, v]) => `${k}=${v}`).join(", ")}`
+    );
+  } else {
+    lines.push("fallback reasons: (none)");
   }
 
-  tryLoadEnvFile();
-  const providers = resolveActiveProviders(process.env);
-  if (providers.length === 0) {
-    console.error("No providers configured (need at least one API key)");
-    return 1;
+  if (input.recordingStats !== undefined) {
+    const live = [...input.recordingStats.liveLatenciesMs].sort(
+      (a, b) => a - b
+    );
+    const p50 = percentile(live, 50);
+    const p95 = percentile(live, 95);
+    lines.push(
+      `served from cache: ${input.recordingStats.hits}`,
+      `newly recorded: ${input.recordingStats.recorded}`,
+      `skipped non-2xx: ${input.recordingStats.skippedNon2xx}`,
+      `live latency p50/p95 (non-cached HTTP attempts): ${formatMs(p50)} / ${formatMs(p95)}`
+    );
+    if (input.fixtureFileCount !== undefined) {
+      lines.push(`fixture files on disk: ${input.fixtureFileCount}`);
+    }
   }
 
-  console.log(
-    "Providers:",
-    providers.map((p) => `${p.name}/${p.model}`).join(", ")
-  );
-  console.log(
-    "Quota warning: free-tier providers may rate-limit or drop requests."
-  );
+  if (input.llmAgg.tokenTotals !== null) {
+    const t = input.llmAgg.tokenTotals;
+    lines.push(
+      `tokens: prompt=${t.prompt} completion=${t.completion} total=${t.total}`
+    );
+  }
 
-  const store = createDirStore(join(ROOT, "evals/fixtures"));
-  const fetchImpl = record
-    ? createRecordingFetch(globalThis.fetch.bind(globalThis), store)
-    : createReplayFetch(store);
+  if (input.snapshots !== undefined) {
+    for (const split of Object.keys(input.snapshots).sort()) {
+      const snap = input.snapshots[split]!;
+      const m = snap.metrics;
+      lines.push(
+        `snapshots[${split}]: n=${m.n} optimal=${formatPct(m.optimalRate)} meanRegret=${m.meanRegret.toFixed(2)} invalid=${formatPct(m.invalidDecisionRate ?? null)}`
+      );
+    }
+  }
+
+  lines.push("-------------------");
+  return lines.join("\n");
+}
+
+async function runLlmMode(
+  args: CliArgs,
+  record: boolean,
+  deps: LlmModeDeps = {}
+): Promise<number> {
+  const log = deps.log ?? ((line: string) => console.log(line));
+  const error = deps.error ?? ((line: string) => console.error(line));
+
+  if (!deps.skipGuards) {
+    if (process.env.CI) {
+      error("record/live modes refuse to run under CI");
+      return 1;
+    }
+    tryLoadEnvFile();
+  }
+
+  const env = deps.env ?? process.env;
+  if (!deps.skipGuards) {
+    const providers = resolveActiveProviders(env);
+    if (providers.length === 0) {
+      error("No providers configured (need at least one API key)");
+      return 1;
+    }
+    log(
+      `Providers: ${providers.map((p) => `${p.name}/${p.model}`).join(", ")}`
+    );
+    log("Quota warning: free-tier providers may rate-limit or drop requests.");
+  }
+
+  const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
+  const store = deps.store ?? createDirStore(fixturesDir);
+
+  let recordingFetch: RecordingFetch | undefined;
+  let fetchImpl: typeof fetch;
+
+  if (record) {
+    const realFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
+    recordingFetch = createRecordingFetch(realFetch, store, { force: false });
+    fetchImpl = recordingFetch;
+  } else if (args.mode === "live") {
+    fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis);
+  } else {
+    fetchImpl = deps.fetch ?? createReplayFetch(store);
+  }
 
   const maxMatches = args.maxMatches ?? 4;
   const allResults: MatchResult[] = [];
+  const inference = {
+    fetch: fetchImpl,
+    temperature: 0 as const,
+    env
+  };
+
+  const turnOptions = {
+    budgetMs: args.budgetMs,
+    inference,
+    ...(deps.skipGuards ? { now: () => 0 } : {})
+  };
 
   for (const split of splitsFor(args.suite)) {
     const scenarios = limitScenarios(buildMatchSuite(split), maxMatches);
     for (const scenario of scenarios) {
-      const results = await runSuite(
-        [scenario],
-        llmCpuPolicy({
-          budgetMs: args.budgetMs,
-          inference: {
-            fetch: fetchImpl,
-            temperature: 0
-          }
-        })
-      );
+      log(`scenario: ${scenario.id}`);
+      const results = await runSuite([scenario], llmCpuPolicy(turnOptions));
       allResults.push(...results);
     }
   }
 
-  const outDir = join(ROOT, "evals/out");
+  const snapshotResults: Record<string, SnapshotEvalResult> = {};
+  let snapshotLlm = 0;
+
+  if (args.snapshots) {
+    for (const split of splitsFor(args.suite)) {
+      log(`snapshots: ${split}`);
+      const snapshots = await loadCommittedSnapshots(split);
+      const evaluated = await evalLlmSnapshots(snapshots, turnOptions);
+      snapshotResults[split] = evaluated;
+      snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+    }
+  }
+
+  const outDir = deps.outDir ?? join(ROOT, "evals/out");
   await mkdir(outDir, { recursive: true });
+  const outName = record ? "record.json" : args.mode === "live" ? "live.json" : "replay.json";
+  const outPath = join(outDir, outName);
+  const llmAgg = aggregateLlm(allResults, { replayMode: args.mode === "replay" });
   const payload = {
     results: allResults,
-    llm: aggregateLlm(allResults, { replayMode: !record })
+    llm: llmAgg,
+    ...(args.snapshots ? { snapshots: snapshotResults } : {})
   };
-  await writeFile(
-    join(outDir, record ? "record.json" : "replay.json"),
-    `${JSON.stringify(payload, null, 2)}\n`,
-    "utf8"
+  await writeFile(outPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+
+  const sources = countSources(allResults);
+  const recordingStats = recordingFetch?.stats();
+  const fixtureFileCount = record
+    ? await countFixtureFiles(fixturesDir)
+    : undefined;
+  const outRel = relative(ROOT, outPath).replace(/\\/g, "/");
+
+  const summaryMode: Mode =
+    args.mode === "live" ? "live" : record ? "record" : "replay";
+
+  log(
+    formatLlmSummary({
+      mode: summaryMode,
+      suite: args.suite,
+      outRel,
+      matches: allResults.length,
+      sources,
+      llmAgg,
+      recordingStats,
+      fixtureFileCount,
+      snapshots: args.snapshots ? snapshotResults : undefined
+    })
   );
 
-  if (!record && payload.llm.fixtureMissCount > 0) {
-    console.error(`fixture_miss count: ${payload.llm.fixtureMissCount}`);
+  if (args.mode === "replay" && llmAgg.fixtureMissCount > 0) {
+    error(`fixture_miss count: ${llmAgg.fixtureMissCount}`);
     return 1;
+  }
+
+  const llmSuccesses = sources.llm + snapshotLlm;
+  if (
+    (args.mode === "record" || args.mode === "live") &&
+    llmSuccesses === 0
+  ) {
+    error(
+      "warning: record/live produced zero successful LLM decisions (all fallback/skip) — refusing to report success"
+    );
+    return 2;
   }
 
   return 0;
 }
 
+/** Test entry: run record/replay/live with injectable deps. */
+export async function runLlmModeForTest(
+  argv: string[],
+  deps: LlmModeDeps
+): Promise<number> {
+  const args = parseArgs(argv);
+  if (args.mode === "replay") {
+    return runLlmMode(args, false, { ...deps, skipGuards: true });
+  }
+  if (args.mode === "record") {
+    return runLlmMode(args, true, { ...deps, skipGuards: true });
+  }
+  if (args.mode === "live") {
+    return runLlmMode(args, false, { ...deps, skipGuards: true });
+  }
+  throw new Error(`runLlmModeForTest expects record/replay/live, got ${args.mode}`);
+}
+
 /** Exported for drift-guard tests. */
 export async function computeBaselineReport(
   options: {
-    suite?: CliArgs["suite"];
+    suite?: SuiteChoice;
     maxMatches?: number;
   } = {}
 ): Promise<BaselineReport> {
   return runBaseline({
     mode: "baseline",
     suite: options.suite ?? "all",
+    suiteExplicit: true,
     maxMatches: options.maxMatches,
     budgetMs: 10000,
-    writeReport: false
+    writeReport: false,
+    snapshots: true
   });
 }
 
@@ -284,7 +549,7 @@ export async function main(argv: string[]): Promise<number> {
     }
 
     if (args.mode === "record" || args.mode === "live") {
-      return await runLlmMode(args, args.mode === "record");
+      return await runLlmMode(args, true);
     }
 
     console.error(`unknown mode: ${args.mode}`);
