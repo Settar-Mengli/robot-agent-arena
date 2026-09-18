@@ -106,9 +106,6 @@ export function decideDiscriminationVerdict(
   splits: readonly DiscriminationSplitReport[]
 ): { verdict: DiscriminationReport["verdict"]; reason: string } {
   const disjointSplit = splits.find((s) => s.winRateCiDisjoint);
-  const anyNonZero =
-    splits.some((s) => s.headroom.nonZeroSpreadRate > SPREAD_THRESHOLD) ||
-    false;
 
   // Aggregate headroom across splits for the >25% rule
   let points = 0;
