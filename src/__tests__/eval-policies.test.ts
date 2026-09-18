@@ -8,7 +8,9 @@ import {
   greedyPlayer,
   mix,
   randomCpuPolicy,
-  seededRandomPlayer
+  scenarioStratumKey,
+  seededRandomPlayer,
+  selectDiverseScenarios
 } from "../eval";
 import {
   MVP_SKILL_CATALOG,
@@ -55,6 +57,20 @@ describe("eval scenarios", () => {
     }
 
     expect(dev.map((s) => s.id)).toEqual([...dev.map((s) => s.id)].sort());
+  });
+
+  it("selectDiverseScenarios yields distinct strata for n=4", () => {
+    const dev = buildMatchSuite("dev");
+    const picked = selectDiverseScenarios(dev, 4);
+    expect(picked).toHaveLength(4);
+    const keys = picked.map(scenarioStratumKey);
+    expect(new Set(keys).size).toBe(4);
+
+    const again = selectDiverseScenarios(dev, 4);
+    expect(again.map((s) => s.id)).toEqual(picked.map((s) => s.id));
+
+    const twelve = selectDiverseScenarios(dev, 12);
+    expect(new Set(twelve.map(scenarioStratumKey)).size).toBe(12);
   });
 });
 

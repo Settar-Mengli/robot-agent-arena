@@ -3,7 +3,9 @@ export {
   DISRUPTOR,
   PLAYER_ARCHETYPES,
   STRIKER,
-  buildMatchSuite
+  buildMatchSuite,
+  scenarioStratumKey,
+  selectDiverseScenarios
 } from "./scenarios";
 export type {
   EvalSplit,

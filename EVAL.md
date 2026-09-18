@@ -15,7 +15,7 @@ npm run eval:replay       # LLM via recorded fixtures (fails on fixture_miss)
 npm run eval:record       # local only: call providers, reuse fixtures, write new ones
 ```
 
-`eval:record` / live default to `--suite dev` (pass `--suite all` or `heldout` to widen). Fixtures are reused on cache hit (incremental; use force only via code). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip).
+`eval:record` / live default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id.
 
 ## Metric definitions
 
@@ -92,10 +92,26 @@ npm run eval:record       # local only: call providers, reuse fixtures, write ne
 ## LLM results
 
 <!-- llm:start -->
-Pending — run `npm run eval:record` locally with keys, then `npm run eval:replay`.
+Measured local `eval:record` (Gemini `gemini-3.5-flash-lite`), suite `dev`, `--max-matches 4`, 20 committed dev snapshots.
 
-Fields to be reported: CPU win/draw/loss with Wilson CI (per split / opponent), snapshot optimal rate and regret, decision-validity %, fallback rates, fixture_miss count, token totals. Latency p50/p95 are omitted in replay mode.
+| metric | value |
+| --- | --- |
+| decisions | 80 (llm=80, fallback=0, skipped=0) |
+| decision-validity | 100% |
+| fixture_miss | 0 |
+| live latency p50 / p95 (non-cached HTTP) | 733ms / 775ms |
+| tokens (prompt / completion / total) | 25948 / 2276 / 28224 |
+| snapshots[dev] optimal / mean regret / invalid | 100% / 0.00 / 0% |
+| match outcomes | 4× draw at turn limit (20 turns) |
+
+Reliability and tactical correctness (valid JSON moves, zero fallback, 100% snapshot-optimal on this suite) are measured. **Match-level advantage is not established**: the sampled matchup is a stalemate for random CPU, greedy CPU, and the LLM (same draw / 20 turns / 0 HP margin).
 <!-- llm:end -->
+
+## Findings
+
+- **Sampling:** `--max-matches N` previously took the first N scenarios by id, so N=4 collapsed to one matchup (`bulwark__greedy__fracture` across unused seeds). Record/live now use stratified selection across archetype × playerPolicy × opponent. Replay still uses first-N-by-id until fixtures from a stratified record run are committed.
+- **Snapshots:** committed dev snapshots are 100% optimal for both greedy and the LLM, so they do not discriminate policies. Prefer points where greedy is suboptimal (suite regeneration deferred).
+- **Providers:** Cloudflare responses double-escape JSON; `mistral-small` is 429 on the free tier; `ministral-3b` wraps the payload; OpenRouter free models are shared-pool rate-limited. This run used Gemini `gemini-3.5-flash-lite`.
 
 ## Limitations
 
