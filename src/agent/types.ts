@@ -1,5 +1,6 @@
 import type { AttemptInfo, ChatMessage, CompleteChatOptions, TokenUsage } from "../inference";
 import type { CombatantState, SkillCatalog, SkillId } from "../engine";
+import type { GroundedFacts } from "./grounding";
 
 export type ValidationOk = {
   ok: true;
@@ -42,6 +43,8 @@ export interface PlayAgentTurnOptions {
   inference?: AgentInferenceOptions;
   now?: () => number;
   catalog?: SkillCatalog;
+  /** Default "off" — must stay off for fixture-compatible prompts. */
+  grounding?: "off" | "facts";
 }
 
 export interface DecisionTrace {
@@ -52,6 +55,7 @@ export interface DecisionTrace {
   observation: { cpu: CombatantState; player: CombatantState } | null;
   messages: ChatMessage[];
   attempts: AttemptInfo[];
+  groundedFacts?: GroundedFacts;
   provider?: string;
   model?: string;
   usage?: TokenUsage;

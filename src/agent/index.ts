@@ -1,5 +1,10 @@
 export { observePostPlayerState } from "./observe";
-export { PROMPT_VERSION, buildAgentMessages } from "./prompt";
+export {
+  PROMPT_VERSION,
+  PROMPT_VERSIONS,
+  buildAgentMessages,
+  resolvePromptVersion
+} from "./prompt";
 export type { BuildAgentMessagesInput } from "./prompt";
 export { validateAgentResponse } from "./validate";
 export { playAgentTurn } from "./llm-turn";

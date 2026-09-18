@@ -5,8 +5,13 @@ import {
   completeChat,
   type AttemptInfo
 } from "../inference";
+import { computeGroundedFacts } from "./grounding";
+import type { GroundedFacts } from "./grounding";
 import { observePostPlayerState } from "./observe";
-import { PROMPT_VERSION, buildAgentMessages } from "./prompt";
+import {
+  buildAgentMessages,
+  resolvePromptVersion
+} from "./prompt";
 import type {
   DecisionTrace,
   PlayAgentTurnOptions,
@@ -41,18 +46,33 @@ export async function playAgentTurn(
   const started = now();
   const attempts: AttemptInfo[] = [];
 
+  const observation = observePostPlayerState(runtime, playerSkillId);
+
+  let groundedFacts: GroundedFacts | undefined;
+  if (options.grounding === "facts" && observation !== null) {
+    groundedFacts = computeGroundedFacts(
+      observation,
+      runtime.session.cpu,
+      runtime.session.player.skillIds,
+      runtime.session.turn,
+      runtime.session.maxTurns,
+      catalog
+    );
+  }
+
+  const promptVersion = resolvePromptVersion({ grounding: groundedFacts });
+
   const baseTrace = (): Pick<
     DecisionTrace,
-    "promptVersion" | "turn" | "budgetMs" | "elapsedMs" | "attempts"
+    "promptVersion" | "turn" | "budgetMs" | "elapsedMs" | "attempts" | "groundedFacts"
   > => ({
-    promptVersion: PROMPT_VERSION,
+    promptVersion,
     turn: runtime.session.turn,
     budgetMs,
     elapsedMs: now() - started,
-    attempts: [...attempts]
+    attempts: [...attempts],
+    groundedFacts
   });
-
-  const observation = observePostPlayerState(runtime, playerSkillId);
 
   if (observation === null) {
     const step = stepBattle(runtime, playerSkillId);
@@ -73,7 +93,8 @@ export async function playAgentTurn(
     maxTurns: runtime.session.maxTurns,
     observation,
     cpuConfig: runtime.session.cpu,
-    catalog
+    catalog,
+    grounding: groundedFacts
   });
 
   const budgetSignal = AbortSignal.timeout(budgetMs);
