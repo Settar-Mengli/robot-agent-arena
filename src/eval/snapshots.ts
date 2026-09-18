@@ -27,6 +27,27 @@ export type SnapshotSuite = {
   snapshots: DecisionSnapshot[];
 };
 
+export const PIVOTAL_MIN_SPREAD = 100;
+export const PIVOTAL_TARGET_COUNT = 20;
+export const STAKE_TAIL_THRESHOLDS = [10, 100, 500, 1000] as const;
+
+export type PivotalDecisionSnapshot = DecisionSnapshot & { spread: number };
+
+export type PivotalSnapshotSuite = {
+  scenariosScanned: number;
+  minSpread: number;
+  targetCount: number;
+  count: number;
+  snapshots: PivotalDecisionSnapshot[];
+  /** Present when count < targetCount after a full scan. */
+  warning?: string;
+};
+
+export type StakeTailCounts = Record<
+  (typeof STAKE_TAIL_THRESHOLDS)[number],
+  number
+>;
+
 const TARGET_COUNT = 20;
 const INITIAL_SCAN = 12;
 
@@ -44,6 +65,21 @@ function valuesAreFlat(values: Record<SkillId, number>): boolean {
   }
   const first = nums[0]!;
   return nums.every((value) => value === first);
+}
+
+/** Oracle value spread: max − min (same notion as discriminate). */
+export function valueSpread(values: Record<SkillId, number>): number {
+  const nums = Object.values(values);
+  if (nums.length === 0) {
+    return 0;
+  }
+  let min = Infinity;
+  let max = -Infinity;
+  for (const value of nums) {
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+  return max - min;
 }
 
 function collectFromScenario(scenario: MatchScenario): DecisionSnapshot[] {
@@ -156,4 +192,149 @@ export function generateSnapshots(split: EvalSplit): SnapshotSuite {
 
   const snapshots = selectEveryKth(candidates, TARGET_COUNT);
   return { scenariosScanned, snapshots };
+}
+
+function withSpread(snap: DecisionSnapshot): PivotalDecisionSnapshot {
+  return { ...snap, spread: valueSpread(snap.values) };
+}
+
+function comparePivotal(
+  a: PivotalDecisionSnapshot,
+  b: PivotalDecisionSnapshot
+): number {
+  if (a.spread !== b.spread) {
+    return b.spread - a.spread;
+  }
+  if (a.scenarioId !== b.scenarioId) {
+    return a.scenarioId < b.scenarioId ? -1 : 1;
+  }
+  return a.runtime.session.turn - b.runtime.session.turn;
+}
+
+export type SelectPivotalOptions = {
+  minSpread?: number;
+  targetCount?: number;
+};
+
+/**
+ * Rank qualifying candidates by spread descending; take up to targetCount.
+ * Never throws on shortfall — returns all qualifiers and a warning string.
+ */
+export function selectPivotalSnapshots(
+  candidates: readonly PivotalDecisionSnapshot[],
+  options: SelectPivotalOptions = {}
+): {
+  snapshots: PivotalDecisionSnapshot[];
+  count: number;
+  warning?: string;
+} {
+  const minSpread = options.minSpread ?? PIVOTAL_MIN_SPREAD;
+  const targetCount = options.targetCount ?? PIVOTAL_TARGET_COUNT;
+  const qualified = candidates
+    .filter((c) => c.spread >= minSpread)
+    .slice()
+    .sort(comparePivotal);
+  const snapshots = qualified.slice(0, targetCount);
+  const count = snapshots.length;
+  if (count < targetCount) {
+    return {
+      snapshots,
+      count,
+      warning: `only ${count} of ${targetCount} pivotal points qualified at spread>=${minSpread}`
+    };
+  }
+  return { snapshots, count };
+}
+
+export type GeneratePivotalOptions = SelectPivotalOptions & {
+  /** Cap scenarios scanned (for tests). Default: entire split. */
+  maxScenarios?: number;
+};
+
+/**
+ * High-stakes snapshot suite: exact non-flat points with spread >= minSpread,
+ * ranked by spread. Shortfall after full scan does not throw.
+ */
+export function generatePivotalSnapshots(
+  split: EvalSplit,
+  options: GeneratePivotalOptions = {}
+): PivotalSnapshotSuite {
+  const minSpread = options.minSpread ?? PIVOTAL_MIN_SPREAD;
+  const targetCount = options.targetCount ?? PIVOTAL_TARGET_COUNT;
+  const suite = buildMatchSuite(split);
+  const limit = options.maxScenarios ?? suite.length;
+  const candidates: PivotalDecisionSnapshot[] = [];
+  let scenariosScanned = 0;
+
+  for (let i = 0; i < suite.length && i < limit; i += 1) {
+    const scenario = suite[i]!;
+    for (const snap of collectFromScenario(scenario)) {
+      candidates.push(withSpread(snap));
+    }
+    scenariosScanned = i + 1;
+
+    const qualifiedSoFar = candidates.filter((c) => c.spread >= minSpread).length;
+    if (
+      options.maxScenarios === undefined &&
+      scenariosScanned >= INITIAL_SCAN &&
+      qualifiedSoFar >= targetCount
+    ) {
+      break;
+    }
+  }
+
+  // If still short and we stopped early, scan the rest of the split.
+  if (
+    options.maxScenarios === undefined &&
+    candidates.filter((c) => c.spread >= minSpread).length < targetCount
+  ) {
+    for (let i = scenariosScanned; i < suite.length; i += 1) {
+      const scenario = suite[i]!;
+      for (const snap of collectFromScenario(scenario)) {
+        candidates.push(withSpread(snap));
+      }
+      scenariosScanned = i + 1;
+      if (
+        candidates.filter((c) => c.spread >= minSpread).length >= targetCount
+      ) {
+        break;
+      }
+    }
+  }
+
+  const selected = selectPivotalSnapshots(candidates, { minSpread, targetCount });
+  const result: PivotalSnapshotSuite = {
+    scenariosScanned,
+    minSpread,
+    targetCount,
+    count: selected.count,
+    snapshots: selected.snapshots
+  };
+  if (selected.warning !== undefined) {
+    result.warning = selected.warning;
+  }
+  return result;
+}
+
+/**
+ * Full-split scan: count exact non-flat candidates meeting each stake threshold.
+ */
+export function countStakeTail(split: EvalSplit): {
+  scenariosScanned: number;
+  counts: StakeTailCounts;
+} {
+  const suite = buildMatchSuite(split);
+  const spreads: number[] = [];
+  let scenariosScanned = 0;
+  for (let i = 0; i < suite.length; i += 1) {
+    for (const snap of collectFromScenario(suite[i]!)) {
+      spreads.push(valueSpread(snap.values));
+    }
+    scenariosScanned = i + 1;
+  }
+  const counts = {} as StakeTailCounts;
+  for (const threshold of STAKE_TAIL_THRESHOLDS) {
+    counts[threshold] = spreads.filter((s) => s >= threshold).length;
+  }
+  return { scenariosScanned, counts };
 }

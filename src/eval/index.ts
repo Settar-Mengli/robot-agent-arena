@@ -54,8 +54,23 @@ export type {
   MemoScope
 } from "./oracle";
 
-export { generateSnapshots } from "./snapshots";
-export type { DecisionSnapshot, SnapshotSuite } from "./snapshots";
+export {
+  countStakeTail,
+  generatePivotalSnapshots,
+  generateSnapshots,
+  selectPivotalSnapshots,
+  valueSpread,
+  PIVOTAL_MIN_SPREAD,
+  PIVOTAL_TARGET_COUNT,
+  STAKE_TAIL_THRESHOLDS
+} from "./snapshots";
+export type {
+  DecisionSnapshot,
+  PivotalDecisionSnapshot,
+  PivotalSnapshotSuite,
+  SnapshotSuite,
+  StakeTailCounts
+} from "./snapshots";
 
 export { runMatch, runSuite } from "./match";
 export type { MatchResult, MatchTurnRecord, RunSuiteOptions } from "./match";
