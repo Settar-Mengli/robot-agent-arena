@@ -1,11 +1,11 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-17
-- Branch: `feat/eval-discrimination` (PR open); base `main`
-- Current state: M-EVAL complete with discrimination verdict **DISCRIMINATES**; fixture manifest + multi-provider keyless suite-all replay. Decisions D-021–D-026 in force. Next: **M-ENV** (D-025).
+- Date: 2026-09-18
+- Branch: `feat/m-tools`; base `main` @ `06fa1b9`
+- Current state: M-EVAL complete; discrimination **DISCRIMINATES**. D-025 amend: M-ENV dropped; batch 2 is **M-TOOLS**. LLM↔greedy tie sits under ~75-point optimal headroom (both play poorly).
 - Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all`
-- Working tree: `feat/eval-discrimination`
+- Working tree: `feat/m-tools`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -35,9 +35,10 @@
 - D-020 positioning docs.
 - M-AGENT (PR #9): `SelectCpuSkillId` seam; `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
 - M-EVAL (PR #10): `src/eval/` harness, snapshot suites, recorded fixtures, Vite `runnerImport` CLI, committed EVAL.md baseline, D-023.
+- Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
 
 ## Current Work
-- Discrimination batch docs (D-025 / D-026); environment verdict DISCRIMINATES.
+- M-TOOLS: normalize line endings; resolve D-025 M-ENV conditional → batch 2 is M-TOOLS.
 
 ## Blockers
 - None.
@@ -45,9 +46,10 @@
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
+- D-026 parked items (seed-spread / snapshot reselection) until a future suite regeneration.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/eval-discrimination`.
+- See `git status` / PR diff on `feat/m-tools`.
 
 ## Exact Next Step
-**M-ENV** (D-025 batch 2 / D-026 deferred items). Then M-TOOLS (D-024). UI remains deferred.
+Implement grounded fact computation (engine parity), opt-in prompt variants, per-match memory, and ablation harness (D-024). Then M-BENCH. UI remains deferred.
