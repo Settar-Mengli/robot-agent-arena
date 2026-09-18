@@ -91,6 +91,23 @@ export function aggregateMatches(results: readonly MatchResult[]): MatchAggregat
   };
 }
 
+export type ProviderLlmAggregate = {
+  decisions: number;
+  validOk: number;
+  validated: number;
+  decisionValidityRate: number | null;
+  fallbackCount: number;
+  latencyP50: number | null;
+  latencyP95: number | null;
+  tokenTotals: {
+    prompt: number;
+    completion: number;
+    total: number;
+  } | null;
+  attemptsOk: number;
+  attemptsFailByStatus: Record<string, number>;
+};
+
 export type LlmAggregate = {
   decisionValidityRate: number | null;
   fallbackByReason: Record<string, number>;
@@ -102,7 +119,75 @@ export type LlmAggregate = {
     completion: number;
     total: number;
   } | null;
+  byProvider: Record<string, ProviderLlmAggregate>;
 };
+
+type ProviderBucket = {
+  decisions: number;
+  validOk: number;
+  validated: number;
+  fallbackCount: number;
+  latencies: number[];
+  prompt: number;
+  completion: number;
+  total: number;
+  usageSeen: boolean;
+  attemptsOk: number;
+  attemptsFailByStatus: Record<string, number>;
+};
+
+function providerKey(provider: string, model: string): string {
+  return `${provider}|${model}`;
+}
+
+function emptyProviderBucket(): ProviderBucket {
+  return {
+    decisions: 0,
+    validOk: 0,
+    validated: 0,
+    fallbackCount: 0,
+    latencies: [],
+    prompt: 0,
+    completion: 0,
+    total: 0,
+    usageSeen: false,
+    attemptsOk: 0,
+    attemptsFailByStatus: {}
+  };
+}
+
+function finalizeProviderBucket(
+  bucket: ProviderBucket,
+  replay: boolean
+): ProviderLlmAggregate {
+  const latencies = [...bucket.latencies].sort((a, b) => a - b);
+  const failStatuses = Object.keys(bucket.attemptsFailByStatus).sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0
+  );
+  const attemptsFailByStatus: Record<string, number> = {};
+  for (const status of failStatuses) {
+    attemptsFailByStatus[status] = bucket.attemptsFailByStatus[status]!;
+  }
+  return {
+    decisions: bucket.decisions,
+    validOk: bucket.validOk,
+    validated: bucket.validated,
+    decisionValidityRate:
+      bucket.validated === 0 ? null : bucket.validOk / bucket.validated,
+    fallbackCount: bucket.fallbackCount,
+    latencyP50: replay ? null : percentile(latencies, 50),
+    latencyP95: replay ? null : percentile(latencies, 95),
+    tokenTotals: bucket.usageSeen
+      ? {
+          prompt: bucket.prompt,
+          completion: bucket.completion,
+          total: bucket.total
+        }
+      : null,
+    attemptsOk: bucket.attemptsOk,
+    attemptsFailByStatus
+  };
+}
 
 export function aggregateLlm(
   results: readonly MatchResult[],
@@ -117,6 +202,16 @@ export function aggregateLlm(
   let completion = 0;
   let total = 0;
   let usageSeen = false;
+  const providerBuckets = new Map<string, ProviderBucket>();
+
+  const getBucket = (key: string): ProviderBucket => {
+    let bucket = providerBuckets.get(key);
+    if (bucket === undefined) {
+      bucket = emptyProviderBucket();
+      providerBuckets.set(key, bucket);
+    }
+    return bucket;
+  };
 
   for (const result of results) {
     for (const turn of result.turns) {
@@ -146,11 +241,49 @@ export function aggregateLlm(
         completion += trace.usage.completion_tokens ?? 0;
         total += trace.usage.total_tokens ?? 0;
       }
+
+      if (trace.provider !== undefined && trace.model !== undefined) {
+        const bucket = getBucket(providerKey(trace.provider, trace.model));
+        bucket.decisions += 1;
+        if (trace.validation !== undefined) {
+          bucket.validated += 1;
+          if (trace.validation.ok) bucket.validOk += 1;
+        }
+        if (trace.source === "fallback") {
+          bucket.fallbackCount += 1;
+        }
+        bucket.latencies.push(trace.elapsedMs);
+        if (trace.usage !== undefined) {
+          bucket.usageSeen = true;
+          bucket.prompt += trace.usage.prompt_tokens ?? 0;
+          bucket.completion += trace.usage.completion_tokens ?? 0;
+          bucket.total += trace.usage.total_tokens ?? 0;
+        }
+      }
+
+      for (const attempt of trace.attempts) {
+        const bucket = getBucket(providerKey(attempt.provider, attempt.model));
+        if (attempt.ok) {
+          bucket.attemptsOk += 1;
+        } else {
+          const statusKey =
+            attempt.status === undefined ? "none" : String(attempt.status);
+          bucket.attemptsFailByStatus[statusKey] =
+            (bucket.attemptsFailByStatus[statusKey] ?? 0) + 1;
+        }
+      }
     }
   }
 
   latencies.sort((a, b) => a - b);
   const replay = options.replayMode === true;
+
+  const byProvider: Record<string, ProviderLlmAggregate> = {};
+  for (const key of [...providerBuckets.keys()].sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0
+  )) {
+    byProvider[key] = finalizeProviderBucket(providerBuckets.get(key)!, replay);
+  }
 
   return {
     decisionValidityRate:
@@ -161,7 +294,8 @@ export function aggregateLlm(
     latencyP95: replay ? null : percentile(latencies, 95),
     tokenTotals: usageSeen
       ? { prompt, completion, total }
-      : null
+      : null,
+    byProvider
   };
 }
 

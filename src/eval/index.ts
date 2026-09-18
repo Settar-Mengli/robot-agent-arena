@@ -67,6 +67,7 @@ export {
 export type {
   LlmAggregate,
   MatchAggregate,
+  ProviderLlmAggregate,
   SnapshotPolicyMetrics,
   WilsonInterval
 } from "./metrics";

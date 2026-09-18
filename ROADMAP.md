@@ -24,7 +24,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Max 20 turns.
 - Seeded RNG (DONE; restore-from-state DONE).
 - Post-match report: explanatory lesson of which design choice caused the result, fictional vocabulary only (PLANNED; coach surfaces in Report later — D-020).
-- **PLANNED:** Grounding/memory tools (M-TOOLS); serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-021). Eval harness (M-EVAL) is DONE pending merge.
+- **PLANNED:** Grounding/memory tools (M-TOOLS); serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-021). Eval harness (M-EVAL) is **DONE** with measured held-out LLM results in EVAL.md.
 
 ## Milestones
 
@@ -36,7 +36,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - CPU opponent catalog (FRACTURE, SENTINEL-X) — DONE.
 - M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred to M-UI per D-016 amendment).
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
-- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — DONE pending merge (PR #10); LLM measurement pending a local `eval:record` run.
+- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE** (incl. independent held-out split, keyless replay, measured held-out LLM results); next is M-TOOLS.
 
 ### M5 / M6 (re-sequenced)
 Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**. They land as **M-UI** (and related persistence) after the AI spine below so no UI is thrown away when agents land.
@@ -49,11 +49,11 @@ Multi-provider free-tier LLM client: structured output, timeout, retry, provider
 #### M-AGENT — LLM agent (DONE)
 Battle-state + personality → validated legal move via `playAgentTurn`; plain `stepBattle` seeded picker is fallback (D-015/D-022). Deterministic greedy baseline for evals. Optional `selectCpuSkillId` on `stepBattle`.
 
-#### M-EVAL — Eval harness (signature piece) — DONE pending merge
-Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). LLM numbers pending local record/replay. Next: **M-TOOLS** (ablation vs this baseline).
+#### M-EVAL — Eval harness (signature piece) — DONE
+Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Held-out LLM measurement published: greedy matches the LLM on the sampled matchups and snapshot optimality — **no measured LLM advantage** today. Next: **M-TOOLS** as a pre-registered ablation against this baseline (D-024).
 
 #### M-TOOLS — Grounding + memory — NEXT
-Grounding tool (computed affordable/threat facts so the agent decides on real state, not hallucination) + per-match memory of player tendencies. Proven by ablation against the M-EVAL baseline.
+Grounding tool (computed affordable/threat facts so the agent decides on real state, not hallucination) + per-match memory of player tendencies. Proven by ablation against the held-out M-EVAL baseline (D-024 falsifier: must beat 50% snapshot optimality).
 
 #### M-COACH — Post-battle coach
 LLM post-battle coach: turns the battle log into tailored advice (surfaces in the Report screen in M-UI).
