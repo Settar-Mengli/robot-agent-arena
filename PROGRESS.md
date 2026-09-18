@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `fix/eval-adversarial-min-regret-1` (PR open); base `main` @ `83101b0`
-- Current state: Adversarial suites on main (PR #18). Follow-up: `ADVERSARIAL_MIN_REGRET=1` so both splits commit n=20 (was 3/1 at threshold 100). Ablation **re-run pending** on `--snapshot-suite adversarial`. Next after that: **M-BENCH**.
-- Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all` (standard suites)
-- Working tree: `fix/eval-adversarial-min-regret-1`
+- Branch: `fix/eval-suite-baselines` (PR open); base `main` @ `a7f1fae`
+- Current state: Per-suite snapshot baselines fixed. Adversarial ablation fixtures committed. **M-TOOLS measured:** grounding changed 0/20 decisions on held-out adversarial (D-024 falsified; D-030). Next: **M-BENCH**. Memory variants unmeasured.
+- Verification: typecheck / lint / coverage; keyless `eval:replay -- --suite all`; adversarial replay with `--variants base,grounded --max-matches 2`
+- Working tree: `fix/eval-suite-baselines`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -38,21 +38,22 @@
 - Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
 - M-TOOLS (PR #16): grounding, memory, opt-in variants, ablation harness; D-027.
 - Pivotal snapshot suites + auditable decisions + D-028 (PR #17).
-- Adversarial snapshot suites + D-029 (PR #18).
+- Adversarial snapshot suites + D-029 (PR #18); min regret 1 (PR #19).
 
 ## Current Work
-- Lower adversarial min regret to 1; regenerate n=20 suites; D-029 amendment.
+- Per-suite baselines; publish M-TOOLS ablation (D-030) and metric choice (D-031).
 
 ## Blockers
-- None. Adversarial ablation numbers require a local keyed `eval:record --snapshot-suite adversarial`.
+- None.
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 - D-026 seed-spread remains parked.
+- Memory ablation variants remain unmeasured.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `fix/eval-adversarial-min-regret-1`.
+- See `git status` / PR diff on `fix/eval-suite-baselines`.
 
 ## Exact Next Step
-Operator runs `npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial` and pastes results into EVAL.md. Then **M-BENCH**. UI remains deferred.
+**M-BENCH**. UI remains deferred.

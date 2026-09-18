@@ -477,3 +477,33 @@ Operator re-runs M-TOOLS with `--snapshot-suite adversarial` and pastes results 
 - Full-split scan at `greedyRegret ≥ 100` yielded only **3 (dev) / 1 (heldout)** points — too few to measure an ablation. An earlier informal count of “~12 @≥100 in the first 12 scenarios” was incorrect: those scenarios are nearly the same matchup with inert seeds (one state repeated).
 - **`ADVERSARIAL_MIN_REGRET` is now `1`** (any point where greedy errs). Ranking remains by greedyRegret descending; target remains 20. Both splits fill n=20 (dev selected mix includes 3 points @≥100; heldout 1). Greedy optimalRate remains **0% by construction**.
 - Rationale unchanged: measure where the baseline fails; the stakes floor is what to relax when catastrophic errors are rare, not the construction.
+
+## D-030 M-TOOLS ablation outcome
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+- On the held-out **adversarial** measurement set (n=20), grounded facts produced **no behavioral change**: base and grounded are identical at 5% optimal / mean regret 4.25 / median 5 / max 5; all 20 decisions match; prompt versions differ (`agent-v1` vs `agent-v2-grounded`). **D-024 is falsified** and published in EVAL.md.
+- Corrected suite baselines: greedy 0% / mean 104.35; LLM Δoptimal +5.0pp / Δregret −100.10 vs greedy. Greedy and the LLM fail in opposite ways (catastrophic rare vs cheap constant).
+- Candidate explanations to test rather than assert: the model may already infer these facts from raw state; the adversarial set may be dominated by regret-2 points where any choice is nearly equal; the grounded block may be placed or phrased such that it is ignored.
+- Memory variants (`agent-v2-memory`, `agent-v3-grounded-memory`) remain **unmeasured**.
+
+Rationale:
+An ablation that changes zero decisions cannot support the grounding hypothesis on this set, regardless of rate deltas vs greedy.
+
+Consequences:
+Next batch is **M-BENCH**. Do not treat grounding-as-implemented as settled positive evidence.
+
+## D-031 Metric choice on stakes-skewed suites
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+- On stakes-skewed suites (adversarial, pivotal), report the **regret distribution** (mean, median, max, count with regret ≥ 100) alongside optimality rate. A policy can be far better in value while looking worse (or only barely better) by rate.
+- Motivating case: this M-TOOLS ablation — greedy 0% / mean 104.35 vs LLM 5% / mean 4.25 / max 5 on held-out adversarial.
+
+Rationale:
+Mean regret is dominated by rare high-stakes misses; rate alone hides that structure.
+
+Consequences:
+Eval digests and ablation tables include median / max / highRegret≥100; CLI baseline deltas compare against the loaded suite’s measured greedy and random metrics.
