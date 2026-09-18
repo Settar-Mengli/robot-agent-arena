@@ -356,3 +356,40 @@ The held-out measurement shows greedy indistinguishable from the LLM mixture on 
 
 Consequences:
 M-TOOLS is next on the spine; EVAL.md is the publication surface for the ablation; no claim of LLM advantage until the falsifier is passed.
+
+## D-025 Product direction and milestone order
+Date: 2026-09-17
+Status: Accepted
+
+Decision:
+**Supersedes D-021’s milestone order.** Product direction: a **measurement bench for agent design**, where the correct answer is known by an exact oracle — model comparison (BYOK), cost/latency per decision, prompt version as a first-class axis, a failure taxonomy per model, and self-consistency checks. The teaching sandbox is delivered **through measurement** rather than assertion.
+
+Locked 7-batch plan:
+1. Discrimination + parked fixes (this batch) — done when the environment’s ability to separate good from bad play is measured.
+2. **M-ENV** — deepen the environment (**conditional on batch 1’s verdict**: proceed because the environment DISCRIMINATES).
+3. **M-TOOLS** — grounding ablation (D-024).
+4. **M-BENCH** — model comparison bench.
+5. **M-UI part 1** — Builder + Arena.
+6. **M-UI part 2** — Report + coach + bench surfacing.
+7. Polish and publish.
+
+Rationale:
+The held-out LLM↔greedy tie looked like “environment too simple,” but the discrimination report shows large headroom for optimal play. Deepening the environment before the bench keeps the oracle meaningful.
+
+Consequences:
+ROADMAP / PROGRESS follow this order. Batch 2 is M-ENV, not M-BENCH.
+
+## D-026 Deferred to M-ENV
+Date: 2026-09-17
+Status: Accepted
+
+Decision:
+Deferred until M-ENV (which regenerates suites/baselines/fixtures anyway):
+- **Seed spread:** nearby small integer seeds appear correlated (e.g. random CPU won 0/30 on dev seeds 1–10 but 10/30 on heldout seeds 101–110 against the same deterministic player).
+- **Snapshot reselection** toward greedy-suboptimal decision points (current suites under-sample headroom states).
+
+Rationale:
+Either change forces regenerating snapshot suites, baselines, and LLM fixtures. Parking them avoids thrash before M-ENV.
+
+Consequences:
+Do not regenerate suites solely for these issues outside M-ENV.

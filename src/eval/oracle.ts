@@ -14,12 +14,23 @@ import type { PlayerPolicy } from "./policies";
  * RNG is irrelevant under full CPU injection: stepBattle only advances RNG
  * via selectSimulationSkillId when the selector is omitted; with an injected
  * selector, memo keys need only {turn, player, cpu}.
+ *
+ * MemoScope is only valid for one (playerPolicy, cpuConfig, maxTurns)
+ * combination: sharing a memo across different games silently corrupts values.
  */
+
+/**
+ * Shared memo for value-of-state within one scenario walk.
+ * Bind once via `identity`; reusing the same object with a different identity throws.
+ */
+export type MemoScope = {
+  identity: string;
+  map: Map<string, number>;
+};
 
 export type BestResponseOptions = {
   maxNodes?: number;
-  /** Shared memo for value-of-state within a scenario walk. */
-  memo?: Map<string, number>;
+  memo?: MemoScope;
 };
 
 export type BestResponseResult = {
@@ -30,6 +41,27 @@ export type BestResponseResult = {
 };
 
 const DEFAULT_MAX_NODES = 200_000;
+
+/** Tracks the identity first bound to each MemoScope object. */
+const boundMemoIdentities = new WeakMap<MemoScope, string>();
+
+function resolveMemoMap(scope: MemoScope | undefined): Map<string, number> {
+  if (scope === undefined) {
+    return new Map<string, number>();
+  }
+  const bound = boundMemoIdentities.get(scope);
+  if (bound === undefined) {
+    boundMemoIdentities.set(scope, scope.identity);
+    return scope.map;
+  }
+  if (bound !== scope.identity) {
+    throw new Error(
+      `MemoScope reused with different identity: was '${bound}', now '${scope.identity}'. ` +
+        "Memo is only valid for one (playerPolicy, cpuConfig, maxTurns) combination."
+    );
+  }
+  return scope.map;
+}
 
 function resolveOutcome(runtime: BattleRuntime): BattleOutcome {
   const fromTurn = runtime.turns[runtime.turns.length - 1]?.outcome;
@@ -127,7 +159,7 @@ export function bestResponse(
   options: BestResponseOptions = {}
 ): BestResponseResult {
   const maxNodes = options.maxNodes ?? DEFAULT_MAX_NODES;
-  const memo = options.memo ?? new Map<string, number>();
+  const memo = resolveMemoMap(options.memo);
   const ctx: SearchCtx = {
     playerPolicy,
     maxNodes,

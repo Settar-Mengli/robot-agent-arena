@@ -12,6 +12,7 @@ import type {
   Seed,
   SkillId
 } from "../engine";
+import { bestResponse } from "./oracle";
 
 /**
  * Stateless player policy: output depends only on the given runtime
@@ -57,7 +58,7 @@ export function seededRandomPlayer(config: AgentConfig, seed: Seed): PlayerPolic
   };
 }
 
-export type CpuPolicyId = "random" | "greedy" | "llm";
+export type CpuPolicyId = "random" | "greedy" | "llm" | "optimal";
 
 export type CpuDecideResult = {
   step: ReturnType<typeof stepBattle>;
@@ -71,6 +72,82 @@ export type CpuPolicy = {
     playerSkillId: SkillId
   ) => Promise<CpuDecideResult>;
 };
+
+export type OptimalCpuPolicy = CpuPolicy & {
+  /** Turns where the oracle was inexact and greedy was used instead. */
+  inexactTurns: () => number;
+};
+
+/**
+ * Pick the first skill in MVP catalog order that is in `best`, equipped, and
+ * affordable at the current CPU energy; otherwise the first equipped best.
+ */
+export function pickBestByCatalogOrder(
+  best: readonly SkillId[],
+  equipped: readonly SkillId[],
+  energy: number
+): SkillId {
+  const bestSet = new Set(best);
+  const equippedSet = new Set(equipped);
+  for (const skill of MVP_SKILL_CATALOG.skills) {
+    if (!bestSet.has(skill.skillId) || !equippedSet.has(skill.skillId)) {
+      continue;
+    }
+    if (skill.energyCost <= energy) {
+      return skill.skillId;
+    }
+  }
+  for (const skill of MVP_SKILL_CATALOG.skills) {
+    if (bestSet.has(skill.skillId) && equippedSet.has(skill.skillId)) {
+      return skill.skillId;
+    }
+  }
+  if (best[0] !== undefined && equippedSet.has(best[0])) {
+    return best[0];
+  }
+  throw new Error("optimalCpuPolicy: no equipped skill in oracle best set");
+}
+
+/**
+ * Exact best-response CPU baseline vs a fixed player policy.
+ * Must receive the SAME playerPolicy instance the match uses.
+ */
+export function optimalCpuPolicy(
+  playerPolicy: PlayerPolicy,
+  options: { maxNodes?: number } = {}
+): OptimalCpuPolicy {
+  let inexact = 0;
+
+  return {
+    id: "optimal",
+    inexactTurns: () => inexact,
+    decide: async (runtime, playerSkillId) => {
+      const result = bestResponse(
+        runtime,
+        playerSkillId,
+        playerPolicy,
+        options.maxNodes !== undefined ? { maxNodes: options.maxNodes } : {}
+      );
+
+      let cpuSkillId: SkillId;
+      if (!result.exact || result.best.length === 0) {
+        inexact += 1;
+        const greedy = createGreedySelector(runtime.session.cpu);
+        cpuSkillId = greedy(runtime.cpu, runtime.player);
+      } else {
+        cpuSkillId = pickBestByCatalogOrder(
+          result.best,
+          runtime.session.cpu.skillIds,
+          runtime.cpu.energy
+        );
+      }
+
+      return {
+        step: stepBattle(runtime, playerSkillId, () => cpuSkillId)
+      };
+    }
+  };
+}
 
 export function randomCpuPolicy(): CpuPolicy {
   return {

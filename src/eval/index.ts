@@ -22,6 +22,8 @@ export {
   greedyPlayer,
   llmCpuPolicy,
   mix,
+  optimalCpuPolicy,
+  pickBestByCatalogOrder,
   randomCpuPolicy,
   resolvePlayerPolicy,
   seededRandomPlayer
@@ -30,17 +32,37 @@ export type {
   CpuDecideResult,
   CpuPolicy,
   CpuPolicyId,
+  OptimalCpuPolicy,
   PlayerPolicy
 } from "./policies";
 
 export { bestResponse, regret } from "./oracle";
-export type { BestResponseOptions, BestResponseResult } from "./oracle";
+export type {
+  BestResponseOptions,
+  BestResponseResult,
+  MemoScope
+} from "./oracle";
 
 export { generateSnapshots } from "./snapshots";
 export type { DecisionSnapshot, SnapshotSuite } from "./snapshots";
 
 export { runMatch, runSuite } from "./match";
 export type { MatchResult, MatchTurnRecord, RunSuiteOptions } from "./match";
+
+export {
+  computeDecisionHeadroom,
+  decideDiscriminationVerdict,
+  formatDiscriminationSummary,
+  intervalsDisjoint,
+  runDiscriminationReport,
+  SPREAD_THRESHOLD
+} from "./discriminate";
+export type {
+  DecisionHeadroom,
+  DiscriminationReport,
+  DiscriminationSplitReport,
+  PolicyMatchSlice
+} from "./discriminate";
 
 export {
   createMemoryStore,

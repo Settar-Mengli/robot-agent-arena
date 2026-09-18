@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import {
   AEGIS,
   BULWARK,
@@ -9,10 +9,14 @@ import {
   PLAYER_ARCHETYPES,
   STRIKER,
   TEMPEST,
+  bestResponse,
   buildMatchSuite,
+  greedyCpuPolicy,
   greedyPlayer,
   mix,
+  optimalCpuPolicy,
   randomCpuPolicy,
+  resolvePlayerPolicy,
   scenarioStratumKey,
   seededRandomPlayer,
   selectDiverseScenarios
@@ -229,4 +233,74 @@ describe("eval CPU policies", () => {
     const actual = await randomCpuPolicy().decide(runtime, playerSkillId);
     expect(actual.step).toEqual(expected);
   });
+
+  it("optimalCpuPolicy never returns an unequipped id and is deterministic", async () => {
+    const playerPolicy = greedyPlayer(STRIKER);
+    const optimal = optimalCpuPolicy(playerPolicy);
+    const runtime = startBattle(STRIKER, FRACTURE, "opt-det");
+    const playerSkillId = playerPolicy(runtime);
+    const first = await optimal.decide(runtime, playerSkillId);
+    const second = await optimalCpuPolicy(playerPolicy).decide(
+      runtime,
+      playerSkillId
+    );
+    const firstCpu = first.step.turnRecord.actions.find((a) => a.actor === "cpu")!;
+    const secondCpu = second.step.turnRecord.actions.find(
+      (a) => a.actor === "cpu"
+    )!;
+    expect(FRACTURE.skillIds).toContain(firstCpu.selectedSkillId);
+    expect(firstCpu.selectedSkillId).toBe(secondCpu.selectedSkillId);
+    expect(optimal.inexactTurns()).toBe(0);
+  });
+
+  it("optimal uses the same playerPolicy instance as the match", async () => {
+    const scenario = buildMatchSuite("dev")[0]!;
+    const shared = resolvePlayerPolicy(scenario);
+    let calls = 0;
+    const wrapped = ((runtime) => {
+      calls += 1;
+      return shared(runtime);
+    }) as typeof shared;
+    const optimal = optimalCpuPolicy(wrapped);
+    const runtime = startBattle(
+      scenario.playerConfig,
+      scenario.cpuConfig,
+      scenario.seed
+    );
+    await optimal.decide(runtime, wrapped(runtime));
+    expect(calls).toBeGreaterThan(1);
+  });
+
+  it(
+    "optimal beats or ties greedy in oracle value on sampled scenarios",
+    async () => {
+      const scenarios = buildMatchSuite("dev").slice(0, 3);
+      for (const scenario of scenarios) {
+        const playerPolicy = resolvePlayerPolicy(scenario);
+        const optimal = optimalCpuPolicy(playerPolicy);
+        const greedy = greedyCpuPolicy(scenario.cpuConfig);
+        const runtime = startBattle(
+          scenario.playerConfig,
+          scenario.cpuConfig,
+          scenario.seed
+        );
+        const playerSkillId = playerPolicy(runtime);
+        const oracle = bestResponse(runtime, playerSkillId, playerPolicy);
+        expect(oracle.exact).toBe(true);
+        const optDecide = await optimal.decide(runtime, playerSkillId);
+        const greedyDecide = await greedy.decide(runtime, playerSkillId);
+        const optId = optDecide.step.turnRecord.actions.find(
+          (a) => a.actor === "cpu"
+        )!.selectedSkillId;
+        const greedyId = greedyDecide.step.turnRecord.actions.find(
+          (a) => a.actor === "cpu"
+        )!.selectedSkillId;
+        expect(scenario.cpuConfig.skillIds).toContain(optId);
+        expect(oracle.values[optId]!).toBeGreaterThanOrEqual(
+          oracle.values[greedyId]!
+        );
+      }
+    },
+    30_000
+  );
 });
