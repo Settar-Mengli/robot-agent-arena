@@ -154,3 +154,31 @@ export {
   upsertBaselineBlock
 } from "./report";
 export type { BaselineReport, BaselineSplitReport } from "./report";
+
+export {
+  assertCommittedManifestScenarioIds,
+  assertScenarioIdsInSuite,
+  fixtureFileExists,
+  mergeManifest,
+  manifestPathFor,
+  manifestVariantsFor,
+  readManifest,
+  readManifestSync,
+  resolveVariantRun,
+  selectScenariosByIds,
+  variantsFromManifestSplit,
+  writeManifest
+} from "./manifest";
+export type {
+  FixtureManifest,
+  ManifestSplit,
+  ManifestVariant,
+  ManifestVariantEntry
+} from "./manifest";
+
+export {
+  discoverVariantScenarioIds,
+  listFixtureHostModels,
+  scenarioMatchFixturesPresent
+} from "./fixture-presence";
+export type { HostModelPair } from "./fixture-presence";

@@ -14,6 +14,19 @@
         "gemini|gemini-3.5-flash-lite",
         "groq|openai/gpt-oss-20b",
         "openrouter|nvidia/nemotron-3-super-120b-a12b:free"
+      ],
+      "variants": [
+        {
+          "id": "base",
+          "promptVersion": "agent-v1",
+          "scenarioIds": [
+            "bulwark__greedy__fracture__s1",
+            "bulwark__greedy__fracture__s10",
+            "bulwark__greedy__fracture__s2",
+            "bulwark__greedy__fracture__s3"
+          ],
+          "snapshots": true
+        }
       ]
     },
     "heldout": {
@@ -31,6 +44,32 @@
         "gemini|gemini-3.5-flash-lite",
         "groq|openai/gpt-oss-20b",
         "openrouter|nvidia/nemotron-3-super-120b-a12b:free"
+      ],
+      "variants": [
+        {
+          "id": "base",
+          "promptVersion": "agent-v1",
+          "scenarioIds": [
+            "aegis__greedy__fracture__s101",
+            "aegis__seeded-random__fracture__s101",
+            "mnemonic__greedy__fracture__s101",
+            "mnemonic__seeded-random__fracture__s101",
+            "tempest__greedy__fracture__s101",
+            "tempest__seeded-random__fracture__s101"
+          ],
+          "snapshots": true,
+          "snapshotSuite": "adversarial"
+        },
+        {
+          "id": "grounded",
+          "promptVersion": "agent-v2-grounded",
+          "scenarioIds": [
+            "aegis__greedy__fracture__s101",
+            "mnemonic__greedy__fracture__s101"
+          ],
+          "snapshots": true,
+          "snapshotSuite": "adversarial"
+        }
       ],
       "snapshotSuite": "adversarial"
     }

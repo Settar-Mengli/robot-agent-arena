@@ -53,6 +53,7 @@ import {
   mergeManifest,
   manifestVariantsFor,
   readManifest,
+  resolveVariantRun,
   selectScenariosByIds,
   variantsFromManifestSplit,
   writeManifest,
@@ -805,47 +806,86 @@ async function runLlmMode(
     log(`variants: ${variants.join(",")}`);
   }
 
-  const selectedBySplit: Partial<Record<EvalSplit, MatchScenario[]>> = {};
-  let totalMatchCount = 0;
-  for (const split of splitsFor(args.suite)) {
-    const suite = buildMatchSuite(split);
-    let scenarios: MatchScenario[];
-    if (args.mode === "replay" && existingManifest?.splits[split] !== undefined) {
-      const entry = existingManifest.splits[split]!;
-      assertScenarioIdsInSuite(split, entry.scenarioIds);
-      scenarios = selectScenariosByIds(suite, entry.scenarioIds);
-      if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
-        scenarios = selectDiverseScenarios(scenarios, args.maxMatches);
+  // Per (variant, split) scenario lists — replay uses resolveVariantRun so
+  // grounded does not inherit base's longer scenarioIds (#21).
+  const selectedByVariantSplit: Record<
+    string,
+    Partial<Record<EvalSplit, MatchScenario[]>>
+  > = {};
+  const expectedMatchCounts: Array<{
+    split: EvalSplit;
+    variant: LlmVariant;
+    expected: number;
+  }> = [];
+
+  for (const variant of variants) {
+    selectedByVariantSplit[variant] = {};
+    for (const split of splitsFor(args.suite)) {
+      const suite = buildMatchSuite(split);
+      let scenarios: MatchScenario[];
+      let expected: number;
+
+      if (
+        args.mode === "replay" &&
+        existingManifest?.splits[split] !== undefined
+      ) {
+        const entry = existingManifest.splits[split]!;
+        const resolved = resolveVariantRun(entry, variant);
+        assertScenarioIdsInSuite(split, resolved.scenarioIds);
+        scenarios = selectScenariosByIds(suite, resolved.scenarioIds);
+        if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
+          scenarios = selectDiverseScenarios(scenarios, args.maxMatches);
+        }
+        expected = scenarios.length;
+      } else {
+        scenarios = selectScenariosForLlmMode(
+          suite,
+          maxMatches,
+          args.mode,
+          args.allSeeds
+        );
+        expected = scenarios.length;
       }
-    } else {
-      scenarios = selectScenariosForLlmMode(
-        suite,
-        maxMatches,
-        args.mode,
-        args.allSeeds
-      );
+
+      selectedByVariantSplit[variant]![split] = scenarios;
+      expectedMatchCounts.push({ split, variant, expected });
     }
-    selectedBySplit[split] = scenarios;
-    totalMatchCount += scenarios.length;
+  }
+
+  let totalMatchCount = 0;
+  for (const bySplit of Object.values(selectedByVariantSplit)) {
+    for (const scenarios of Object.values(bySplit)) {
+      if (scenarios) totalMatchCount += scenarios.length;
+    }
   }
 
   let totalSnapshotCount = 0;
   if (args.snapshots) {
-    for (const split of splitsFor(args.suite)) {
-      if (
-        args.mode === "replay" &&
-        existingManifest?.splits[split] !== undefined &&
-        !existingManifest.splits[split]!.snapshots
-      ) {
-        continue;
-      }
-      for (const kind of resolveSnapshotKinds(
-        args,
-        split,
-        existingManifest
-      )) {
-        const snapshots = await loadCommittedSnapshots(split, kind);
-        totalSnapshotCount += snapshots.length;
+    for (const variant of variants) {
+      for (const split of splitsFor(args.suite)) {
+        const entry = existingManifest?.splits[split];
+        const resolved =
+          args.mode === "replay" && entry !== undefined
+            ? resolveVariantRun(entry, variant)
+            : {
+                snapshots: true,
+                snapshotSuite: args.snapshotSuite as
+                  | "standard"
+                  | "pivotal"
+                  | "adversarial"
+                  | undefined
+              };
+        if (args.mode === "replay" && resolved.snapshots === false) {
+          continue;
+        }
+        for (const kind of resolveSnapshotKinds(
+          args,
+          split,
+          existingManifest
+        )) {
+          const snapshots = await loadCommittedSnapshots(split, kind);
+          totalSnapshotCount += snapshots.length;
+        }
       }
     }
   }
@@ -853,11 +893,13 @@ async function runLlmMode(
   if (args.mode === "record" || args.mode === "live") {
     const projected = projectQuotaCalls(
       variants.length,
-      totalSnapshotCount,
-      totalMatchCount
+      // snapshot count was multiplied by variants above; undo for projection
+      // which already multiplies by variantCount
+      Math.round(totalSnapshotCount / Math.max(1, variants.length)),
+      Math.round(totalMatchCount / Math.max(1, variants.length))
     );
     log(
-      `quota projection: variants=${variants.length} snapshots=${totalSnapshotCount} matches=${totalMatchCount} × ~17 → ${projected} calls (cap 300)`
+      `quota projection: variants=${variants.length} snapshots=${Math.round(totalSnapshotCount / Math.max(1, variants.length))} matches=${Math.round(totalMatchCount / Math.max(1, variants.length))} × ~17 → ${projected} calls (cap 300)`
     );
     try {
       assertQuotaWithinCap(projected, args.forceQuota);
@@ -879,12 +921,11 @@ async function runLlmMode(
 
   const byVariant: Record<string, VariantBundle> = {};
   const allResults: MatchResult[] = [];
-  const selectedScenarios: MatchScenario[] = [];
-  for (const scenarios of Object.values(selectedBySplit)) {
-    if (scenarios) {
-      selectedScenarios.push(...scenarios);
-    }
-  }
+  const actualMatchCounts: Array<{
+    split: EvalSplit;
+    variant: LlmVariant;
+    actual: number;
+  }> = [];
 
   let snapshotLlm = 0;
   const suiteBaselines: Record<
@@ -903,7 +944,12 @@ async function runLlmMode(
     const variantResults: MatchResult[] = [];
 
     for (const split of splitsFor(args.suite)) {
-      const scenarios = selectedBySplit[split] ?? [];
+      const scenarios = selectedByVariantSplit[variant]?.[split] ?? [];
+      actualMatchCounts.push({
+        split,
+        variant,
+        actual: scenarios.length
+      });
       for (const scenario of scenarios) {
         log(`scenario: ${scenario.id} [${variant}]`);
         const results = await runSuite([scenario], policy);
@@ -915,12 +961,13 @@ async function runLlmMode(
     const snapshotResults: Record<string, SnapshotEvalResult> = {};
     if (args.snapshots) {
       for (const split of splitsFor(args.suite)) {
-        if (
-          args.mode === "replay" &&
-          existingManifest?.splits[split] !== undefined &&
-          !existingManifest.splits[split]!.snapshots
-        ) {
-          log(`snapshots: ${split} skipped (manifest.snapshots=false)`);
+        const entry = existingManifest?.splits[split];
+        const resolved =
+          args.mode === "replay" && entry !== undefined
+            ? resolveVariantRun(entry, variant)
+            : { snapshots: true as boolean };
+        if (args.mode === "replay" && resolved.snapshots === false) {
+          log(`snapshots: ${split} skipped (variant.snapshots=false)`);
           continue;
         }
         for (const kind of resolveSnapshotKinds(
@@ -1014,6 +1061,27 @@ async function runLlmMode(
     }
   }
 
+  // EXPECTED vs ACTUAL match counts per (split, variant)
+  let matchCountMismatch = false;
+  for (const exp of expectedMatchCounts) {
+    const act = actualMatchCounts.find(
+      (a) => a.split === exp.split && a.variant === exp.variant
+    );
+    const actual = act?.actual ?? -1;
+    log(
+      `match counts [${exp.split}/${exp.variant}]: EXPECTED=${exp.expected} ACTUAL=${actual}`
+    );
+    if (actual !== exp.expected) {
+      matchCountMismatch = true;
+      error(
+        `match count mismatch [${exp.split}/${exp.variant}]: EXPECTED=${exp.expected} ACTUAL=${actual}`
+      );
+    }
+  }
+  if (matchCountMismatch) {
+    return 1;
+  }
+
   if (record || args.mode === "live") {
     const providerKeys = new Set<string>();
     for (const result of allResults) {
@@ -1027,24 +1095,33 @@ async function runLlmMode(
         }
       }
     }
-    const patch: FixtureManifest = { version: 1, splits: {} };
-    for (const split of splitsFor(args.suite)) {
-      const selected = selectedBySplit[split] ?? [];
-      const kinds = resolveSnapshotKinds(args, split, existingManifest);
-      const primaryKind: SnapshotSuiteKind =
-        kinds.includes("pivotal") && !kinds.includes("standard")
-          ? "pivotal"
-          : kinds[0] ?? "standard";
-      patch.splits[split] = {
-        scenarioIds: selected.map((s) => s.id),
-        snapshots: args.snapshots,
-        providers: [...providerKeys].sort(),
-        variants: manifestVariantsFor(variants),
-        snapshotSuite: primaryKind
-      };
+    let merged = existingManifest;
+    for (const variant of variants) {
+      const patch: FixtureManifest = { version: 1, splits: {} };
+      for (const split of splitsFor(args.suite)) {
+        const selected = selectedByVariantSplit[variant]?.[split] ?? [];
+        const kinds = resolveSnapshotKinds(args, split, existingManifest);
+        const primaryKind: SnapshotSuiteKind =
+          kinds.includes("pivotal") && !kinds.includes("standard")
+            ? "pivotal"
+            : kinds.includes("adversarial") && !kinds.includes("standard")
+              ? "adversarial"
+              : kinds[0] ?? "standard";
+        patch.splits[split] = {
+          scenarioIds: selected.map((s) => s.id),
+          snapshots: args.snapshots,
+          providers: [...providerKeys].sort(),
+          variants: manifestVariantsFor([variant], {
+            scenarioIds: selected.map((s) => s.id),
+            snapshots: args.snapshots,
+            snapshotSuite: primaryKind
+          }),
+          snapshotSuite: primaryKind
+        };
+      }
+      merged = mergeManifest(merged, patch);
     }
-    const merged = mergeManifest(existingManifest, patch);
-    await writeManifest(manifestFile, merged);
+    await writeManifest(manifestFile, merged!);
     log(`manifest updated: ${manifestFile.replace(/\\/g, "/")}`);
   }
 
@@ -1083,6 +1160,12 @@ async function runLlmMode(
     })
   );
 
+  const selectedScenarios: MatchScenario[] = [];
+  for (const bySplit of Object.values(selectedByVariantSplit)) {
+    for (const scenarios of Object.values(bySplit)) {
+      if (scenarios) selectedScenarios.push(...scenarios);
+    }
+  }
   const distinct = countDistinctMatchups(selectedScenarios);
   log(
     `distinct matchups: ${distinct} of ${selectedScenarios.length} selected scenarios`
