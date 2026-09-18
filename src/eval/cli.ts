@@ -27,6 +27,8 @@ import {
   evalGreedySnapshots,
   evalLlmSnapshots,
   evalRandomSnapshots,
+  formatSnapshotDecisionsDigest,
+  promptVersionMismatchMessage,
   type SnapshotEvalResult
 } from "./snapshot-eval";
 import type { DecisionSnapshot } from "./snapshots";
@@ -78,6 +80,7 @@ type CliArgs = {
   replayProvider?: string;
   variantsRaw?: string;
   forceQuota: boolean;
+  snapshotSuite: "standard" | "pivotal" | "both";
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -131,7 +134,8 @@ function parseArgs(argv: string[]): CliArgs {
     writeReport: false,
     snapshots: true,
     allSeeds: false,
-    forceQuota: false
+    forceQuota: false,
+    snapshotSuite: "standard"
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -175,6 +179,14 @@ function parseArgs(argv: string[]): CliArgs {
       i += 1;
     } else if (flag === "--force-quota") {
       args.forceQuota = true;
+    } else if (flag === "--snapshot-suite" && next) {
+      if (next !== "standard" && next !== "pivotal" && next !== "both") {
+        throw new Error(
+          `--snapshot-suite must be standard|pivotal|both, got ${next}`
+        );
+      }
+      args.snapshotSuite = next;
+      i += 1;
     }
   }
 
@@ -396,15 +408,43 @@ export function identicalOutcomeWarning(
   return `warning: all ${results.length} matches ended identically (${first.outcome.result}, ${first.totalTurns} turns) — this sample may not discriminate between policies`;
 }
 
+type SnapshotSuiteKind = "standard" | "pivotal";
+
 async function loadCommittedSnapshots(
   split: EvalSplit,
+  kind: SnapshotSuiteKind = "standard",
   root: string = ROOT
 ): Promise<DecisionSnapshot[]> {
-  const path = join(root, "evals/suites", `snapshots.${split}.json`);
+  const file =
+    kind === "pivotal"
+      ? `snapshots.pivotal.${split}.json`
+      : `snapshots.${split}.json`;
+  const path = join(root, "evals/suites", file);
   const raw = JSON.parse(await readFile(path, "utf8")) as {
     snapshots: DecisionSnapshot[];
   };
   return raw.snapshots;
+}
+
+function resolveSnapshotKinds(
+  args: CliArgs,
+  split: EvalSplit,
+  manifest: FixtureManifest | undefined
+): SnapshotSuiteKind[] {
+  if (args.mode === "replay" && args.snapshotSuite === "standard") {
+    const fromManifest = manifest?.splits[split]?.snapshotSuite;
+    if (fromManifest === "pivotal" || fromManifest === "standard") {
+      return [fromManifest];
+    }
+  }
+  if (args.snapshotSuite === "both") {
+    return ["standard", "pivotal"];
+  }
+  return [args.snapshotSuite];
+}
+
+function snapshotResultKey(split: EvalSplit, kind: SnapshotSuiteKind): string {
+  return kind === "standard" ? split : `${split}:pivotal`;
 }
 
 async function runBaseline(args: CliArgs): Promise<BaselineReport> {
@@ -779,8 +819,14 @@ async function runLlmMode(
       ) {
         continue;
       }
-      const snapshots = await loadCommittedSnapshots(split);
-      totalSnapshotCount += snapshots.length;
+      for (const kind of resolveSnapshotKinds(
+        args,
+        split,
+        existingManifest
+      )) {
+        const snapshots = await loadCommittedSnapshots(split, kind);
+        totalSnapshotCount += snapshots.length;
+      }
     }
   }
 
@@ -850,15 +896,22 @@ async function runLlmMode(
           log(`snapshots: ${split} skipped (manifest.snapshots=false)`);
           continue;
         }
-        log(`snapshots: ${split} [${variant}]`);
-        const snapshots = await loadCommittedSnapshots(split);
-        const evaluated = await evalLlmSnapshots(
-          snapshots,
-          turnOptions,
-          llmPolicyIdForVariant(variant)
-        );
-        snapshotResults[split] = evaluated;
-        snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+        for (const kind of resolveSnapshotKinds(
+          args,
+          split,
+          existingManifest
+        )) {
+          const key = snapshotResultKey(split, kind);
+          log(`snapshots: ${key} [${variant}]`);
+          const snapshots = await loadCommittedSnapshots(split, kind);
+          const evaluated = await evalLlmSnapshots(
+            snapshots,
+            turnOptions,
+            llmPolicyIdForVariant(variant)
+          );
+          snapshotResults[key] = evaluated;
+          snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+        }
       }
     }
 
@@ -895,6 +948,16 @@ async function runLlmMode(
         snapshots: args.snapshots ? snapshotResults : undefined
       })
     );
+    if (args.snapshots) {
+      for (const [split, snap] of Object.entries(snapshotResults)) {
+        log(formatSnapshotDecisionsDigest(`${variant}/${split}`, snap));
+        const mismatch = promptVersionMismatchMessage(variant, snap.decisions);
+        if (mismatch !== null) {
+          error(mismatch);
+          return 2;
+        }
+      }
+    }
     for (const [split, delta] of Object.entries(baselineDelta)) {
       log(
         `vs greedy heldout baseline [${variant}/${split}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)}`
@@ -918,11 +981,17 @@ async function runLlmMode(
     const patch: FixtureManifest = { version: 1, splits: {} };
     for (const split of splitsFor(args.suite)) {
       const selected = selectedBySplit[split] ?? [];
+      const kinds = resolveSnapshotKinds(args, split, existingManifest);
+      const primaryKind: SnapshotSuiteKind =
+        kinds.includes("pivotal") && !kinds.includes("standard")
+          ? "pivotal"
+          : kinds[0] ?? "standard";
       patch.splits[split] = {
         scenarioIds: selected.map((s) => s.id),
         snapshots: args.snapshots,
         providers: [...providerKeys].sort(),
-        variants: manifestVariantsFor(variants)
+        variants: manifestVariantsFor(variants),
+        snapshotSuite: primaryKind
       };
     }
     const merged = mergeManifest(existingManifest, patch);
@@ -1028,7 +1097,8 @@ export async function computeBaselineReport(
     writeReport: false,
     snapshots: true,
     allSeeds: false,
-    forceQuota: false
+    forceQuota: false,
+    snapshotSuite: "standard"
   });
 }
 

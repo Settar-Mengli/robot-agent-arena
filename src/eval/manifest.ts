@@ -14,6 +14,8 @@ export type ManifestSplit = {
   providers: string[];
   /** Optional; absent = legacy base-only replay. */
   variants?: ManifestVariant[];
+  /** Which snapshot suite was evaluated; absent = standard. */
+  snapshotSuite?: "standard" | "pivotal";
 };
 
 export type FixtureManifest = {
@@ -62,11 +64,13 @@ export function mergeManifest(
     const left = a ?? emptySplit();
     const right = b ?? emptySplit();
     const variants = mergeVariants(left.variants, right.variants);
+    const snapshotSuite = right.snapshotSuite ?? left.snapshotSuite;
     splits[split] = {
       scenarioIds: sortUnique([...left.scenarioIds, ...right.scenarioIds]),
       snapshots: left.snapshots || right.snapshots,
       providers: sortUnique([...left.providers, ...right.providers]),
-      ...(variants !== undefined ? { variants } : {})
+      ...(variants !== undefined ? { variants } : {}),
+      ...(snapshotSuite !== undefined ? { snapshotSuite } : {})
     };
   }
   return { version: 1, splits };

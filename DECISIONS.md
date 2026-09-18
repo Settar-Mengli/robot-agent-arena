@@ -436,3 +436,20 @@ Fixture keys hash messages. Changing the default prompt would break CI. Ablation
 
 Consequences:
 M-TOOLS code is in; ablation **numbers** land in EVAL.md only after a local `eval:record` with `--variants`. Next batch is M-BENCH.
+
+## D-028 Snapshot stakes
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+- Snapshot suites used to **compare policies** must sample by **decision stakes** (oracle value spread = best − worst), not merely by non-flatness.
+- A suite whose **maxRegret is near zero** (standard held-out: maxRegret ≈ 1.0) cannot discriminate between policies — the first M-TOOLS ablation’s Δ0.0pp on standard suites is therefore **inconclusive**, not a negative result for grounding.
+- **Standard** suites (`snapshots.dev.json` / `snapshots.heldout.json`) are retained for fixture keys and CI keyless replay stability.
+- **Pivotal** suites (`snapshots.pivotal.{dev,heldout}.json`) select exact non-flat points with spread ≥ `PIVOTAL_MIN_SPREAD` (100), ranked by spread; they are the measurement set for ablations (`--snapshot-suite pivotal`).
+- This **supersedes** the snapshot-reselection item parked in D-026 for the purpose of ablation measurement (seed-spread correlation remains parked).
+
+Rationale:
+Discrimination shows ~75 points of win-rate headroom above greedy from rare catastrophic decisions (max spread ~2007). Measuring grounding on near-zero-stakes points cannot detect whether facts help on the decisions that matter.
+
+Consequences:
+Re-run M-TOOLS ablation with `--snapshot-suite pivotal`. Per-decision snapshot results + prompt-version guard keep future ablations auditable. Next batch remains M-BENCH after that re-run.
