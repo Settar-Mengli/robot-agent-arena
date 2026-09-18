@@ -86,7 +86,7 @@ describe("adversarial snapshot selection", () => {
     const candidates = [
       fakeCandidate("s1__t1", 150),
       fakeCandidate("s2__t1", 200),
-      fakeCandidate("s3__t1", 50)
+      fakeCandidate("s3__t1", 0)
     ];
     const selected = selectAdversarialSnapshots(candidates);
     expect(selected.count).toBe(2);
