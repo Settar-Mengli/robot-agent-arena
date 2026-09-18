@@ -1,0 +1,24 @@
+{
+  "asOf": "2026-03-20",
+  "note": "Informational only. Unlisted provider:model → null cost (never invent). Free-tier known models use 0; quota still binds.",
+  "entries": {
+    "gemini:gemini-3.5-flash-lite": {
+      "promptPer1M": 0,
+      "completionPer1M": 0,
+      "source": "google-ai-studio-free-tier",
+      "freeTier": true
+    },
+    "groq:llama-3.3-70b-versatile": {
+      "promptPer1M": 0,
+      "completionPer1M": 0,
+      "source": "groq-free-tier",
+      "freeTier": true
+    },
+    "mistral:mistral-small-latest": {
+      "promptPer1M": 0,
+      "completionPer1M": 0,
+      "source": "mistral-free-tier",
+      "freeTier": true
+    }
+  }
+}

@@ -2,6 +2,12 @@ import { createGreedySelector, playAgentTurn } from "../agent";
 import type { DecisionTrace, PlayAgentTurnOptions } from "../agent";
 import type { SkillId } from "../engine";
 import {
+  computeConsistencyMetrics,
+  consistencySampleForSnapshot,
+  type ConsistencyMetrics,
+  type ConsistencySample
+} from "./bench";
+import {
   metricsForChosenMoves,
   randomPolicyExpectation,
   type SnapshotPolicyMetrics
@@ -194,36 +200,64 @@ export function evalGreedySnapshots(
 export async function evalLlmSnapshots(
   snapshots: readonly DecisionSnapshot[],
   options: PlayAgentTurnOptions = {},
-  policyId = "llm"
-): Promise<SnapshotEvalResult> {
+  policyId = "llm",
+  consistencyOptions: {
+    consistency?: number;
+    setRepeat?: (n: number) => void;
+  } = {}
+): Promise<SnapshotEvalResult & { consistency?: ConsistencyMetrics }> {
+  const consistencyN = Math.max(1, consistencyOptions.consistency ?? 1);
   const chosen: SkillId[] = [];
   const invalidFlags: boolean[] = [];
   const decisions: SnapshotDecisionRecord[] = [];
+  const consistencySamples: ConsistencySample[] = [];
 
   for (const snap of snapshots) {
-    const { step, trace } = await playAgentTurn(
-      snap.runtime,
-      snap.playerSkillId,
-      options
-    );
-    const executed =
-      trace.executedSkillId ??
-      step.turnRecord.actions.find((a) => a.actor === "cpu")
-        ?.selectedSkillId ??
-      snap.runtime.session.cpu.skillIds[0]!;
+    const picks: SkillId[] = [];
+    let primaryTrace: Awaited<ReturnType<typeof playAgentTurn>> | undefined;
+
+    for (let i = 0; i < consistencyN; i += 1) {
+      consistencyOptions.setRepeat?.(i);
+      const result = await playAgentTurn(
+        snap.runtime,
+        snap.playerSkillId,
+        options
+      );
+      const executed =
+        result.trace.executedSkillId ??
+        result.step.turnRecord.actions.find((a) => a.actor === "cpu")
+          ?.selectedSkillId ??
+        snap.runtime.session.cpu.skillIds[0]!;
+      picks.push(executed);
+      if (i === 0) {
+        primaryTrace = result;
+      }
+    }
+
+    consistencyOptions.setRepeat?.(0);
+
+    const { trace } = primaryTrace!;
+    const executed = picks[0]!;
     chosen.push(executed);
     invalidFlags.push(
       trace.source === "fallback" ||
         (trace.validation !== undefined && !trace.validation.ok)
     );
     decisions.push(decisionFromTrace(snap, executed, trace));
+    if (consistencyN > 1) {
+      consistencySamples.push(consistencySampleForSnapshot(snap, picks));
+    }
   }
 
-  return {
+  const result: SnapshotEvalResult & { consistency?: ConsistencyMetrics } = {
     policyId,
     metrics: metricsForChosenMoves(snapshots, chosen, { invalidFlags }),
     decisions
   };
+  if (consistencyN > 1) {
+    result.consistency = computeConsistencyMetrics(consistencySamples);
+  }
+  return result;
 }
 
 export function distinctPromptVersions(

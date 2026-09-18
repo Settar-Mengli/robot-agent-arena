@@ -188,6 +188,27 @@ export {
   KNOWN_PROVIDERS,
   parseModelsFlag,
   pinnedInferenceEnv,
-  pinMismatchMessage
+  pinMismatchMessage,
+  loadPricing,
+  lookupCostUsd,
+  pricingKey,
+  projectBenchQuotaCalls,
+  assertBenchQuotaWithinCap,
+  buildFailureTaxonomy,
+  computeConsistencyMetrics,
+  consistencySampleForSnapshot,
+  aggregateLiveLatencies,
+  buildBenchRow
 } from "./bench";
-export type { KnownProvider, ModelPin } from "./bench";
+export type {
+  KnownProvider,
+  ModelPin,
+  PricingEntry,
+  PricingTable,
+  FailureTaxonomy,
+  ConsistencySample,
+  ConsistencyMetrics,
+  BenchLatency,
+  BenchRow,
+  BenchRowKey
+} from "./bench";

@@ -7,8 +7,6 @@ import {
   greedyCpuPolicy,
   llmCpuPolicy,
   parseVariantsList,
-  projectQuotaCalls,
-  assertQuotaWithinCap,
   llmPolicyIdForVariant,
   variantToPlayOptions,
   randomCpuPolicy,
@@ -68,8 +66,11 @@ import {
   parseModelsFlag,
   pinnedInferenceEnv,
   pinMismatchMessage,
+  projectBenchQuotaCalls,
+  assertBenchQuotaWithinCap,
   type ModelPin
 } from "./bench";
+import type { RepeatAwareFetch } from "./transport";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -92,6 +93,7 @@ type CliArgs = {
   snapshotSuite: "standard" | "pivotal" | "adversarial" | "both" | "all";
   modelsRaw?: string;
   models?: ModelPin[];
+  consistency: number;
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -146,7 +148,8 @@ function parseArgs(argv: string[]): CliArgs {
     snapshots: true,
     allSeeds: false,
     forceQuota: false,
-    snapshotSuite: "standard"
+    snapshotSuite: "standard",
+    consistency: 1
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -207,6 +210,13 @@ function parseArgs(argv: string[]): CliArgs {
     } else if (flag === "--models" && next) {
       args.modelsRaw = next;
       args.models = parseModelsFlag(next);
+      i += 1;
+    } else if (flag === "--consistency" && next) {
+      const n = Number(next);
+      if (!Number.isFinite(n) || n < 1 || !Number.isInteger(n)) {
+        throw new Error(`--consistency must be an integer >= 1, got ${next}`);
+      }
+      args.consistency = n;
       i += 1;
     }
   }
@@ -918,18 +928,25 @@ async function runLlmMode(
   }
 
   if (args.mode === "record" || args.mode === "live") {
-    const projected = projectQuotaCalls(
+    const modelCount = Math.max(1, args.models?.length ?? 1);
+    const snapsPerVariant = Math.round(
+      totalSnapshotCount / Math.max(1, variants.length)
+    );
+    const matchesPerVariant = Math.round(
+      totalMatchCount / Math.max(1, variants.length)
+    );
+    const projected = projectBenchQuotaCalls(
+      modelCount,
       variants.length,
-      // snapshot count was multiplied by variants above; undo for projection
-      // which already multiplies by variantCount
-      Math.round(totalSnapshotCount / Math.max(1, variants.length)),
-      Math.round(totalMatchCount / Math.max(1, variants.length))
+      snapsPerVariant,
+      matchesPerVariant,
+      args.consistency
     );
     log(
-      `quota projection: variants=${variants.length} snapshots=${Math.round(totalSnapshotCount / Math.max(1, variants.length))} matches=${Math.round(totalMatchCount / Math.max(1, variants.length))} × ~17 → ${projected} calls (cap 300)`
+      `quota projection: models=${modelCount} variants=${variants.length} snapshots=${snapsPerVariant} matches=${matchesPerVariant} × ~17 × consistency=${args.consistency} → ${projected} calls (cap 300)`
     );
     try {
-      assertQuotaWithinCap(projected, args.forceQuota);
+      assertBenchQuotaWithinCap(projected, args.forceQuota);
     } catch (err) {
       error(err instanceof Error ? err.message : String(err));
       return 1;
@@ -1011,10 +1028,18 @@ async function runLlmMode(
               random: evalRandomSnapshots(snapshots)
             };
           }
+          const setRepeat =
+            typeof (fetchImpl as RepeatAwareFetch).setRepeat === "function"
+              ? (n: number) => (fetchImpl as RepeatAwareFetch).setRepeat(n)
+              : undefined;
           const evaluated = await evalLlmSnapshots(
             snapshots,
             turnOptions,
-            llmPolicyIdForVariant(variant)
+            llmPolicyIdForVariant(variant),
+            {
+              consistency: args.consistency,
+              ...(setRepeat !== undefined ? { setRepeat } : {})
+            }
           );
           snapshotResults[key] = evaluated;
           snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
@@ -1286,7 +1311,8 @@ export async function computeBaselineReport(
     snapshots: true,
     allSeeds: false,
     forceQuota: false,
-    snapshotSuite: "standard"
+    snapshotSuite: "standard",
+    consistency: 1
   });
 }
 
