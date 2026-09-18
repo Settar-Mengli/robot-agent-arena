@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `feat/m-tools` (PR open); base `main` @ `06fa1b9`
-- Current state: **M-TOOLS implemented** (grounding + memory + variant ablation harness). Default prompt remains `agent-v1` (fixtures/CI green). Ablation **results pending** local record. D-027 grounding contract recorded. Next: **M-BENCH**.
-- Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all`
-- Working tree: `feat/m-tools`
+- Branch: `feat/eval-pivotal-snapshots` (PR open); base `main` @ `63ec7d4`
+- Current state: M-TOOLS code on main. First ablation on standard suites **inconclusive** (Δ0.0pp). Pivotal suites + auditable snapshot decisions (D-028) in this PR. Ablation **re-run pending** on `--snapshot-suite pivotal`. Next after that: **M-BENCH**.
+- Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all` (standard suites)
+- Working tree: `feat/eval-pivotal-snapshots`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -36,21 +36,21 @@
 - M-AGENT (PR #9): `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
 - M-EVAL (PR #10): eval harness, snapshot suites, fixtures, EVAL.md baseline, D-023.
 - Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
-- M-TOOLS (this PR): grounding parity, memory, opt-in prompt variants, ablation quota harness; D-027.
+- M-TOOLS (PR #16): grounding, memory, opt-in variants, ablation harness; D-027.
 
 ## Current Work
-- Docs: grounding contract + ablation protocol (results empty pending operator record).
+- Pivotal snapshot suites + auditable decisions + D-028 docs.
 
 ## Blockers
-- None. Ablation numbers require a local keyed `eval:record` (not available to the agent).
+- None. Pivotal ablation numbers require a local keyed `eval:record --snapshot-suite pivotal`.
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
-- D-026 parked items (seed-spread / snapshot reselection) until a future suite regeneration.
+- D-026 seed-spread remains parked.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/m-tools`.
+- See `git status` / PR diff on `feat/eval-pivotal-snapshots`.
 
 ## Exact Next Step
-Operator runs `npm run eval:record -- --suite heldout --variants base,grounded` and pastes results into EVAL.md Ablation section. Then **M-BENCH**. UI remains deferred.
+Operator runs `npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite pivotal` and pastes results into EVAL.md. Then **M-BENCH**. UI remains deferred.

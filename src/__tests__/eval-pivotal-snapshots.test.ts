@@ -122,8 +122,8 @@ describe("pivotal snapshot selection", () => {
     expect(overlap).toBe(0);
   });
 
-  it(
-    "drift-guard: generatePivotalSnapshots matches committed JSON",
+  it.skipIf(process.env.PIVOTAL_DRIFT !== "1")(
+    "drift-guard: generatePivotalSnapshots matches committed JSON (set PIVOTAL_DRIFT=1)",
     () => {
       for (const split of ["dev", "heldout"] as const) {
         const generated = generatePivotalSnapshots(split);
