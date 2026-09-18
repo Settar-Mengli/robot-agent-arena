@@ -8,6 +8,16 @@ export {
   LOW_HEALTH_RATIO,
   createGreedySelector
 } from "./baselines/greedy";
+export {
+  computeGroundedFacts,
+  damageAfterDefense,
+  projectSkillEffects
+} from "./grounding";
+export type {
+  GroundedFacts,
+  GroundedSkillFact,
+  GroundedThreatSkillFact
+} from "./grounding";
 export type {
   AgentFallbackReason,
   AgentInferenceOptions,
