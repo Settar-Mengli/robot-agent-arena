@@ -55,19 +55,28 @@ export type {
 } from "./oracle";
 
 export {
+  countRegretTail,
   countStakeTail,
+  generateAdversarialSnapshots,
   generatePivotalSnapshots,
   generateSnapshots,
+  selectAdversarialSnapshots,
   selectPivotalSnapshots,
   valueSpread,
+  ADVERSARIAL_MIN_REGRET,
+  ADVERSARIAL_TARGET_COUNT,
+  ADVERSARIAL_REGRET_TAIL_THRESHOLDS,
   PIVOTAL_MIN_SPREAD,
   PIVOTAL_TARGET_COUNT,
   STAKE_TAIL_THRESHOLDS
 } from "./snapshots";
 export type {
+  AdversarialDecisionSnapshot,
+  AdversarialSnapshotSuite,
   DecisionSnapshot,
   PivotalDecisionSnapshot,
   PivotalSnapshotSuite,
+  RegretTailCounts,
   SnapshotSuite,
   StakeTailCounts
 } from "./snapshots";
