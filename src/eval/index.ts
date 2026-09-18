@@ -171,6 +171,7 @@ export {
 } from "./manifest";
 export type {
   FixtureManifest,
+  ManifestModelEntry,
   ManifestSplit,
   ManifestVariant,
   ManifestVariantEntry
@@ -182,3 +183,11 @@ export {
   scenarioMatchFixturesPresent
 } from "./fixture-presence";
 export type { HostModelPair } from "./fixture-presence";
+
+export {
+  KNOWN_PROVIDERS,
+  parseModelsFlag,
+  pinnedInferenceEnv,
+  pinMismatchMessage
+} from "./bench";
+export type { KnownProvider, ModelPin } from "./bench";

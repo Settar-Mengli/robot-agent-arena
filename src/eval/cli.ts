@@ -64,6 +64,12 @@ import {
   runDiscriminationReport,
   summarizeDiscriminationReport
 } from "./discriminate";
+import {
+  parseModelsFlag,
+  pinnedInferenceEnv,
+  pinMismatchMessage,
+  type ModelPin
+} from "./bench";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -84,6 +90,8 @@ type CliArgs = {
   variantsRaw?: string;
   forceQuota: boolean;
   snapshotSuite: "standard" | "pivotal" | "adversarial" | "both" | "all";
+  modelsRaw?: string;
+  models?: ModelPin[];
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -195,6 +203,10 @@ function parseArgs(argv: string[]): CliArgs {
         );
       }
       args.snapshotSuite = next;
+      i += 1;
+    } else if (flag === "--models" && next) {
+      args.modelsRaw = next;
+      args.models = parseModelsFlag(next);
       i += 1;
     }
   }
@@ -706,11 +718,18 @@ async function runLlmMode(
   const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
   let env: EnvMap = deps.env ?? process.env;
 
+  // Commit 2: pin to first --models entry for record/live/replay.
+  // Multi-model looping lands in --mode bench (commit 4).
+  const activePin: ModelPin | undefined =
+    args.models !== undefined && args.models.length > 0
+      ? args.models[0]
+      : undefined;
+
   if (args.mode === "replay" && deps.env === undefined) {
     try {
       const derived = await deriveReplayEnvFromFixtures(
         fixturesDir,
-        args.replayProvider
+        activePin?.provider ?? args.replayProvider
       );
       env = { ...process.env, ...derived.env };
       log(
@@ -731,6 +750,13 @@ async function runLlmMode(
       `Providers: ${providers.map((p) => `${p.name}/${p.model}`).join(", ")}`
     );
     log("Quota warning: free-tier providers may rate-limit or drop requests.");
+  }
+
+  if (activePin !== undefined) {
+    env = pinnedInferenceEnv(env, activePin);
+    log(
+      `pinned model: ${activePin.provider}/${activePin.model} (maxProviders=1)`
+    );
   }
 
   const store = deps.store ?? createDirStore(fixturesDir);
@@ -758,7 +784,8 @@ async function runLlmMode(
   const inference = {
     fetch: fetchImpl,
     temperature: 0 as const,
-    env
+    env,
+    ...(activePin !== undefined ? { maxProviders: 1 as const } : {})
   };
 
   const baseTurnOptions = {
@@ -830,7 +857,7 @@ async function runLlmMode(
         existingManifest?.splits[split] !== undefined
       ) {
         const entry = existingManifest.splits[split]!;
-        const resolved = resolveVariantRun(entry, variant);
+        const resolved = resolveVariantRun(entry, variant, activePin);
         assertScenarioIdsInSuite(split, resolved.scenarioIds);
         scenarios = selectScenariosByIds(suite, resolved.scenarioIds);
         if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
@@ -866,7 +893,7 @@ async function runLlmMode(
         const entry = existingManifest?.splits[split];
         const resolved =
           args.mode === "replay" && entry !== undefined
-            ? resolveVariantRun(entry, variant)
+            ? resolveVariantRun(entry, variant, activePin)
             : {
                 snapshots: true,
                 snapshotSuite: args.snapshotSuite as
@@ -964,7 +991,7 @@ async function runLlmMode(
         const entry = existingManifest?.splits[split];
         const resolved =
           args.mode === "replay" && entry !== undefined
-            ? resolveVariantRun(entry, variant)
+            ? resolveVariantRun(entry, variant, activePin)
             : { snapshots: true as boolean };
         if (args.mode === "replay" && resolved.snapshots === false) {
           log(`snapshots: ${split} skipped (variant.snapshots=false)`);
@@ -1047,6 +1074,35 @@ async function runLlmMode(
         if (mismatch !== null) {
           error(mismatch);
           return 2;
+        }
+        if (activePin !== undefined) {
+          for (const decision of snap.decisions) {
+            const pinMsg = pinMismatchMessage(
+              activePin,
+              decision.provider,
+              decision.model
+            );
+            if (pinMsg !== null) {
+              error(pinMsg);
+              return 2;
+            }
+          }
+        }
+      }
+    }
+    if (activePin !== undefined) {
+      for (const result of variantResults) {
+        for (const turn of result.turns) {
+          const trace = turn.trace;
+          const pinMsg = pinMismatchMessage(
+            activePin,
+            trace?.provider,
+            trace?.model
+          );
+          if (pinMsg !== null) {
+            error(pinMsg);
+            return 2;
+          }
         }
       }
     }

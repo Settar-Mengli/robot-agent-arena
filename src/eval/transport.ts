@@ -35,18 +35,35 @@ export type RecordingFetchStats = {
   liveLatenciesMs: number[];
 };
 
-export type RecordingFetch = typeof fetch & {
-  stats: () => RecordingFetchStats;
+export type RepeatAwareFetch = typeof fetch & {
+  setRepeat: (n: number) => void;
 };
 
-export function fixtureKey(url: string, body: Record<string, unknown>): string {
-  const payload = {
+export type RecordingFetch = typeof fetch & {
+  stats: () => RecordingFetchStats;
+  setRepeat: (n: number) => void;
+};
+
+/**
+ * Hash host+model+messages+response_format+temperature.
+ * Include `repeat` in the payload only when (repeat ?? 0) !== 0 so
+ * repeat 0 stays byte-identical to legacy keys.
+ */
+export function fixtureKey(
+  url: string,
+  body: Record<string, unknown>,
+  repeat?: number
+): string {
+  const payload: Record<string, unknown> = {
     host: new URL(url).host,
     model: body.model,
     messages: body.messages,
     response_format: body.response_format,
     temperature: body.temperature
   };
+  if ((repeat ?? 0) !== 0) {
+    payload.repeat = repeat;
+  }
   return createHash("sha256")
     .update(JSON.stringify(payload))
     .digest("hex");
@@ -72,20 +89,27 @@ function jsonResponse(status: number, body: unknown): Response {
   });
 }
 
-export function createReplayFetch(store: FixtureStore): typeof fetch {
-  return async (input, init) => {
+export function createReplayFetch(store: FixtureStore): RepeatAwareFetch {
+  let repeatSlot = 0;
+  const fetchImpl: typeof fetch = async (input, init) => {
     const url = String(input);
     const rawBody =
       init?.body === undefined
         ? {}
         : (JSON.parse(String(init.body)) as Record<string, unknown>);
-    const key = fixtureKey(url, rawBody);
+    const key = fixtureKey(url, rawBody, repeatSlot);
     const hit = await store.read(key);
     if (hit === undefined) {
       return jsonResponse(599, { error: "fixture_miss", key });
     }
     return jsonResponse(200, hit.response);
   };
+
+  return Object.assign(fetchImpl, {
+    setRepeat: (n: number): void => {
+      repeatSlot = n;
+    }
+  });
 }
 
 export function createRecordingFetch(
@@ -100,6 +124,7 @@ export function createRecordingFetch(
     skippedNon2xx: 0,
     liveLatenciesMs: []
   };
+  let repeatSlot = 0;
 
   const fetchImpl: typeof fetch = async (input, init) => {
     const url = String(input);
@@ -107,7 +132,7 @@ export function createRecordingFetch(
       init?.body === undefined
         ? {}
         : (JSON.parse(String(init.body)) as Record<string, unknown>);
-    const key = fixtureKey(url, rawBody);
+    const key = fixtureKey(url, rawBody, repeatSlot);
 
     if (!force) {
       const cached = await store.read(key);
@@ -146,6 +171,9 @@ export function createRecordingFetch(
       recorded: counters.recorded,
       skippedNon2xx: counters.skippedNon2xx,
       liveLatenciesMs: [...counters.liveLatenciesMs]
-    })
+    }),
+    setRepeat: (n: number): void => {
+      repeatSlot = n;
+    }
   });
 }

@@ -205,4 +205,89 @@ describe("recorded LLM transport", () => {
     expect(recording.stats().recorded).toBe(0);
     expect(recording.stats().liveLatenciesMs).toHaveLength(1);
   });
+
+  it("repeat 0 / absent ≡ legacy key; repeat 1 differs", () => {
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+    const body = {
+      model: "m",
+      messages: [{ role: "user", content: "a" }],
+      temperature: 0,
+      response_format: { type: "json_object" }
+    };
+    const legacy = fixtureKey(url, body);
+    expect(fixtureKey(url, body, 0)).toBe(legacy);
+    expect(fixtureKey(url, body, undefined)).toBe(legacy);
+    expect(fixtureKey(url, body, 1)).not.toBe(legacy);
+  });
+
+  it("reconstructs committed fixture key at repeat 0", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const key =
+      "037aafcc80c818a19572015c4519d7ea8b755a29e72d8d15ba46b2b94371d277";
+    const record = JSON.parse(
+      await readFile(join("evals/fixtures", `${key}.json`), "utf8")
+    ) as {
+      key: string;
+      request: { host: string; model: string; messages: unknown };
+    };
+    const url = `https://${record.request.host}/v1beta/openai/chat/completions`;
+    const body = {
+      model: record.request.model,
+      messages: record.request.messages,
+      temperature: 0,
+      response_format: { type: "json_object" }
+    };
+    expect(fixtureKey(url, body, 0)).toBe(record.key);
+    expect(fixtureKey(url, body, 1)).not.toBe(record.key);
+  });
+
+  it("cache hit/miss is per-repeat; recording stores separate entries", async () => {
+    const store = createMemoryStore();
+    const realFetch = vi
+      .fn()
+      .mockResolvedValueOnce(openaiOk("skill-override-pulse"))
+      .mockResolvedValueOnce(openaiOk("skill-null-pulse"));
+    const recording = createRecordingFetch(realFetch, store);
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+    const init = {
+      method: "POST",
+      body: JSON.stringify({
+        model: "m",
+        messages: [{ role: "user", content: "repeat-body" }],
+        temperature: 0
+      })
+    };
+
+    recording.setRepeat(0);
+    await recording(url, init);
+    recording.setRepeat(1);
+    await recording(url, init);
+
+    expect(realFetch).toHaveBeenCalledTimes(2);
+    expect(store.map.size).toBe(2);
+    expect(recording.stats().recorded).toBe(2);
+
+    const replay = createReplayFetch(store);
+    replay.setRepeat(0);
+    const r0 = (await (await replay(url, init)).json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    expect(r0.choices[0]!.message.content).toContain("skill-override-pulse");
+
+    replay.setRepeat(1);
+    const r1 = (await (await replay(url, init)).json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    expect(r1.choices[0]!.message.content).toContain("skill-null-pulse");
+
+    // realFetch never sees repeat — only body fields
+    for (const call of realFetch.mock.calls) {
+      const body = JSON.parse(String(call[1]?.body)) as Record<string, unknown>;
+      expect(body.repeat).toBeUndefined();
+      expect(Object.keys(body).sort()).toEqual(
+        ["messages", "model", "temperature"].sort()
+      );
+    }
+  });
 });

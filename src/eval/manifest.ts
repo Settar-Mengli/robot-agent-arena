@@ -5,12 +5,22 @@ import type { LlmVariant } from "./policies";
 import { isLlmVariant, variantPromptVersion } from "./policies";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
 
+export type ManifestModelEntry = {
+  provider: string;
+  model: string;
+  scenarioIds: string[];
+  snapshots?: boolean;
+  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+};
+
 export type ManifestVariantEntry = {
   id: LlmVariant;
   promptVersion: string;
   scenarioIds: string[];
   snapshots: boolean;
   snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  /** Optional per-model scenario lists; absent = use variant-level scenarioIds. */
+  models?: ManifestModelEntry[];
 };
 
 /** @deprecated Use ManifestVariantEntry. */
@@ -43,6 +53,59 @@ function sortUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
+function modelKey(provider: string, model: string): string {
+  return `${provider}|${model}`;
+}
+
+function normalizeModelEntry(entry: ManifestModelEntry): ManifestModelEntry {
+  return {
+    provider: entry.provider,
+    model: entry.model,
+    scenarioIds: Array.isArray(entry.scenarioIds)
+      ? sortUnique(entry.scenarioIds)
+      : [],
+    ...(entry.snapshots !== undefined ? { snapshots: entry.snapshots } : {}),
+    ...(entry.snapshotSuite !== undefined
+      ? { snapshotSuite: entry.snapshotSuite }
+      : {})
+  };
+}
+
+function mergeModels(
+  left: readonly ManifestModelEntry[] | undefined,
+  right: readonly ManifestModelEntry[] | undefined
+): ManifestModelEntry[] | undefined {
+  if (left === undefined && right === undefined) {
+    return undefined;
+  }
+  const byKey = new Map<string, ManifestModelEntry>();
+  for (const raw of [...(left ?? []), ...(right ?? [])]) {
+    const entry = normalizeModelEntry(raw);
+    const key = modelKey(entry.provider, entry.model);
+    const prev = byKey.get(key);
+    if (prev === undefined) {
+      byKey.set(key, entry);
+      continue;
+    }
+    byKey.set(key, {
+      provider: entry.provider,
+      model: entry.model,
+      scenarioIds: sortUnique([...prev.scenarioIds, ...entry.scenarioIds]),
+      ...(entry.snapshots !== undefined || prev.snapshots !== undefined
+        ? { snapshots: entry.snapshots ?? prev.snapshots }
+        : {}),
+      ...(entry.snapshotSuite !== undefined || prev.snapshotSuite !== undefined
+        ? { snapshotSuite: entry.snapshotSuite ?? prev.snapshotSuite }
+        : {})
+    });
+  }
+  return [...byKey.values()].sort((a, b) => {
+    const ka = modelKey(a.provider, a.model);
+    const kb = modelKey(b.provider, b.model);
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+}
+
 function normalizeVariantEntry(
   entry: ManifestVariantEntry | { id: LlmVariant; promptVersion: string }
 ): ManifestVariantEntry {
@@ -56,6 +119,9 @@ function normalizeVariantEntry(
     snapshots: withIds.snapshots === true,
     ...(withIds.snapshotSuite !== undefined
       ? { snapshotSuite: withIds.snapshotSuite }
+      : {}),
+    ...(withIds.models !== undefined
+      ? { models: mergeModels(undefined, withIds.models) }
       : {})
   };
 }
@@ -79,6 +145,7 @@ function mergeVariants(
       byId.set(entry.id, entry);
       continue;
     }
+    const models = mergeModels(prev.models, entry.models);
     byId.set(entry.id, {
       id: entry.id,
       promptVersion: entry.promptVersion || prev.promptVersion,
@@ -88,7 +155,8 @@ function mergeVariants(
         ? {
             snapshotSuite: entry.snapshotSuite ?? prev.snapshotSuite
           }
-        : {})
+        : {}),
+      ...(models !== undefined ? { models } : {})
     });
   }
   return [...byId.values()].sort((a, b) =>
@@ -205,15 +273,22 @@ export function variantsFromManifestSplit(
   return ids;
 }
 
+export type ResolveVariantPin = {
+  provider: string;
+  model: string;
+};
+
 /**
  * Resolve which scenarioIds / snapshot flags to use for a variant on a split.
  * - Legacy (no variants[]): split-level scenarioIds.
  * - Modern (variants[] present): only that variant's scenarioIds; absent
  *   variant → empty list (do not inherit another variant's matches).
+ * - With pin + models[]: select that model's scenarioIds when present.
  */
 export function resolveVariantRun(
   split: ManifestSplit | undefined,
-  variantId: LlmVariant
+  variantId: LlmVariant,
+  pin?: ResolveVariantPin
 ): {
   scenarioIds: string[];
   snapshots: boolean;
@@ -237,12 +312,30 @@ export function resolveVariantRun(
         promptVersion: variantPromptVersion(variantId)
       };
     }
+
+    let scenarioIds = entry.scenarioIds ?? [];
+    let snapshots = entry.snapshots ?? split.snapshots;
+    let snapshotSuite = entry.snapshotSuite ?? split.snapshotSuite;
+
+    if (pin !== undefined && entry.models !== undefined && entry.models.length > 0) {
+      const modelEntry = entry.models.find(
+        (m) => m.provider === pin.provider && m.model === pin.model
+      );
+      if (modelEntry !== undefined) {
+        scenarioIds = modelEntry.scenarioIds;
+        if (modelEntry.snapshots !== undefined) {
+          snapshots = modelEntry.snapshots;
+        }
+        if (modelEntry.snapshotSuite !== undefined) {
+          snapshotSuite = modelEntry.snapshotSuite;
+        }
+      }
+    }
+
     return {
-      scenarioIds: entry.scenarioIds ?? [],
-      snapshots: entry.snapshots ?? split.snapshots,
-      ...(entry.snapshotSuite !== undefined || split.snapshotSuite !== undefined
-        ? { snapshotSuite: entry.snapshotSuite ?? split.snapshotSuite }
-        : {}),
+      scenarioIds,
+      snapshots,
+      ...(snapshotSuite !== undefined ? { snapshotSuite } : {}),
       promptVersion: entry.promptVersion || variantPromptVersion(variantId)
     };
   }
