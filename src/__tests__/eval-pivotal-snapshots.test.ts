@@ -152,4 +152,37 @@ describe("pivotal baselines (informational invariants)", () => {
       expect(Number.isFinite(random.metrics.meanRegret)).toBe(true);
     }
   });
+
+  it("committed pivotal suites pin spread min/median/max (even-count median)", () => {
+    // Local copy of metrics.ts medianOf (not exported; fence forbids editing metrics.ts).
+    function medianOf(values: readonly number[]): number {
+      if (values.length === 0) {
+        return 0;
+      }
+      const sorted = [...values].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      if (sorted.length % 2 === 1) {
+        return sorted[mid]!;
+      }
+      return (sorted[mid - 1]! + sorted[mid]!) / 2;
+    }
+
+    const expected: Record<
+      "dev" | "heldout",
+      { min: number; median: number; max: number }
+    > = {
+      // 10×2003 + 10×2001 → even median (2001+2003)/2 = 2002
+      dev: { min: 2001, median: 2002, max: 2003 },
+      heldout: { min: 2002, median: 2007, max: 2008 }
+    };
+
+    for (const split of ["dev", "heldout"] as const) {
+      const suite = loadPivotal(`snapshots.pivotal.${split}.json`);
+      const spreads = suite.snapshots.map((s) => s.spread);
+      const min = Math.min(...spreads);
+      const max = Math.max(...spreads);
+      const median = medianOf(spreads);
+      expect({ min, median, max }).toEqual(expected[split]);
+    }
+  });
 });

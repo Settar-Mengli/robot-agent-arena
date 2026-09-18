@@ -2,6 +2,7 @@
 
 ## Decision Log Format
 Each entry includes ID, date, status, decision, rationale, and consequences.
+Status values: **Accepted** = in force; **Superseded** = replaced by a later decision (see that entry’s amendment); **Falsified** = pre-registered prediction failed (see that entry’s amendment).
 
 ## D-001 Naming Policy
 Date: 2026-06-04  
@@ -187,6 +188,8 @@ Roadmap priority is M-INF → M-AGENT → M-TOOLS → M-EVAL → M-COACH → M-U
 
 Amended (2026-09-17): Milestone order superseded by D-021 (M-EVAL before M-TOOLS).
 
+Pointer: current milestone order is **D-025 as amended** (M-ENV dropped; batch 2 = M-TOOLS; then M-BENCH → M-UI parts → polish) — not the Consequences line above.
+
 ## D-015 AI Strategy Provider Seam
 Date: 2026-09-17  
 Status: Accepted
@@ -250,6 +253,8 @@ Status: Accepted
 Decision:
 LLM non-determinism lives only in move selection. The engine, its tests (~88 today), and replay/resume via `BattleRuntime` / `RngState` stay deterministic. The AI layer must not modify engine combat, outcome, validation, or existing engine tests to “make AI work.”
 
+Pointer: do not use the “~88” figure; the live test count is in PROGRESS.md (Status Snapshot) and the CI coverage run.
+
 Rationale:
 Preserves the tested backbone and save/resume guarantees while still allowing intelligent opponents.
 
@@ -274,7 +279,7 @@ Anti-scope (so this framing does not balloon): this remains a focused sandbox/de
 
 ## D-021 Milestone Order (Eval Before Tools)
 Date: 2026-09-17
-Status: Accepted
+Status: Superseded (see amendment 2026-09-18)
 
 Decision:
 Roadmap priority is M-INF → M-AGENT → M-EVAL → M-TOOLS → M-COACH → M-UI.
@@ -284,6 +289,11 @@ Grounding and memory (M-TOOLS) must be proven by ablation against an eval baseli
 
 Consequences:
 PROGRESS / ROADMAP follow this order. M-AGENT may start a minimal M-EVAL baseline alongside the agent turn; M-TOOLS stays after measurable agent quality exists.
+
+### Amend — 2026-09-18 — Order superseded by D-025
+
+Decision (amend):
+This milestone order is **superseded by D-025** (and D-025’s 2026-09-18 amend). M-ENV was dropped; the remaining plan is Discrimination → M-TOOLS → M-BENCH → M-UI part 1 → M-UI part 2 (coach folded in) → Polish. PROGRESS / ROADMAP follow D-025 as amended, not the Consequences line above.
 
 ## D-022 Agent Turn Contract
 Date: 2026-09-17
@@ -337,7 +347,7 @@ Consequences:
 
 ## D-024 M-TOOLS hypothesis (pre-registered)
 Date: 2026-09-17
-Status: Accepted
+Status: Falsified (see amendment 2026-09-18)
 
 Decision:
 Written **before** building M-TOOLS. Prediction: giving the agent computed grounded facts (affordability, damage-after-defense, lethality, threat) will raise held-out snapshot optimality **above the greedy baseline of 50%** and beat greedy on match outcomes.
@@ -356,6 +366,11 @@ The held-out measurement shows greedy indistinguishable from the LLM mixture on 
 
 Consequences:
 M-TOOLS is next on the spine; EVAL.md is the publication surface for the ablation; no claim of LLM advantage until the falsifier is passed.
+
+### Amend — 2026-09-18 — Falsified (measurement-set honesty)
+
+Decision (amend):
+**Falsified.** The prediction was pre-registered against the **standard** held-out snapshot baseline (greedy 50% / mean regret 0.50). After D-028/D-029, the ablation was executed on the **adversarial** suite (greedy 0% by construction). The qualitative result stands and is published in EVAL.md / D-030: grounding changed **0 of 20** decisions (base ≡ grounded at 5% / mean regret 4.25). The claim that “the pre-registered test was run exactly as written” does **not** stand — the measurement set changed between registration and execution.
 
 ## D-025 Product direction and milestone order
 Date: 2026-09-17
@@ -439,7 +454,7 @@ M-TOOLS code is in; ablation **numbers** land in EVAL.md only after a local `eva
 
 ## D-028 Snapshot stakes
 Date: 2026-09-18
-Status: Accepted
+Status: Superseded (see amendment 2026-09-18)
 
 Decision:
 - Snapshot suites used to **compare policies** must sample by **decision stakes** (oracle value spread = best − worst), not merely by non-flatness.
@@ -454,6 +469,11 @@ Discrimination shows ~75 points of win-rate headroom above greedy from rare cata
 Consequences:
 Re-run M-TOOLS ablation with `--snapshot-suite pivotal`. Per-decision snapshot results + prompt-version guard keep future ablations auditable. Next batch remains M-BENCH after that re-run.
 
+### Amend — 2026-09-18 — Ablation set replaced by D-029
+
+Decision (amend):
+**D-029** replaced pivotal as the ablation measurement set. Pivotal remains a **stakes probe** (high spread; greedy-saturated). Ablations that claim to beat a baseline must use `--snapshot-suite adversarial`. The stakes-sampling rationale above still stands for why standard suites cannot discriminate policies.
+
 ## D-029 Measure where the baseline fails
 Date: 2026-09-18
 Status: Accepted
@@ -465,6 +485,8 @@ Decision:
 - Motivating full-split regret-tail counts (@1 / @100 / @500 / @1000): **dev 39 / 3 / 3 / 3**; **heldout 38 / 1 / 1 / 1**. Selected: dev 3 (regret 2001), heldout 1 (regret 2002). Shortfall vs target 20 is accepted and recorded.
 - **Pivotal** (D-028) is retained as a **stakes probe**, not the ablation set. **Standard** suites remain for fixtures/CI.
 - Committed adversarial runtimes keep `turns` so `memory=match` summaries still work.
+
+Pointer: the `ADVERSARIAL_MIN_REGRET` (100) and selected-count shortfall (dev 3 / heldout 1) in the bullets above are historical; see **Amendment (2026-09-18)** below — min regret is now **1**, both splits fill **n=20**.
 
 Rationale:
 An ablation that only moves scores on points the baseline already solves cannot demonstrate improvement. Selecting by baseline regret makes failure the filter criterion.

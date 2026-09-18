@@ -24,7 +24,8 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Max 20 turns.
 - Seeded RNG (DONE; restore-from-state DONE).
 - Post-match report: explanatory lesson of which design choice caused the result, fictional vocabulary only (PLANNED; coach surfaces in Report later — D-020).
-- **PLANNED:** Grounding/memory tools (M-TOOLS); serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-021). Eval harness (M-EVAL) is **DONE** with measured held-out LLM results in EVAL.md.
+- **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md.
+- **PLANNED:** Serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-025 as amended).
 
 ## Milestones
 
@@ -36,12 +37,13 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - CPU opponent catalog (FRACTURE, SENTINEL-X) — DONE.
 - M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred to M-UI per D-016 amendment).
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
-- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE** (incl. independent held-out split, keyless replay, measured held-out LLM results); next is M-TOOLS.
+- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE** (incl. independent held-out split, keyless replay, measured held-out LLM results).
+- M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030); next is M-BENCH.
 
 ### M5 / M6 (re-sequenced)
 Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**. They land as **M-UI** (and related persistence) after the AI spine below so no UI is thrown away when agents land.
 
-### AI milestone spine (headless-first, D-021)
+### AI milestone spine (headless-first, D-025 as amended)
 
 #### M-INF — Inference layer (client DONE)
 Multi-provider free-tier LLM client: structured output, timeout, retry, provider fallback, external abort + per-attempt hook. Default order in `src/inference/providers.ts`: groq, cloudflare, gemini, mistral, openrouter. Serverless proxy deferred to M-UI (D-016 amendment).
@@ -50,7 +52,7 @@ Multi-provider free-tier LLM client: structured output, timeout, retry, provider
 Battle-state + personality → validated legal move via `playAgentTurn`; plain `stepBattle` seeded picker is fallback (D-015/D-022). Deterministic greedy baseline for evals. Optional `selectCpuSkillId` on `stepBattle`.
 
 #### M-EVAL — Eval harness (signature piece) — DONE
-Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). Held-out LLM still ties greedy on the n=6 sample. Fixture manifest + multi-provider keyless `--suite all` replay.
+Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). On an earlier n=6 FRACTURE sample with **standard** snapshots, held-out LLM tied greedy; the adversarial ablation (M-TOOLS) is the measurement set that separates them. Fixture manifest + multi-provider keyless `--suite all` replay.
 
 #### M-TOOLS — Grounding + memory — DONE (ablation measured; grounding negative)
 Grounding + memory + variant ablation harness (D-027). Standard ablation inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial record: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: report regret distribution with rate (D-031). Memory variants still unmeasured.
@@ -58,11 +60,8 @@ Grounding + memory + variant ablation harness (D-027). Standard ablation inconcl
 #### M-BENCH — Model comparison bench — NEXT
 BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025).
 
-#### M-COACH — Post-battle coach
-LLM post-battle coach: turns the battle log into tailored advice (surfaces in the Report screen in M-UI).
-
 #### M-UI — Minimal functional UI (+ deferred serverless proxy)
-Part 1 Builder+Arena; part 2 Report+coach+bench surfacing (D-025). Serverless inference proxy when the browser needs secret-safe calls.
+Part 1 Builder+Arena; part 2 Report + post-battle coach + bench surfacing (D-025 as amended; coach folded into M-UI part 2). Serverless inference proxy when the browser needs secret-safe calls.
 
 #### Parked (D-026)
 Seed-spread correlation and greedy-suboptimal snapshot reselection — deferred until a future suite regeneration (M-ENV milestone dropped).

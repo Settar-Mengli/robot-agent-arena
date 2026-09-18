@@ -90,12 +90,14 @@ export {
   formatDiscriminationSummary,
   intervalsDisjoint,
   runDiscriminationReport,
+  summarizeDiscriminationReport,
   SPREAD_THRESHOLD
 } from "./discriminate";
 export type {
   DecisionHeadroom,
   DiscriminationReport,
   DiscriminationSplitReport,
+  DiscriminationSummary,
   PolicyMatchSlice
 } from "./discriminate";
 

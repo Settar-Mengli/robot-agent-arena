@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, inference client, agent layer (LLM turn + greedy baseline), and eval harness (M-EVAL) are complete and covered by automated tests. Headless-first per D-014 / D-021: **M-TOOLS is next**; UI (screens, store, React) remains later and is not present in this repository yet.
+**Status today:** the battle engine, inference client, agent layer (LLM turn + greedy baseline), eval harness (M-EVAL), and M-TOOLS grounding ablation are complete and covered by automated tests. Headless-first per D-014 / D-025 as amended: M-TOOLS is done (D-024 falsified; D-030); **M-BENCH is next**; UI (screens, store, React) remains later and is not present in this repository yet.
 
 ## Layered architecture and dependency rule
 
