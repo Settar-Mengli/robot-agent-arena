@@ -32,16 +32,6 @@
         "groq|openai/gpt-oss-20b",
         "openrouter|nvidia/nemotron-3-super-120b-a12b:free"
       ],
-      "variants": [
-        {
-          "id": "base",
-          "promptVersion": "agent-v1"
-        },
-        {
-          "id": "grounded",
-          "promptVersion": "agent-v2-grounded"
-        }
-      ],
       "snapshotSuite": "adversarial"
     }
   }
