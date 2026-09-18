@@ -18,10 +18,11 @@ import { runSuite, type MatchResult } from "./match";
 import {
   aggregateLlm,
   aggregateMatches,
-  deltaVsGreedyHeldoutBaseline,
+  deltaVsSuiteBaseline,
   percentile,
   type MatchAggregate,
-  type SnapshotPolicyMetrics
+  type SnapshotPolicyMetrics,
+  type SuiteBaselineDelta
 } from "./metrics";
 import {
   evalGreedySnapshots,
@@ -812,6 +813,9 @@ async function runLlmMode(
       const entry = existingManifest.splits[split]!;
       assertScenarioIdsInSuite(split, entry.scenarioIds);
       scenarios = selectScenariosByIds(suite, entry.scenarioIds);
+      if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
+        scenarios = selectDiverseScenarios(scenarios, args.maxMatches);
+      }
     } else {
       scenarios = selectScenariosForLlmMode(
         suite,
@@ -866,7 +870,10 @@ async function runLlmMode(
     results: MatchResult[];
     llm: ReturnType<typeof aggregateLlm>;
     snapshots?: Record<string, SnapshotEvalResult>;
-    baselineDelta?: Record<string, ReturnType<typeof deltaVsGreedyHeldoutBaseline>>;
+    baselineDelta?: Record<
+      string,
+      { greedy: SuiteBaselineDelta; random: SuiteBaselineDelta }
+    >;
   };
 
   const byVariant: Record<string, VariantBundle> = {};
@@ -879,6 +886,10 @@ async function runLlmMode(
   }
 
   let snapshotLlm = 0;
+  const suiteBaselines: Record<
+    string,
+    { greedy: SnapshotEvalResult; random: SnapshotEvalResult }
+  > = {};
 
   for (const variant of variants) {
     log(`--- variant: ${variant} (${llmPolicyIdForVariant(variant)}) ---`);
@@ -919,6 +930,12 @@ async function runLlmMode(
           const key = snapshotResultKey(split, kind);
           log(`snapshots: ${key} [${variant}]`);
           const snapshots = await loadCommittedSnapshots(split, kind);
+          if (suiteBaselines[key] === undefined) {
+            suiteBaselines[key] = {
+              greedy: evalGreedySnapshots(snapshots),
+              random: evalRandomSnapshots(snapshots)
+            };
+          }
           const evaluated = await evalLlmSnapshots(
             snapshots,
             turnOptions,
@@ -935,14 +952,26 @@ async function runLlmMode(
     });
     const baselineDelta: Record<
       string,
-      ReturnType<typeof deltaVsGreedyHeldoutBaseline>
+      { greedy: SuiteBaselineDelta; random: SuiteBaselineDelta }
     > = {};
-    for (const [split, snap] of Object.entries(snapshotResults)) {
-      baselineDelta[split] = deltaVsGreedyHeldoutBaseline(
-        variant,
-        snap.metrics.optimalRate,
-        snap.metrics.meanRegret
-      );
+    for (const [suiteKey, snap] of Object.entries(snapshotResults)) {
+      const baselines = suiteBaselines[suiteKey]!;
+      baselineDelta[suiteKey] = {
+        greedy: deltaVsSuiteBaseline(
+          variant,
+          suiteKey,
+          "greedy",
+          snap.metrics,
+          baselines.greedy.metrics
+        ),
+        random: deltaVsSuiteBaseline(
+          variant,
+          suiteKey,
+          "random",
+          snap.metrics,
+          baselines.random.metrics
+        )
+      };
     }
 
     byVariant[variant] = {
@@ -973,10 +1002,14 @@ async function runLlmMode(
         }
       }
     }
-    for (const [split, delta] of Object.entries(baselineDelta)) {
-      log(
-        `vs greedy heldout baseline [${variant}/${split}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)}`
-      );
+    for (const [suiteKey, deltas] of Object.entries(baselineDelta)) {
+      for (const delta of [deltas.greedy, deltas.random]) {
+        const m = delta.policy;
+        const b = delta.baseline;
+        log(
+          `vs ${delta.baselineId} [${suiteKey}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)} | policy mean/median/max/high>=100=${m.meanRegret.toFixed(2)}/${m.medianRegret.toFixed(2)}/${m.maxRegret.toFixed(2)}/${m.highRegretCount} | baseline mean/median/max/high>=100=${b.meanRegret.toFixed(2)}/${b.medianRegret.toFixed(2)}/${b.maxRegret.toFixed(2)}/${b.highRegretCount}`
+        );
+      }
     }
   }
 

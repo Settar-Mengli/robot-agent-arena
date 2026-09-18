@@ -85,7 +85,9 @@ describe("auditable snapshot decisions", () => {
         n: 1,
         optimalRate: 1,
         meanRegret: 0,
-        maxRegret: 0
+        medianRegret: 0,
+        maxRegret: 0,
+        highRegretCount: 0
       },
       decisions: [
         decisionRecordFromChoice(snap, skillId, {

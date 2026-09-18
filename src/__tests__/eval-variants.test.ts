@@ -1,16 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
   assertQuotaWithinCap,
-  deltaVsGreedyHeldoutBaseline,
+  deltaVsSuiteBaseline,
   llmCpuPolicy,
   llmPolicyIdForVariant,
   parseVariantsList,
   projectQuotaCalls,
   variantPromptVersion,
   variantToPlayOptions,
-  QUOTA_CALL_CAP
+  QUOTA_CALL_CAP,
+  type SnapshotPolicyMetrics
 } from "../eval";
 import { mergeManifest, manifestVariantsFor } from "../eval/manifest";
+
+function metricsStub(
+  partial: Partial<SnapshotPolicyMetrics> &
+    Pick<SnapshotPolicyMetrics, "optimalRate" | "meanRegret">
+): SnapshotPolicyMetrics {
+  return {
+    n: 20,
+    medianRegret: partial.meanRegret,
+    maxRegret: partial.meanRegret,
+    highRegretCount: 0,
+    ...partial
+  };
+}
 
 describe("prompt-variant ablation helpers", () => {
   it("routes variant ids and play options", () => {
@@ -100,9 +114,19 @@ describe("prompt-variant ablation helpers", () => {
     expect(merged.splits.dev!.variants![0]!.promptVersion).toBe("agent-v1");
   });
 
-  it("aggregates delta vs greedy heldout baseline", () => {
-    const delta = deltaVsGreedyHeldoutBaseline("grounded", 0.7, 0.2);
+  it("aggregates delta vs measured suite baseline", () => {
+    const policy = metricsStub({ optimalRate: 0.7, meanRegret: 0.2 });
+    const baseline = metricsStub({ optimalRate: 0.5, meanRegret: 0.5 });
+    const delta = deltaVsSuiteBaseline(
+      "grounded",
+      "heldout",
+      "greedy",
+      policy,
+      baseline
+    );
     expect(delta.deltaOptimalRate).toBeCloseTo(0.2);
     expect(delta.deltaMeanRegret).toBeCloseTo(-0.3);
+    expect(delta.baseline.optimalRate).toBe(0.5);
+    expect(delta.suiteLabel).toBe("heldout");
   });
 });

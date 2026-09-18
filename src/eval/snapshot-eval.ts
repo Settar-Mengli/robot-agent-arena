@@ -118,13 +118,17 @@ export function evalRandomSnapshots(
   let optimalSum = 0;
   let regretSum = 0;
   let maxRegret = 0;
+  let highRegretCount = 0;
+  const perSnapMeanRegrets: number[] = [];
   const decisions: SnapshotDecisionRecord[] = [];
 
   for (const snap of snapshots) {
     const exp = randomPolicyExpectation(snap);
     optimalSum += exp.optimalRate;
     regretSum += exp.meanRegret;
+    perSnapMeanRegrets.push(exp.meanRegret);
     if (exp.maxRegret > maxRegret) maxRegret = exp.maxRegret;
+    if (exp.maxRegret >= 100) highRegretCount += 1;
 
     // Representative choice: first catalog-order skill among values for audit shape.
     const executed =
@@ -139,13 +143,24 @@ export function evalRandomSnapshots(
   }
 
   const n = snapshots.length;
+  const sorted = [...perSnapMeanRegrets].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const medianRegret =
+    n === 0
+      ? 0
+      : n % 2 === 1
+        ? sorted[mid]!
+        : (sorted[mid - 1]! + sorted[mid]!) / 2;
+
   return {
     policyId: "random",
     metrics: {
       n,
       optimalRate: n === 0 ? 0 : optimalSum / n,
       meanRegret: n === 0 ? 0 : regretSum / n,
-      maxRegret
+      medianRegret,
+      maxRegret,
+      highRegretCount
     },
     decisions
   };
@@ -227,7 +242,7 @@ export function formatSnapshotDecisionsDigest(
 ): string {
   const versions = distinctPromptVersions(result.decisions);
   const m = result.metrics;
-  return `snapshots-digest[${variant}]: optimal=${(m.optimalRate * 100).toFixed(2)}% meanRegret=${m.meanRegret.toFixed(2)} maxRegret=${m.maxRegret.toFixed(2)} promptVersions=${versions.join(",") || "(none)"}`;
+  return `snapshots-digest[${variant}]: optimal=${(m.optimalRate * 100).toFixed(2)}% meanRegret=${m.meanRegret.toFixed(2)} medianRegret=${m.medianRegret.toFixed(2)} maxRegret=${m.maxRegret.toFixed(2)} highRegret>=100=${m.highRegretCount} promptVersions=${versions.join(",") || "(none)"}`;
 }
 
 /**

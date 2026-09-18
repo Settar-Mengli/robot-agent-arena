@@ -31,7 +31,8 @@
         "gemini|gemini-3.5-flash-lite",
         "groq|openai/gpt-oss-20b",
         "openrouter|nvidia/nemotron-3-super-120b-a12b:free"
-      ]
+      ],
+      "snapshotSuite": "adversarial"
     }
   }
 }
