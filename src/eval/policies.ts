@@ -1,4 +1,4 @@
-import { createGreedySelector, playAgentTurn } from "../agent";
+import { createGreedySelector, playAgentTurn, PROMPT_VERSIONS } from "../agent";
 import type { DecisionTrace, PlayAgentTurnOptions } from "../agent";
 import {
   createSeededRng,
@@ -58,7 +58,21 @@ export function seededRandomPlayer(config: AgentConfig, seed: Seed): PlayerPolic
   };
 }
 
-export type CpuPolicyId = "random" | "greedy" | "llm" | "optimal";
+export const LLM_VARIANTS = [
+  "base",
+  "grounded",
+  "memory",
+  "grounded+memory"
+] as const;
+
+export type LlmVariant = (typeof LLM_VARIANTS)[number];
+
+export type CpuPolicyId =
+  | "random"
+  | "greedy"
+  | "llm"
+  | "optimal"
+  | `llm:${LlmVariant}`;
 
 export type CpuDecideResult = {
   step: ReturnType<typeof stepBattle>;
@@ -77,6 +91,106 @@ export type OptimalCpuPolicy = CpuPolicy & {
   /** Turns where the oracle was inexact and greedy was used instead. */
   inexactTurns: () => number;
 };
+
+export const QUOTA_CALL_CAP = 300;
+export const QUOTA_DECISIONS_PER_MATCH = 17;
+
+export function isLlmVariant(value: string): value is LlmVariant {
+  return (LLM_VARIANTS as readonly string[]).includes(value);
+}
+
+/**
+ * Parse `--variants` list. Record/live default: base,grounded.
+ * Replay default when unset: base (legacy fixtures).
+ * `all` expands to the four variants.
+ */
+export function parseVariantsList(
+  raw: string | undefined,
+  mode: "record" | "live" | "replay" | "baseline" | "discriminate"
+): LlmVariant[] {
+  if (raw === undefined || raw.trim() === "") {
+    if (mode === "replay") {
+      return ["base"];
+    }
+    if (mode === "record" || mode === "live") {
+      return ["base", "grounded"];
+    }
+    return ["base"];
+  }
+  const trimmed = raw.trim();
+  if (trimmed === "all") {
+    return [...LLM_VARIANTS];
+  }
+  const parts = trimmed.split(",").map((p) => p.trim()).filter(Boolean);
+  const out: LlmVariant[] = [];
+  for (const part of parts) {
+    if (!isLlmVariant(part)) {
+      throw new Error(
+        `unknown variant "${part}"; expected one of ${LLM_VARIANTS.join(", ")} or all`
+      );
+    }
+    if (!out.includes(part)) {
+      out.push(part);
+    }
+  }
+  if (out.length === 0) {
+    throw new Error("variants list is empty");
+  }
+  return out;
+}
+
+export function variantToPlayOptions(
+  variant: LlmVariant
+): Pick<PlayAgentTurnOptions, "grounding" | "memory"> {
+  switch (variant) {
+    case "base":
+      return { grounding: "off", memory: "off" };
+    case "grounded":
+      return { grounding: "facts", memory: "off" };
+    case "memory":
+      return { grounding: "off", memory: "match" };
+    case "grounded+memory":
+      return { grounding: "facts", memory: "match" };
+  }
+}
+
+export function variantPromptVersion(variant: LlmVariant): string {
+  switch (variant) {
+    case "base":
+      return PROMPT_VERSIONS.v1;
+    case "grounded":
+      return PROMPT_VERSIONS.grounded;
+    case "memory":
+      return PROMPT_VERSIONS.memory;
+    case "grounded+memory":
+      return PROMPT_VERSIONS.groundedMemory;
+  }
+}
+
+export function llmPolicyIdForVariant(variant: LlmVariant): `llm:${LlmVariant}` {
+  return `llm:${variant}`;
+}
+
+export function projectQuotaCalls(
+  variantCount: number,
+  snapshotCount: number,
+  matchCount: number,
+  decisionsPerMatch: number = QUOTA_DECISIONS_PER_MATCH
+): number {
+  return variantCount * (snapshotCount + matchCount * decisionsPerMatch);
+}
+
+export function assertQuotaWithinCap(
+  projected: number,
+  forceQuota: boolean,
+  cap: number = QUOTA_CALL_CAP
+): void {
+  if (projected > cap && !forceQuota) {
+    throw new Error(
+      `projected call count ${projected} exceeds cap ${cap}; pass --force-quota to override`
+    );
+  }
+}
 
 /**
  * Pick the first skill in MVP catalog order that is in `best`, equipped, and
@@ -168,20 +282,39 @@ export function greedyCpuPolicy(cpuConfig: AgentConfig): CpuPolicy {
   };
 }
 
-export function llmCpuPolicy(
-  options: PlayAgentTurnOptions = {}
-): CpuPolicy {
+export type LlmCpuPolicyOptions = PlayAgentTurnOptions & {
+  variant?: LlmVariant;
+};
+
+export function llmCpuPolicy(options: LlmCpuPolicyOptions = {}): CpuPolicy {
+  const variant = options.variant ?? "base";
+  const playOptions: PlayAgentTurnOptions = {
+    budgetMs: options.budgetMs,
+    signal: options.signal,
+    inference: options.inference,
+    now: options.now,
+    catalog: options.catalog,
+    ...variantToPlayOptions(variant)
+  };
   return {
-    id: "llm",
+    id: llmPolicyIdForVariant(variant),
     decide: async (runtime, playerSkillId) => {
-      const { step, trace } = await playAgentTurn(runtime, playerSkillId, options);
+      const { step, trace } = await playAgentTurn(
+        runtime,
+        playerSkillId,
+        playOptions
+      );
       return { step, trace };
     }
   };
 }
 
 export function resolvePlayerPolicy(
-  scenario: { playerConfig: AgentConfig; playerPolicy: "greedy" | "seeded-random"; seed: Seed }
+  scenario: {
+    playerConfig: AgentConfig;
+    playerPolicy: "greedy" | "seeded-random";
+    seed: Seed;
+  }
 ): PlayerPolicy {
   if (scenario.playerPolicy === "greedy") {
     return greedyPlayer(scenario.playerConfig);

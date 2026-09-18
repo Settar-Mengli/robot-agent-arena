@@ -14,6 +14,8 @@ npm run eval:report       # baseline + regenerate EVAL.md baseline block
 npm run eval:replay       # LLM via recorded fixtures (fails on fixture_miss)
 npm run eval:record       # local only: call providers, reuse fixtures, write new ones
 node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate   # keyless: random vs greedy vs optimal
+# Ablation (M-TOOLS) — local record; defaults --variants base,grounded, snapshots on, --max-matches 2:
+npm run eval:record -- --suite heldout --variants base,grounded
 ```
 
 `eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures; CI runs the same command). Pass `--suite heldout` / `all` only after a heldout record exists, or replay will fixture-miss. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice.
@@ -155,10 +157,34 @@ Decision headroom (oracle values along greedy playthroughs):
 
 There is large room above greedy: optimal wins ~83–88% of matches while greedy wins ~9–11%. The earlier LLM↔greedy tie is therefore **not** evidence that the environment cannot separate good from bad play — only that today’s LLM mixture is not capturing that headroom.
 
+## Ablation (M-TOOLS)
+
+Protocol (D-024 / D-027):
+
+- Same held-out match suite and committed held-out snapshots as the measured baseline above.
+- Same model set / provider order as a local held-out record run.
+- Arms: at least `base` (`agent-v1`, grounding/memory off) vs `grounded` (`agent-v2-grounded`). Optional: `memory`, `grounded+memory`.
+- Report per variant: snapshot optimality, mean regret, match outcomes, validity / fallbacks, and delta vs greedy held-out baseline (50% optimality / 0.50 mean regret).
+- Default record caps: snapshots on, `--max-matches 2`, quota projection must stay ≤300 calls unless `--force-quota`.
+
+**Command that produces results (operator, local keys required):**
+
+```bash
+npm run eval:record -- --suite heldout --variants base,grounded
+```
+
+Then paste numbers here. Do not invent results.
+
+**Results:** _pending local record run._
+
+**D-024 prediction:** grounded facts raise held-out snapshot optimality **above 50%** and beat greedy on match outcomes.
+
+**D-024 falsifier:** if grounded does not beat 50% optimality (and does not beat greedy on matches), publish that failure here — the honest conclusion is that this environment is too simple for LLM strategy to add value with this grounding contract.
+
 ## Findings
 
-- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. Next batch per D-025: **M-ENV** (deepen the environment), then M-TOOLS.
-- **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on that sample. Pre-registered grounding test remains D-024.
+- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS** (implemented; ablation results pending local record).
+- **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on that sample. That tie is **not** a ceiling: discrimination shows ~75 points of win-rate headroom above greedy (optimal ~83–88% vs greedy ~9–11%), so “greedy ties the LLM” means **both play poorly**, not that the task is saturated. Pre-registered grounding test remains D-024 (see Ablation section).
 - **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attribution is in the eval summary JSON.
 - **Held-out independence (fixed):** Disjoint archetypes (`aegis` / `tempest` / `mnemonic`); snapshot state-key overlap **0**.
 - **Keyless replay + CI:** Fixture `manifest.json` records scenario ids per split; multi-provider keyless replay cascades across all fixture hosts. CI runs `eval:replay -- --suite all` (10 matches: 4 dev + 6 heldout).
@@ -172,7 +198,7 @@ There is large room above greedy: optimal wins ~83–88% of matches while greedy
 - Held-out LLM match sample is small (**n=6**) and all six used **FRACTURE** (archetype-first stratification varies archetype and policy before opponent, so SENTINEL-X was not sampled at n=6).
 - “The LLM” in the held-out record is a **mixture of three models** via failover, not a single system under test.
 - Snapshot optimality at n=20 has **no confidence interval**.
-- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread quirks and greedy-suboptimal snapshot reselection are deferred to M-ENV (D-026).
+- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread quirks and greedy-suboptimal snapshot reselection remain parked (D-026 amend) until a future suite regeneration.
 - Free-tier model volatility can change live/record results.
 - Replay latency is not meaningful.
 - Fictional environment vocabulary only.

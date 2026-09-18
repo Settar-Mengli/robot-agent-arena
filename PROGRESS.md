@@ -1,11 +1,11 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-17
-- Branch: `feat/eval-discrimination` (PR open); base `main`
-- Current state: M-EVAL complete with discrimination verdict **DISCRIMINATES**; fixture manifest + multi-provider keyless suite-all replay. Decisions D-021–D-026 in force. Next: **M-ENV** (D-025).
+- Date: 2026-09-18
+- Branch: `feat/m-tools` (PR open); base `main` @ `06fa1b9`
+- Current state: **M-TOOLS implemented** (grounding + memory + variant ablation harness). Default prompt remains `agent-v1` (fixtures/CI green). Ablation **results pending** local record. D-027 grounding contract recorded. Next: **M-BENCH**.
 - Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all`
-- Working tree: `feat/eval-discrimination`
+- Working tree: `feat/m-tools`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -33,21 +33,24 @@
 - Multi-provider OpenAI-compatible inference client under `src/inference/` (M-INF, PR #6); external abort + per-attempt hook (M-AGENT c2).
 - MIT LICENSE (PR #7).
 - D-020 positioning docs.
-- M-AGENT (PR #9): `SelectCpuSkillId` seam; `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
-- M-EVAL (PR #10): `src/eval/` harness, snapshot suites, recorded fixtures, Vite `runnerImport` CLI, committed EVAL.md baseline, D-023.
+- M-AGENT (PR #9): `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
+- M-EVAL (PR #10): eval harness, snapshot suites, fixtures, EVAL.md baseline, D-023.
+- Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
+- M-TOOLS (this PR): grounding parity, memory, opt-in prompt variants, ablation quota harness; D-027.
 
 ## Current Work
-- Discrimination batch docs (D-025 / D-026); environment verdict DISCRIMINATES.
+- Docs: grounding contract + ablation protocol (results empty pending operator record).
 
 ## Blockers
-- None.
+- None. Ablation numbers require a local keyed `eval:record` (not available to the agent).
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
+- D-026 parked items (seed-spread / snapshot reselection) until a future suite regeneration.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/eval-discrimination`.
+- See `git status` / PR diff on `feat/m-tools`.
 
 ## Exact Next Step
-**M-ENV** (D-025 batch 2 / D-026 deferred items). Then M-TOOLS (D-024). UI remains deferred.
+Operator runs `npm run eval:record -- --suite heldout --variants base,grounded` and pastes results into EVAL.md Ablation section. Then **M-BENCH**. UI remains deferred.

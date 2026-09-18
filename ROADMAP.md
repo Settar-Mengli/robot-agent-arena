@@ -52,20 +52,20 @@ Battle-state + personality → validated legal move via `playAgentTurn`; plain `
 #### M-EVAL — Eval harness (signature piece) — DONE
 Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). Held-out LLM still ties greedy on the n=6 sample. Fixture manifest + multi-provider keyless `--suite all` replay.
 
-#### M-ENV — Deepen the environment — NEXT (D-025 batch 2)
-Address seed-spread / snapshot reselection (D-026) and enlarge strategic depth so agent improvements are easier to measure. Conditional on the discrimination verdict (satisfied).
+#### M-TOOLS — Grounding + memory — DONE (ablation results pending)
+Grounding tool (computed affordable/threat facts) + per-match memory. Opt-in prompt variants; default `agent-v1` unchanged for fixtures/CI. Ablation harness with quota projection. Protocol in EVAL.md; **numbers pending** operator `eval:record -- --suite heldout --variants base,grounded` (D-024 / D-027).
 
-#### M-TOOLS — Grounding + memory
-Grounding tool (computed affordable/threat facts) + per-match memory. Ablation against held-out baseline (D-024). After M-ENV per D-025.
-
-#### M-BENCH — Model comparison bench
+#### M-BENCH — Model comparison bench — NEXT
 BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025).
 
 #### M-COACH — Post-battle coach
 LLM post-battle coach: turns the battle log into tailored advice (surfaces in the Report screen in M-UI).
 
 #### M-UI — Minimal functional UI (+ deferred serverless proxy)
-Part 1 Builder+Arena; part 2 Report+coach+bench surfacing (D-025 batches 5–6). Serverless inference proxy when the browser needs secret-safe calls.
+Part 1 Builder+Arena; part 2 Report+coach+bench surfacing (D-025). Serverless inference proxy when the browser needs secret-safe calls.
+
+#### Parked (D-026)
+Seed-spread correlation and greedy-suboptimal snapshot reselection — deferred until a future suite regeneration (M-ENV milestone dropped).
 ### Stretch (optional)
 - Natural-language robot builder (NL → validated `AgentConfig`).
 - An agent that adapts across matches (bandit/RL). Revisit a heavier backend/DB only if cross-match learning, leaderboards, or stored eval runs require real persistence beyond localStorage.

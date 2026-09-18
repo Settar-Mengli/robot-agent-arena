@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { SENTINEL_X } from "../data/opponents";
-import { PROMPT_VERSION, buildAgentMessages } from "../agent";
+import {
+  PROMPT_VERSION,
+  PROMPT_VERSIONS,
+  buildAgentMessages,
+  computeGroundedFacts,
+  resolvePromptVersion
+} from "../agent";
 import type { CombatantState } from "../engine";
 
 const cpu: CombatantState = {
@@ -28,6 +34,7 @@ const player: CombatantState = {
 describe("buildAgentMessages", () => {
   it("builds a stable prompt snapshot for a fixed input", () => {
     expect(PROMPT_VERSION).toBe("agent-v1");
+    expect(PROMPT_VERSION).toBe(PROMPT_VERSIONS.v1);
     const messages = buildAgentMessages({
       turn: 1,
       maxTurns: 20,
@@ -61,5 +68,56 @@ describe("buildAgentMessages", () => {
     for (const value of Object.values(data.cpuConfig.modules)) {
       expect(value.length).toBe(500);
     }
+  });
+
+  it("grounded path has its own snapshot and authoritative system line", () => {
+    const grounding = computeGroundedFacts(
+      { cpu, player },
+      SENTINEL_X,
+      ["skill-core-identity"],
+      1,
+      20
+    );
+    expect(resolvePromptVersion({ grounding })).toBe(PROMPT_VERSIONS.grounded);
+    const messages = buildAgentMessages({
+      turn: 1,
+      maxTurns: 20,
+      observation: { cpu, player },
+      cpuConfig: SENTINEL_X,
+      grounding
+    });
+    expect(messages).toMatchSnapshot();
+    expect(messages[0]!.content).toContain("authoritative");
+    expect(messages[0]!.content).not.toMatch(/sk-|api[_-]?key|Bearer/i);
+    expect(messages.some((m) => m.content.startsWith("ENGINE_GROUNDED_FACTS"))).toBe(
+      true
+    );
+  });
+
+  it("grounded facts mark lethal when a lethal equipped move exists", () => {
+    const fragilePlayer: CombatantState = {
+      ...player,
+      health: 1,
+      defense: 0
+    };
+    const grounding = computeGroundedFacts(
+      { cpu: { ...cpu, energy: 10 }, player: fragilePlayer },
+      SENTINEL_X,
+      ["skill-core-identity"],
+      1,
+      20
+    );
+    const lethal = grounding.cpuSkills.filter((s) => s.lethal && s.affordable);
+    expect(lethal.length).toBeGreaterThan(0);
+    const messages = buildAgentMessages({
+      turn: 1,
+      maxTurns: 20,
+      observation: { cpu, player: fragilePlayer },
+      cpuConfig: SENTINEL_X,
+      grounding
+    });
+    const factsMsg = messages.find((m) => m.content.startsWith("ENGINE_GROUNDED_FACTS"));
+    expect(factsMsg).toBeDefined();
+    expect(factsMsg!.content).toContain('"lethal":true');
   });
 });

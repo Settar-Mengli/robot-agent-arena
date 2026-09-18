@@ -9,7 +9,7 @@ import {
 import type { DecisionSnapshot } from "./snapshots";
 
 export type SnapshotEvalResult = {
-  policyId: "random" | "greedy" | "llm";
+  policyId: string;
   metrics: SnapshotPolicyMetrics;
 };
 
@@ -54,7 +54,8 @@ export function evalGreedySnapshots(
 
 export async function evalLlmSnapshots(
   snapshots: readonly DecisionSnapshot[],
-  options: PlayAgentTurnOptions = {}
+  options: PlayAgentTurnOptions = {},
+  policyId = "llm"
 ): Promise<SnapshotEvalResult> {
   const chosen: SkillId[] = [];
   const invalidFlags: boolean[] = [];
@@ -78,7 +79,7 @@ export async function evalLlmSnapshots(
   }
 
   return {
-    policyId: "llm",
+    policyId,
     metrics: metricsForChosenMoves(snapshots, chosen, { invalidFlags })
   };
 }
