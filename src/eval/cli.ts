@@ -60,7 +60,8 @@ import {
 } from "./manifest";
 import {
   formatDiscriminationSummary,
-  runDiscriminationReport
+  runDiscriminationReport,
+  summarizeDiscriminationReport
 } from "./discriminate";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -1170,8 +1171,18 @@ export async function main(argv: string[]): Promise<number> {
         `${JSON.stringify(report, null, 2)}\n`,
         "utf8"
       );
+      const committedDir = join(ROOT, "evals/out-committed");
+      await mkdir(committedDir, { recursive: true });
+      const summaryPath = join(committedDir, "discriminate.summary.json");
+      const summary = summarizeDiscriminationReport(report);
+      await writeFile(
+        summaryPath,
+        `${JSON.stringify(summary, null, 2)}\n`,
+        "utf8"
+      );
       console.log(formatDiscriminationSummary(report));
       console.log(`wrote ${relative(ROOT, outPath).replace(/\\/g, "/")}`);
+      console.log(`wrote ${relative(ROOT, summaryPath).replace(/\\/g, "/")}`);
       return 0;
     }
 

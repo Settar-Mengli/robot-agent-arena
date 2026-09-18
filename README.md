@@ -2,7 +2,7 @@
 
 Configure an AI agent’s design choices. Run them in a deterministic battle environment. See measurable consequences.
 
-**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), and eval harness (match/snapshot suites, oracle, recorded fixtures, CLI) are complete. LLM eval numbers pending a local record run; UI remains later.
+**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), eval harness (match/snapshot suites, oracle, recorded fixtures, CLI), and M-TOOLS grounding ablation are complete. Held-out LLM results and the adversarial ablation are published in [EVAL.md](EVAL.md). Next is **M-BENCH**; UI remains later.
 
 ## What it is
 
@@ -63,6 +63,14 @@ npm run eval:record # local only — writes fixtures (needs keys)
 
 Headless harness under `src/eval/` (D-018 / D-023). Committed baseline lives in [EVAL.md](EVAL.md). **No API keys needed** for `npm run eval` / `eval:report` (random + greedy). LLM path uses recorded fixtures in CI; `eval:record` / live are local-only.
 
+Additional CLI flags (via `node scripts/run-ts.mjs src/eval/cli.ts` or the `npm run eval:*` scripts):
+
+- `--mode discriminate` — keyless environment discrimination report (random / greedy / optimal)
+- `--snapshot-suite standard|pivotal|adversarial` — which snapshot suite to evaluate
+- `--variants base,grounded` (etc.) — prompt-variant ablation arms
+
+CI runs `npm run eval:replay -- --suite all` after coverage (keyless fixture replay).
+
 ## Project structure
 
 ```
@@ -92,17 +100,17 @@ npm test
 npm run coverage
 ```
 
-The engine is covered by a comprehensive Vitest suite, including seam-parity tests that prove the interactive turn path matches full-match simulation. Agent/inference tests inject mocks (no live network). GitHub Actions CI runs `typecheck`, `lint`, and `coverage` on every pull request and on pushes to `main`.
+The engine is covered by a comprehensive Vitest suite, including seam-parity tests that prove the interactive turn path matches full-match simulation. Agent/inference tests inject mocks (no live network). GitHub Actions CI runs `typecheck`, `lint`, `coverage`, and `eval:replay -- --suite all` on every pull request and on pushes to `main`.
 
 For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Status / roadmap
 
-1. **Done:** Pure TypeScript battle engine, inference client (M-INF), agent turn + greedy baseline (M-AGENT, D-022)
-2. **Next:** M-EVAL (headless eval harness)
-3. **Later:** M-TOOLS, M-COACH, M-UI (React/Tailwind/Zustand not installed yet; serverless proxy deferred to M-UI)
+1. **Done:** Pure TypeScript battle engine, inference client (M-INF), agent turn + greedy baseline (M-AGENT), eval harness (M-EVAL), grounding + memory tools with measured ablation (M-TOOLS; D-024 falsified)
+2. **Next:** M-BENCH (model comparison bench)
+3. **Later:** M-UI — Builder + Arena, then Report + coach + bench surfacing (React/Tailwind/Zustand not installed yet; serverless proxy deferred to M-UI)
 
-Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md). Order locked in [D-021](DECISIONS.md).
+Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md). Order locked in [D-025](DECISIONS.md) as amended.
 
 ## Original work / theme
 

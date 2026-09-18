@@ -322,5 +322,94 @@ export function formatDiscriminationSummary(
   return lines.join("\n");
 }
 
+export type DiscriminationPolicySummary = {
+  policy: "random" | "greedy" | "optimal";
+  n: number;
+  cpuWinRate: number;
+  cpuWinWilson: { low: number; high: number };
+  drawRate: number;
+  lossRate: number;
+  meanTurns: number;
+  meanFinalHpMargin: number;
+};
+
+export type DiscriminationHeadroomSummary = {
+  decisionPoints: number;
+  flatRate: number;
+  nonZeroSpreadRate: number;
+  greedySuboptimalRate: number;
+  meanSpread: number;
+  medianSpread: number;
+  maxSpread: number;
+};
+
+export type DiscriminationSplitSummary = {
+  split: EvalSplit;
+  policies: DiscriminationPolicySummary[];
+  headroom: DiscriminationHeadroomSummary;
+  optimalInexactTurns: number;
+  winRateCiDisjoint: boolean;
+};
+
+export type DiscriminationSummary = {
+  verdict: DiscriminationReport["verdict"];
+  verdictReason: string;
+  overallNonZeroSpreadRate: number;
+  splits: DiscriminationSplitSummary[];
+};
+
+/**
+ * Deterministic aggregate-only view for committed reproduce logs.
+ * Omits spreads[], byOpponent, timestamps, paths, and host info.
+ */
+export function summarizeDiscriminationReport(
+  report: DiscriminationReport
+): DiscriminationSummary {
+  let points = 0;
+  let nonFlat = 0;
+  for (const s of report.splits) {
+    points += s.headroom.decisionPoints;
+    nonFlat += Math.round(
+      s.headroom.nonZeroSpreadRate * s.headroom.decisionPoints
+    );
+  }
+  const overallNonZeroSpreadRate = points === 0 ? 0 : nonFlat / points;
+
+  const splits: DiscriminationSplitSummary[] = report.splits.map((split) => ({
+    split: split.split,
+    policies: split.policies.map((slice) => ({
+      policy: slice.policy,
+      n: slice.aggregate.n,
+      cpuWinRate: slice.aggregate.cpuWinRate,
+      cpuWinWilson: {
+        low: slice.aggregate.cpuWinWilson.low,
+        high: slice.aggregate.cpuWinWilson.high
+      },
+      drawRate: slice.aggregate.drawRate,
+      lossRate: slice.aggregate.lossRate,
+      meanTurns: slice.aggregate.meanTurns,
+      meanFinalHpMargin: slice.aggregate.meanFinalHpMargin
+    })),
+    headroom: {
+      decisionPoints: split.headroom.decisionPoints,
+      flatRate: split.headroom.flatRate,
+      nonZeroSpreadRate: split.headroom.nonZeroSpreadRate,
+      greedySuboptimalRate: split.headroom.greedySuboptimalRate,
+      meanSpread: split.headroom.meanSpread,
+      medianSpread: split.headroom.medianSpread,
+      maxSpread: split.headroom.maxSpread
+    },
+    optimalInexactTurns: split.optimalInexactTurns,
+    winRateCiDisjoint: split.winRateCiDisjoint
+  }));
+
+  return {
+    verdict: report.verdict,
+    verdictReason: report.verdictReason,
+    overallNonZeroSpreadRate,
+    splits
+  };
+}
+
 /** Exported for tests — unused import guard. */
 export { wilsonInterval };

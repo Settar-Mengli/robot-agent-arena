@@ -1,0 +1,38 @@
+{
+  "dev": {
+    "greedy": {
+      "n": 20,
+      "optimalRate": 0,
+      "meanRegret": 301.85,
+      "medianRegret": 2,
+      "maxRegret": 2001,
+      "highRegretCount": 3
+    },
+    "random": {
+      "n": 20,
+      "optimalRate": 0.5,
+      "meanRegret": 150.925,
+      "medianRegret": 1,
+      "maxRegret": 2001,
+      "highRegretCount": 3
+    }
+  },
+  "heldout": {
+    "greedy": {
+      "n": 20,
+      "optimalRate": 0,
+      "meanRegret": 104.35,
+      "medianRegret": 5,
+      "maxRegret": 2002,
+      "highRegretCount": 1
+    },
+    "random": {
+      "n": 20,
+      "optimalRate": 0.5,
+      "meanRegret": 52.175,
+      "medianRegret": 2.5,
+      "maxRegret": 2002,
+      "highRegretCount": 1
+    }
+  }
+}

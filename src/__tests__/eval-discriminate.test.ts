@@ -1,11 +1,29 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   computeDecisionHeadroom,
   decideDiscriminationVerdict,
   intervalsDisjoint,
+  runDiscriminationReport,
+  summarizeDiscriminationReport,
   SPREAD_THRESHOLD,
-  type DiscriminationSplitReport
+  type DiscriminationSplitReport,
+  type DiscriminationSummary
 } from "../eval/discriminate";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
+const committedSummaryPath = join(
+  root,
+  "evals/out-committed/discriminate.summary.json"
+);
+
+function loadCommittedSummary(): DiscriminationSummary {
+  return JSON.parse(
+    readFileSync(committedSummaryPath, "utf8")
+  ) as DiscriminationSummary;
+}
 
 function fakeSplit(input: {
   winRateCiDisjoint: boolean;
@@ -30,6 +48,10 @@ function fakeSplit(input: {
     optimalInexactTurns: 0,
     winRateCiDisjoint: input.winRateCiDisjoint
   };
+}
+
+function fmtPct2(rate: number): string {
+  return `${(rate * 100).toFixed(2)}%`;
 }
 
 describe("discrimination helpers", () => {
@@ -82,4 +104,72 @@ describe("discrimination helpers", () => {
     expect(a.greedySuboptimalRate).toBe(0.5);
     expect(a.medianSpread).toBe(2);
   });
+
+  it("summarizeDiscriminationReport omits spreads and byOpponent", () => {
+    const split = fakeSplit({
+      winRateCiDisjoint: true,
+      nonZeroSpreadRate: 0.5
+    });
+    split.policies = [
+      {
+        policy: "greedy",
+        aggregate: {
+          n: 10,
+          cpuWinRate: 0.1,
+          cpuWinWilson: { low: 0.01, high: 0.4 },
+          drawRate: 0,
+          lossRate: 0.9,
+          meanTurns: 5,
+          meanFinalHpMargin: -1
+        },
+        byOpponent: { "cpu-x": {} as never }
+      }
+    ];
+    const summary = summarizeDiscriminationReport({
+      splits: [split],
+      verdict: "DISCRIMINATES",
+      verdictReason: "test"
+    });
+    expect(summary.verdict).toBe("DISCRIMINATES");
+    expect(summary.splits[0]!.policies[0]!.n).toBe(10);
+    expect("spreads" in summary.splits[0]!.headroom).toBe(false);
+    expect("byOpponent" in (summary.splits[0]!.policies[0] as object)).toBe(
+      false
+    );
+  });
+});
+
+describe("committed discrimination summary vs EVAL.md", () => {
+  it("EVAL.md quotes rates from the committed summary", () => {
+    const summary = loadCommittedSummary();
+    const evalMd = readFileSync(join(root, "EVAL.md"), "utf8");
+    expect(summary.verdict).toBe("DISCRIMINATES");
+    expect(evalMd).toContain("**Verdict: DISCRIMINATES**");
+    const overallPct = (summary.overallNonZeroSpreadRate * 100).toFixed(1);
+    expect(evalMd).toContain(`**${overallPct}%**`);
+
+    for (const split of summary.splits) {
+      for (const policy of split.policies) {
+        expect(evalMd).toContain(fmtPct2(policy.cpuWinRate));
+      }
+      expect(evalMd).toContain(String(split.headroom.decisionPoints));
+      expect(evalMd).toContain(
+        `${(split.headroom.flatRate * 100).toFixed(1)}%`
+      );
+      expect(evalMd).toContain(
+        `${(split.headroom.nonZeroSpreadRate * 100).toFixed(1)}%`
+      );
+    }
+  });
+
+  it.skipIf(process.env.SNAPSHOT_DRIFT !== "1")(
+    "drift-guard: runDiscriminationReport summary matches committed file (set SNAPSHOT_DRIFT=1)",
+    async () => {
+      const report = await runDiscriminationReport(() => undefined);
+      const generated = summarizeDiscriminationReport(report);
+      const committed = loadCommittedSummary();
+      expect(generated).toEqual(committed);
+    },
+    300_000
+  );
 });

@@ -200,6 +200,38 @@ describe("adversarial snapshot selection", () => {
     expect(delta.deltaOptimalRate).not.toBeCloseTo(0.05 - 0.5, 5);
   });
 
+  it("committed adversarial.baselines.json matches regen from suites", () => {
+    const committedPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      "../../evals/out-committed/adversarial.baselines.json"
+    );
+    const committed = JSON.parse(readFileSync(committedPath, "utf8")) as Record<
+      string,
+      {
+        greedy: SnapshotPolicyMetrics;
+        random: SnapshotPolicyMetrics;
+      }
+    >;
+
+    for (const split of ["dev", "heldout"] as const) {
+      const suite = loadAdversarial(`snapshots.adversarial.${split}.json`);
+      const greedy = evalGreedySnapshots(suite.snapshots).metrics;
+      const random = evalRandomSnapshots(suite.snapshots).metrics;
+      const pick = (m: SnapshotPolicyMetrics) => ({
+        n: m.n,
+        optimalRate: m.optimalRate,
+        meanRegret: m.meanRegret,
+        medianRegret: m.medianRegret,
+        maxRegret: m.maxRegret,
+        highRegretCount: m.highRegretCount
+      });
+      expect(committed[split]).toEqual({
+        greedy: pick(greedy),
+        random: pick(random)
+      });
+    }
+  });
+
   it.skipIf(!driftEnabled)(
     "drift-guard: generateAdversarialSnapshots matches committed JSON (set SNAPSHOT_DRIFT=1)",
     () => {

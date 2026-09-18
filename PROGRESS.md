@@ -2,10 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `fix/eval-suite-baselines` (PR open); base `main` @ `a7f1fae`
-- Current state: Per-suite snapshot baselines fixed. Adversarial ablation fixtures committed. **M-TOOLS measured:** grounding changed 0/20 decisions on held-out adversarial (D-024 falsified; D-030). Next: **M-BENCH**. Memory variants unmeasured.
-- Verification: typecheck / lint / coverage; keyless `eval:replay -- --suite all`; adversarial replay with `--variants base,grounded --max-matches 2`
-- Working tree: `fix/eval-suite-baselines`
+- Branch: `docs/reconcile-truth`; base `main` @ `f521d70`
+- Current state: Reconciling public docs with measured results (stale next-milestone claims, unamended decisions, unscoped snapshot numbers, false replay instructions, discrimination reproduce log). **M-TOOLS measured:** grounding changed 0/20 decisions on held-out adversarial (D-024 falsified; D-030). Next: **M-BENCH**. Memory variants unmeasured.
+- Test count: **258** (`npm run coverage`: 255 passed, 3 skipped)
+- Verification: typecheck / lint / coverage (all green); keyless `eval:replay -- --suite all`
+- Working tree: `docs/reconcile-truth`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -39,9 +40,10 @@
 - M-TOOLS (PR #16): grounding, memory, opt-in variants, ablation harness; D-027.
 - Pivotal snapshot suites + auditable decisions + D-028 (PR #17).
 - Adversarial snapshot suites + D-029 (PR #18); min regret 1 (PR #19).
+- M-TOOLS ablation published (D-030) and metric choice (D-031).
 
 ## Current Work
-- Per-suite baselines; publish M-TOOLS ablation (D-030) and metric choice (D-031).
+- Docs reconcile: public docs vs measured reality; committed discrimination summary.
 
 ## Blockers
 - None.
@@ -53,7 +55,7 @@
 - Memory ablation variants remain unmeasured.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `fix/eval-suite-baselines`.
+- See `git status` / PR diff on `docs/reconcile-truth`.
 
 ## Exact Next Step
 **M-BENCH**. UI remains deferred.

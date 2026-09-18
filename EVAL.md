@@ -18,7 +18,13 @@ node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate   # keyless: random 
 npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial
 ```
 
-`eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures; CI runs the same command). Pass `--suite heldout` / `all` only after a heldout record exists, or replay will fixture-miss. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice.
+`eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures). **CI runs `npm run eval:replay -- --suite all`** (not the dev default) — held-out fixtures are committed, so `--suite heldout` / `all` work keyless. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings). **Replay follows the fixture manifest when present** (scenario ids per split); first-N-by-id is only the no-manifest fallback. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice. LLM adversarial snapshot figures in this file are from a local record; reproduce keylessly with:
+
+```bash
+npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite adversarial
+```
+
+(Manifest has no `variants` field yet, so `--variants` must be passed explicitly.)
 
 ## Metric definitions
 
@@ -105,7 +111,7 @@ Measured local `eval:record`, suite `heldout`, `--max-matches 6` (archetype-firs
 | live latency p50 / p95 (non-cached HTTP) | 206ms / 729ms |
 | tokens (prompt / completion / total) | 34074 / 10949 / 45023 |
 | newly recorded / cache hits / fixtures on disk | 96 / 30 / 168 |
-| snapshots[heldout] optimal / mean regret / invalid | 50% / 0.50 / 0% |
+| snapshots[heldout, **standard**] optimal / mean regret / invalid | 50% / 0.50 / 0% |
 
 #### Provider attempts (failover)
 
@@ -119,7 +125,7 @@ Measured local `eval:record`, suite `heldout`, `--max-matches 6` (archetype-firs
 
 #### Matches — random vs greedy vs LLM (same 6 scenarios)
 
-Independently verified: greedy CPU matches the LLM on **every** row (result and turn count). Random differs only on `aegis__greedy` (player-victory instead of draw). Held-out snapshot optimality: greedy 50% / 0.50 regret (identical to LLM); random 50% / 0.75.
+Independently verified: greedy CPU matches the LLM on **every** row (result and turn count). Random differs only on `aegis__greedy` (player-victory instead of draw). Held-out **standard** snapshot optimality: greedy 50% / 0.50 regret (identical to LLM); random 50% / 0.75.
 
 | scenario | random | greedy | LLM |
 | --- | --- | --- | --- |
@@ -130,7 +136,7 @@ Independently verified: greedy CPU matches the LLM on **every** row (result and 
 | mnemonic__seeded-random__fracture__s101 | player-victory / 20t | player-victory / 20t | player-victory / 20t |
 | tempest__seeded-random__fracture__s101 | player-victory / 11t | player-victory / 11t | player-victory / 11t |
 
-**Headline:** On this task the deterministic greedy bot is indistinguishable from the LLM on both tactical optimality (held-out snapshots) and match outcomes across these six matchups. **The LLM shows no measured advantage on this task today.**
+**Headline (scoped):** On this sample — **n=6 matchups, FRACTURE only, standard snapshots** — the deterministic greedy bot is indistinguishable from the LLM on both tactical optimality (standard held-out snapshots) and match outcomes across these six matchups. That is **not** the current measurement set. On held-out **adversarial** snapshots (n=20), the same LLM mixture is 5% optimal / mean regret **4.25** vs greedy **0% / 104.35** — see [Ablation](#ablation-m-tools); rate and value disagree.
 <!-- llm:end -->
 
 ## Does the environment discriminate?
@@ -195,7 +201,7 @@ Pivotal baselines (retained as stakes probe, not ablation):
 
 | split | stake-tail @10/100/500/1000 | count | spread min/med/max | greedy | random |
 | --- | --- | ---: | --- | --- | --- |
-| dev | 54 / 54 / 54 / 54 | 20 | 2001 / 2001 / 2003 | 100.00% / 0.00 | 50.00% / 1001.00 |
+| dev | 54 / 54 / 54 / 54 | 20 | 2001 / 2002 / 2003 | 100.00% / 0.00 | 50.00% / 1001.00 |
 | heldout | 20 / 20 / 20 / 20 | 20 | 2002 / 2007 / 2008 | 95.00% / 100.10 | 50.00% / 1002.98 |
 
 **Command used (operator, local keys):**
@@ -238,8 +244,9 @@ Providers across the record run: gemini 71 decisions (18× 429), openrouter 8 (2
 - **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attribution is in the eval summary JSON.
 - **Held-out independence (fixed):** Disjoint archetypes (`aegis` / `tempest` / `mnemonic`); snapshot state-key overlap **0**.
 - **Keyless replay + CI:** Fixture `manifest.json` records scenario ids per split; multi-provider keyless replay cascades across all fixture hosts. CI runs `eval:replay -- --suite all` (10 matches: 4 dev + 6 heldout).
-- **Sampling:** Record/live use archetype-first stratified selection; replay follows the manifest when present.
-- **Snapshots:** Dev snapshots remain 100% greedy-optimal. Held-out snapshots sit at 50% for greedy and LLM — while match-level optimal shows large headroom (see discrimination section).
+- **Sampling:** Record/live use archetype-first stratified selection; **replay follows the manifest when present** (first-N-by-id only if the manifest is missing).
+- **Reproduce logs:** Aggregate discrimination numbers live in `evals/out-committed/discriminate.summary.json` (regenerated by `--mode discriminate`). Adversarial greedy/random baselines: `evals/out-committed/adversarial.baselines.json`. LLM record figures remain uncommitted; keyless replay command is under [How to run](#how-to-run).
+- **Snapshots:** Dev **standard** snapshots remain 100% greedy-optimal. Held-out **standard** snapshots sit at 50% for greedy and LLM — while match-level optimal shows large headroom (see discrimination section). Held-out **adversarial** greedy is **0%** by construction (LLM 5% / mean regret 4.25 on the measured ablation).
 - **Providers:** Cloudflare JSON double-escape; Mistral free-tier 429s / wrapping; OpenRouter free-pool limits.
 
 ## Limitations
