@@ -52,11 +52,11 @@ Battle-state + personality → validated legal move via `playAgentTurn`; plain `
 #### M-EVAL — Eval harness (signature piece) — DONE
 Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). Held-out LLM still ties greedy on the n=6 sample. Fixture manifest + multi-provider keyless `--suite all` replay.
 
-#### M-TOOLS — Grounding + memory — DONE (pivotal ablation re-run pending)
-Grounding + memory + variant ablation harness (D-027). First standard-suite ablation was **inconclusive** (Δ0.0pp; maxRegret ≈ 1). Pivotal high-stakes suites + auditable decisions (D-028). Operator must re-run: `eval:record -- --suite heldout --variants base,grounded --snapshot-suite pivotal`.
+#### M-TOOLS — Grounding + memory — DONE (adversarial ablation re-run pending)
+Grounding + memory + variant ablation harness (D-027). First standard-suite ablation was **inconclusive** (Δ0.0pp; maxRegret ≈ 1). Pivotal high-stakes suites proved greedy-saturated (D-028). Adversarial suites ranked by greedy regret (D-029; greedy 0% by construction). Operator must re-run: `eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial`.
 
 #### M-BENCH — Model comparison bench — NEXT
-BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025). After pivotal ablation publication.
+BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025). After adversarial ablation publication.
 
 #### M-COACH — Post-battle coach
 LLM post-battle coach: turns the battle log into tailored advice (surfaces in the Report screen in M-UI).

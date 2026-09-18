@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `feat/eval-pivotal-snapshots` (PR open); base `main` @ `63ec7d4`
-- Current state: M-TOOLS code on main. First ablation on standard suites **inconclusive** (Δ0.0pp). Pivotal suites + auditable snapshot decisions (D-028) in this PR. Ablation **re-run pending** on `--snapshot-suite pivotal`. Next after that: **M-BENCH**.
+- Branch: `feat/eval-adversarial-snapshots` (PR open); base `main` @ `4980d03`
+- Current state: M-TOOLS code on main. Standard ablation **inconclusive** (Δ0.0pp). Pivotal suites greedy-saturated (D-028). Adversarial suites + D-029 in this PR (greedy 0% by construction). Ablation **re-run pending** on `--snapshot-suite adversarial`. Next after that: **M-BENCH**.
 - Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all` (standard suites)
-- Working tree: `feat/eval-pivotal-snapshots`
+- Working tree: `feat/eval-adversarial-snapshots`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -37,12 +37,13 @@
 - M-EVAL (PR #10): eval harness, snapshot suites, fixtures, EVAL.md baseline, D-023.
 - Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
 - M-TOOLS (PR #16): grounding, memory, opt-in variants, ablation harness; D-027.
+- Pivotal snapshot suites + auditable decisions + D-028 (PR #17).
 
 ## Current Work
-- Pivotal snapshot suites + auditable decisions + D-028 docs.
+- Adversarial snapshot suites ranked by greedy regret + D-029 docs.
 
 ## Blockers
-- None. Pivotal ablation numbers require a local keyed `eval:record --snapshot-suite pivotal`.
+- None. Adversarial ablation numbers require a local keyed `eval:record --snapshot-suite adversarial`.
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
@@ -50,7 +51,7 @@
 - D-026 seed-spread remains parked.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/eval-pivotal-snapshots`.
+- See `git status` / PR diff on `feat/eval-adversarial-snapshots`.
 
 ## Exact Next Step
-Operator runs `npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite pivotal` and pastes results into EVAL.md. Then **M-BENCH**. UI remains deferred.
+Operator runs `npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial` and pastes results into EVAL.md. Then **M-BENCH**. UI remains deferred.

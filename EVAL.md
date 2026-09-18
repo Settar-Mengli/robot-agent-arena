@@ -15,7 +15,7 @@ npm run eval:replay       # LLM via recorded fixtures (fails on fixture_miss)
 npm run eval:record       # local only: call providers, reuse fixtures, write new ones
 node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate   # keyless: random vs greedy vs optimal
 # Ablation (M-TOOLS) — local record; defaults --variants base,grounded, snapshots on, --max-matches 2:
-npm run eval:record -- --suite heldout --variants base,grounded
+npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial
 ```
 
 `eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures; CI runs the same command). Pass `--suite heldout` / `all` only after a heldout record exists, or replay will fixture-miss. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice.
@@ -159,43 +159,62 @@ There is large room above greedy: optimal wins ~83–88% of matches while greedy
 
 ## Ablation (M-TOOLS)
 
-Protocol (D-024 / D-027 / D-028):
+Protocol (D-024 / D-027 / D-028 / D-029):
 
 - Arms: at least `base` (`agent-v1`) vs `grounded` (`agent-v2-grounded`). Optional: `memory`, `grounded+memory`.
-- **Measurement set:** pivotal snapshot suites (`--snapshot-suite pivotal`), not the standard suites used for fixtures/CI.
-- Report per variant: snapshot optimality, mean regret, match outcomes, validity / fallbacks, per-decision audit trail, and delta vs the **pivotal** greedy/random baselines below.
+- **Measurement set:** **adversarial** snapshot suites (`--snapshot-suite adversarial`), where greedy fails by construction — not standard (fixtures/CI) and not pivotal (stakes probe; greedy-saturated).
+- Report per variant: snapshot optimality, mean regret, match outcomes, validity / fallbacks, per-decision audit trail, and delta vs the **adversarial** greedy/random baselines below.
 - Default record caps: snapshots on, `--max-matches 2`, quota projection must stay ≤300 calls unless `--force-quota`.
+
+### Three snapshot suites
+
+| suite | role | selection | greedy on committed set |
+| --- | --- | --- | --- |
+| **standard** | fixtures / CI / keyless replay | every-kth non-flat exact points | often high (dev 100%; heldout 50%) — **no stakes** (maxRegret ≈ 1) |
+| **pivotal** | high-stakes probe (D-028) | spread ≥ 100, top 20 by spread | **greedy-saturated** (dev 100% / heldout 95%) — lethal rule coincides with oracle |
+| **adversarial** | ablation measurement (D-029) | greedyRegret ≥ 100, top 20 by greedyRegret | **0% by construction** |
 
 ### Why the first ablation measured nothing
 
-A local held-out record on the **standard** snapshot suites returned **Δ0.0pp** between `base` and `grounded` (both 50% optimal / 0.50 mean regret). That is **not** evidence for or against grounding. Those suites max out at **maxRegret ≈ 1.0** — every sampled point is near-zero stakes — while discrimination shows median spread 2 and max spread ~2007, with the ~75-point greedy→optimal gap coming from rare catastrophic decisions. The standard suites sample the decisions that do not matter.
+A local held-out record on the **standard** snapshot suites returned **Δ0.0pp** between `base` and `grounded` (both 50% optimal / 0.50 mean regret). That is **not** evidence for or against grounding. Those suites max out at **maxRegret ≈ 1.0** — every sampled point is near-zero stakes — while discrimination shows median spread 2 and max spread ~2007, with the ~75-point greedy→optimal gap coming from rare catastrophic decisions. The standard suites sample the decisions that do not matter. That earlier Δ0.0pp stays **inconclusive**.
 
-### Pivotal suite baselines (new comparison point)
+### Why pivotal is not the ablation set
 
-Exact non-flat points with oracle value spread ≥ 100, top 20 by spread (D-028).
+Pivotal suites correctly select high **spread** (lethal availability), but on that set greedy already matches the oracle almost always (100% / 95%). Measuring grounding there cannot show improvement over the baseline that already saturates. Spread selects *where a mistake would hurt*; it does not select *where greedy actually errs*.
 
-| split | stake-tail qualifies @10/100/500/1000 | selected count | spread min/median/max | greedy optimal / mean regret | random optimal / mean regret |
+### Adversarial suite baselines (ablation comparison point)
+
+Exact non-flat points with greedy regret ≥ 100, ranked by greedyRegret (D-029). Full-split scan; shortfall allowed (dev 3 / heldout 1 of target 20). `turns` retained in runtimes for memory summaries.
+
+| split | regret-tail qualifies @1/100/500/1000 | selected count | greedyRegret min/median/max | greedy optimal / mean regret | random optimal / mean regret | catalog-optimal |
+| --- | --- | ---: | --- | --- | --- | --- |
+| dev | 39 / 3 / 3 / 3 | 3 | 2001 / 2001 / 2001 | **0.00%** / 2001.00 | 50.00% / 1000.50 | 100% / 0 |
+| heldout | 38 / 1 / 1 / 1 | 1 | 2002 / 2002 / 2002 | **0.00%** / 2002.00 | 50.00% / 1001.00 | 100% / 0 |
+
+Pivotal baselines (retained as stakes probe, not ablation):
+
+| split | stake-tail @10/100/500/1000 | count | spread min/med/max | greedy | random |
 | --- | --- | ---: | --- | --- | --- |
 | dev | 54 / 54 / 54 / 54 | 20 | 2001 / 2001 / 2003 | 100.00% / 0.00 | 50.00% / 1001.00 |
 | heldout | 20 / 20 / 20 / 20 | 20 | 2002 / 2007 / 2008 | 95.00% / 100.10 | 50.00% / 1002.98 |
 
-**Command for the re-run (operator, local keys required):**
+**Command for the grounded re-run (operator, local keys required):**
 
 ```bash
-npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite pivotal
+npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial
 ```
 
 Then paste numbers here. Do not invent results.
 
-**Results:** _pending pivotal re-run._
+**Results:** _pending adversarial re-run._
 
-**D-024 prediction:** grounded facts raise held-out **pivotal** snapshot optimality above the pivotal greedy baseline and beat greedy on match outcomes.
+**D-024 prediction:** grounded facts raise held-out **adversarial** snapshot optimality above the adversarial greedy baseline (0%) and beat greedy on match outcomes.
 
-**D-024 falsifier:** if grounded does not beat pivotal greedy on optimality (and does not beat greedy on matches), publish that failure here.
+**D-024 falsifier:** if grounded does not beat adversarial greedy on optimality (and does not beat greedy on matches), publish that failure here.
 
 ## Findings
 
-- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive** (D-028); re-run on pivotal suites pending.
+- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites are greedy-saturated (D-028); ablation measurement moves to **adversarial** suites (D-029).
 - **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on that sample. That tie is **not** a ceiling: discrimination shows ~75 points of win-rate headroom above greedy (optimal ~83–88% vs greedy ~9–11%), so “greedy ties the LLM” means **both play poorly**, not that the task is saturated. Pre-registered grounding test remains D-024 (see Ablation section).
 - **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attribution is in the eval summary JSON.
 - **Held-out independence (fixed):** Disjoint archetypes (`aegis` / `tempest` / `mnemonic`); snapshot state-key overlap **0**.
@@ -210,7 +229,7 @@ Then paste numbers here. Do not invent results.
 - Held-out LLM match sample is small (**n=6**) and all six used **FRACTURE** (archetype-first stratification varies archetype and policy before opponent, so SENTINEL-X was not sampled at n=6).
 - “The LLM” in the held-out record is a **mixture of three models** via failover, not a single system under test.
 - Snapshot optimality at n=20 has **no confidence interval**.
-- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread correlation remains parked (D-026). Ablation measurement uses **pivotal** suites (D-028), not the standard low-stakes suites.
+- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread correlation remains parked (D-026). Ablation measurement uses **adversarial** suites (D-029); pivotal suites remain a stakes probe only.
 - Free-tier model volatility can change live/record results.
 - Replay latency is not meaningful.
 - Fictional environment vocabulary only.
