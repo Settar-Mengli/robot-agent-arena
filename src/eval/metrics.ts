@@ -341,9 +341,24 @@ export type SnapshotPolicyMetrics = {
   n: number;
   optimalRate: number;
   meanRegret: number;
+  medianRegret: number;
   maxRegret: number;
+  /** Decisions (or per-snapshot for random) with regret ≥ 100. */
+  highRegretCount: number;
   invalidDecisionRate?: number;
 };
+
+function medianOf(values: readonly number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) {
+    return sorted[mid]!;
+  }
+  return (sorted[mid - 1]! + sorted[mid]!) / 2;
+}
 
 export function metricsForChosenMoves(
   snapshots: readonly DecisionSnapshot[],
@@ -357,15 +372,19 @@ export function metricsForChosenMoves(
   let optimal = 0;
   let regretSum = 0;
   let maxRegret = 0;
+  let highRegretCount = 0;
   let invalid = 0;
+  const regrets: number[] = [];
 
   for (let i = 0; i < snapshots.length; i += 1) {
     const snap = snapshots[i]!;
     const skillId = chosen[i]!;
     if (snap.best.includes(skillId)) optimal += 1;
     const r = regret(snap.values, skillId);
+    regrets.push(r);
     regretSum += r;
     if (r > maxRegret) maxRegret = r;
+    if (r >= 100) highRegretCount += 1;
     if (options.invalidFlags?.[i] === true) invalid += 1;
   }
 
@@ -374,7 +393,9 @@ export function metricsForChosenMoves(
     n,
     optimalRate: n === 0 ? 0 : optimal / n,
     meanRegret: n === 0 ? 0 : regretSum / n,
+    medianRegret: medianOf(regrets),
     maxRegret,
+    highRegretCount,
     ...(options.invalidFlags !== undefined
       ? { invalidDecisionRate: n === 0 ? 0 : invalid / n }
       : {})
@@ -402,28 +423,31 @@ export function decisionFromTrace(
   return { skillId, invalid };
 }
 
-/** Held-out greedy baseline from EVAL.md (D-024). */
-export const GREEDY_HELDOUT_OPTIMAL_RATE = 0.5;
-export const GREEDY_HELDOUT_MEAN_REGRET = 0.5;
-
-export type VariantBaselineDelta = {
+/** Compare LLM (or other) policy metrics to a measured suite baseline (greedy/random). */
+export type SuiteBaselineDelta = {
   variant: string;
-  optimalRate: number;
-  meanRegret: number;
+  suiteLabel: string;
+  baselineId: "greedy" | "random";
+  policy: SnapshotPolicyMetrics;
+  baseline: SnapshotPolicyMetrics;
   deltaOptimalRate: number;
   deltaMeanRegret: number;
 };
 
-export function deltaVsGreedyHeldoutBaseline(
+export function deltaVsSuiteBaseline(
   variant: string,
-  optimalRate: number,
-  meanRegret: number
-): VariantBaselineDelta {
+  suiteLabel: string,
+  baselineId: "greedy" | "random",
+  policy: SnapshotPolicyMetrics,
+  baseline: SnapshotPolicyMetrics
+): SuiteBaselineDelta {
   return {
     variant,
-    optimalRate,
-    meanRegret,
-    deltaOptimalRate: optimalRate - GREEDY_HELDOUT_OPTIMAL_RATE,
-    deltaMeanRegret: meanRegret - GREEDY_HELDOUT_MEAN_REGRET
+    suiteLabel,
+    baselineId,
+    policy,
+    baseline,
+    deltaOptimalRate: policy.optimalRate - baseline.optimalRate,
+    deltaMeanRegret: policy.meanRegret - baseline.meanRegret
   };
 }

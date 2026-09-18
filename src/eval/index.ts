@@ -116,20 +116,18 @@ export type {
 export {
   aggregateLlm,
   aggregateMatches,
-  deltaVsGreedyHeldoutBaseline,
+  deltaVsSuiteBaseline,
   metricsForChosenMoves,
   percentile,
   randomPolicyExpectation,
-  wilsonInterval,
-  GREEDY_HELDOUT_MEAN_REGRET,
-  GREEDY_HELDOUT_OPTIMAL_RATE
+  wilsonInterval
 } from "./metrics";
 export type {
   LlmAggregate,
   MatchAggregate,
   ProviderLlmAggregate,
   SnapshotPolicyMetrics,
-  VariantBaselineDelta,
+  SuiteBaselineDelta,
   WilsonInterval
 } from "./metrics";
 

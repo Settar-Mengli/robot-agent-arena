@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   ADVERSARIAL_MIN_REGRET,
   ADVERSARIAL_TARGET_COUNT,
+  deltaVsSuiteBaseline,
   evalGreedySnapshots,
   evalRandomSnapshots,
   generateAdversarialSnapshots,
@@ -14,7 +15,8 @@ import {
   selectAdversarialSnapshots,
   type AdversarialDecisionSnapshot,
   type AdversarialSnapshotSuite,
-  type DecisionSnapshot
+  type DecisionSnapshot,
+  type SnapshotPolicyMetrics
 } from "../eval";
 import type { SkillId } from "../engine";
 
@@ -164,6 +166,38 @@ describe("adversarial snapshot selection", () => {
       expect(optimal.optimalRate).toBe(1);
       expect(optimal.meanRegret).toBe(0);
     }
+  });
+
+  it("suite baseline deltas use measured adversarial greedy, not standard 50%/0.50", () => {
+    const suite = loadAdversarial("snapshots.adversarial.heldout.json");
+    const greedy = evalGreedySnapshots(suite.snapshots);
+    expect(greedy.metrics.optimalRate).toBe(0);
+    expect(greedy.metrics.meanRegret).toBeCloseTo(104.35, 1);
+    // Must not match the old hardcoded standard-suite baseline.
+    expect(greedy.metrics.optimalRate).not.toBe(0.5);
+    expect(greedy.metrics.meanRegret).not.toBe(0.5);
+
+    const llmLike: SnapshotPolicyMetrics = {
+      n: suite.count,
+      optimalRate: 0.05,
+      meanRegret: 4.25,
+      medianRegret: 5,
+      maxRegret: 5,
+      highRegretCount: 0
+    };
+    const delta = deltaVsSuiteBaseline(
+      "grounded",
+      "heldout:adversarial",
+      "greedy",
+      llmLike,
+      greedy.metrics
+    );
+    expect(delta.baseline.optimalRate).toBe(greedy.metrics.optimalRate);
+    expect(delta.baseline.meanRegret).toBe(greedy.metrics.meanRegret);
+    expect(delta.deltaOptimalRate).toBeCloseTo(0.05, 5);
+    expect(delta.deltaMeanRegret).toBeCloseTo(4.25 - greedy.metrics.meanRegret, 5);
+    // Old bug would have reported Δoptimal=-45pp using standard 50%.
+    expect(delta.deltaOptimalRate).not.toBeCloseTo(0.05 - 0.5, 5);
   });
 
   it.skipIf(!driftEnabled)(
