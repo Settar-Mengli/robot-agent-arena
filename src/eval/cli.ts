@@ -6,12 +6,19 @@ import { buildMatchSuite, selectDiverseScenarios, scenarioStratumKey, type EvalS
 import {
   greedyCpuPolicy,
   llmCpuPolicy,
-  randomCpuPolicy
+  parseVariantsList,
+  projectQuotaCalls,
+  assertQuotaWithinCap,
+  llmPolicyIdForVariant,
+  variantToPlayOptions,
+  randomCpuPolicy,
+  type LlmVariant
 } from "./policies";
 import { runSuite, type MatchResult } from "./match";
 import {
   aggregateLlm,
   aggregateMatches,
+  deltaVsGreedyHeldoutBaseline,
   percentile,
   type MatchAggregate,
   type SnapshotPolicyMetrics
@@ -41,8 +48,10 @@ import {
 import {
   assertScenarioIdsInSuite,
   mergeManifest,
+  manifestVariantsFor,
   readManifest,
   selectScenariosByIds,
+  variantsFromManifestSplit,
   writeManifest,
   type FixtureManifest
 } from "./manifest";
@@ -61,11 +70,14 @@ type CliArgs = {
   suite: SuiteChoice;
   suiteExplicit: boolean;
   maxMatches?: number;
+  maxMatchesExplicit: boolean;
   budgetMs: number;
   writeReport: boolean;
   snapshots: boolean;
   allSeeds: boolean;
   replayProvider?: string;
+  variantsRaw?: string;
+  forceQuota: boolean;
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -114,10 +126,12 @@ function parseArgs(argv: string[]): CliArgs {
     mode: "baseline",
     suite: "all",
     suiteExplicit: false,
+    maxMatchesExplicit: false,
     budgetMs: 10000,
     writeReport: false,
     snapshots: true,
-    allSeeds: false
+    allSeeds: false,
+    forceQuota: false
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -132,6 +146,7 @@ function parseArgs(argv: string[]): CliArgs {
       i += 1;
     } else if (flag === "--max-matches" && next) {
       args.maxMatches = Number(next);
+      args.maxMatchesExplicit = true;
       i += 1;
     } else if (flag === "--budget-ms" && next) {
       args.budgetMs = Number(next);
@@ -155,6 +170,11 @@ function parseArgs(argv: string[]): CliArgs {
     } else if (flag === "--replay-provider" && next) {
       args.replayProvider = next.trim().toLowerCase();
       i += 1;
+    } else if (flag === "--variants" && next) {
+      args.variantsRaw = next;
+      i += 1;
+    } else if (flag === "--force-quota") {
+      args.forceQuota = true;
     }
   }
 
@@ -670,17 +690,20 @@ async function runLlmMode(
     fetchImpl = deps.fetch ?? createReplayFetch(store);
   }
 
-  const maxMatches = args.maxMatches ?? 4;
-  const allResults: MatchResult[] = [];
-  const selectedScenarios: MatchScenario[] = [];
-  const selectedBySplit: Partial<Record<EvalSplit, MatchScenario[]>> = {};
+  const maxMatches =
+    args.maxMatchesExplicit && args.maxMatches !== undefined
+      ? args.maxMatches
+      : args.mode === "record" || args.mode === "live"
+        ? 2
+        : 4;
+
   const inference = {
     fetch: fetchImpl,
     temperature: 0 as const,
     env
   };
 
-  const turnOptions = {
+  const baseTurnOptions = {
     budgetMs: args.budgetMs,
     inference,
     ...(deps.skipGuards ? { now: () => 0 } : {})
@@ -702,6 +725,31 @@ async function runLlmMode(
     }
   }
 
+  let variants: LlmVariant[] = parseVariantsList(args.variantsRaw, args.mode);
+  if (args.mode === "replay" && args.variantsRaw === undefined) {
+    const fromManifest: LlmVariant[] = [];
+    for (const split of splitsFor(args.suite)) {
+      const ids = variantsFromManifestSplit(existingManifest?.splits[split]);
+      if (ids !== undefined) {
+        for (const id of ids) {
+          if (!fromManifest.includes(id)) {
+            fromManifest.push(id);
+          }
+        }
+      }
+    }
+    if (fromManifest.length > 0) {
+      variants = fromManifest;
+      log(`manifest variants: ${variants.join(",")}`);
+    } else {
+      log("manifest has no variants; replaying base only");
+    }
+  } else {
+    log(`variants: ${variants.join(",")}`);
+  }
+
+  const selectedBySplit: Partial<Record<EvalSplit, MatchScenario[]>> = {};
+  let totalMatchCount = 0;
   for (const split of splitsFor(args.suite)) {
     const suite = buildMatchSuite(split);
     let scenarios: MatchScenario[];
@@ -718,17 +766,10 @@ async function runLlmMode(
       );
     }
     selectedBySplit[split] = scenarios;
-    selectedScenarios.push(...scenarios);
-    for (const scenario of scenarios) {
-      log(`scenario: ${scenario.id}`);
-      const results = await runSuite([scenario], llmCpuPolicy(turnOptions));
-      allResults.push(...results);
-    }
+    totalMatchCount += scenarios.length;
   }
 
-  const snapshotResults: Record<string, SnapshotEvalResult> = {};
-  let snapshotLlm = 0;
-
+  let totalSnapshotCount = 0;
   if (args.snapshots) {
     for (const split of splitsFor(args.suite)) {
       if (
@@ -736,14 +777,128 @@ async function runLlmMode(
         existingManifest?.splits[split] !== undefined &&
         !existingManifest.splits[split]!.snapshots
       ) {
-        log(`snapshots: ${split} skipped (manifest.snapshots=false)`);
         continue;
       }
-      log(`snapshots: ${split}`);
       const snapshots = await loadCommittedSnapshots(split);
-      const evaluated = await evalLlmSnapshots(snapshots, turnOptions);
-      snapshotResults[split] = evaluated;
-      snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+      totalSnapshotCount += snapshots.length;
+    }
+  }
+
+  if (args.mode === "record" || args.mode === "live") {
+    const projected = projectQuotaCalls(
+      variants.length,
+      totalSnapshotCount,
+      totalMatchCount
+    );
+    log(
+      `quota projection: variants=${variants.length} snapshots=${totalSnapshotCount} matches=${totalMatchCount} × ~17 → ${projected} calls (cap 300)`
+    );
+    try {
+      assertQuotaWithinCap(projected, args.forceQuota);
+    } catch (err) {
+      error(err instanceof Error ? err.message : String(err));
+      return 1;
+    }
+  }
+
+  type VariantBundle = {
+    results: MatchResult[];
+    llm: ReturnType<typeof aggregateLlm>;
+    snapshots?: Record<string, SnapshotEvalResult>;
+    baselineDelta?: Record<string, ReturnType<typeof deltaVsGreedyHeldoutBaseline>>;
+  };
+
+  const byVariant: Record<string, VariantBundle> = {};
+  const allResults: MatchResult[] = [];
+  const selectedScenarios: MatchScenario[] = [];
+  for (const scenarios of Object.values(selectedBySplit)) {
+    if (scenarios) {
+      selectedScenarios.push(...scenarios);
+    }
+  }
+
+  let snapshotLlm = 0;
+
+  for (const variant of variants) {
+    log(`--- variant: ${variant} (${llmPolicyIdForVariant(variant)}) ---`);
+    const turnOptions = {
+      ...baseTurnOptions,
+      ...variantToPlayOptions(variant),
+      variant
+    };
+    const policy = llmCpuPolicy(turnOptions);
+    const variantResults: MatchResult[] = [];
+
+    for (const split of splitsFor(args.suite)) {
+      const scenarios = selectedBySplit[split] ?? [];
+      for (const scenario of scenarios) {
+        log(`scenario: ${scenario.id} [${variant}]`);
+        const results = await runSuite([scenario], policy);
+        variantResults.push(...results);
+        allResults.push(...results);
+      }
+    }
+
+    const snapshotResults: Record<string, SnapshotEvalResult> = {};
+    if (args.snapshots) {
+      for (const split of splitsFor(args.suite)) {
+        if (
+          args.mode === "replay" &&
+          existingManifest?.splits[split] !== undefined &&
+          !existingManifest.splits[split]!.snapshots
+        ) {
+          log(`snapshots: ${split} skipped (manifest.snapshots=false)`);
+          continue;
+        }
+        log(`snapshots: ${split} [${variant}]`);
+        const snapshots = await loadCommittedSnapshots(split);
+        const evaluated = await evalLlmSnapshots(
+          snapshots,
+          turnOptions,
+          llmPolicyIdForVariant(variant)
+        );
+        snapshotResults[split] = evaluated;
+        snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+      }
+    }
+
+    const llmAgg = aggregateLlm(variantResults, {
+      replayMode: args.mode === "replay"
+    });
+    const baselineDelta: Record<
+      string,
+      ReturnType<typeof deltaVsGreedyHeldoutBaseline>
+    > = {};
+    for (const [split, snap] of Object.entries(snapshotResults)) {
+      baselineDelta[split] = deltaVsGreedyHeldoutBaseline(
+        variant,
+        snap.metrics.optimalRate,
+        snap.metrics.meanRegret
+      );
+    }
+
+    byVariant[variant] = {
+      results: variantResults,
+      llm: llmAgg,
+      ...(args.snapshots ? { snapshots: snapshotResults, baselineDelta } : {})
+    };
+
+    log(
+      formatLlmSummary({
+        mode:
+          args.mode === "live" ? "live" : record ? "record" : "replay",
+        suite: args.suite,
+        outRel: `variant:${variant}`,
+        matches: variantResults.length,
+        sources: countSources(variantResults),
+        llmAgg,
+        snapshots: args.snapshots ? snapshotResults : undefined
+      })
+    );
+    for (const [split, delta] of Object.entries(baselineDelta)) {
+      log(
+        `vs greedy heldout baseline [${variant}/${split}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)}`
+      );
     }
   }
 
@@ -766,7 +921,8 @@ async function runLlmMode(
       patch.splits[split] = {
         scenarioIds: selected.map((s) => s.id),
         snapshots: args.snapshots,
-        providers: [...providerKeys].sort()
+        providers: [...providerKeys].sort(),
+        variants: manifestVariantsFor(variants)
       };
     }
     const merged = mergeManifest(existingManifest, patch);
@@ -780,9 +936,9 @@ async function runLlmMode(
   const outPath = join(outDir, outName);
   const llmAgg = aggregateLlm(allResults, { replayMode: args.mode === "replay" });
   const payload = {
+    variants: byVariant,
     results: allResults,
-    llm: llmAgg,
-    ...(args.snapshots ? { snapshots: snapshotResults } : {})
+    llm: llmAgg
   };
   await writeFile(outPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 
@@ -805,8 +961,7 @@ async function runLlmMode(
       sources,
       llmAgg,
       recordingStats,
-      fixtureFileCount,
-      snapshots: args.snapshots ? snapshotResults : undefined
+      fixtureFileCount
     })
   );
 
@@ -868,10 +1023,12 @@ export async function computeBaselineReport(
     suite: options.suite ?? "all",
     suiteExplicit: true,
     maxMatches: options.maxMatches,
+    maxMatchesExplicit: options.maxMatches !== undefined,
     budgetMs: 10000,
     writeReport: false,
     snapshots: true,
-    allSeeds: false
+    allSeeds: false,
+    forceQuota: false
   });
 }
 

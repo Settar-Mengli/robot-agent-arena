@@ -1,10 +1,19 @@
 import { readFile, writeFile } from "node:fs/promises";
+import type { LlmVariant } from "./policies";
+import { isLlmVariant, variantPromptVersion } from "./policies";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
+
+export type ManifestVariant = {
+  id: LlmVariant;
+  promptVersion: string;
+};
 
 export type ManifestSplit = {
   scenarioIds: string[];
   snapshots: boolean;
   providers: string[];
+  /** Optional; absent = legacy base-only replay. */
+  variants?: ManifestVariant[];
 };
 
 export type FixtureManifest = {
@@ -23,6 +32,22 @@ function sortUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
+function mergeVariants(
+  left: readonly ManifestVariant[] | undefined,
+  right: readonly ManifestVariant[] | undefined
+): ManifestVariant[] | undefined {
+  if (left === undefined && right === undefined) {
+    return undefined;
+  }
+  const byId = new Map<string, ManifestVariant>();
+  for (const entry of [...(left ?? []), ...(right ?? [])]) {
+    byId.set(entry.id, entry);
+  }
+  return [...byId.values()].sort((a, b) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+  );
+}
+
 export function mergeManifest(
   existing: FixtureManifest | undefined,
   patch: FixtureManifest
@@ -36,10 +61,12 @@ export function mergeManifest(
     }
     const left = a ?? emptySplit();
     const right = b ?? emptySplit();
+    const variants = mergeVariants(left.variants, right.variants);
     splits[split] = {
       scenarioIds: sortUnique([...left.scenarioIds, ...right.scenarioIds]),
       snapshots: left.snapshots || right.snapshots,
-      providers: sortUnique([...left.providers, ...right.providers])
+      providers: sortUnique([...left.providers, ...right.providers]),
+      ...(variants !== undefined ? { variants } : {})
     };
   }
   return { version: 1, splits };
@@ -102,4 +129,28 @@ export function selectScenariosByIds(
 
 export function manifestPathFor(fixturesDir: string): string {
   return `${fixturesDir.replace(/\\/g, "/").replace(/\/$/, "")}/manifest.json`;
+}
+
+export function variantsFromManifestSplit(
+  split: ManifestSplit | undefined
+): LlmVariant[] | undefined {
+  if (split?.variants === undefined || split.variants.length === 0) {
+    return undefined;
+  }
+  const ids: LlmVariant[] = [];
+  for (const entry of split.variants) {
+    if (!isLlmVariant(entry.id)) {
+      throw new Error(`manifest variant id unknown: ${entry.id}`);
+    }
+    ids.push(entry.id);
+  }
+  return ids;
+}
+
+export function manifestVariantsFor(
+  variants: readonly LlmVariant[]
+): ManifestVariant[] {
+  return variants
+    .map((id) => ({ id, promptVersion: variantPromptVersion(id) }))
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }

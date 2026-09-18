@@ -21,17 +21,28 @@ export {
   greedyCpuPolicy,
   greedyPlayer,
   llmCpuPolicy,
+  llmPolicyIdForVariant,
   mix,
   optimalCpuPolicy,
+  parseVariantsList,
   pickBestByCatalogOrder,
+  projectQuotaCalls,
+  assertQuotaWithinCap,
   randomCpuPolicy,
   resolvePlayerPolicy,
-  seededRandomPlayer
+  seededRandomPlayer,
+  variantPromptVersion,
+  variantToPlayOptions,
+  LLM_VARIANTS,
+  QUOTA_CALL_CAP,
+  QUOTA_DECISIONS_PER_MATCH
 } from "./policies";
 export type {
   CpuDecideResult,
   CpuPolicy,
   CpuPolicyId,
+  LlmCpuPolicyOptions,
+  LlmVariant,
   OptimalCpuPolicy,
   PlayerPolicy
 } from "./policies";
@@ -81,16 +92,20 @@ export type {
 export {
   aggregateLlm,
   aggregateMatches,
+  deltaVsGreedyHeldoutBaseline,
   metricsForChosenMoves,
   percentile,
   randomPolicyExpectation,
-  wilsonInterval
+  wilsonInterval,
+  GREEDY_HELDOUT_MEAN_REGRET,
+  GREEDY_HELDOUT_OPTIMAL_RATE
 } from "./metrics";
 export type {
   LlmAggregate,
   MatchAggregate,
   ProviderLlmAggregate,
   SnapshotPolicyMetrics,
+  VariantBaselineDelta,
   WilsonInterval
 } from "./metrics";
 

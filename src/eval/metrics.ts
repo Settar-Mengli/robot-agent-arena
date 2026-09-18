@@ -401,3 +401,29 @@ export function decisionFromTrace(
     (trace.validation !== undefined && !trace.validation.ok);
   return { skillId, invalid };
 }
+
+/** Held-out greedy baseline from EVAL.md (D-024). */
+export const GREEDY_HELDOUT_OPTIMAL_RATE = 0.5;
+export const GREEDY_HELDOUT_MEAN_REGRET = 0.5;
+
+export type VariantBaselineDelta = {
+  variant: string;
+  optimalRate: number;
+  meanRegret: number;
+  deltaOptimalRate: number;
+  deltaMeanRegret: number;
+};
+
+export function deltaVsGreedyHeldoutBaseline(
+  variant: string,
+  optimalRate: number,
+  meanRegret: number
+): VariantBaselineDelta {
+  return {
+    variant,
+    optimalRate,
+    meanRegret,
+    deltaOptimalRate: optimalRate - GREEDY_HELDOUT_OPTIMAL_RATE,
+    deltaMeanRegret: meanRegret - GREEDY_HELDOUT_MEAN_REGRET
+  };
+}
