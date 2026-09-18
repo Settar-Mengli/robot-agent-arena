@@ -813,6 +813,9 @@ async function runLlmMode(
       const entry = existingManifest.splits[split]!;
       assertScenarioIdsInSuite(split, entry.scenarioIds);
       scenarios = selectScenariosByIds(suite, entry.scenarioIds);
+      if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
+        scenarios = selectDiverseScenarios(scenarios, args.maxMatches);
+      }
     } else {
       scenarios = selectScenariosForLlmMode(
         suite,
