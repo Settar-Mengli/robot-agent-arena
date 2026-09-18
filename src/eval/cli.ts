@@ -53,6 +53,33 @@ type CliArgs = {
   writeReport: boolean;
   snapshots: boolean;
   allSeeds: boolean;
+  replayProvider?: string;
+};
+
+const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
+const REPLAY_PLACEHOLDER_ACCOUNT = "replay-placeholder-account";
+
+const FIXTURE_HOST_TO_PROVIDER: Readonly<Record<string, string>> = {
+  "generativelanguage.googleapis.com": "gemini",
+  "api.groq.com": "groq",
+  "api.mistral.ai": "mistral",
+  "openrouter.ai": "openrouter",
+  "api.cloudflare.com": "cloudflare"
+};
+
+const PROVIDER_API_KEY_ENV: Readonly<Record<string, string>> = {
+  groq: "GROQ_API_KEY",
+  cloudflare: "CLOUDFLARE_API_TOKEN",
+  gemini: "GEMINI_API_KEY",
+  mistral: "MISTRAL_API_KEY",
+  openrouter: "OPENROUTER_API_KEY"
+};
+
+export type ReplayEnvDerivation = {
+  env: Record<string, string>;
+  provider: string;
+  model: string;
+  reason: string;
 };
 
 export type LlmModeDeps = {
@@ -110,17 +137,131 @@ function parseArgs(argv: string[]): CliArgs {
       args.snapshots = false;
     } else if (flag === "--all-seeds") {
       args.allSeeds = true;
+    } else if (flag === "--replay-provider" && next) {
+      args.replayProvider = next.trim().toLowerCase();
+      i += 1;
     }
   }
 
   if (
-    (args.mode === "record" || args.mode === "live") &&
+    (args.mode === "record" ||
+      args.mode === "live" ||
+      args.mode === "replay") &&
     !args.suiteExplicit
   ) {
     args.suite = "dev";
   }
 
   return args;
+}
+
+function providerModelEnvKey(provider: string): string {
+  return `${provider.toUpperCase()}_MODEL`;
+}
+
+/**
+ * Scan committed fixtures and build a placeholder env so replay needs no API keys.
+ * Provider pick: most fixtures, then alphabetical name; `--replay-provider` overrides.
+ */
+export async function deriveReplayEnvFromFixtures(
+  fixturesDir: string,
+  replayProvider?: string
+): Promise<ReplayEnvDerivation> {
+  let names: string[];
+  try {
+    names = (await readdir(fixturesDir)).filter((n) => n.endsWith(".json"));
+  } catch {
+    names = [];
+  }
+
+  if (names.length === 0) {
+    throw new Error(
+      `No fixtures in ${fixturesDir.replace(/\\/g, "/")} — run npm run eval:record first`
+    );
+  }
+
+  type Agg = { count: number; models: Map<string, number> };
+  const byProvider = new Map<string, Agg>();
+
+  for (const name of names) {
+    const raw = JSON.parse(
+      await readFile(join(fixturesDir, name), "utf8")
+    ) as { request?: { host?: unknown; model?: unknown } };
+    const host =
+      typeof raw.request?.host === "string" ? raw.request.host : undefined;
+    const model =
+      typeof raw.request?.model === "string" ? raw.request.model : undefined;
+    if (host === undefined || model === undefined) {
+      continue;
+    }
+    const provider = FIXTURE_HOST_TO_PROVIDER[host];
+    if (provider === undefined) {
+      continue;
+    }
+    let agg = byProvider.get(provider);
+    if (agg === undefined) {
+      agg = { count: 0, models: new Map() };
+      byProvider.set(provider, agg);
+    }
+    agg.count += 1;
+    agg.models.set(model, (agg.models.get(model) ?? 0) + 1);
+  }
+
+  if (byProvider.size === 0) {
+    throw new Error(
+      `No recognizable provider hosts in fixtures under ${fixturesDir.replace(/\\/g, "/")} — run npm run eval:record first`
+    );
+  }
+
+  const ranked = [...byProvider.entries()].sort((a, b) => {
+    if (b[1].count !== a[1].count) {
+      return b[1].count - a[1].count;
+    }
+    return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
+  });
+
+  let provider: string;
+  let reason: string;
+  if (replayProvider !== undefined && replayProvider.length > 0) {
+    if (!byProvider.has(replayProvider)) {
+      const available = [...byProvider.keys()].sort().join(", ");
+      throw new Error(
+        `Unknown or unavailable --replay-provider '${replayProvider}' (fixtures have: ${available})`
+      );
+    }
+    provider = replayProvider;
+    reason = `--replay-provider ${provider}`;
+  } else {
+    provider = ranked[0]![0];
+    const count = ranked[0]![1].count;
+    reason = `most fixtures (${count}), then alphabetical`;
+  }
+
+  const models = byProvider.get(provider)!.models;
+  const model = [...models.entries()].sort((a, b) => {
+    if (b[1] !== a[1]) {
+      return b[1] - a[1];
+    }
+    return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
+  })[0]![0];
+
+  const apiKeyEnv = PROVIDER_API_KEY_ENV[provider];
+  if (apiKeyEnv === undefined) {
+    throw new Error(`No API key env mapping for provider '${provider}'`);
+  }
+
+  const env: Record<string, string> = {
+    [apiKeyEnv]: REPLAY_PLACEHOLDER_KEY,
+    [providerModelEnvKey(provider)]: model,
+    INFERENCE_PROVIDER_ORDER: provider,
+    INFERENCE_MAX_PROVIDERS: "1"
+  };
+
+  if (provider === "cloudflare") {
+    env.CLOUDFLARE_ACCOUNT_ID = REPLAY_PLACEHOLDER_ACCOUNT;
+  }
+
+  return { env, provider, model, reason };
 }
 
 /** Exported for tests. */
@@ -421,15 +562,39 @@ async function runLlmMode(
   const error = deps.error ?? ((line: string) => console.error(line));
 
   if (!deps.skipGuards) {
-    if (process.env.CI) {
+    if (process.env.CI && args.mode !== "replay") {
       error("record/live modes refuse to run under CI");
       return 1;
     }
-    tryLoadEnvFile();
+    if (args.mode !== "replay") {
+      tryLoadEnvFile();
+    }
   }
 
-  const env = deps.env ?? process.env;
-  if (!deps.skipGuards) {
+  const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
+  let env: EnvMap = deps.env ?? process.env;
+
+  if (args.mode === "replay" && deps.env === undefined) {
+    try {
+      const derived = await deriveReplayEnvFromFixtures(
+        fixturesDir,
+        args.replayProvider
+      );
+      env = { ...process.env, ...derived.env };
+      log(
+        `replay provider: ${derived.provider}/${derived.model} (${derived.reason})`
+      );
+      log("replay is keyless: API keys are placeholders derived from fixtures");
+      if (args.suite === "heldout" || args.suite === "all") {
+        log(
+          "note: heldout/all replay will fixture-miss until a heldout eval:record exists"
+        );
+      }
+    } catch (err) {
+      error(err instanceof Error ? err.message : String(err));
+      return 1;
+    }
+  } else if (!deps.skipGuards) {
     const providers = resolveActiveProviders(env);
     if (providers.length === 0) {
       error("No providers configured (need at least one API key)");
@@ -441,7 +606,6 @@ async function runLlmMode(
     log("Quota warning: free-tier providers may rate-limit or drop requests.");
   }
 
-  const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
   const store = deps.store ?? createDirStore(fixturesDir);
 
   let recordingFetch: RecordingFetch | undefined;

@@ -1,8 +1,9 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
+  deriveReplayEnvFromFixtures,
   formatLlmSummary,
   resolveCliArgs,
   runLlmModeForTest,
@@ -36,6 +37,23 @@ function openaiOk(skillId: string): Response {
   );
 }
 
+async function writeFixture(
+  dir: string,
+  name: string,
+  host: string,
+  model: string
+): Promise<void> {
+  await writeFile(
+    join(dir, name),
+    `${JSON.stringify({
+      key: name.replace(/\.json$/, ""),
+      request: { host, model, messages: [] },
+      response: {}
+    })}\n`,
+    "utf8"
+  );
+}
+
 describe("eval cli args", () => {
   it("defaults suite to dev for record when --suite is omitted", () => {
     const args = resolveCliArgs(["--mode", "record"]);
@@ -43,15 +61,27 @@ describe("eval cli args", () => {
     expect(args.suiteExplicit).toBe(false);
   });
 
-  it("keeps suite all for baseline/replay by default", () => {
+  it("defaults suite to dev for replay when --suite is omitted", () => {
+    const args = resolveCliArgs(["--mode", "replay"]);
+    expect(args.suite).toBe("dev");
+    expect(args.suiteExplicit).toBe(false);
+  });
+
+  it("keeps suite all for baseline by default", () => {
     expect(resolveCliArgs(["--mode", "baseline"]).suite).toBe("all");
-    expect(resolveCliArgs(["--mode", "replay"]).suite).toBe("all");
   });
 
   it("honors explicit --suite for record", () => {
     expect(
       resolveCliArgs(["--mode", "record", "--suite", "heldout"]).suite
     ).toBe("heldout");
+  });
+
+  it("parses --replay-provider", () => {
+    expect(
+      resolveCliArgs(["--mode", "replay", "--replay-provider", "Gemini"])
+        .replayProvider
+    ).toBe("gemini");
   });
 
   it("parses --all-seeds", () => {
@@ -71,6 +101,69 @@ describe("eval cli args", () => {
     expect(firstN.map((s) => s.id)).toEqual(suite.slice(0, 4).map((s) => s.id));
     expect(allSeeds.map((s) => s.id)).toEqual(firstN.map((s) => s.id));
     expect(stratified.map((s) => s.id)).not.toEqual(firstN.map((s) => s.id));
+  });
+});
+
+describe("keyless replay env derivation", () => {
+  it("derives env from fixture hosts without real keys", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "eval-replay-env-"));
+    await writeFixture(dir, "a.json", "api.groq.com", "openai/gpt-oss-20b");
+    await writeFixture(dir, "b.json", "api.groq.com", "openai/gpt-oss-20b");
+    await writeFixture(
+      dir,
+      "c.json",
+      "generativelanguage.googleapis.com",
+      "gemini-3.5-flash-lite"
+    );
+
+    const derived = await deriveReplayEnvFromFixtures(dir);
+    expect(derived.provider).toBe("groq");
+    expect(derived.model).toBe("openai/gpt-oss-20b");
+    expect(derived.env.GROQ_API_KEY).toBeTruthy();
+    expect(derived.env.GROQ_API_KEY).not.toMatch(/sk-|gsk_/i);
+    expect(derived.env.INFERENCE_PROVIDER_ORDER).toBe("groq");
+    expect(derived.env.GROQ_MODEL).toBe("openai/gpt-oss-20b");
+    expect(derived.reason).toContain("most fixtures");
+  });
+
+  it("honors --replay-provider override", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "eval-replay-override-"));
+    await writeFixture(dir, "a.json", "api.groq.com", "openai/gpt-oss-20b");
+    await writeFixture(dir, "b.json", "api.groq.com", "openai/gpt-oss-20b");
+    await writeFixture(
+      dir,
+      "c.json",
+      "generativelanguage.googleapis.com",
+      "gemini-3.5-flash-lite"
+    );
+
+    const derived = await deriveReplayEnvFromFixtures(dir, "gemini");
+    expect(derived.provider).toBe("gemini");
+    expect(derived.model).toBe("gemini-3.5-flash-lite");
+    expect(derived.env.GEMINI_API_KEY).toBeTruthy();
+    expect(derived.reason).toContain("--replay-provider");
+  });
+
+  it("errors on empty fixtures dir", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "eval-replay-empty-"));
+    await mkdir(join(dir, "nested"), { recursive: true });
+    await expect(deriveReplayEnvFromFixtures(dir)).rejects.toThrow(
+      /run npm run eval:record first/
+    );
+  });
+
+  it("includes cloudflare account placeholder when host appears", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "eval-replay-cf-"));
+    await writeFixture(
+      dir,
+      "a.json",
+      "api.cloudflare.com",
+      "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+    );
+    const derived = await deriveReplayEnvFromFixtures(dir);
+    expect(derived.provider).toBe("cloudflare");
+    expect(derived.env.CLOUDFLARE_API_TOKEN).toBeTruthy();
+    expect(derived.env.CLOUDFLARE_ACCOUNT_ID).toBeTruthy();
   });
 });
 
