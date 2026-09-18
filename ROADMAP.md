@@ -50,16 +50,22 @@ Multi-provider free-tier LLM client: structured output, timeout, retry, provider
 Battle-state + personality → validated legal move via `playAgentTurn`; plain `stepBattle` seeded picker is fallback (D-015/D-022). Deterministic greedy baseline for evals. Optional `selectCpuSkillId` on `stepBattle`.
 
 #### M-EVAL — Eval harness (signature piece) — DONE
-Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Held-out LLM measurement published: greedy matches the LLM on the sampled matchups and snapshot optimality — **no measured LLM advantage** today. Next: **M-TOOLS** as a pre-registered ablation against this baseline (D-024).
+Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). Held-out LLM still ties greedy on the n=6 sample. Fixture manifest + multi-provider keyless `--suite all` replay.
 
-#### M-TOOLS — Grounding + memory — NEXT
-Grounding tool (computed affordable/threat facts so the agent decides on real state, not hallucination) + per-match memory of player tendencies. Proven by ablation against the held-out M-EVAL baseline (D-024 falsifier: must beat 50% snapshot optimality).
+#### M-ENV — Deepen the environment — NEXT (D-025 batch 2)
+Address seed-spread / snapshot reselection (D-026) and enlarge strategic depth so agent improvements are easier to measure. Conditional on the discrimination verdict (satisfied).
+
+#### M-TOOLS — Grounding + memory
+Grounding tool (computed affordable/threat facts) + per-match memory. Ablation against held-out baseline (D-024). After M-ENV per D-025.
+
+#### M-BENCH — Model comparison bench
+BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025).
 
 #### M-COACH — Post-battle coach
 LLM post-battle coach: turns the battle log into tailored advice (surfaces in the Report screen in M-UI).
 
 #### M-UI — Minimal functional UI (+ deferred serverless proxy)
-Minimal functional UI built to showcase the agents; visual polish optional afterward. Uses store/lib over the engine; React/Tailwind/Zustand installed then. Serverless inference proxy lands here when the browser needs secret-safe calls.
+Part 1 Builder+Arena; part 2 Report+coach+bench surfacing (D-025 batches 5–6). Serverless inference proxy when the browser needs secret-safe calls.
 ### Stretch (optional)
 - Natural-language robot builder (NL → validated `AgentConfig`).
 - An agent that adapts across matches (bandit/RL). Revisit a heavier backend/DB only if cross-match learning, leaderboards, or stored eval runs require real persistence beyond localStorage.

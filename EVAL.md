@@ -13,6 +13,7 @@ npm run eval              # baseline (random + greedy), writes evals/out/baselin
 npm run eval:report       # baseline + regenerate EVAL.md baseline block
 npm run eval:replay       # LLM via recorded fixtures (fails on fixture_miss)
 npm run eval:record       # local only: call providers, reuse fixtures, write new ones
+node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate   # keyless: random vs greedy vs optimal
 ```
 
 `eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures; CI runs the same command). Pass `--suite heldout` / `all` only after a heldout record exists, or replay will fixture-miss. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings); **replay still uses first-N-by-id** so committed fixtures stay green until a stratified record run is committed. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice.
@@ -130,23 +131,48 @@ Independently verified: greedy CPU matches the LLM on **every** row (result and 
 **Headline:** On this task the deterministic greedy bot is indistinguishable from the LLM on both tactical optimality (held-out snapshots) and match outcomes across these six matchups. **The LLM shows no measured advantage on this task today.**
 <!-- llm:end -->
 
+## Does the environment discriminate?
+
+Keyless run: `node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate` (full 120-scenario suites × random / greedy / optimal; 0 inexact oracle turns).
+
+**Verdict: DISCRIMINATES** — optimal’s CPU win-rate Wilson CI is disjoint from greedy’s on both splits, and **67.1%** of greedy-playthrough decision points have a non-zero oracle value spread (>25% threshold).
+
+| split | policy | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin |
+| --- | --- | ---: | --- | ---: | ---: | ---: | ---: |
+| dev | random | 120 | 5.00% [2.31%, 10.48%] | 9.17% | 85.83% | 17.89 | -5.32 |
+| dev | greedy | 120 | 10.83% [6.44%, 17.66%] | 9.17% | 80.00% | 17.89 | -4.46 |
+| dev | optimal | 120 | 83.33% [75.65%, 88.94%] | 0.00% | 16.67% | 14.68 | 8.05 |
+| heldout | random | 120 | 6.67% [3.42%, 12.61%] | 0.00% | 93.33% | 18.60 | -5.09 |
+| heldout | greedy | 120 | 9.17% [5.20%, 15.67%] | 11.67% | 79.17% | 18.60 | -4.69 |
+| heldout | optimal | 120 | 88.33% [81.37%, 92.92%] | 0.00% | 11.67% | 17.85 | 13.97 |
+
+Decision headroom (oracle values along greedy playthroughs):
+
+| split | points | flat | non-zero spread | greedy suboptimal | mean / median / max spread |
+| --- | ---: | ---: | ---: | ---: | --- |
+| dev | 340 | 33.2% | 66.8% | 11.5% | 319.33 / 2.00 / 2007.00 |
+| heldout | 381 | 32.5% | 67.5% | 10.0% | 107.27 / 2.00 / 2008.00 |
+
+There is large room above greedy: optimal wins ~83–88% of matches while greedy wins ~9–11%. The earlier LLM↔greedy tie is therefore **not** evidence that the environment cannot separate good from bad play — only that today’s LLM mixture is not capturing that headroom.
+
 ## Findings
 
-- **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on this task today. Pre-registered next test: M-TOOLS grounding ablation (D-024).
-- **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attempt/decision attribution is now in the eval summary JSON.
-- **Held-out independence (fixed):** Earlier seed-only held-out duplicated dev snapshot states 20/20; disjoint archetypes (`aegis` / `tempest` / `mnemonic`) now yield state-key overlap **0**.
-- **Keyless replay + CI:** `eval:replay` derives placeholder provider env from fixture hosts and is enforced in CI. Default replay is first-N-by-id (dev fixtures); held-out fixtures were recorded under stratified selection — `replay --suite all` first-N heldout rows can fixture-miss until selection/fixtures align.
-- **Sampling:** Record/live use **archetype-first** stratified selection. Replay stays first-N-by-id for committed first-N fixtures.
-- **Snapshots:** Dev snapshots remain 100% greedy-optimal (non-discriminating). Held-out snapshots sit at 50% for greedy and LLM.
-- **Providers:** Cloudflare JSON double-escape; Mistral free-tier 429s / wrapping; OpenRouter free-pool limits. This held-out run used Gemini → OpenRouter → Groq failover.
+- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. Next batch per D-025: **M-ENV** (deepen the environment), then M-TOOLS.
+- **Held-out LLM vs greedy:** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matches the LLM on all six outcomes/turn counts and on snapshot optimality (50% / 0.50). **No measured LLM advantage** on that sample. Pre-registered grounding test remains D-024.
+- **Reliability:** 84 failed provider attempts (mostly Gemini 429s) produced **zero** decision fallbacks; live latency p50 was 206ms. Per-provider attribution is in the eval summary JSON.
+- **Held-out independence (fixed):** Disjoint archetypes (`aegis` / `tempest` / `mnemonic`); snapshot state-key overlap **0**.
+- **Keyless replay + CI:** Fixture `manifest.json` records scenario ids per split; multi-provider keyless replay cascades across all fixture hosts. CI runs `eval:replay -- --suite all` (10 matches: 4 dev + 6 heldout).
+- **Sampling:** Record/live use archetype-first stratified selection; replay follows the manifest when present.
+- **Snapshots:** Dev snapshots remain 100% greedy-optimal. Held-out snapshots sit at 50% for greedy and LLM — while match-level optimal shows large headroom (see discrimination section).
+- **Providers:** Cloudflare JSON double-escape; Mistral free-tier 429s / wrapping; OpenRouter free-pool limits.
 
 ## Limitations
 
 - Oracle is a fixed-policy best response, not an equilibrium.
 - Held-out LLM match sample is small (**n=6**) and all six used **FRACTURE** (archetype-first stratification varies archetype and policy before opponent, so SENTINEL-X was not sampled at n=6).
-- “The LLM” here is a **mixture of three models** via failover, not a single system under test.
+- “The LLM” in the held-out record is a **mixture of three models** via failover, not a single system under test.
 - Snapshot optimality at n=20 has **no confidence interval**.
-- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space).
+- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread quirks and greedy-suboptimal snapshot reselection are deferred to M-ENV (D-026).
 - Free-tier model volatility can change live/record results.
 - Replay latency is not meaningful.
 - Fictional environment vocabulary only.

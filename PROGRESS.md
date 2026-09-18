@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-17
-- Branch: `feat/eval-heldout-results` (see open PR); base `main`
-- Current state: Engine, data, infra, inference (M-INF), agent (M-AGENT), and eval harness (M-EVAL) are on main. Held-out LLM results + per-provider attribution + fixtures in flight on this branch. Decisions D-021–D-024 in force. No UI yet.
-- Verification: `npm run typecheck` / `lint` / `coverage` (+ CI `eval:replay`) green on prior merges
-- Working tree: `feat/eval-heldout-results`
+- Branch: `feat/eval-discrimination` (PR open); base `main`
+- Current state: M-EVAL complete with discrimination verdict **DISCRIMINATES**; fixture manifest + multi-provider keyless suite-all replay. Decisions D-021–D-026 in force. Next: **M-ENV** (D-025).
+- Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all`
+- Working tree: `feat/eval-discrimination`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -37,7 +37,7 @@
 - M-EVAL (PR #10): `src/eval/` harness, snapshot suites, recorded fixtures, Vite `runnerImport` CLI, committed EVAL.md baseline, D-023.
 
 ## Current Work
-- Document held-out LLM results (greedy indistinguishable from LLM on sampled matchups) and pre-register M-TOOLS hypothesis (D-024).
+- Discrimination batch docs (D-025 / D-026); environment verdict DISCRIMINATES.
 
 ## Blockers
 - None.
@@ -45,10 +45,9 @@
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
-- Keyless `eval:replay --suite all` first-N heldout can fixture-miss (held-out fixtures recorded under stratified selection; replay stays first-N). Documented in EVAL.md Findings.
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/eval-heldout-results`.
+- See `git status` / PR diff on `feat/eval-discrimination`.
 
 ## Exact Next Step
-**M-TOOLS** ablation (grounding on vs off) against the held-out baseline in EVAL.md / D-024. UI remains deferred.
+**M-ENV** (D-025 batch 2 / D-026 deferred items). Then M-TOOLS (D-024). UI remains deferred.
