@@ -15,7 +15,7 @@ export type ManifestSplit = {
   /** Optional; absent = legacy base-only replay. */
   variants?: ManifestVariant[];
   /** Which snapshot suite was evaluated; absent = standard. */
-  snapshotSuite?: "standard" | "pivotal";
+  snapshotSuite?: "standard" | "pivotal" | "adversarial";
 };
 
 export type FixtureManifest = {

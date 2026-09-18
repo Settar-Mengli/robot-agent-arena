@@ -8,7 +8,7 @@ import {
 import type { BattleRuntime, SkillId } from "../engine";
 import { createGreedySelector } from "../agent";
 import { resolvePlayerPolicy } from "./policies";
-import { bestResponse } from "./oracle";
+import { bestResponse, regret } from "./oracle";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
 
 export type DecisionSnapshot = {
@@ -45,6 +45,31 @@ export type PivotalSnapshotSuite = {
 
 export type StakeTailCounts = Record<
   (typeof STAKE_TAIL_THRESHOLDS)[number],
+  number
+>;
+
+export const ADVERSARIAL_MIN_REGRET = 100;
+export const ADVERSARIAL_TARGET_COUNT = 20;
+export const ADVERSARIAL_REGRET_TAIL_THRESHOLDS = [1, 100, 500, 1000] as const;
+
+export type AdversarialDecisionSnapshot = DecisionSnapshot & {
+  spread: number;
+  greedyRegret: number;
+  greedySkillId: SkillId;
+};
+
+export type AdversarialSnapshotSuite = {
+  scenariosScanned: number;
+  minRegret: number;
+  targetCount: number;
+  count: number;
+  snapshots: AdversarialDecisionSnapshot[];
+  /** Present when count < targetCount after a full scan. */
+  warning?: string;
+};
+
+export type RegretTailCounts = Record<
+  (typeof ADVERSARIAL_REGRET_TAIL_THRESHOLDS)[number],
   number
 >;
 
@@ -335,6 +360,135 @@ export function countStakeTail(split: EvalSplit): {
   const counts = {} as StakeTailCounts;
   for (const threshold of STAKE_TAIL_THRESHOLDS) {
     counts[threshold] = spreads.filter((s) => s >= threshold).length;
+  }
+  return { scenariosScanned, counts };
+}
+
+function withAdversarialFields(
+  snap: DecisionSnapshot
+): AdversarialDecisionSnapshot {
+  const select = createGreedySelector(snap.runtime.session.cpu);
+  const greedySkillId = select(snap.runtime.cpu, snap.runtime.player);
+  return {
+    ...snap,
+    spread: valueSpread(snap.values),
+    greedyRegret: regret(snap.values, greedySkillId),
+    greedySkillId
+  };
+}
+
+function compareAdversarial(
+  a: AdversarialDecisionSnapshot,
+  b: AdversarialDecisionSnapshot
+): number {
+  if (a.greedyRegret !== b.greedyRegret) {
+    return b.greedyRegret - a.greedyRegret;
+  }
+  if (a.scenarioId !== b.scenarioId) {
+    return a.scenarioId < b.scenarioId ? -1 : 1;
+  }
+  return a.runtime.session.turn - b.runtime.session.turn;
+}
+
+export type SelectAdversarialOptions = {
+  minRegret?: number;
+  targetCount?: number;
+};
+
+/**
+ * Rank qualifying candidates by greedyRegret descending; take up to targetCount.
+ * Never throws on shortfall — returns all qualifiers and a warning string.
+ */
+export function selectAdversarialSnapshots(
+  candidates: readonly AdversarialDecisionSnapshot[],
+  options: SelectAdversarialOptions = {}
+): {
+  snapshots: AdversarialDecisionSnapshot[];
+  count: number;
+  warning?: string;
+} {
+  const minRegret = options.minRegret ?? ADVERSARIAL_MIN_REGRET;
+  const targetCount = options.targetCount ?? ADVERSARIAL_TARGET_COUNT;
+  const qualified = candidates
+    .filter((c) => c.greedyRegret >= minRegret)
+    .slice()
+    .sort(compareAdversarial);
+  const snapshots = qualified.slice(0, targetCount);
+  const count = snapshots.length;
+  if (count < targetCount) {
+    return {
+      snapshots,
+      count,
+      warning: `only ${count} of ${targetCount} adversarial points qualified at greedyRegret>=${minRegret}`
+    };
+  }
+  return { snapshots, count };
+}
+
+export type GenerateAdversarialOptions = SelectAdversarialOptions & {
+  /** Cap scenarios scanned (for tests). Default: entire split. */
+  maxScenarios?: number;
+};
+
+/**
+ * Adversarial snapshot suite: exact non-flat points where greedy regret >= minRegret,
+ * ranked by greedyRegret. Always full-split (unless maxScenarios). Shortfall does not throw.
+ */
+export function generateAdversarialSnapshots(
+  split: EvalSplit,
+  options: GenerateAdversarialOptions = {}
+): AdversarialSnapshotSuite {
+  const minRegret = options.minRegret ?? ADVERSARIAL_MIN_REGRET;
+  const targetCount = options.targetCount ?? ADVERSARIAL_TARGET_COUNT;
+  const suite = buildMatchSuite(split);
+  const limit = options.maxScenarios ?? suite.length;
+  const candidates: AdversarialDecisionSnapshot[] = [];
+  let scenariosScanned = 0;
+
+  for (let i = 0; i < suite.length && i < limit; i += 1) {
+    const scenario = suite[i]!;
+    for (const snap of collectFromScenario(scenario)) {
+      candidates.push(withAdversarialFields(snap));
+    }
+    scenariosScanned = i + 1;
+  }
+
+  const selected = selectAdversarialSnapshots(candidates, {
+    minRegret,
+    targetCount
+  });
+  const result: AdversarialSnapshotSuite = {
+    scenariosScanned,
+    minRegret,
+    targetCount,
+    count: selected.count,
+    snapshots: selected.snapshots
+  };
+  if (selected.warning !== undefined) {
+    result.warning = selected.warning;
+  }
+  return result;
+}
+
+/**
+ * Full-split scan: count exact non-flat candidates meeting each greedyRegret threshold.
+ */
+export function countRegretTail(split: EvalSplit): {
+  scenariosScanned: number;
+  counts: RegretTailCounts;
+} {
+  const suite = buildMatchSuite(split);
+  const regrets: number[] = [];
+  let scenariosScanned = 0;
+  for (let i = 0; i < suite.length; i += 1) {
+    for (const snap of collectFromScenario(suite[i]!)) {
+      regrets.push(withAdversarialFields(snap).greedyRegret);
+    }
+    scenariosScanned = i + 1;
+  }
+  const counts = {} as RegretTailCounts;
+  for (const threshold of ADVERSARIAL_REGRET_TAIL_THRESHOLDS) {
+    counts[threshold] = regrets.filter((r) => r >= threshold).length;
   }
   return { scenariosScanned, counts };
 }

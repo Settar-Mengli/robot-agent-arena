@@ -80,7 +80,7 @@ type CliArgs = {
   replayProvider?: string;
   variantsRaw?: string;
   forceQuota: boolean;
-  snapshotSuite: "standard" | "pivotal" | "both";
+  snapshotSuite: "standard" | "pivotal" | "adversarial" | "both" | "all";
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -180,9 +180,15 @@ function parseArgs(argv: string[]): CliArgs {
     } else if (flag === "--force-quota") {
       args.forceQuota = true;
     } else if (flag === "--snapshot-suite" && next) {
-      if (next !== "standard" && next !== "pivotal" && next !== "both") {
+      if (
+        next !== "standard" &&
+        next !== "pivotal" &&
+        next !== "adversarial" &&
+        next !== "both" &&
+        next !== "all"
+      ) {
         throw new Error(
-          `--snapshot-suite must be standard|pivotal|both, got ${next}`
+          `--snapshot-suite must be standard|pivotal|adversarial|both|all, got ${next}`
         );
       }
       args.snapshotSuite = next;
@@ -408,7 +414,7 @@ export function identicalOutcomeWarning(
   return `warning: all ${results.length} matches ended identically (${first.outcome.result}, ${first.totalTurns} turns) — this sample may not discriminate between policies`;
 }
 
-type SnapshotSuiteKind = "standard" | "pivotal";
+type SnapshotSuiteKind = "standard" | "pivotal" | "adversarial";
 
 async function loadCommittedSnapshots(
   split: EvalSplit,
@@ -418,7 +424,9 @@ async function loadCommittedSnapshots(
   const file =
     kind === "pivotal"
       ? `snapshots.pivotal.${split}.json`
-      : `snapshots.${split}.json`;
+      : kind === "adversarial"
+        ? `snapshots.adversarial.${split}.json`
+        : `snapshots.${split}.json`;
   const path = join(root, "evals/suites", file);
   const raw = JSON.parse(await readFile(path, "utf8")) as {
     snapshots: DecisionSnapshot[];
@@ -433,18 +441,25 @@ function resolveSnapshotKinds(
 ): SnapshotSuiteKind[] {
   if (args.mode === "replay" && args.snapshotSuite === "standard") {
     const fromManifest = manifest?.splits[split]?.snapshotSuite;
-    if (fromManifest === "pivotal" || fromManifest === "standard") {
+    if (
+      fromManifest === "pivotal" ||
+      fromManifest === "standard" ||
+      fromManifest === "adversarial"
+    ) {
       return [fromManifest];
     }
   }
   if (args.snapshotSuite === "both") {
     return ["standard", "pivotal"];
   }
+  if (args.snapshotSuite === "all") {
+    return ["standard", "pivotal", "adversarial"];
+  }
   return [args.snapshotSuite];
 }
 
 function snapshotResultKey(split: EvalSplit, kind: SnapshotSuiteKind): string {
-  return kind === "standard" ? split : `${split}:pivotal`;
+  return kind === "standard" ? split : `${split}:${kind}`;
 }
 
 async function runBaseline(args: CliArgs): Promise<BaselineReport> {

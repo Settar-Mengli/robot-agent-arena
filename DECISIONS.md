@@ -453,3 +453,21 @@ Discrimination shows ~75 points of win-rate headroom above greedy from rare cata
 
 Consequences:
 Re-run M-TOOLS ablation with `--snapshot-suite pivotal`. Per-decision snapshot results + prompt-version guard keep future ablations auditable. Next batch remains M-BENCH after that re-run.
+
+## D-029 Measure where the baseline fails
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+- Ablations that claim to beat a **baseline** must measure on points where that baseline **fails**. Selecting by stakes alone is insufficient when the baseline saturates the high-stakes set.
+- **Spread** (best − worst) selects lethal availability — greedy rule 1 often coincides with the oracle there, which is why pivotal suites show greedy at 100% / 95%.
+- **Adversarial** suites (`snapshots.adversarial.{dev,heldout}.json`) select exact non-flat points with `greedyRegret ≥ ADVERSARIAL_MIN_REGRET` (100), ranked by greedyRegret; greedy optimalRate is **0% by construction**. They are the measurement set for ablations (`--snapshot-suite adversarial`).
+- Motivating full-split regret-tail counts (@1 / @100 / @500 / @1000): **dev 39 / 3 / 3 / 3**; **heldout 38 / 1 / 1 / 1**. Selected: dev 3 (regret 2001), heldout 1 (regret 2002). Shortfall vs target 20 is accepted and recorded.
+- **Pivotal** (D-028) is retained as a **stakes probe**, not the ablation set. **Standard** suites remain for fixtures/CI.
+- Committed adversarial runtimes keep `turns` so `memory=match` summaries still work.
+
+Rationale:
+An ablation that only moves scores on points the baseline already solves cannot demonstrate improvement. Selecting by baseline regret makes failure the filter criterion.
+
+Consequences:
+Operator re-runs M-TOOLS with `--snapshot-suite adversarial` and pastes results into EVAL.md. Next batch remains **M-BENCH** after that publication.
