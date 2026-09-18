@@ -2,8 +2,8 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `feat/m-tools`; base `main` @ `06fa1b9`
-- Current state: M-EVAL complete; discrimination **DISCRIMINATES**. D-025 amend: M-ENV dropped; batch 2 is **M-TOOLS**. LLM↔greedy tie sits under ~75-point optimal headroom (both play poorly).
+- Branch: `feat/m-tools` (PR open); base `main` @ `06fa1b9`
+- Current state: **M-TOOLS implemented** (grounding + memory + variant ablation harness). Default prompt remains `agent-v1` (fixtures/CI green). Ablation **results pending** local record. D-027 grounding contract recorded. Next: **M-BENCH**.
 - Verification: typecheck / lint / coverage; CI `eval:replay -- --suite all`
 - Working tree: `feat/m-tools`
 
@@ -33,15 +33,16 @@
 - Multi-provider OpenAI-compatible inference client under `src/inference/` (M-INF, PR #6); external abort + per-attempt hook (M-AGENT c2).
 - MIT LICENSE (PR #7).
 - D-020 positioning docs.
-- M-AGENT (PR #9): `SelectCpuSkillId` seam; `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
-- M-EVAL (PR #10): `src/eval/` harness, snapshot suites, recorded fixtures, Vite `runnerImport` CLI, committed EVAL.md baseline, D-023.
+- M-AGENT (PR #9): `playAgentTurn` with validation/fallback/budget/trace; greedy baseline; D-021/D-022 docs.
+- M-EVAL (PR #10): eval harness, snapshot suites, fixtures, EVAL.md baseline, D-023.
 - Discrimination + fixture manifest + multi-provider keyless suite-all replay (PR #15); D-025/D-026.
+- M-TOOLS (this PR): grounding parity, memory, opt-in prompt variants, ablation quota harness; D-027.
 
 ## Current Work
-- M-TOOLS: normalize line endings; resolve D-025 M-ENV conditional → batch 2 is M-TOOLS.
+- Docs: grounding contract + ablation protocol (results empty pending operator record).
 
 ## Blockers
-- None.
+- None. Ablation numbers require a local keyed `eval:record` (not available to the agent).
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
@@ -52,4 +53,4 @@
 - See `git status` / PR diff on `feat/m-tools`.
 
 ## Exact Next Step
-Implement grounded fact computation (engine parity), opt-in prompt variants, per-match memory, and ablation harness (D-024). Then M-BENCH. UI remains deferred.
+Operator runs `npm run eval:record -- --suite heldout --variants base,grounded` and pastes results into EVAL.md Ablation section. Then **M-BENCH**. UI remains deferred.

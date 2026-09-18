@@ -52,10 +52,10 @@ Battle-state + personality → validated legal move via `playAgentTurn`; plain `
 #### M-EVAL — Eval harness (signature piece) — DONE
 Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). Held-out LLM still ties greedy on the n=6 sample. Fixture manifest + multi-provider keyless `--suite all` replay.
 
-#### M-TOOLS — Grounding + memory — NEXT (D-025 batch 2)
-Grounding tool (computed affordable/threat facts) + per-match memory. Ablation against held-out baseline (D-024). Discrimination showed ~75 points of headroom above greedy; the LLM↔greedy tie means both play poorly, not that the task is saturated. M-ENV dropped per D-025 amend.
+#### M-TOOLS — Grounding + memory — DONE (ablation results pending)
+Grounding tool (computed affordable/threat facts) + per-match memory. Opt-in prompt variants; default `agent-v1` unchanged for fixtures/CI. Ablation harness with quota projection. Protocol in EVAL.md; **numbers pending** operator `eval:record -- --suite heldout --variants base,grounded` (D-024 / D-027).
 
-#### M-BENCH — Model comparison bench
+#### M-BENCH — Model comparison bench — NEXT
 BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025).
 
 #### M-COACH — Post-battle coach

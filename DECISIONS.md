@@ -419,3 +419,20 @@ With M-ENV dropped as a batch (D-025 amend), these items stay **parked** until a
 
 Consequences:
 Do not regenerate suites for seed-spread / snapshot reselection during M-TOOLS.
+
+## D-027 Grounding contract
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+- **Facts are authoritative:** `computeGroundedFacts` mirrors the engine’s own combat rules (damage after defense, lethality, heal caps, energy drain, affordability). When grounding is on, the prompt states that `ENGINE_GROUNDED_FACTS` are engine-computed and the model must not recompute them.
+- **Parity is tested:** a skill×state grid asserts projections match `resolveAction` / battle stepping; threat uses next-turn player energy via `TURN_ENERGY_RECOVERY` (not current energy).
+- **Opt-in variants:** grounding and memory default **off**. Default `PROMPT_VERSION` remains `"agent-v1"` so existing fixtures and CI keyless replay stay valid. Opt-in versions: `agent-v2-grounded`, `agent-v2-memory`, `agent-v3-grounded-memory`.
+- **Prompt version is first-class:** every decision trace and ablation result carries `promptVersion`; manifest records `{ id, promptVersion }` per variant so replay reproduces the recorded set.
+- **Low health is shared:** per-match memory uses `LOW_HEALTH_RATIO` from the greedy baseline (0.4).
+
+Rationale:
+Fixture keys hash messages. Changing the default prompt would break CI. Ablation must compare arms without invalidating the committed keyless path. D-024’s prediction and falsifier apply to the operator’s local record run.
+
+Consequences:
+M-TOOLS code is in; ablation **numbers** land in EVAL.md only after a local `eval:record` with `--variants`. Next batch is M-BENCH.
