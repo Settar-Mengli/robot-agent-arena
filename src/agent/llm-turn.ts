@@ -7,6 +7,8 @@ import {
 } from "../inference";
 import { computeGroundedFacts } from "./grounding";
 import type { GroundedFacts } from "./grounding";
+import { summarizePlayerTendencies } from "./memory";
+import type { PlayerTendencies } from "./memory";
 import { observePostPlayerState } from "./observe";
 import {
   buildAgentMessages,
@@ -60,18 +62,33 @@ export async function playAgentTurn(
     );
   }
 
-  const promptVersion = resolvePromptVersion({ grounding: groundedFacts });
+  let playerTendencies: PlayerTendencies | undefined;
+  if (options.memory === "match") {
+    playerTendencies = summarizePlayerTendencies(runtime);
+  }
+
+  const promptVersion = resolvePromptVersion({
+    grounding: groundedFacts,
+    memory: playerTendencies
+  });
 
   const baseTrace = (): Pick<
     DecisionTrace,
-    "promptVersion" | "turn" | "budgetMs" | "elapsedMs" | "attempts" | "groundedFacts"
+    | "promptVersion"
+    | "turn"
+    | "budgetMs"
+    | "elapsedMs"
+    | "attempts"
+    | "groundedFacts"
+    | "playerTendencies"
   > => ({
     promptVersion,
     turn: runtime.session.turn,
     budgetMs,
     elapsedMs: now() - started,
     attempts: [...attempts],
-    groundedFacts
+    groundedFacts,
+    playerTendencies
   });
 
   if (observation === null) {
@@ -94,7 +111,8 @@ export async function playAgentTurn(
     observation,
     cpuConfig: runtime.session.cpu,
     catalog,
-    grounding: groundedFacts
+    grounding: groundedFacts,
+    memory: playerTendencies
   });
 
   const budgetSignal = AbortSignal.timeout(budgetMs);

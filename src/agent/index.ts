@@ -23,6 +23,8 @@ export type {
   GroundedSkillFact,
   GroundedThreatSkillFact
 } from "./grounding";
+export { summarizePlayerTendencies } from "./memory";
+export type { PlayerTendencies } from "./memory";
 export type {
   AgentFallbackReason,
   AgentInferenceOptions,

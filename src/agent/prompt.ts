@@ -7,10 +7,13 @@ import type {
 } from "../engine";
 import { MVP_SKILL_CATALOG } from "../engine";
 import type { GroundedFacts } from "./grounding";
+import type { PlayerTendencies } from "./memory";
 
 export const PROMPT_VERSIONS = {
   v1: "agent-v1",
-  grounded: "agent-v2-grounded"
+  grounded: "agent-v2-grounded",
+  memory: "agent-v2-memory",
+  groundedMemory: "agent-v3-grounded-memory"
 } as const;
 
 /** Default path — fixtures and CI replay hash against this version. */
@@ -26,13 +29,24 @@ export interface BuildAgentMessagesInput {
   catalog?: SkillCatalog;
   /** Opt-in engine-computed facts. Absent → byte-identical to agent-v1. */
   grounding?: GroundedFacts;
+  /** Opt-in per-match player tendency summary. Absent → unchanged default. */
+  memory?: PlayerTendencies;
 }
 
 export function resolvePromptVersion(input: {
   grounding?: GroundedFacts;
+  memory?: PlayerTendencies;
 }): string {
-  if (input.grounding !== undefined) {
+  const hasGrounding = input.grounding !== undefined;
+  const hasMemory = input.memory !== undefined;
+  if (hasGrounding && hasMemory) {
+    return PROMPT_VERSIONS.groundedMemory;
+  }
+  if (hasGrounding) {
     return PROMPT_VERSIONS.grounded;
+  }
+  if (hasMemory) {
+    return PROMPT_VERSIONS.memory;
   }
   return PROMPT_VERSIONS.v1;
 }
@@ -123,6 +137,12 @@ export function buildAgentMessages(input: BuildAgentMessagesInput): ChatMessage[
     );
   }
 
+  if (input.memory !== undefined) {
+    systemParts.push(
+      "A following user block labelled PLAYER_TENDENCIES summarizes observed player moves this match (derived from the battle log)."
+    );
+  }
+
   const messages: ChatMessage[] = [
     { role: "system", content: systemParts.join(" ") },
     { role: "user", content: JSON.stringify(data) }
@@ -132,6 +152,13 @@ export function buildAgentMessages(input: BuildAgentMessagesInput): ChatMessage[
     messages.push({
       role: "user",
       content: `ENGINE_GROUNDED_FACTS\n${JSON.stringify(input.grounding)}`
+    });
+  }
+
+  if (input.memory !== undefined) {
+    messages.push({
+      role: "user",
+      content: `PLAYER_TENDENCIES\n${JSON.stringify(input.memory)}`
     });
   }
 
