@@ -38,6 +38,14 @@ import {
   type BaselineReport,
   type BaselineSplitReport
 } from "./report";
+import {
+  assertScenarioIdsInSuite,
+  mergeManifest,
+  readManifest,
+  selectScenariosByIds,
+  writeManifest,
+  type FixtureManifest
+} from "./manifest";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -77,6 +85,9 @@ const PROVIDER_API_KEY_ENV: Readonly<Record<string, string>> = {
 
 export type ReplayEnvDerivation = {
   env: Record<string, string>;
+  /** Ordered providers enabled for keyless replay (most fixtures first). */
+  providers: Array<{ provider: string; model: string }>;
+  /** Primary (first) provider — for log lines. */
   provider: string;
   model: string;
   reason: string;
@@ -161,7 +172,8 @@ function providerModelEnvKey(provider: string): string {
 
 /**
  * Scan committed fixtures and build a placeholder env so replay needs no API keys.
- * Provider pick: most fixtures, then alphabetical name; `--replay-provider` overrides.
+ * Enables ALL providers found in fixtures (failover cascade). Order: most fixtures
+ * first, then alphabetical. `--replay-provider` forces a single provider.
  */
 export async function deriveReplayEnvFromFixtures(
   fixturesDir: string,
@@ -169,7 +181,9 @@ export async function deriveReplayEnvFromFixtures(
 ): Promise<ReplayEnvDerivation> {
   let names: string[];
   try {
-    names = (await readdir(fixturesDir)).filter((n) => n.endsWith(".json"));
+    names = (await readdir(fixturesDir)).filter(
+      (n) => n.endsWith(".json") && n !== "manifest.json"
+    );
   } catch {
     names = [];
   }
@@ -220,7 +234,15 @@ export async function deriveReplayEnvFromFixtures(
     return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
   });
 
-  let provider: string;
+  const pickModel = (agg: Agg): string =>
+    [...agg.models.entries()].sort((a, b) => {
+      if (b[1] !== a[1]) {
+        return b[1] - a[1];
+      }
+      return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
+    })[0]![0];
+
+  let selectedNames: string[];
   let reason: string;
   if (replayProvider !== undefined && replayProvider.length > 0) {
     if (!byProvider.has(replayProvider)) {
@@ -229,39 +251,43 @@ export async function deriveReplayEnvFromFixtures(
         `Unknown or unavailable --replay-provider '${replayProvider}' (fixtures have: ${available})`
       );
     }
-    provider = replayProvider;
-    reason = `--replay-provider ${provider}`;
+    selectedNames = [replayProvider];
+    reason = `--replay-provider ${replayProvider}`;
   } else {
-    provider = ranked[0]![0];
-    const count = ranked[0]![1].count;
-    reason = `most fixtures (${count}), then alphabetical`;
+    selectedNames = ranked.map(([name]) => name);
+    reason = `all providers by fixture count then alphabetical (${selectedNames.join(", ")})`;
   }
 
-  const models = byProvider.get(provider)!.models;
-  const model = [...models.entries()].sort((a, b) => {
-    if (b[1] !== a[1]) {
-      return b[1] - a[1];
-    }
-    return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
-  })[0]![0];
-
-  const apiKeyEnv = PROVIDER_API_KEY_ENV[provider];
-  if (apiKeyEnv === undefined) {
-    throw new Error(`No API key env mapping for provider '${provider}'`);
-  }
+  const providers = selectedNames.map((name) => ({
+    provider: name,
+    model: pickModel(byProvider.get(name)!)
+  }));
 
   const env: Record<string, string> = {
-    [apiKeyEnv]: REPLAY_PLACEHOLDER_KEY,
-    [providerModelEnvKey(provider)]: model,
-    INFERENCE_PROVIDER_ORDER: provider,
-    INFERENCE_MAX_PROVIDERS: "1"
+    INFERENCE_PROVIDER_ORDER: selectedNames.join(","),
+    INFERENCE_MAX_PROVIDERS: String(selectedNames.length)
   };
 
-  if (provider === "cloudflare") {
-    env.CLOUDFLARE_ACCOUNT_ID = REPLAY_PLACEHOLDER_ACCOUNT;
+  for (const row of providers) {
+    const apiKeyEnv = PROVIDER_API_KEY_ENV[row.provider];
+    if (apiKeyEnv === undefined) {
+      throw new Error(`No API key env mapping for provider '${row.provider}'`);
+    }
+    env[apiKeyEnv] = REPLAY_PLACEHOLDER_KEY;
+    env[providerModelEnvKey(row.provider)] = row.model;
+    if (row.provider === "cloudflare") {
+      env.CLOUDFLARE_ACCOUNT_ID = REPLAY_PLACEHOLDER_ACCOUNT;
+    }
   }
 
-  return { env, provider, model, reason };
+  const primary = providers[0]!;
+  return {
+    env,
+    providers,
+    provider: primary.provider,
+    model: primary.model,
+    reason
+  };
 }
 
 /** Exported for tests. */
@@ -606,14 +632,9 @@ async function runLlmMode(
       );
       env = { ...process.env, ...derived.env };
       log(
-        `replay provider: ${derived.provider}/${derived.model} (${derived.reason})`
+        `replay providers: ${derived.providers.map((p) => `${p.provider}/${p.model}`).join(", ")} (${derived.reason})`
       );
       log("replay is keyless: API keys are placeholders derived from fixtures");
-      if (args.suite === "heldout" || args.suite === "all") {
-        log(
-          "note: heldout/all replay will fixture-miss until a heldout eval:record exists"
-        );
-      }
     } catch (err) {
       error(err instanceof Error ? err.message : String(err));
       return 1;
@@ -648,6 +669,7 @@ async function runLlmMode(
   const maxMatches = args.maxMatches ?? 4;
   const allResults: MatchResult[] = [];
   const selectedScenarios: MatchScenario[] = [];
+  const selectedBySplit: Partial<Record<EvalSplit, MatchScenario[]>> = {};
   const inference = {
     fetch: fetchImpl,
     temperature: 0 as const,
@@ -660,13 +682,38 @@ async function runLlmMode(
     ...(deps.skipGuards ? { now: () => 0 } : {})
   };
 
+  const manifestFile = join(fixturesDir, "manifest.json");
+  const existingManifest =
+    args.mode === "replay" || record || args.mode === "live"
+      ? await readManifest(manifestFile)
+      : undefined;
+
+  if (args.mode === "replay") {
+    if (existingManifest === undefined) {
+      log(
+        "manifest missing: falling back to first-N-by-id scenario selection"
+      );
+    } else {
+      log(`manifest: ${manifestFile.replace(/\\/g, "/")}`);
+    }
+  }
+
   for (const split of splitsFor(args.suite)) {
-    const scenarios = selectScenariosForLlmMode(
-      buildMatchSuite(split),
-      maxMatches,
-      args.mode,
-      args.allSeeds
-    );
+    const suite = buildMatchSuite(split);
+    let scenarios: MatchScenario[];
+    if (args.mode === "replay" && existingManifest?.splits[split] !== undefined) {
+      const entry = existingManifest.splits[split]!;
+      assertScenarioIdsInSuite(split, entry.scenarioIds);
+      scenarios = selectScenariosByIds(suite, entry.scenarioIds);
+    } else {
+      scenarios = selectScenariosForLlmMode(
+        suite,
+        maxMatches,
+        args.mode,
+        args.allSeeds
+      );
+    }
+    selectedBySplit[split] = scenarios;
     selectedScenarios.push(...scenarios);
     for (const scenario of scenarios) {
       log(`scenario: ${scenario.id}`);
@@ -680,12 +727,47 @@ async function runLlmMode(
 
   if (args.snapshots) {
     for (const split of splitsFor(args.suite)) {
+      if (
+        args.mode === "replay" &&
+        existingManifest?.splits[split] !== undefined &&
+        !existingManifest.splits[split]!.snapshots
+      ) {
+        log(`snapshots: ${split} skipped (manifest.snapshots=false)`);
+        continue;
+      }
       log(`snapshots: ${split}`);
       const snapshots = await loadCommittedSnapshots(split);
       const evaluated = await evalLlmSnapshots(snapshots, turnOptions);
       snapshotResults[split] = evaluated;
       snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
     }
+  }
+
+  if (record || args.mode === "live") {
+    const providerKeys = new Set<string>();
+    for (const result of allResults) {
+      for (const turn of result.turns) {
+        const trace = turn.trace;
+        if (trace?.provider !== undefined && trace.model !== undefined) {
+          providerKeys.add(`${trace.provider}|${trace.model}`);
+        }
+        for (const attempt of trace?.attempts ?? []) {
+          providerKeys.add(`${attempt.provider}|${attempt.model}`);
+        }
+      }
+    }
+    const patch: FixtureManifest = { version: 1, splits: {} };
+    for (const split of splitsFor(args.suite)) {
+      const selected = selectedBySplit[split] ?? [];
+      patch.splits[split] = {
+        scenarioIds: selected.map((s) => s.id),
+        snapshots: args.snapshots,
+        providers: [...providerKeys].sort()
+      };
+    }
+    const merged = mergeManifest(existingManifest, patch);
+    await writeManifest(manifestFile, merged);
+    log(`manifest updated: ${manifestFile.replace(/\\/g, "/")}`);
   }
 
   const outDir = deps.outDir ?? join(ROOT, "evals/out");

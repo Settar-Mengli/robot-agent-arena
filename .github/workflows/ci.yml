@@ -19,4 +19,4 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run coverage
-      - run: npm run eval:replay
+      - run: npm run eval:replay -- --suite all

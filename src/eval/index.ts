@@ -50,6 +50,15 @@ export { runMatch, runSuite } from "./match";
 export type { MatchResult, MatchTurnRecord, RunSuiteOptions } from "./match";
 
 export {
+  assertScenarioIdsInSuite,
+  mergeManifest,
+  readManifest,
+  selectScenariosByIds,
+  writeManifest
+} from "./manifest";
+export type { FixtureManifest, ManifestSplit } from "./manifest";
+
+export {
   createMemoryStore,
   createRecordingFetch,
   createReplayFetch,

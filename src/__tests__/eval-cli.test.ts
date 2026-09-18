@@ -121,9 +121,12 @@ describe("keyless replay env derivation", () => {
     expect(derived.model).toBe("openai/gpt-oss-20b");
     expect(derived.env.GROQ_API_KEY).toBeTruthy();
     expect(derived.env.GROQ_API_KEY).not.toMatch(/sk-|gsk_/i);
-    expect(derived.env.INFERENCE_PROVIDER_ORDER).toBe("groq");
+    expect(derived.env.INFERENCE_PROVIDER_ORDER).toContain("groq");
+    expect(derived.env.INFERENCE_PROVIDER_ORDER).toContain("gemini");
+    expect(Number(derived.env.INFERENCE_MAX_PROVIDERS)).toBeGreaterThanOrEqual(2);
+    expect(derived.providers.length).toBeGreaterThanOrEqual(2);
     expect(derived.env.GROQ_MODEL).toBe("openai/gpt-oss-20b");
-    expect(derived.reason).toContain("most fixtures");
+    expect(derived.reason).toContain("all providers");
   });
 
   it("honors --replay-provider override", async () => {
@@ -139,8 +142,10 @@ describe("keyless replay env derivation", () => {
 
     const derived = await deriveReplayEnvFromFixtures(dir, "gemini");
     expect(derived.provider).toBe("gemini");
+    expect(derived.providers).toHaveLength(1);
     expect(derived.model).toBe("gemini-3.5-flash-lite");
     expect(derived.env.GEMINI_API_KEY).toBeTruthy();
+    expect(derived.env.INFERENCE_MAX_PROVIDERS).toBe("1");
     expect(derived.reason).toContain("--replay-provider");
   });
 
