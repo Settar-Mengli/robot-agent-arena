@@ -42,7 +42,13 @@ export {
   createReplayFetch,
   fixtureKey
 } from "./transport";
-export type { FixtureRecord, FixtureStore } from "./transport";
+export type {
+  FixtureRecord,
+  FixtureStore,
+  RecordingFetch,
+  RecordingFetchOptions,
+  RecordingFetchStats
+} from "./transport";
 
 export {
   aggregateLlm,
