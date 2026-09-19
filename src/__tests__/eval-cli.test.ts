@@ -6,6 +6,7 @@ import {
   deriveReplayEnvFromFixtures,
   formatLlmSummary,
   resolveCliArgs,
+  resolveRunPin,
   runLlmModeForTest,
   selectScenariosForLlmMode
 } from "../eval/cli";
@@ -394,5 +395,108 @@ describe("eval cli record summary", () => {
       }
     });
     expect(text).toContain("fixture_miss: 0 (matches 0, snapshots 0)");
+  });
+});
+
+describe("resolveRunPin", () => {
+  it("uses unanimous manifest pin when CLI pin is absent", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              },
+              {
+                id: "grounded",
+                promptVersion: "agent-v2-grounded",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              }
+            ]
+          }
+        }
+      },
+      ["base", "grounded"],
+      ["heldout"],
+      undefined
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.pin).toEqual({
+      provider: "groq",
+      model: "openai/gpt-oss-20b"
+    });
+  });
+
+  it("fails when CLI pin disagrees with recorded manifest pin", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              }
+            ]
+          }
+        }
+      },
+      ["base"],
+      ["heldout"],
+      { provider: "gemini", model: "gemini-3.5-flash-lite" }
+    );
+    expect(result.pin).toBeUndefined();
+    expect(result.error).toMatch(/PIN MISMATCH/);
+    expect(result.error).toContain("gemini:gemini-3.5-flash-lite");
+    expect(result.error).toContain("groq/openai/gpt-oss-20b");
+  });
+
+  it("leaves legacy unpinned manifests without a pin", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true
+              }
+            ]
+          }
+        }
+      },
+      ["base"],
+      ["heldout"],
+      undefined
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.pin).toBeUndefined();
   });
 });

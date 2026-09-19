@@ -532,6 +532,69 @@ function snapshotResultKey(split: EvalSplit, kind: SnapshotSuiteKind): string {
   return kind === "standard" ? split : `${split}:${kind}`;
 }
 
+/**
+ * Resolve the active pin for a record/live/replay run.
+ * CLI --models wins when present; must match any recorded manifest pins.
+ * With no CLI pin, use a unanimous manifest pin or stay unpinned (legacy).
+ */
+export function resolveRunPin(
+  manifest: FixtureManifest | undefined,
+  variants: readonly LlmVariant[],
+  splits: readonly EvalSplit[],
+  cliPin: ModelPin | undefined
+): { pin?: ModelPin; error?: string } {
+  const recordedKeys = new Set<string>();
+  for (const variant of variants) {
+    for (const split of splits) {
+      const entry = manifest?.splits[split];
+      if (entry === undefined) continue;
+      const resolved = resolveVariantRun(entry, variant);
+      if (
+        typeof resolved.provider === "string" &&
+        resolved.provider.length > 0 &&
+        typeof resolved.model === "string" &&
+        resolved.model.length > 0
+      ) {
+        recordedKeys.add(`${resolved.provider}|${resolved.model}`);
+      }
+    }
+  }
+
+  if (cliPin !== undefined) {
+    const cliKey = `${cliPin.provider}|${cliPin.model}`;
+    for (const key of recordedKeys) {
+      if (key !== cliKey) {
+        return {
+          error:
+            `PIN MISMATCH: --models ${cliPin.provider}:${cliPin.model} does not match ` +
+            `recorded manifest pin ${key.replace("|", "/")}`
+        };
+      }
+    }
+    return { pin: cliPin };
+  }
+
+  if (recordedKeys.size === 0) {
+    return {};
+  }
+  if (recordedKeys.size > 1) {
+    return {
+      error:
+        `manifest variants disagree on pin: ${[...recordedKeys]
+          .map((k) => k.replace("|", "/"))
+          .join(", ")}`
+    };
+  }
+  const only = [...recordedKeys][0]!;
+  const sep = only.indexOf("|");
+  return {
+    pin: {
+      provider: only.slice(0, sep),
+      model: only.slice(sep + 1)
+    }
+  };
+}
+
 async function runBaseline(args: CliArgs): Promise<BaselineReport> {
   const splits: BaselineSplitReport[] = [];
 
@@ -769,9 +832,7 @@ async function runLlmMode(
   const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
   let env: EnvMap = deps.env ?? process.env;
 
-  // Pin to first --models entry for record/live/replay (exactly one enforced after variants resolve).
-  // Multi-model looping lands in --mode bench.
-  const activePin: ModelPin | undefined =
+  const cliPin: ModelPin | undefined =
     args.models !== undefined && args.models.length > 0
       ? args.models[0]
       : undefined;
@@ -780,7 +841,7 @@ async function runLlmMode(
     try {
       const derived = await deriveReplayEnvFromFixtures(
         fixturesDir,
-        activePin?.provider ?? args.replayProvider
+        cliPin?.provider ?? args.replayProvider
       );
       env = { ...process.env, ...derived.env };
       log(
@@ -803,47 +864,12 @@ async function runLlmMode(
     log("Quota warning: free-tier providers may rate-limit or drop requests.");
   }
 
-  if (activePin !== undefined) {
-    env = pinnedInferenceEnv(env, activePin);
-    log(
-      `pinned model: ${activePin.provider}/${activePin.model} (maxProviders=1)`
-    );
-  }
-
-  const store = deps.store ?? createDirStore(fixturesDir);
-
-  let recordingFetch: RecordingFetch | undefined;
-  let fetchImpl: typeof fetch;
-
-  if (record) {
-    const realFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
-    recordingFetch = createRecordingFetch(realFetch, store, { force: false });
-    fetchImpl = recordingFetch;
-  } else if (args.mode === "live") {
-    fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis);
-  } else {
-    fetchImpl = deps.fetch ?? createReplayFetch(store);
-  }
-
   const maxMatches =
     args.maxMatchesExplicit && args.maxMatches !== undefined
       ? args.maxMatches
       : args.mode === "record" || args.mode === "live"
         ? 2
         : 4;
-
-  const inference = {
-    fetch: fetchImpl,
-    temperature: 0 as const,
-    env,
-    ...(activePin !== undefined ? { maxProviders: 1 as const } : {})
-  };
-
-  const baseTurnOptions = {
-    budgetMs: args.budgetMs,
-    inference,
-    ...(deps.skipGuards ? { now: () => 0 } : {})
-  };
 
   const manifestFile = join(fixturesDir, "manifest.json");
   const existingManifest =
@@ -891,6 +917,19 @@ async function runLlmMode(
     );
     return 1;
   }
+
+  const pinResolve = resolveRunPin(
+    existingManifest,
+    variants,
+    splitsFor(args.suite),
+    cliPin
+  );
+  if (pinResolve.error !== undefined) {
+    error(pinResolve.error);
+    return 1;
+  }
+  const activePin = pinResolve.pin;
+
   if (variants.length > 1) {
     if (args.mode === "record" || args.mode === "live") {
       if (pinCount !== 1) {
@@ -901,16 +940,51 @@ async function runLlmMode(
         );
         return 1;
       }
-    } else if (args.mode === "replay" && pinCount === 0) {
+    } else if (args.mode === "replay" && activePin === undefined) {
       log(
-        "warning: multi-variant replay without --models is not attributable across providers; pass --models provider:model or use a pinned manifest"
+        "warning: multi-variant replay without a pin is not attributable across providers; pass --models provider:model or record under a pin"
       );
     }
-  } else if (variants.length === 1 && pinCount === 0) {
+  } else if (variants.length === 1 && activePin === undefined) {
     log(
       "warning: single-variant run is unpinned; results are not comparable across runs (pass --models provider:model to pin)"
     );
   }
+
+  if (activePin !== undefined) {
+    env = pinnedInferenceEnv(env, activePin);
+    log(
+      `pinned model: ${activePin.provider}/${activePin.model} (maxProviders=1)`
+    );
+  }
+
+  const store = deps.store ?? createDirStore(fixturesDir);
+
+  let recordingFetch: RecordingFetch | undefined;
+  let fetchImpl: typeof fetch;
+
+  if (record) {
+    const realFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
+    recordingFetch = createRecordingFetch(realFetch, store, { force: false });
+    fetchImpl = recordingFetch;
+  } else if (args.mode === "live") {
+    fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis);
+  } else {
+    fetchImpl = deps.fetch ?? createReplayFetch(store);
+  }
+
+  const inference = {
+    fetch: fetchImpl,
+    temperature: 0 as const,
+    env,
+    ...(activePin !== undefined ? { maxProviders: 1 as const } : {})
+  };
+
+  const baseTurnOptions = {
+    budgetMs: args.budgetMs,
+    inference,
+    ...(deps.skipGuards ? { now: () => 0 } : {})
+  };
 
   // Per (variant, split) scenario lists — replay uses resolveVariantRun so
   // grounded does not inherit base's longer scenarioIds (#21).
@@ -1275,7 +1349,10 @@ async function runLlmMode(
           variants: manifestVariantsFor([variant], {
             scenarioIds: selected.map((s) => s.id),
             snapshots: args.snapshots,
-            snapshotSuite: primaryKind
+            snapshotSuite: primaryKind,
+            ...(activePin !== undefined
+              ? { provider: activePin.provider, model: activePin.model }
+              : {})
           }),
           snapshotSuite: primaryKind
         };

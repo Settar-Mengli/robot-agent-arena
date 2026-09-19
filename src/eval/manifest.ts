@@ -19,6 +19,10 @@ export type ManifestVariantEntry = {
   scenarioIds: string[];
   snapshots: boolean;
   snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  /** Pinned provider for this recorded variant run (D-036). */
+  provider?: string;
+  /** Pinned model for this recorded variant run (D-036). */
+  model?: string;
   /** Optional per-model scenario lists; absent = use variant-level scenarioIds. */
   models?: ManifestModelEntry[];
 };
@@ -120,6 +124,12 @@ function normalizeVariantEntry(
     ...(withIds.snapshotSuite !== undefined
       ? { snapshotSuite: withIds.snapshotSuite }
       : {}),
+    ...(typeof withIds.provider === "string" && withIds.provider.length > 0
+      ? { provider: withIds.provider }
+      : {}),
+    ...(typeof withIds.model === "string" && withIds.model.length > 0
+      ? { model: withIds.model }
+      : {}),
     ...(withIds.models !== undefined
       ? { models: mergeModels(undefined, withIds.models) }
       : {})
@@ -146,6 +156,8 @@ function mergeVariants(
       continue;
     }
     const models = mergeModels(prev.models, entry.models);
+    const provider = entry.provider ?? prev.provider;
+    const model = entry.model ?? prev.model;
     byId.set(entry.id, {
       id: entry.id,
       promptVersion: entry.promptVersion || prev.promptVersion,
@@ -156,6 +168,8 @@ function mergeVariants(
             snapshotSuite: entry.snapshotSuite ?? prev.snapshotSuite
           }
         : {}),
+      ...(provider !== undefined ? { provider } : {}),
+      ...(model !== undefined ? { model } : {}),
       ...(models !== undefined ? { models } : {})
     });
   }
@@ -294,6 +308,8 @@ export function resolveVariantRun(
   snapshots: boolean;
   snapshotSuite?: "standard" | "pivotal" | "adversarial";
   promptVersion: string;
+  provider?: string;
+  model?: string;
 } {
   if (split === undefined) {
     return {
@@ -316,6 +332,8 @@ export function resolveVariantRun(
     let scenarioIds = entry.scenarioIds ?? [];
     let snapshots = entry.snapshots ?? split.snapshots;
     let snapshotSuite = entry.snapshotSuite ?? split.snapshotSuite;
+    let provider = entry.provider;
+    let model = entry.model;
 
     if (pin !== undefined && entry.models !== undefined && entry.models.length > 0) {
       const modelEntry = entry.models.find(
@@ -329,6 +347,8 @@ export function resolveVariantRun(
         if (modelEntry.snapshotSuite !== undefined) {
           snapshotSuite = modelEntry.snapshotSuite;
         }
+        provider = modelEntry.provider;
+        model = modelEntry.model;
       }
     }
 
@@ -336,7 +356,9 @@ export function resolveVariantRun(
       scenarioIds,
       snapshots,
       ...(snapshotSuite !== undefined ? { snapshotSuite } : {}),
-      promptVersion: entry.promptVersion || variantPromptVersion(variantId)
+      promptVersion: entry.promptVersion || variantPromptVersion(variantId),
+      ...(provider !== undefined ? { provider } : {}),
+      ...(model !== undefined ? { model } : {})
     };
   }
 
@@ -356,6 +378,8 @@ export function manifestVariantsFor(
     scenarioIds: readonly string[];
     snapshots: boolean;
     snapshotSuite?: "standard" | "pivotal" | "adversarial";
+    provider?: string;
+    model?: string;
   }
 ): ManifestVariantEntry[] {
   return variants
@@ -366,7 +390,9 @@ export function manifestVariantsFor(
       snapshots: options.snapshots,
       ...(options.snapshotSuite !== undefined
         ? { snapshotSuite: options.snapshotSuite }
-        : {})
+        : {}),
+      ...(options.provider !== undefined ? { provider: options.provider } : {}),
+      ...(options.model !== undefined ? { model: options.model } : {})
     }))
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }

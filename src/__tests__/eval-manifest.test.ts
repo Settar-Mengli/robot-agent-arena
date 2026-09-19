@@ -106,6 +106,79 @@ describe("fixture manifest", () => {
     ]);
   });
 
+  it("mergeManifest preserves variant provider/model pins from the patch", () => {
+    const merged = mergeManifest(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                snapshotSuite: "adversarial"
+              }
+            ]
+          }
+        }
+      },
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                snapshotSuite: "adversarial",
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              }
+            ]
+          }
+        }
+      }
+    );
+    const base = merged.splits.heldout!.variants!.find((v) => v.id === "base")!;
+    expect(base.provider).toBe("groq");
+    expect(base.model).toBe("openai/gpt-oss-20b");
+    expect(resolveVariantRun(merged.splits.heldout, "base")).toMatchObject({
+      provider: "groq",
+      model: "openai/gpt-oss-20b"
+    });
+  });
+
+  it("resolveVariantRun leaves legacy entries without provider/model unpinned", () => {
+    const resolved = resolveVariantRun(
+      {
+        scenarioIds: ["a"],
+        snapshots: true,
+        providers: [],
+        variants: [
+          {
+            id: "base",
+            promptVersion: "agent-v1",
+            scenarioIds: ["a"],
+            snapshots: true
+          }
+        ]
+      },
+      "base"
+    );
+    expect(resolved.provider).toBeUndefined();
+    expect(resolved.model).toBeUndefined();
+  });
+
   it("resolveVariantRun uses per-variant scenarioIds; legacy falls back", () => {
     const legacy = resolveVariantRun(
       {
