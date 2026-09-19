@@ -216,7 +216,7 @@ Quota projection: `models=1 variants=3 snapshots=13 matches=2 × ~17 × consiste
 
 ### Results (held-out adversarial, historical n=20 pre-D-035) — D-024 FALSIFIED
 
-> Historical row on the **pre-dedupe** suite (multiplicity-weighted). D-030 agreement claim (grounding changed **0** decisions) survives; do not re-cite the old greedy mean regret **104.35** as the current baseline — current greedy baseline is **0% / 156.15** (n=13). LLM optimality on the **new** suite is **pending operator re-record**.
+> Historical row on the **pre-dedupe** suite (multiplicity-weighted). D-030 agreement claim (grounding changed **0** decisions) survives; do not re-cite the old greedy mean regret **104.35** as the current baseline — current greedy baseline is **0% / 156.15** (n=13). LLM optimality on the **new** suite is published in the pinned ablation below (D-034 / D-036).
 
 | arm | promptVersion | optimal | mean / median / max regret | regret≥100 | validity | fallback |
 | --- | --- | ---: | --- | ---: | ---: | ---: |

@@ -1,17 +1,12 @@
-import type { BattleOutcome, BattleRuntime, SkillId } from "../engine";
-import {
-  determineHealthOutcome,
-  determineTurnLimitOutcome,
-  isBattleOver,
-  stepBattle
-} from "../engine";
+import type { BattleRuntime, SkillId } from "../engine";
+import { robotEnvironment } from "../env";
 import type { PlayerPolicy } from "./policies";
 
 /**
  * Exact best-response oracle vs a fixed, known player policy.
  * This is NOT a game-theoretic equilibrium — the player does not adapt.
  *
- * RNG is irrelevant under full CPU injection: stepBattle only advances RNG
+ * RNG is irrelevant under full CPU injection: apply only advances RNG
  * via selectSimulationSkillId when the selector is omitted; with an injected
  * selector, memo keys need only {turn, player, cpu}.
  *
@@ -77,41 +72,6 @@ function resolveMemoMap(scope: MemoScope | undefined): Map<string, number> {
   return scope.map;
 }
 
-function resolveOutcome(runtime: BattleRuntime): BattleOutcome {
-  const fromTurn = runtime.turns[runtime.turns.length - 1]?.outcome;
-  if (fromTurn !== undefined) {
-    return fromTurn;
-  }
-
-  const health = determineHealthOutcome(runtime.player, runtime.cpu);
-  if (health !== undefined) {
-    return health;
-  }
-
-  return determineTurnLimitOutcome(runtime.player, runtime.cpu);
-}
-
-function terminalValue(runtime: BattleRuntime): number {
-  const outcome = resolveOutcome(runtime);
-
-  let base = 0;
-  if (outcome.result === "cpu-victory") {
-    base = 1000;
-  } else if (outcome.result === "player-victory") {
-    base = -1000;
-  }
-
-  return base + (runtime.cpu.health - runtime.player.health);
-}
-
-function stateKey(runtime: BattleRuntime): string {
-  return JSON.stringify({
-    turn: runtime.session.turn,
-    player: runtime.player,
-    cpu: runtime.cpu
-  });
-}
-
 type SearchCtx = {
   playerPolicy: PlayerPolicy;
   maxNodes: number;
@@ -121,11 +81,11 @@ type SearchCtx = {
 };
 
 function valueOfState(runtime: BattleRuntime, ctx: SearchCtx): number {
-  if (isBattleOver(runtime.session)) {
-    return terminalValue(runtime);
+  if (robotEnvironment.isTerminal(runtime)) {
+    return robotEnvironment.terminalValue(runtime);
   }
 
-  const key = stateKey(runtime);
+  const key = robotEnvironment.memoStateKey(runtime);
   const cached = ctx.memo.get(key);
   if (cached !== undefined) {
     return cached;
@@ -138,11 +98,11 @@ function valueOfState(runtime: BattleRuntime, ctx: SearchCtx): number {
   }
 
   const playerSkillId = ctx.playerPolicy(runtime);
-  const cpuSkills = runtime.session.cpu.skillIds;
+  const cpuSkills = robotEnvironment.equippedActions(runtime, "cpu");
   let best = -Infinity;
 
   for (const cpuSkillId of cpuSkills) {
-    const { runtime: next } = stepBattle(
+    const { runtime: next } = robotEnvironment.apply(
       runtime,
       playerSkillId,
       () => cpuSkillId
@@ -183,7 +143,7 @@ export function bestResponse(
   };
 
   const values: Record<SkillId, number> = {};
-  const cpuSkills = runtime.session.cpu.skillIds;
+  const cpuSkills = robotEnvironment.equippedActions(runtime, "cpu");
 
   for (const cpuSkillId of cpuSkills) {
     ctx.nodes += 1;
@@ -193,7 +153,7 @@ export function bestResponse(
       continue;
     }
 
-    const { runtime: next } = stepBattle(
+    const { runtime: next } = robotEnvironment.apply(
       runtime,
       playerSkillId,
       () => cpuSkillId

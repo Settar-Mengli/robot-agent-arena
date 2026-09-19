@@ -3,8 +3,7 @@ import type { DecisionTrace, PlayAgentTurnOptions } from "../agent";
 import {
   createSeededRng,
   findSkillDefinition,
-  MVP_SKILL_CATALOG,
-  stepBattle
+  MVP_SKILL_CATALOG
 } from "../engine";
 import type {
   AgentConfig,
@@ -12,6 +11,7 @@ import type {
   Seed,
   SkillId
 } from "../engine";
+import { robotEnvironment } from "../env";
 import { bestResponse } from "./oracle";
 
 /**
@@ -76,7 +76,7 @@ export type CpuPolicyId =
   | `llm:${LlmVariant}`;
 
 export type CpuDecideResult = {
-  step: ReturnType<typeof stepBattle>;
+  step: ReturnType<typeof robotEnvironment.apply>;
   trace?: DecisionTrace;
 };
 
@@ -262,7 +262,7 @@ export function optimalCpuPolicy(
       }
 
       return {
-        step: stepBattle(runtime, playerSkillId, () => cpuSkillId)
+        step: robotEnvironment.apply(runtime, playerSkillId, () => cpuSkillId)
       };
     }
   };
@@ -272,7 +272,7 @@ export function randomCpuPolicy(): CpuPolicy {
   return {
     id: "random",
     decide: async (runtime, playerSkillId) => ({
-      step: stepBattle(runtime, playerSkillId)
+      step: robotEnvironment.apply(runtime, playerSkillId)
     })
   };
 }
@@ -282,7 +282,7 @@ export function greedyCpuPolicy(cpuConfig: AgentConfig): CpuPolicy {
   return {
     id: "greedy",
     decide: async (runtime, playerSkillId) => ({
-      step: stepBattle(runtime, playerSkillId, select)
+      step: robotEnvironment.apply(runtime, playerSkillId, select)
     })
   };
 }

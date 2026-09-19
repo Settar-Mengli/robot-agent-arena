@@ -61,11 +61,11 @@ Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture k
 #### 4. Correctness hardening — DONE — execution batch **A1** (prompt-byte frozen)
 CI re-proves pivotal / adversarial / bench / discriminate regen (`drift` job, `SNAPSHOT_DRIFT=1`); Oracle MemoScope identity (numeric `maxTurns` + catalog); pricing for Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; weak tests pin published values; greedy→grounding landed after differential proof (0 choice diffs). **Gate held:** committed numbers byte-identical. Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
 
-#### A2. Grounding correctness + ablation re-run (D-034) — CODE DONE; RESULT PENDING PINNED RECORD
-Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2`. Old `agent-v2-grounded` fixtures and D-030 preserved. Unpinned comparative readings retracted (D-036). **Operator pinned record still required** before EVAL results are filled.
+#### A2. Grounding correctness + ablation re-run (D-034) — DONE
+Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2`. Old `agent-v2-grounded` fixtures and D-030 preserved. Pinned gemini ablation published on post-D-035 suites (D-036).
 
-#### 5. Environment interface + port — execution batch **A3** (adapter only)
-Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON — no new serialized state type. **Gate: byte-identical** (committed artifacts must still replay unchanged).
+#### 5. Environment interface + port — DONE — execution batch **A3** (adapter only)
+Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON. Committed differential proof under `SNAPSHOT_DRIFT`. **Gate held:** byte-identical artifacts. Next: A-to-Z recon, then batch B (UI).
 
 #### 6. UI part 1 — scaffolding + Builder — execution batch B
 React, entry, state layer, component test env + Builder. Planned — not built.

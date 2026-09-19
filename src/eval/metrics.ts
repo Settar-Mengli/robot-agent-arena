@@ -1,5 +1,5 @@
 import type { SkillId } from "../engine";
-import { findSkillDefinition, MVP_SKILL_CATALOG } from "../engine";
+import { robotEnvironment } from "../env";
 import type { DecisionTrace } from "../agent";
 import type { MatchResult } from "./match";
 import type { DecisionSnapshot } from "./snapshots";
@@ -420,12 +420,8 @@ export function aggregateLlm(
 export function randomPolicyExpectation(
   snapshot: DecisionSnapshot
 ): { optimalRate: number; meanRegret: number; maxRegret: number } {
-  const energy = snapshot.runtime.cpu.energy;
-  const skillIds = snapshot.runtime.session.cpu.skillIds;
-  const affordable = skillIds.filter((skillId) => {
-    const skill = findSkillDefinition(MVP_SKILL_CATALOG, skillId);
-    return skill !== undefined && skill.energyCost <= energy;
-  });
+  const skillIds = robotEnvironment.equippedActions(snapshot.runtime, "cpu");
+  const affordable = robotEnvironment.legalActions(snapshot.runtime, "cpu");
   const candidates =
     affordable.length > 0 ? affordable : [skillIds[0]!];
 

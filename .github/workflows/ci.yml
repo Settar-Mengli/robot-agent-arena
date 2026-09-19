@@ -45,3 +45,4 @@ jobs:
           src/__tests__/eval-adversarial-snapshots.test.ts
           src/__tests__/eval-discriminate.test.ts
           src/__tests__/eval-bench-mode.test.ts
+          src/__tests__/env-differential.test.ts

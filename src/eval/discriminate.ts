@@ -1,11 +1,5 @@
-import {
-  findSkillDefinition,
-  isBattleOver,
-  MVP_SKILL_CATALOG,
-  startBattle,
-  stepBattle
-} from "../engine";
 import { createGreedySelector } from "../agent";
+import { robotEnvironment } from "../env";
 import { bestResponse } from "./oracle";
 import {
   aggregateMatches,
@@ -154,21 +148,20 @@ async function collectHeadroomForSplit(
   for (const scenario of suite) {
     const playerPolicy = resolvePlayerPolicy(scenario);
     const greedySelect = createGreedySelector(scenario.cpuConfig);
-    let runtime = startBattle(
+    let runtime = robotEnvironment.start(
       scenario.playerConfig,
       scenario.cpuConfig,
       scenario.seed
     );
 
-    while (!isBattleOver(runtime.session)) {
+    while (!robotEnvironment.isTerminal(runtime)) {
       const playerSkillId = playerPolicy(runtime);
       const stateKey = decisionStateKey(runtime, playerSkillId);
-      const affordable = runtime.session.cpu.skillIds.filter((id) => {
-        const skill = findSkillDefinition(MVP_SKILL_CATALOG, id);
-        return skill !== undefined && skill.energyCost <= runtime.cpu.energy;
-      });
+      const affordable = robotEnvironment.legalActions(runtime, "cpu");
       const candidates =
-        affordable.length > 0 ? affordable : [runtime.session.cpu.skillIds[0]!];
+        affordable.length > 0
+          ? affordable
+          : [robotEnvironment.equippedActions(runtime, "cpu")[0]!];
 
       if (candidates.length >= 2) {
         const oracle = bestResponse(runtime, playerSkillId, playerPolicy);
@@ -189,7 +182,11 @@ async function collectHeadroomForSplit(
         }
       }
 
-      runtime = stepBattle(runtime, playerSkillId, greedySelect).runtime;
+      runtime = robotEnvironment.apply(
+        runtime,
+        playerSkillId,
+        greedySelect
+      ).runtime;
     }
   }
 
