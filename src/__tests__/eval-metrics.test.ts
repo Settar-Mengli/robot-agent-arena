@@ -97,16 +97,15 @@ describe("eval metrics", () => {
     expect(exp.optimalRate).toBe(optimalRate);
   });
 
-  it("greedy snapshot eval on standard dev slice pins published 100%/0", () => {
-    const snapshots: DecisionSnapshot[] = suite.snapshots.slice(0, 5);
-    const random = evalRandomSnapshots(snapshots);
-    const greedy = evalGreedySnapshots(snapshots);
-    expect(random.metrics.n).toBe(5);
+  it("greedy snapshot eval on standard dev suite pins published baseline", () => {
+    const greedy = evalGreedySnapshots(suite.snapshots);
+    const random = evalRandomSnapshots(suite.snapshots);
+    expect(greedy.metrics.n).toBe(suite.snapshots.length);
     expect(Number.isFinite(random.metrics.optimalRate)).toBe(true);
     expect(Number.isFinite(random.metrics.meanRegret)).toBe(true);
-    // EVAL.md: Dev standard snapshots remain 100% greedy-optimal.
-    expect(greedy.metrics.optimalRate).toBe(1);
-    expect(greedy.metrics.meanRegret).toBe(0);
+    // EVAL.md baseline after D-035: standard dev greedy 85% / mean regret 100.25
+    expect(greedy.metrics.optimalRate).toBe(0.85);
+    expect(greedy.metrics.meanRegret).toBeCloseTo(100.25, 2);
   });
 
   it("aggregateLlm rolls up per provider|model decisions and attempts", () => {

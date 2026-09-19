@@ -45,13 +45,16 @@ function snapshotStateKey(snap: AdversarialDecisionSnapshot): string {
 function fakeCandidate(
   id: string,
   greedyRegret: number,
-  turn = 1
+  turn = 1,
+  playerHp = 10
 ): AdversarialDecisionSnapshot {
   return {
     id,
     scenarioId: id.split("__")[0]!,
     runtime: {
-      session: { turn }
+      session: { turn },
+      player: { health: playerHp, energy: 1, defense: 0 },
+      cpu: { health: 10, energy: 2, defense: 0 }
     },
     playerSkillId: "skill-core-identity",
     cpuConfigId: "c",
@@ -86,24 +89,25 @@ function evalCatalogOptimalSnapshots(
 describe("adversarial snapshot selection", () => {
   it("short-suite path does not throw and warns", () => {
     const candidates = [
-      fakeCandidate("s1__t1", 150),
-      fakeCandidate("s2__t1", 200),
-      fakeCandidate("s3__t1", 0)
+      fakeCandidate("s1__t1", 150, 1, 1),
+      fakeCandidate("s2__t1", 200, 1, 2),
+      fakeCandidate("s3__t1", 0, 1, 3)
     ];
     const selected = selectAdversarialSnapshots(candidates);
     expect(selected.count).toBe(2);
     expect(selected.snapshots.map((s) => s.id)).toEqual(["s2__t1", "s1__t1"]);
     expect(selected.warning).toBe(
-      `only 2 of ${ADVERSARIAL_TARGET_COUNT} adversarial points qualified at greedyRegret>=${ADVERSARIAL_MIN_REGRET}`
+      `only 2 of ${ADVERSARIAL_TARGET_COUNT} distinct adversarial states qualified at greedyRegret>=${ADVERSARIAL_MIN_REGRET}`
     );
   });
 
-  it("selection is deterministic", () => {
+  it("selection is deterministic and skips duplicate states", () => {
     const candidates = [
-      fakeCandidate("b__t1", 500, 1),
-      fakeCandidate("a__t2", 500, 2),
-      fakeCandidate("a__t1", 500, 1),
-      fakeCandidate("c__t1", 1000, 1)
+      fakeCandidate("b__t1", 500, 1, 1),
+      fakeCandidate("a__t2", 500, 2, 2),
+      fakeCandidate("a__t1", 500, 1, 3),
+      fakeCandidate("c__t1", 1000, 1, 4),
+      fakeCandidate("clone__t1", 999, 1, 4)
     ];
     const once = selectAdversarialSnapshots(candidates, { targetCount: 3 });
     const twice = selectAdversarialSnapshots(candidates, { targetCount: 3 });
@@ -123,6 +127,7 @@ describe("adversarial snapshot selection", () => {
       expect(suite.minRegret).toBe(ADVERSARIAL_MIN_REGRET);
       expect(suite.targetCount).toBe(ADVERSARIAL_TARGET_COUNT);
       expect(suite.count).toBe(suite.snapshots.length);
+      expect(suite.distinctStateCount).toBe(suite.snapshots.length);
       expect(suite.count).toBeLessThanOrEqual(ADVERSARIAL_TARGET_COUNT);
       for (const snap of suite.snapshots) {
         expect(snap.greedyRegret).toBeGreaterThanOrEqual(ADVERSARIAL_MIN_REGRET);
@@ -164,18 +169,18 @@ describe("adversarial snapshot selection", () => {
       expect(optimal.optimalRate).toBe(1);
       expect(optimal.meanRegret).toBe(0);
     }
-    // adversarial.baselines.json heldout random (EVAL 50.00% / 52.18)
+    // adversarial.baselines.json heldout random after D-035
     const heldout = loadAdversarial("snapshots.adversarial.heldout.json");
     const heldoutRandom = evalRandomSnapshots(heldout.snapshots);
     expect(heldoutRandom.metrics.optimalRate).toBe(0.5);
-    expect(heldoutRandom.metrics.meanRegret).toBeCloseTo(52.175, 3);
+    expect(heldoutRandom.metrics.meanRegret).toBeCloseTo(78.0769, 3);
   });
 
   it("suite baseline deltas use measured adversarial greedy, not standard 50%/0.50", () => {
     const suite = loadAdversarial("snapshots.adversarial.heldout.json");
     const greedy = evalGreedySnapshots(suite.snapshots);
     expect(greedy.metrics.optimalRate).toBe(0);
-    expect(greedy.metrics.meanRegret).toBeCloseTo(104.35, 1);
+    expect(greedy.metrics.meanRegret).toBeCloseTo(156.1538, 1);
     // Must not match the old hardcoded standard-suite baseline.
     expect(greedy.metrics.optimalRate).not.toBe(0.5);
     expect(greedy.metrics.meanRegret).not.toBe(0.5);
@@ -248,7 +253,11 @@ describe("adversarial snapshot selection", () => {
           minRegret: generated.minRegret,
           targetCount: generated.targetCount,
           count: generated.count,
-          snapshots: generated.snapshots
+          distinctStateCount: generated.distinctStateCount,
+          snapshots: generated.snapshots,
+          ...(generated.warning !== undefined
+            ? { warning: generated.warning }
+            : {})
         }).toEqual(committed);
       }
     },

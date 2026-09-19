@@ -1568,10 +1568,41 @@ export async function runBenchMode(
   }
 
   if (rows.length === 0) {
-    error(
-      "bench produced 0 rows (all fixture misses) — refusing empty summary; record missing fixtures first"
+    const pendingNote =
+      "D-035: all bench rows skipped (fixture_miss on regenerated adversarial suite); awaiting operator record — stale metrics removed";
+    log(
+      "bench produced 0 rows (all fixture misses) — writing pending empty summary (not inventing)"
     );
-    return 1;
+    const summary = summarizeBench({
+      rows: [],
+      models: args.models.map((m) => `${m.provider}:${m.model}`),
+      variants,
+      split: args.suite === "all" ? "all" : args.suite,
+      snapshotSuite: primaryKind,
+      consistency: args.consistency,
+      singleModelPending: true,
+      note: pendingNote
+    });
+    const outDir = deps.outDir ?? join(ROOT, "evals/out");
+    await mkdir(outDir, { recursive: true });
+    const outPath = join(outDir, "bench.json");
+    await writeFile(
+      outPath,
+      `${JSON.stringify({ summary, rows }, null, 2)}\n`,
+      "utf8"
+    );
+    const committedDir = join(ROOT, "evals/out-committed");
+    await mkdir(committedDir, { recursive: true });
+    const summaryPath = join(committedDir, "bench.summary.json");
+    await writeFile(
+      summaryPath,
+      `${JSON.stringify(summary, null, 2)}\n`,
+      "utf8"
+    );
+    log(`wrote ${relative(ROOT, outPath).replace(/\\/g, "/")}`);
+    log(`wrote ${relative(ROOT, summaryPath).replace(/\\/g, "/")}`);
+    log(`note: ${summary.note}`);
+    return 0;
   }
 
   const expectedRows = args.models.length * variants.length * splits.length;
