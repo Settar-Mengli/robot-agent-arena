@@ -2,11 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `docs/reconcile-truth`; base `main` @ `f521d70`
-- Current state: Reconciling public docs with measured results (stale next-milestone claims, unamended decisions, unscoped snapshot numbers, false replay instructions, discrimination reproduce log). **M-TOOLS measured:** grounding changed 0/20 decisions on held-out adversarial (D-024 falsified; D-030). Next: **M-BENCH**. Memory variants unmeasured.
+- Branch: `docs/d033-direction`; base `main` @ `982e8a4`
+- Current state: Docs-only lock of **D-033** (supersedes D-025 scope/batch order). D-026 closed won't-fix. Coach cut. M-BENCH headless remains **in review** (PR #23). Next after #23: **batch 4 — correctness hardening** (not UI).
 - Test count: **258** (`npm run coverage`: 255 passed, 3 skipped)
-- Verification: typecheck / lint / coverage (all green); keyless `eval:replay -- --suite all`
-- Working tree: `docs/reconcile-truth`
+- Verification: typecheck / lint / coverage (all green)
+- Working tree: `docs/d033-direction` (six docs files only)
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -41,9 +41,10 @@
 - Pivotal snapshot suites + auditable decisions + D-028 (PR #17).
 - Adversarial snapshot suites + D-029 (PR #18); min regret 1 (PR #19).
 - M-TOOLS ablation published (D-030) and metric choice (D-031).
+- Docs reconcile (PR #22): public docs vs measured reality.
 
 ## Current Work
-- Docs reconcile: public docs vs measured reality; committed discrimination summary.
+- D-033: lock revised product direction (11-batch plan; BYOK / Arena race / coach cut; D-026 won't-fix). Docs only.
 
 ## Blockers
 - None.
@@ -51,11 +52,12 @@
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
-- D-026 seed-spread remains parked.
+- D-026 closed as won't-fix under D-033 (known limitations: small n, seed correlation).
 - Memory ablation variants remain unmeasured.
+- PR #23 (M-BENCH) in review; pin protocol lands with that PR (not yet on `main`).
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `docs/reconcile-truth`.
+- `DECISIONS.md`, `ROADMAP.md`, `PROGRESS.md`, `README.md`, `ARCHITECTURE.md`, `EVAL.md`
 
 ## Exact Next Step
-**M-BENCH**. UI remains deferred.
+- Land PR #23 (M-BENCH), then **batch 4 — correctness hardening** (CI regen gates, MemoScope, grounding, greedy→grounding, pricing, `.env.example`, weak tests). Environment interface is batch 5.

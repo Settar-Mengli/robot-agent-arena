@@ -1,18 +1,22 @@
 # AGENT ARENA
 
-Configure an AI agent’s design choices. Run them in a deterministic battle environment. See measurable consequences.
+An **agent evaluation framework** that measures and **diagnoses** agent decision quality against exact ground truth. The robot battle is the **reference environment** — not the end product.
 
-**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), eval harness (match/snapshot suites, oracle, recorded fixtures, CLI), and M-TOOLS grounding ablation are complete. Held-out LLM results and the adversarial ablation are published in [EVAL.md](EVAL.md). Next is **M-BENCH**; UI remains later.
+Configure agent design choices. Run them in a deterministic battle environment. See which decisions were suboptimal, by how much, and why — cited to an exact oracle.
+
+**Published negative result (held-out adversarial, n=20):** grounding changed **0/20** decisions (D-024 falsified). Greedy: **0%** optimal / mean regret **104.35**. LLM (failover mixture): **5%** / **4.25**. Details in [EVAL.md](EVAL.md).
+
+**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), eval harness, and M-TOOLS grounding ablation are complete. **M-BENCH** headless is in review (PR #23). Next after that is **correctness hardening** (batch 4), then the environment interface (batch 5). UI, diagnostics, BYOK leaderboard, and a second reference environment are **planned** — not built. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships; default is deterministic CPU + fixture replay).
 
 ## What it is
 
-AGENT ARENA is an interactive agent-design sandbox that teaches AI-agent engineering by making design choices produce measurable outcomes. You configure identity, memory, tools/skills, guardrails/rules, and strategy; the pure TypeScript battle engine is the environment (seeded RNG, identical setups → identical resolution). Evals, decision traces, and an explanatory post-match report show which choices moved the result — not a course or LMS, just consequence plus a concise readout (D-020). Fictional vocabulary only; no real-world attack, jailbreak, or prompt-injection content.
+AGENT ARENA measures agent decision quality in a seeded, pure TypeScript battle environment (identical setups → identical resolution). Identity, memory, tools/skills, guardrails/rules, and strategy are the design surface; the engine is the first **reference environment** behind a planned environment interface (D-033). Binding honesty: every public conclusion must trace to a measurement (D-020 / D-031 / D-033). Fictional vocabulary only; no real-world attack, jailbreak, or prompt-injection content.
 
 Temporary product title: **AGENT ARENA**. Repository name: `robot-agent-arena`. See [DECISIONS.md](DECISIONS.md) for naming policy.
 
 ## Live demo
 
-_Coming with the UI milestone._
+_Coming with the UI batches (6–7)._
 
 ## Screenshots
 
@@ -91,7 +95,7 @@ PROGRESS.md        # Current status
 AGENT_RULES.md     # Contributor / agent operating rules
 ```
 
-**PLANNED (UI milestone):** `store/`, `components/` / screens, and a thin `lib/` bridge. Those directories do not exist yet.
+**PLANNED (UI batches):** `store/`, `components/` / screens, and a thin `lib/` bridge. Those directories do not exist yet. Measurement core will depend on an environment interface; the game is the first implementation (D-033).
 
 ## Testing
 
@@ -104,13 +108,23 @@ The engine is covered by a comprehensive Vitest suite, including seam-parity tes
 
 For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## Status / roadmap
+## Status / roadmap (D-033 — 11 batches)
 
-1. **Done:** Pure TypeScript battle engine, inference client (M-INF), agent turn + greedy baseline (M-AGENT), eval harness (M-EVAL), grounding + memory tools with measured ablation (M-TOOLS; D-024 falsified)
-2. **Next:** M-BENCH (model comparison bench)
-3. **Later:** M-UI — Builder + Arena, then Report + coach + bench surfacing (React/Tailwind/Zustand not installed yet; serverless proxy deferred to M-UI)
+1. **Done:** Discrimination + parked fixes
+2. **Done:** M-TOOLS grounding/memory ablation (D-024 falsified)
+3. **In review:** M-BENCH headless (PR #23)
+4. **Next after #23:** Correctness hardening (not UI)
+5. Environment interface + port (no behavior change; artifacts must still replay)
+6. UI part 1 — scaffolding + Builder
+7. UI part 2 — Arena + results (must design against the in-flight race)
+8. Diagnostic layer (headless first, then UI)
+9. Three new measurements (pre-register before implement)
+10. BYOK + committed static leaderboard + methodology writeup
+11. Second reference environment + publish
 
-Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md). Order locked in [D-025](DECISIONS.md) as amended.
+Coach is **cut** (unmeasured-if-UI-only contradicts D-018 / D-023). Order locked in [D-033](DECISIONS.md).
+
+Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md).
 
 ## Original work / theme
 
@@ -124,3 +138,4 @@ All robots, skills, and lore are original. Security-related gameplay uses safe f
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — layers, engine contract, types, battle flow
 - [DECISIONS.md](DECISIONS.md) — why the architecture is locked the way it is
+- [EVAL.md](EVAL.md) — metrics, baselines, published findings

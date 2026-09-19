@@ -277,6 +277,11 @@ Consequences:
 Framing and copy shift toward agent-design/teaching. The five agent modules and the post-match report are the teaching surface (modules as real design levers; the report as an explanatory lesson of which design choice caused the result). The eval harness (M-EVAL) is elevated as core evidence, not optional. No change to the engine, seam, determinism, or milestone spine.
 Anti-scope (so this framing does not balloon): this remains a focused sandbox/demo — not a course, curriculum, LMS, or content platform. Teaching happens through consequence plus a concise report, not lessons/text. No new heavy “educational” infrastructure (no CMS, no accounts, no backend beyond the planned minimal serverless proxy). Prior review anti-scope still holds: no agent framework, no vector DB/RAG, no multi-agent debate, no LLM judges, no real backend/leaderboard. Scope stays one configurable agent vs opponents, a few scenarios, and a live eval/decision readout — depth over breadth.
 
+### Amend — 2026-09-18 — Coach cut by D-033
+
+Decision (amend):
+The Decision body above still lists `M-COACH` as its own milestone in the spine. **D-033 cuts the post-match coach.** It is not a milestone. The first public Report is trace-driven and cites oracle regret. Teaching-sandbox intent (consequence through measurement) remains; the coach deliverable does not.
+
 ## D-021 Milestone Order (Eval Before Tools)
 Date: 2026-09-17
 Status: Superseded (see amendment 2026-09-18)
@@ -374,7 +379,7 @@ Decision (amend):
 
 ## D-025 Product direction and milestone order
 Date: 2026-09-17
-Status: Accepted
+Status: Superseded (see amendment 2026-09-18)
 
 Decision:
 **Supersedes D-021’s milestone order.** Product direction: a **measurement bench for agent design**, where the correct answer is known by an exact oracle — model comparison (BYOK), cost/latency per decision, prompt version as a first-class axis, a failure taxonomy per model, and self-consistency checks. The teaching sandbox is delivered **through measurement** rather than assertion.
@@ -412,9 +417,14 @@ Rationale:
 Consequences:
 ROADMAP / PROGRESS follow the amended order. D-026 items remain parked (see amend below), not scheduled as batch 2.
 
+### Amend — 2026-09-18 — Scope and batch order superseded by D-033
+
+Decision (amend):
+**D-033** supersedes this entry’s product scope and batch order. The 6-batch plan above (M-TOOLS → M-BENCH → M-UI part 1 → M-UI part 2 with coach → Polish) is replaced by D-033’s 11-batch plan. **M-UI part 2’s post-match coach is cut** (see D-033). ROADMAP / PROGRESS follow D-033, not the Consequences lines above.
+
 ## D-026 Deferred to M-ENV
 Date: 2026-09-17
-Status: Accepted
+Status: Superseded (see amendment 2026-09-18)
 
 Decision:
 Deferred until M-ENV (which regenerates suites/baselines/fixtures anyway):
@@ -434,6 +444,11 @@ With M-ENV dropped as a batch (D-025 amend), these items stay **parked** until a
 
 Consequences:
 Do not regenerate suites for seed-spread / snapshot reselection during M-TOOLS.
+
+### Amend — 2026-09-18 — Closed as won't-fix under D-033
+
+Decision (amend):
+**Won't-fix.** D-033 batch 5 (environment interface) is a port with no behavior change — committed suites, baselines, and fixtures must still replay. Seed-spread correlation and greedy-suboptimal snapshot reselection require regenerating those artifacts, so they cannot ride batch 5. Batch 4 (correctness hardening) fixes silent risks on **existing** suites; it is not a resample. Small n and seed correlation remain **known limitations** under D-033; diagnosis (batch 8) uses the existing adversarial set. A future suite regeneration would need a new decision.
 
 ## D-027 Grounding contract
 Date: 2026-09-18
@@ -529,3 +544,77 @@ Mean regret is dominated by rare high-stakes misses; rate alone hides that struc
 
 Consequences:
 Eval digests and ablation tables include median / max / highRegret≥100; CLI baseline deltas compare against the loaded suite’s measured greedy and random metrics.
+
+## D-033 Product direction: an agent evaluation framework with an exact oracle
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+**Supersedes D-025’s scope and batch order.** This repository is an **agent evaluation framework** that measures and **diagnoses** agent decision quality against exact ground truth. The robot battle is its **reference environment**, not the product’s end. The framework includes a bring-your-own-key model bench and a published methodology. The teaching sandbox (D-020) is delivered **through measurement**, not assertion — consequence and diagnosis, not a scoreboard claim.
+
+### Scope
+
+1. **Environment interface** — The measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description), not on this game. The existing game becomes its first implementation. No measurement changes in the port.
+2. **Diagnostic layer** — Failure clustering by decision type (missed lethal, ignored incoming threat, wasted energy, over-defending at full health); ranked “what would help most” from variant results; stakes distribution of errors (frequent-and-cheap vs rare-and-fatal); one replayable counterexample per run (state, the agent’s own reason string, the optimal move, the cost); run-to-run diffs with confidence intervals.
+3. **Three new measurements** — Prompt-perturbation sensitivity (same decision, reworded and reordered: does the choice flip?); adversarial-context robustness (inject a false grounded fact or wrong tendency summary: does the agent trust it?); information-scaling curves (raw state → grounded → memory → both, reported as a curve).
+4. **BYOK model bench + committed leaderboard** — Pinned model per run, no failover (bench pin protocol landing with PR #23 / batch 3); rerun on demand, never on a schedule. The “leaderboard” is a **committed static comparison page**, not a live backend — D-020’s anti-scope against a real backend/leaderboard stays in force.
+5. **UI** — Builder, Arena, results and diagnostics pages; renders the framework, owns no measurement logic.
+6. **Methodology writeup** — Told through the four failed measurement sets (standard had no stakes; pivotal was greedy-saturated; adversarial at regret≥100 gave n=1; the inert-seed duplicate miscount) and the falsified pre-registered hypothesis (D-024 / D-030), linking the committed reproduce logs.
+7. **Second reference environment** — A small, provably solvable task proving the interface is real rather than asserted.
+
+### Explicitly cut: post-match coach
+
+D-025’s M-UI part 2 included a post-battle coach; **this supersedes that**. Reasons: (a) a coach demonstrates LLM machinery this repo has already demonstrated and serves the sandbox framing rather than the framework; (b) shipping it inside a UI batch means it ships **unmeasured**, which contradicts D-018 and D-023. The first public Report is **trace-driven and cites oracle regret**. If a coach is ever built, it goes in `src/agent` with its own prompts, fixtures, and evals **first**.
+
+### BYOK (locked)
+
+Browser-direct multi-provider calls are blocked or unsafe: `completeChat` reads `process.env` (`src/inference/client.ts`), sends `Authorization: Bearer` straight to providers, Gemini’s OpenAI-compat endpoint lacks usable CORS for browser apps, Groq’s SDK treats browser keys as dangerous, and Cloudflare puts the account id in the URL (`src/inference/providers.ts`). Therefore:
+
+- The UI ships with **deterministic CPU** (greedy/random) plus **fixture-replayed** LLM results by default.
+- Live BYOK play is **OpenRouter-only**, key held in memory, with an explicit warning.
+- The D-016 serverless proxy stays **deferred** until multi-provider live play is actually wanted.
+
+### Arena correctness (locked for UI batches)
+
+`playAgentTurn` always calls `stepBattle` on timeout, invalid output, or provider failure (`src/agent/llm-turn.ts`); no in-flight type exists. The UI must model the in-flight turn explicitly and apply the returned runtime **only after awaiting**, or double-click desyncs the displayed state from the decision trace. Design against this race in batches 6–7.
+
+### Honesty constraints on the diagnostic layer (binding)
+
+Every conclusion must trace to a specific measurement. Where n is too small, the output must say **“insufficient evidence”** instead of asserting. No recommendation may be generated that the measured data does not support. Precedent: D-031 (report regret distribution alongside rate).
+
+### Known limitations
+
+- The reference environment is small: **2** equipped skills (`MVP_SKILL_SLOT_LIMIT`), **20**-turn cap (`MAX_TURNS`) — `src/engine/constants.ts`.
+- Sample sizes are small (n=20 snapshots; small match counts).
+- Published LLM figures came from a multi-model failover mixture before pinned single-model runs (PR #23 / batch 3).
+- Memory variants (`agent-v2-memory`, `agent-v3-grounded-memory`) remain **unmeasured**.
+- Cost is **null** for unpriced pins.
+- Findings concern **methodology**, which transfers, rather than the domain, which does not.
+
+### Locked 11-batch plan
+
+1. ✅ Discrimination + parked fixes
+2. ✅ M-TOOLS grounding/memory ablation
+3. 🔄 M-BENCH headless (PR #23)
+4. **Correctness hardening** — silent risks on existing files, before any Report screen: CI must re-prove headline numbers (pivotal / adversarial / bench / discriminate regen currently `skipIf`-gated); Oracle MemoScope identity must include the numeric `maxTurns` (and not be bypassable by same-string different policy); grounding must model fallback-stabilize, not silently zero unknown effect categories, and not mis-state `diesNextTurn` when the CPU would guard; greedy must call grounding instead of reimplementing combat arithmetic; pricing must cover the recorded Groq pin; sanitize **new** fixture records (drop provider junk; do not rewrite committed fixtures — they are the hash preimage); complete `.env.example` for `INFERENCE_*` vars; strengthen weak tests that assert “finite” or exit code instead of published values.
+5. Environment interface + port the game to it (no behavior change; all committed artifacts must still replay)
+6. UI part 1 — scaffolding (React, entry, state layer, component test env) + Builder
+7. UI part 2 — Arena + results pages (design against the in-flight race)
+8. Diagnostic layer (headless first, then surfaced in the UI)
+9. The three new measurements (pre-register protocols before implementation — D-024 pattern)
+10. BYOK + committed leaderboard page + methodology writeup
+11. Second reference environment + publish
+
+### Decisions kept in force
+
+D-018, D-020 (coach line amended), D-022, D-027, D-029, D-031. The M-BENCH pin / repeat / cost protocol (recorded as D-032 on PR #23) lands with batch 3 and remains in force for batches 3 and 10 once that PR merges — this entry does not invent a D-032 body on `main`.
+
+### D-026
+
+Closed as **won't-fix** (see D-026 amendment). Seed-spread and snapshot reselection stay known limitations; they are not in batch 4 or batch 5.
+
+Rationale:
+Measured reality: grounding changed 0 of 20 decisions, and rate vs value disagree (greedy 0% / mean regret 104.35 vs LLM 5% / 4.25 on held-out adversarial). The interesting output is **diagnosis**, not a score. Structural: the measurement core imports this game’s `stepBattle`, `MVP_SKILL_CATALOG`, `createGreedySelector`, and `src/data/opponents` directly — the interface must land before the UI hard-codes the game into screens.
+
+Consequences:
+ROADMAP / PROGRESS / README follow this 11-batch order. Next after PR #23 is **batch 4 (correctness hardening)**, then the environment interface (batch 5). Coach is out of scope.
