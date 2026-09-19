@@ -1,20 +1,39 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { LlmVariant } from "./policies";
 import { isLlmVariant, variantPromptVersion } from "./policies";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
 
-export type ManifestVariant = {
-  id: LlmVariant;
-  promptVersion: string;
+export type ManifestModelEntry = {
+  provider: string;
+  model: string;
+  scenarioIds: string[];
+  snapshots?: boolean;
+  snapshotSuite?: "standard" | "pivotal" | "adversarial";
 };
 
+export type ManifestVariantEntry = {
+  id: LlmVariant;
+  promptVersion: string;
+  scenarioIds: string[];
+  snapshots: boolean;
+  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  /** Optional per-model scenario lists; absent = use variant-level scenarioIds. */
+  models?: ManifestModelEntry[];
+};
+
+/** @deprecated Use ManifestVariantEntry. */
+export type ManifestVariant = ManifestVariantEntry;
+
 export type ManifestSplit = {
+  /** Legacy shared list; union of all variant lists for old readers. */
   scenarioIds: string[];
   snapshots: boolean;
   providers: string[];
   /** Optional; absent = legacy base-only replay. */
-  variants?: ManifestVariant[];
-  /** Which snapshot suite was evaluated; absent = standard. */
+  variants?: ManifestVariantEntry[];
+  /** Legacy split-level suite; prefer variants[].snapshotSuite. */
   snapshotSuite?: "standard" | "pivotal" | "adversarial";
 };
 
@@ -34,16 +53,111 @@ function sortUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
-function mergeVariants(
-  left: readonly ManifestVariant[] | undefined,
-  right: readonly ManifestVariant[] | undefined
-): ManifestVariant[] | undefined {
+function modelKey(provider: string, model: string): string {
+  return `${provider}|${model}`;
+}
+
+function normalizeModelEntry(entry: ManifestModelEntry): ManifestModelEntry {
+  return {
+    provider: entry.provider,
+    model: entry.model,
+    scenarioIds: Array.isArray(entry.scenarioIds)
+      ? sortUnique(entry.scenarioIds)
+      : [],
+    ...(entry.snapshots !== undefined ? { snapshots: entry.snapshots } : {}),
+    ...(entry.snapshotSuite !== undefined
+      ? { snapshotSuite: entry.snapshotSuite }
+      : {})
+  };
+}
+
+function mergeModels(
+  left: readonly ManifestModelEntry[] | undefined,
+  right: readonly ManifestModelEntry[] | undefined
+): ManifestModelEntry[] | undefined {
   if (left === undefined && right === undefined) {
     return undefined;
   }
-  const byId = new Map<string, ManifestVariant>();
-  for (const entry of [...(left ?? []), ...(right ?? [])]) {
-    byId.set(entry.id, entry);
+  const byKey = new Map<string, ManifestModelEntry>();
+  for (const raw of [...(left ?? []), ...(right ?? [])]) {
+    const entry = normalizeModelEntry(raw);
+    const key = modelKey(entry.provider, entry.model);
+    const prev = byKey.get(key);
+    if (prev === undefined) {
+      byKey.set(key, entry);
+      continue;
+    }
+    byKey.set(key, {
+      provider: entry.provider,
+      model: entry.model,
+      scenarioIds: sortUnique([...prev.scenarioIds, ...entry.scenarioIds]),
+      ...(entry.snapshots !== undefined || prev.snapshots !== undefined
+        ? { snapshots: entry.snapshots ?? prev.snapshots }
+        : {}),
+      ...(entry.snapshotSuite !== undefined || prev.snapshotSuite !== undefined
+        ? { snapshotSuite: entry.snapshotSuite ?? prev.snapshotSuite }
+        : {})
+    });
+  }
+  return [...byKey.values()].sort((a, b) => {
+    const ka = modelKey(a.provider, a.model);
+    const kb = modelKey(b.provider, b.model);
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+}
+
+function normalizeVariantEntry(
+  entry: ManifestVariantEntry | { id: LlmVariant; promptVersion: string }
+): ManifestVariantEntry {
+  const withIds = entry as ManifestVariantEntry;
+  return {
+    id: withIds.id,
+    promptVersion: withIds.promptVersion,
+    scenarioIds: Array.isArray(withIds.scenarioIds)
+      ? sortUnique(withIds.scenarioIds)
+      : [],
+    snapshots: withIds.snapshots === true,
+    ...(withIds.snapshotSuite !== undefined
+      ? { snapshotSuite: withIds.snapshotSuite }
+      : {}),
+    ...(withIds.models !== undefined
+      ? { models: mergeModels(undefined, withIds.models) }
+      : {})
+  };
+}
+
+/**
+ * Merge variant entries by id. scenarioIds union per variant; never drop
+ * another variant. Right overwrites promptVersion when provided.
+ */
+function mergeVariants(
+  left: readonly ManifestVariantEntry[] | undefined,
+  right: readonly ManifestVariantEntry[] | undefined
+): ManifestVariantEntry[] | undefined {
+  if (left === undefined && right === undefined) {
+    return undefined;
+  }
+  const byId = new Map<string, ManifestVariantEntry>();
+  for (const raw of [...(left ?? []), ...(right ?? [])]) {
+    const entry = normalizeVariantEntry(raw);
+    const prev = byId.get(entry.id);
+    if (prev === undefined) {
+      byId.set(entry.id, entry);
+      continue;
+    }
+    const models = mergeModels(prev.models, entry.models);
+    byId.set(entry.id, {
+      id: entry.id,
+      promptVersion: entry.promptVersion || prev.promptVersion,
+      scenarioIds: sortUnique([...prev.scenarioIds, ...entry.scenarioIds]),
+      snapshots: prev.snapshots || entry.snapshots,
+      ...(entry.snapshotSuite !== undefined || prev.snapshotSuite !== undefined
+        ? {
+            snapshotSuite: entry.snapshotSuite ?? prev.snapshotSuite
+          }
+        : {}),
+      ...(models !== undefined ? { models } : {})
+    });
   }
   return [...byId.values()].sort((a, b) =>
     a.id < b.id ? -1 : a.id > b.id ? 1 : 0
@@ -65,8 +179,16 @@ export function mergeManifest(
     const right = b ?? emptySplit();
     const variants = mergeVariants(left.variants, right.variants);
     const snapshotSuite = right.snapshotSuite ?? left.snapshotSuite;
+    const scenarioIdsFromVariants =
+      variants === undefined
+        ? []
+        : variants.flatMap((v) => v.scenarioIds);
     splits[split] = {
-      scenarioIds: sortUnique([...left.scenarioIds, ...right.scenarioIds]),
+      scenarioIds: sortUnique([
+        ...left.scenarioIds,
+        ...right.scenarioIds,
+        ...scenarioIdsFromVariants
+      ]),
       snapshots: left.snapshots || right.snapshots,
       providers: sortUnique([...left.providers, ...right.providers]),
       ...(variants !== undefined ? { variants } : {}),
@@ -151,10 +273,136 @@ export function variantsFromManifestSplit(
   return ids;
 }
 
+export type ResolveVariantPin = {
+  provider: string;
+  model: string;
+};
+
+/**
+ * Resolve which scenarioIds / snapshot flags to use for a variant on a split.
+ * - Legacy (no variants[]): split-level scenarioIds.
+ * - Modern (variants[] present): only that variant's scenarioIds; absent
+ *   variant → empty list (do not inherit another variant's matches).
+ * - With pin + models[]: select that model's scenarioIds when present.
+ */
+export function resolveVariantRun(
+  split: ManifestSplit | undefined,
+  variantId: LlmVariant,
+  pin?: ResolveVariantPin
+): {
+  scenarioIds: string[];
+  snapshots: boolean;
+  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  promptVersion: string;
+} {
+  if (split === undefined) {
+    return {
+      scenarioIds: [],
+      snapshots: false,
+      promptVersion: variantPromptVersion(variantId)
+    };
+  }
+
+  if (split.variants !== undefined && split.variants.length > 0) {
+    const entry = split.variants.find((v) => v.id === variantId);
+    if (entry === undefined) {
+      return {
+        scenarioIds: [],
+        snapshots: false,
+        promptVersion: variantPromptVersion(variantId)
+      };
+    }
+
+    let scenarioIds = entry.scenarioIds ?? [];
+    let snapshots = entry.snapshots ?? split.snapshots;
+    let snapshotSuite = entry.snapshotSuite ?? split.snapshotSuite;
+
+    if (pin !== undefined && entry.models !== undefined && entry.models.length > 0) {
+      const modelEntry = entry.models.find(
+        (m) => m.provider === pin.provider && m.model === pin.model
+      );
+      if (modelEntry !== undefined) {
+        scenarioIds = modelEntry.scenarioIds;
+        if (modelEntry.snapshots !== undefined) {
+          snapshots = modelEntry.snapshots;
+        }
+        if (modelEntry.snapshotSuite !== undefined) {
+          snapshotSuite = modelEntry.snapshotSuite;
+        }
+      }
+    }
+
+    return {
+      scenarioIds,
+      snapshots,
+      ...(snapshotSuite !== undefined ? { snapshotSuite } : {}),
+      promptVersion: entry.promptVersion || variantPromptVersion(variantId)
+    };
+  }
+
+  return {
+    scenarioIds: split.scenarioIds,
+    snapshots: split.snapshots,
+    ...(split.snapshotSuite !== undefined
+      ? { snapshotSuite: split.snapshotSuite }
+      : {}),
+    promptVersion: variantPromptVersion(variantId)
+  };
+}
+
 export function manifestVariantsFor(
-  variants: readonly LlmVariant[]
-): ManifestVariant[] {
+  variants: readonly LlmVariant[],
+  options: {
+    scenarioIds: readonly string[];
+    snapshots: boolean;
+    snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  }
+): ManifestVariantEntry[] {
   return variants
-    .map((id) => ({ id, promptVersion: variantPromptVersion(id) }))
+    .map((id) => ({
+      id,
+      promptVersion: variantPromptVersion(id),
+      scenarioIds: sortUnique([...options.scenarioIds]),
+      snapshots: options.snapshots,
+      ...(options.snapshotSuite !== undefined
+        ? { snapshotSuite: options.snapshotSuite }
+        : {})
+    }))
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+
+export function fixtureFileExists(fixturesDir: string, key: string): boolean {
+  return existsSync(join(fixturesDir, `${key}.json`));
+}
+
+export function assertCommittedManifestScenarioIds(
+  manifest: FixtureManifest
+): void {
+  for (const split of ["dev", "heldout"] as const) {
+    const entry = manifest.splits[split];
+    if (entry === undefined) continue;
+    assertScenarioIdsInSuite(split, entry.scenarioIds);
+    for (const variant of entry.variants ?? []) {
+      assertScenarioIdsInSuite(split, variant.scenarioIds);
+    }
+  }
+}
+
+export function readManifestSync(path: string): FixtureManifest | undefined {
+  try {
+    const raw = JSON.parse(readFileSync(path, "utf8")) as FixtureManifest;
+    if (raw.version !== 1 || typeof raw.splits !== "object" || raw.splits === null) {
+      return undefined;
+    }
+    return raw;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function assertFixtureFileReadable(
+  fixturesDir: string,
+  key: string
+): Promise<void> {
+  await access(join(fixturesDir, `${key}.json`));
 }

@@ -7,8 +7,6 @@ import {
   greedyCpuPolicy,
   llmCpuPolicy,
   parseVariantsList,
-  projectQuotaCalls,
-  assertQuotaWithinCap,
   llmPolicyIdForVariant,
   variantToPlayOptions,
   randomCpuPolicy,
@@ -39,7 +37,8 @@ import {
   createReplayFetch,
   type FixtureStore,
   type RecordingFetch,
-  type RecordingFetchStats
+  type RecordingFetchStats,
+  type RepeatAwareFetch
 } from "./transport";
 import {
   buildEvalMarkdownShell,
@@ -53,6 +52,7 @@ import {
   mergeManifest,
   manifestVariantsFor,
   readManifest,
+  resolveVariantRun,
   selectScenariosByIds,
   variantsFromManifestSplit,
   writeManifest,
@@ -63,10 +63,25 @@ import {
   runDiscriminationReport,
   summarizeDiscriminationReport
 } from "./discriminate";
+import {
+  parseModelsFlag,
+  pinnedInferenceEnv,
+  pinMismatchMessage,
+  projectBenchQuotaCalls,
+  assertBenchQuotaWithinCap,
+  buildBenchRow,
+  buildFailureTaxonomy,
+  summarizeBench,
+  loadPricing,
+  lookupCostUsd,
+  aggregateLiveLatencies,
+  type ModelPin,
+  type BenchRow
+} from "./bench";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
-type Mode = "baseline" | "replay" | "record" | "live" | "discriminate";
+type Mode = "baseline" | "replay" | "record" | "live" | "discriminate" | "bench";
 type SuiteChoice = "dev" | "heldout" | "all";
 
 type CliArgs = {
@@ -83,6 +98,10 @@ type CliArgs = {
   variantsRaw?: string;
   forceQuota: boolean;
   snapshotSuite: "standard" | "pivotal" | "adversarial" | "both" | "all";
+  snapshotSuiteExplicit: boolean;
+  modelsRaw?: string;
+  models?: ModelPin[];
+  consistency: number;
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -137,7 +156,9 @@ function parseArgs(argv: string[]): CliArgs {
     snapshots: true,
     allSeeds: false,
     forceQuota: false,
-    snapshotSuite: "standard"
+    snapshotSuite: "standard",
+    snapshotSuiteExplicit: false,
+    consistency: 1
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -194,6 +215,18 @@ function parseArgs(argv: string[]): CliArgs {
         );
       }
       args.snapshotSuite = next;
+      args.snapshotSuiteExplicit = true;
+      i += 1;
+    } else if (flag === "--models" && next) {
+      args.modelsRaw = next;
+      args.models = parseModelsFlag(next);
+      i += 1;
+    } else if (flag === "--consistency" && next) {
+      const n = Number(next);
+      if (!Number.isFinite(n) || n < 1 || !Number.isInteger(n)) {
+        throw new Error(`--consistency must be an integer >= 1, got ${next}`);
+      }
+      args.consistency = n;
       i += 1;
     }
   }
@@ -205,6 +238,22 @@ function parseArgs(argv: string[]): CliArgs {
     !args.suiteExplicit
   ) {
     args.suite = "dev";
+  }
+
+  if (args.mode === "bench") {
+    if (!args.suiteExplicit) {
+      args.suite = "heldout";
+    }
+    if (!args.maxMatchesExplicit) {
+      args.maxMatches = 0;
+      args.maxMatchesExplicit = true;
+    }
+    if (!args.snapshotSuiteExplicit) {
+      args.snapshotSuite = "adversarial";
+    }
+    if (args.variantsRaw === undefined) {
+      args.variantsRaw = "base,grounded";
+    }
   }
 
   return args;
@@ -705,11 +754,18 @@ async function runLlmMode(
   const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
   let env: EnvMap = deps.env ?? process.env;
 
+  // Commit 2: pin to first --models entry for record/live/replay.
+  // Multi-model looping lands in --mode bench (commit 4).
+  const activePin: ModelPin | undefined =
+    args.models !== undefined && args.models.length > 0
+      ? args.models[0]
+      : undefined;
+
   if (args.mode === "replay" && deps.env === undefined) {
     try {
       const derived = await deriveReplayEnvFromFixtures(
         fixturesDir,
-        args.replayProvider
+        activePin?.provider ?? args.replayProvider
       );
       env = { ...process.env, ...derived.env };
       log(
@@ -730,6 +786,13 @@ async function runLlmMode(
       `Providers: ${providers.map((p) => `${p.name}/${p.model}`).join(", ")}`
     );
     log("Quota warning: free-tier providers may rate-limit or drop requests.");
+  }
+
+  if (activePin !== undefined) {
+    env = pinnedInferenceEnv(env, activePin);
+    log(
+      `pinned model: ${activePin.provider}/${activePin.model} (maxProviders=1)`
+    );
   }
 
   const store = deps.store ?? createDirStore(fixturesDir);
@@ -757,7 +820,8 @@ async function runLlmMode(
   const inference = {
     fetch: fetchImpl,
     temperature: 0 as const,
-    env
+    env,
+    ...(activePin !== undefined ? { maxProviders: 1 as const } : {})
   };
 
   const baseTurnOptions = {
@@ -805,62 +869,110 @@ async function runLlmMode(
     log(`variants: ${variants.join(",")}`);
   }
 
-  const selectedBySplit: Partial<Record<EvalSplit, MatchScenario[]>> = {};
-  let totalMatchCount = 0;
-  for (const split of splitsFor(args.suite)) {
-    const suite = buildMatchSuite(split);
-    let scenarios: MatchScenario[];
-    if (args.mode === "replay" && existingManifest?.splits[split] !== undefined) {
-      const entry = existingManifest.splits[split]!;
-      assertScenarioIdsInSuite(split, entry.scenarioIds);
-      scenarios = selectScenariosByIds(suite, entry.scenarioIds);
-      if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
-        scenarios = selectDiverseScenarios(scenarios, args.maxMatches);
+  // Per (variant, split) scenario lists — replay uses resolveVariantRun so
+  // grounded does not inherit base's longer scenarioIds (#21).
+  const selectedByVariantSplit: Record<
+    string,
+    Partial<Record<EvalSplit, MatchScenario[]>>
+  > = {};
+  const expectedMatchCounts: Array<{
+    split: EvalSplit;
+    variant: LlmVariant;
+    expected: number;
+  }> = [];
+
+  for (const variant of variants) {
+    selectedByVariantSplit[variant] = {};
+    for (const split of splitsFor(args.suite)) {
+      const suite = buildMatchSuite(split);
+      let scenarios: MatchScenario[];
+      let expected: number;
+
+      if (
+        args.mode === "replay" &&
+        existingManifest?.splits[split] !== undefined
+      ) {
+        const entry = existingManifest.splits[split]!;
+        const resolved = resolveVariantRun(entry, variant, activePin);
+        assertScenarioIdsInSuite(split, resolved.scenarioIds);
+        scenarios = selectScenariosByIds(suite, resolved.scenarioIds);
+        if (args.maxMatchesExplicit && args.maxMatches !== undefined) {
+          scenarios = selectDiverseScenarios(scenarios, args.maxMatches);
+        }
+        expected = scenarios.length;
+      } else {
+        scenarios = selectScenariosForLlmMode(
+          suite,
+          maxMatches,
+          args.mode,
+          args.allSeeds
+        );
+        expected = scenarios.length;
       }
-    } else {
-      scenarios = selectScenariosForLlmMode(
-        suite,
-        maxMatches,
-        args.mode,
-        args.allSeeds
-      );
+
+      selectedByVariantSplit[variant]![split] = scenarios;
+      expectedMatchCounts.push({ split, variant, expected });
     }
-    selectedBySplit[split] = scenarios;
-    totalMatchCount += scenarios.length;
+  }
+
+  let totalMatchCount = 0;
+  for (const bySplit of Object.values(selectedByVariantSplit)) {
+    for (const scenarios of Object.values(bySplit)) {
+      if (scenarios) totalMatchCount += scenarios.length;
+    }
   }
 
   let totalSnapshotCount = 0;
   if (args.snapshots) {
-    for (const split of splitsFor(args.suite)) {
-      if (
-        args.mode === "replay" &&
-        existingManifest?.splits[split] !== undefined &&
-        !existingManifest.splits[split]!.snapshots
-      ) {
-        continue;
-      }
-      for (const kind of resolveSnapshotKinds(
-        args,
-        split,
-        existingManifest
-      )) {
-        const snapshots = await loadCommittedSnapshots(split, kind);
-        totalSnapshotCount += snapshots.length;
+    for (const variant of variants) {
+      for (const split of splitsFor(args.suite)) {
+        const entry = existingManifest?.splits[split];
+        const resolved =
+          args.mode === "replay" && entry !== undefined
+            ? resolveVariantRun(entry, variant, activePin)
+            : {
+                snapshots: true,
+                snapshotSuite: args.snapshotSuite as
+                  | "standard"
+                  | "pivotal"
+                  | "adversarial"
+                  | undefined
+              };
+        if (args.mode === "replay" && resolved.snapshots === false) {
+          continue;
+        }
+        for (const kind of resolveSnapshotKinds(
+          args,
+          split,
+          existingManifest
+        )) {
+          const snapshots = await loadCommittedSnapshots(split, kind);
+          totalSnapshotCount += snapshots.length;
+        }
       }
     }
   }
 
   if (args.mode === "record" || args.mode === "live") {
-    const projected = projectQuotaCalls(
+    const modelCount = Math.max(1, args.models?.length ?? 1);
+    const snapsPerVariant = Math.round(
+      totalSnapshotCount / Math.max(1, variants.length)
+    );
+    const matchesPerVariant = Math.round(
+      totalMatchCount / Math.max(1, variants.length)
+    );
+    const projected = projectBenchQuotaCalls(
+      modelCount,
       variants.length,
-      totalSnapshotCount,
-      totalMatchCount
+      snapsPerVariant,
+      matchesPerVariant,
+      args.consistency
     );
     log(
-      `quota projection: variants=${variants.length} snapshots=${totalSnapshotCount} matches=${totalMatchCount} × ~17 → ${projected} calls (cap 300)`
+      `quota projection: models=${modelCount} variants=${variants.length} snapshots=${snapsPerVariant} matches=${matchesPerVariant} × ~17 × consistency=${args.consistency} → ${projected} calls (cap 300)`
     );
     try {
-      assertQuotaWithinCap(projected, args.forceQuota);
+      assertBenchQuotaWithinCap(projected, args.forceQuota);
     } catch (err) {
       error(err instanceof Error ? err.message : String(err));
       return 1;
@@ -879,12 +991,11 @@ async function runLlmMode(
 
   const byVariant: Record<string, VariantBundle> = {};
   const allResults: MatchResult[] = [];
-  const selectedScenarios: MatchScenario[] = [];
-  for (const scenarios of Object.values(selectedBySplit)) {
-    if (scenarios) {
-      selectedScenarios.push(...scenarios);
-    }
-  }
+  const actualMatchCounts: Array<{
+    split: EvalSplit;
+    variant: LlmVariant;
+    actual: number;
+  }> = [];
 
   let snapshotLlm = 0;
   const suiteBaselines: Record<
@@ -903,7 +1014,12 @@ async function runLlmMode(
     const variantResults: MatchResult[] = [];
 
     for (const split of splitsFor(args.suite)) {
-      const scenarios = selectedBySplit[split] ?? [];
+      const scenarios = selectedByVariantSplit[variant]?.[split] ?? [];
+      actualMatchCounts.push({
+        split,
+        variant,
+        actual: scenarios.length
+      });
       for (const scenario of scenarios) {
         log(`scenario: ${scenario.id} [${variant}]`);
         const results = await runSuite([scenario], policy);
@@ -915,12 +1031,13 @@ async function runLlmMode(
     const snapshotResults: Record<string, SnapshotEvalResult> = {};
     if (args.snapshots) {
       for (const split of splitsFor(args.suite)) {
-        if (
-          args.mode === "replay" &&
-          existingManifest?.splits[split] !== undefined &&
-          !existingManifest.splits[split]!.snapshots
-        ) {
-          log(`snapshots: ${split} skipped (manifest.snapshots=false)`);
+        const entry = existingManifest?.splits[split];
+        const resolved =
+          args.mode === "replay" && entry !== undefined
+            ? resolveVariantRun(entry, variant, activePin)
+            : { snapshots: true as boolean };
+        if (args.mode === "replay" && resolved.snapshots === false) {
+          log(`snapshots: ${split} skipped (variant.snapshots=false)`);
           continue;
         }
         for (const kind of resolveSnapshotKinds(
@@ -937,10 +1054,18 @@ async function runLlmMode(
               random: evalRandomSnapshots(snapshots)
             };
           }
+          const setRepeat =
+            typeof (fetchImpl as RepeatAwareFetch).setRepeat === "function"
+              ? (n: number) => (fetchImpl as RepeatAwareFetch).setRepeat(n)
+              : undefined;
           const evaluated = await evalLlmSnapshots(
             snapshots,
             turnOptions,
-            llmPolicyIdForVariant(variant)
+            llmPolicyIdForVariant(variant),
+            {
+              consistency: args.consistency,
+              ...(setRepeat !== undefined ? { setRepeat } : {})
+            }
           );
           snapshotResults[key] = evaluated;
           snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
@@ -1001,6 +1126,37 @@ async function runLlmMode(
           error(mismatch);
           return 2;
         }
+        if (activePin !== undefined) {
+          for (const decision of snap.decisions) {
+            const pinMsg = pinMismatchMessage(
+              activePin,
+              decision.provider,
+              decision.model,
+              `snapshot ${decision.snapshotId}`
+            );
+            if (pinMsg !== null) {
+              error(pinMsg);
+              return 2;
+            }
+          }
+        }
+      }
+    }
+    if (activePin !== undefined) {
+      for (const result of variantResults) {
+        for (const turn of result.turns) {
+          const trace = turn.trace;
+          const pinMsg = pinMismatchMessage(
+            activePin,
+            trace?.provider,
+            trace?.model,
+            `scenario ${result.scenarioId} turn ${turn.turn}`
+          );
+          if (pinMsg !== null) {
+            error(pinMsg);
+            return 2;
+          }
+        }
       }
     }
     for (const [suiteKey, deltas] of Object.entries(baselineDelta)) {
@@ -1012,6 +1168,27 @@ async function runLlmMode(
         );
       }
     }
+  }
+
+  // EXPECTED vs ACTUAL match counts per (split, variant)
+  let matchCountMismatch = false;
+  for (const exp of expectedMatchCounts) {
+    const act = actualMatchCounts.find(
+      (a) => a.split === exp.split && a.variant === exp.variant
+    );
+    const actual = act?.actual ?? -1;
+    log(
+      `match counts [${exp.split}/${exp.variant}]: EXPECTED=${exp.expected} ACTUAL=${actual}`
+    );
+    if (actual !== exp.expected) {
+      matchCountMismatch = true;
+      error(
+        `match count mismatch [${exp.split}/${exp.variant}]: EXPECTED=${exp.expected} ACTUAL=${actual}`
+      );
+    }
+  }
+  if (matchCountMismatch) {
+    return 1;
   }
 
   if (record || args.mode === "live") {
@@ -1027,24 +1204,33 @@ async function runLlmMode(
         }
       }
     }
-    const patch: FixtureManifest = { version: 1, splits: {} };
-    for (const split of splitsFor(args.suite)) {
-      const selected = selectedBySplit[split] ?? [];
-      const kinds = resolveSnapshotKinds(args, split, existingManifest);
-      const primaryKind: SnapshotSuiteKind =
-        kinds.includes("pivotal") && !kinds.includes("standard")
-          ? "pivotal"
-          : kinds[0] ?? "standard";
-      patch.splits[split] = {
-        scenarioIds: selected.map((s) => s.id),
-        snapshots: args.snapshots,
-        providers: [...providerKeys].sort(),
-        variants: manifestVariantsFor(variants),
-        snapshotSuite: primaryKind
-      };
+    let merged = existingManifest;
+    for (const variant of variants) {
+      const patch: FixtureManifest = { version: 1, splits: {} };
+      for (const split of splitsFor(args.suite)) {
+        const selected = selectedByVariantSplit[variant]?.[split] ?? [];
+        const kinds = resolveSnapshotKinds(args, split, existingManifest);
+        const primaryKind: SnapshotSuiteKind =
+          kinds.includes("pivotal") && !kinds.includes("standard")
+            ? "pivotal"
+            : kinds.includes("adversarial") && !kinds.includes("standard")
+              ? "adversarial"
+              : kinds[0] ?? "standard";
+        patch.splits[split] = {
+          scenarioIds: selected.map((s) => s.id),
+          snapshots: args.snapshots,
+          providers: [...providerKeys].sort(),
+          variants: manifestVariantsFor([variant], {
+            scenarioIds: selected.map((s) => s.id),
+            snapshots: args.snapshots,
+            snapshotSuite: primaryKind
+          }),
+          snapshotSuite: primaryKind
+        };
+      }
+      merged = mergeManifest(merged, patch);
     }
-    const merged = mergeManifest(existingManifest, patch);
-    await writeManifest(manifestFile, merged);
+    await writeManifest(manifestFile, merged!);
     log(`manifest updated: ${manifestFile.replace(/\\/g, "/")}`);
   }
 
@@ -1083,6 +1269,12 @@ async function runLlmMode(
     })
   );
 
+  const selectedScenarios: MatchScenario[] = [];
+  for (const bySplit of Object.values(selectedByVariantSplit)) {
+    for (const scenarios of Object.values(bySplit)) {
+      if (scenarios) selectedScenarios.push(...scenarios);
+    }
+  }
   const distinct = countDistinctMatchups(selectedScenarios);
   log(
     `distinct matchups: ${distinct} of ${selectedScenarios.length} selected scenarios`
@@ -1147,8 +1339,287 @@ export async function computeBaselineReport(
     snapshots: true,
     allSeeds: false,
     forceQuota: false,
-    snapshotSuite: "standard"
+    snapshotSuite: "standard",
+    snapshotSuiteExplicit: false,
+    consistency: 1
   });
+}
+
+/** Exported for drift-guard / unit tests. */
+export async function runBenchMode(
+  args: CliArgs,
+  deps: LlmModeDeps = {}
+): Promise<number> {
+  const log = deps.log ?? ((line: string) => console.log(line));
+  const error = deps.error ?? ((line: string) => console.error(line));
+
+  if (args.models === undefined || args.models.length === 0) {
+    error("--mode bench requires --models provider:model[,...]");
+    return 1;
+  }
+
+  const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
+  const baseStore = deps.store ?? createDirStore(fixturesDir);
+  let fixtureMissTotal = 0;
+  const missedKeys = new Set<string>();
+  const store: FixtureStore = {
+    read: async (key) => {
+      const hit = await baseStore.read(key);
+      if (hit === undefined) {
+        fixtureMissTotal += 1;
+        missedKeys.add(key);
+      }
+      return hit;
+    },
+    write: (key, record) => baseStore.write(key, record)
+  };
+  const fetchImpl = deps.fetch ?? createReplayFetch(store);
+  const setRepeat =
+    typeof (fetchImpl as RepeatAwareFetch).setRepeat === "function"
+      ? (n: number) => (fetchImpl as RepeatAwareFetch).setRepeat(n)
+      : undefined;
+
+  let baseEnv: EnvMap = deps.env ?? process.env;
+  if (deps.env === undefined) {
+    try {
+      const derived = await deriveReplayEnvFromFixtures(fixturesDir);
+      baseEnv = { ...process.env, ...derived.env };
+      log("bench replay is keyless: API keys are placeholders derived from fixtures");
+    } catch (err) {
+      error(err instanceof Error ? err.message : String(err));
+      return 1;
+    }
+  }
+
+  const variants = parseVariantsList(args.variantsRaw, "replay");
+  log(`variants: ${variants.join(",")}`);
+  log(
+    `bench models: ${args.models.map((m) => `${m.provider}:${m.model}`).join(", ")}`
+  );
+
+  const splits = splitsFor(args.suite);
+  const snapshotKinds = resolveSnapshotKinds(args, splits[0]!, undefined);
+  const primaryKind = snapshotKinds[0] ?? "adversarial";
+
+  // Count snapshots for quota (per variant; same suite for all)
+  let snapsPerVariant = 0;
+  if (args.snapshots) {
+    for (const split of splits) {
+      for (const kind of resolveSnapshotKinds(args, split, undefined)) {
+        snapsPerVariant += (await loadCommittedSnapshots(split, kind)).length;
+      }
+    }
+  }
+
+  const projected = projectBenchQuotaCalls(
+    args.models.length,
+    variants.length,
+    snapsPerVariant,
+    args.maxMatches ?? 0,
+    args.consistency
+  );
+  log(
+    `quota projection: models=${args.models.length} variants=${variants.length} snapshots=${snapsPerVariant} matches=${args.maxMatches ?? 0} × ~17 × consistency=${args.consistency} → ${projected} calls (cap 300)`
+  );
+  try {
+    assertBenchQuotaWithinCap(projected, args.forceQuota);
+  } catch (err) {
+    error(err instanceof Error ? err.message : String(err));
+    return 1;
+  }
+
+  const pricing = loadPricing();
+  const rows: BenchRow[] = [];
+  const suiteBaselines: Record<
+    string,
+    { greedy: SnapshotEvalResult; random: SnapshotEvalResult }
+  > = {};
+
+  // Reset miss counters around each eval so we can drop missy rows without
+  // inventing metrics from fallbacks.
+  const takeMisses = (): { count: number; keys: string[] } => {
+    const count = fixtureMissTotal;
+    const keys = [...missedKeys];
+    fixtureMissTotal = 0;
+    missedKeys.clear();
+    return { count, keys };
+  };
+  for (const pin of args.models) {
+    const env = pinnedInferenceEnv(baseEnv, pin);
+    const modelLabel = `${pin.provider}:${pin.model}`;
+    log(`--- model: ${modelLabel} (maxProviders=1) ---`);
+
+    for (const variant of variants) {
+      const turnOptions = {
+        budgetMs: args.budgetMs,
+        inference: {
+          fetch: fetchImpl,
+          temperature: 0 as const,
+          env,
+          maxProviders: 1 as const
+        },
+        ...variantToPlayOptions(variant),
+        variant,
+        ...(deps.skipGuards ? { now: () => 0 } : {})
+      };
+
+      if (!args.snapshots) continue;
+
+      for (const split of splits) {
+        for (const kind of resolveSnapshotKinds(args, split, undefined)) {
+          const key = snapshotResultKey(split, kind);
+          log(`snapshots: ${key} [${variant}] @ ${modelLabel}`);
+          const snapshots = await loadCommittedSnapshots(split, kind);
+          if (suiteBaselines[key] === undefined) {
+            suiteBaselines[key] = {
+              greedy: evalGreedySnapshots(snapshots),
+              random: evalRandomSnapshots(snapshots)
+            };
+          }
+
+          const evaluated = await evalLlmSnapshots(
+            snapshots,
+            turnOptions,
+            llmPolicyIdForVariant(variant),
+            {
+              consistency: args.consistency,
+              ...(setRepeat !== undefined ? { setRepeat } : {})
+            }
+          );
+          const misses = takeMisses();
+          if (misses.count > 0) {
+            error(
+              `bench fixture_miss=${misses.count} for ${modelLabel}/${variant}/${split}/${kind} keys=${misses.keys.length} sample=[${misses.keys.slice(0, 6).join(", ")}] — skipping row (not inventing)`
+            );
+            continue;
+          }
+
+          for (const decision of evaluated.decisions) {
+            const pinMsg = pinMismatchMessage(
+              pin,
+              decision.provider,
+              decision.model,
+              `snapshot ${decision.snapshotId}`
+            );
+            if (pinMsg !== null) {
+              error(pinMsg);
+              return 2;
+            }
+          }
+          const mismatch = promptVersionMismatchMessage(
+            variant,
+            evaluated.decisions
+          );
+          if (mismatch !== null) {
+            error(mismatch);
+            return 2;
+          }
+
+          const fallbackCount = evaluated.decisions.filter(
+            (d) => d.fallbackReason !== undefined
+          ).length;
+          const taxonomy = buildFailureTaxonomy(evaluated.decisions);
+          const tokenPrompt = 0;
+          const tokenCompletion = 0;
+          // Cost from pricing table when tokens unknown → still lookup with 0
+          const costUsd = lookupCostUsd(
+            pricing,
+            pin.provider,
+            pin.model,
+            tokenPrompt,
+            tokenCompletion
+          );
+
+          const recordingStats: RecordingFetchStats | undefined =
+            typeof (fetchImpl as unknown as { stats?: () => RecordingFetchStats })
+              .stats === "function"
+              ? (fetchImpl as unknown as { stats: () => RecordingFetchStats }).stats()
+              : undefined;
+
+          rows.push(
+            buildBenchRow(
+              {
+                model: modelLabel,
+                variant,
+                split,
+                snapshotSuite: kind
+              },
+              evaluated.metrics,
+              {
+                fallbackCount,
+                greedyBaseline: suiteBaselines[key]!.greedy.metrics,
+                randomBaseline: suiteBaselines[key]!.random.metrics,
+                latency: aggregateLiveLatencies(
+                  recordingStats?.liveLatenciesMs ?? [],
+                  recordingStats?.hits ?? 0,
+                  true
+                ),
+                costUsd,
+                taxonomy,
+                ...(evaluated.consistency !== undefined
+                  ? { consistency: evaluated.consistency }
+                  : {})
+              }
+            )
+          );
+        }
+      }
+    }
+  }
+
+  if (rows.length === 0) {
+    error(
+      "bench produced 0 rows (all fixture misses) — refusing empty summary; record missing fixtures first"
+    );
+    return 1;
+  }
+
+  const expectedRows = args.models.length * variants.length * splits.length;
+  const singleModelPending =
+    args.models.length < 2 || rows.length < expectedRows;
+  const note = singleModelPending
+    ? rows.length < expectedRows
+      ? "partial bench: some model/variant rows skipped due to fixture_miss; multi-model/operator record still pending"
+      : "single-model proof pending operator multi-model record"
+    : "multi-model bench summary";
+
+  const summary = summarizeBench({
+    rows,
+    models: args.models.map((m) => `${m.provider}:${m.model}`),
+    variants,
+    split: args.suite === "all" ? "all" : args.suite,
+    snapshotSuite: primaryKind,
+    consistency: args.consistency,
+    singleModelPending,
+    note
+  });
+
+  const outDir = deps.outDir ?? join(ROOT, "evals/out");
+  await mkdir(outDir, { recursive: true });
+  const outPath = join(outDir, "bench.json");
+  await writeFile(outPath, `${JSON.stringify({ summary, rows }, null, 2)}\n`, "utf8");
+
+  const committedDir = join(ROOT, "evals/out-committed");
+  await mkdir(committedDir, { recursive: true });
+  const summaryPath = join(committedDir, "bench.summary.json");
+  await writeFile(
+    summaryPath,
+    `${JSON.stringify(summary, null, 2)}\n`,
+    "utf8"
+  );
+
+  log(`wrote ${relative(ROOT, outPath).replace(/\\/g, "/")}`);
+  log(`wrote ${relative(ROOT, summaryPath).replace(/\\/g, "/")}`);
+  for (const row of summary.rows) {
+    log(
+      `bench[${row.model}/${row.variant}/${row.split}/${row.snapshotSuite}]: n=${row.n} optimal=${(row.optimalRate * 100).toFixed(1)}% meanRegret=${row.meanRegret.toFixed(2)} highRegret>=100=${row.highRegret} costUsd=${row.costUsd}`
+    );
+  }
+  if (summary.singleModelPending) {
+    log(`note: ${summary.note}`);
+  }
+
+  return 0;
 }
 
 export async function main(argv: string[]): Promise<number> {
@@ -1184,6 +1655,10 @@ export async function main(argv: string[]): Promise<number> {
       console.log(`wrote ${relative(ROOT, outPath).replace(/\\/g, "/")}`);
       console.log(`wrote ${relative(ROOT, summaryPath).replace(/\\/g, "/")}`);
       return 0;
+    }
+
+    if (args.mode === "bench") {
+      return await runBenchMode(args);
     }
 
     if (args.mode === "replay") {

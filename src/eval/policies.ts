@@ -106,10 +106,10 @@ export function isLlmVariant(value: string): value is LlmVariant {
  */
 export function parseVariantsList(
   raw: string | undefined,
-  mode: "record" | "live" | "replay" | "baseline" | "discriminate"
+  mode: "record" | "live" | "replay" | "baseline" | "discriminate" | "bench"
 ): LlmVariant[] {
   if (raw === undefined || raw.trim() === "") {
-    if (mode === "replay") {
+    if (mode === "replay" || mode === "bench") {
       return ["base"];
     }
     if (mode === "record" || mode === "live") {

@@ -38,6 +38,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
 - M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE**.
 - M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
+- M-BENCH headless model bench — **IN REVIEW** (PR #23 / D-032); multi-model pending operator record.
 
 ### AI milestone spine (D-033 — 11 locked batches, 5 execution groups)
 
@@ -50,7 +51,7 @@ Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-pro
 Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: regret distribution with rate (D-031). Memory variants still unmeasured.
 
 #### 3. M-BENCH headless — IN REVIEW (PR #23)
-Pinned single-model runs, repeat-aware fixtures, taxonomy/cost/consistency, committed bench summary. Protocol lands with that PR; multi-model operator record may follow.
+Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json` (D-032). Single-model gemini proof committed; multi-model awaits operator record.
 
 #### 4. Correctness hardening — NEXT (after #23) — execution batch A
 Silent risks on existing files, before any Report screen shows headline numbers: CI must re-prove pivotal / adversarial / bench / discriminate regen (today `skipIf`-gated); Oracle MemoScope identity; grounding gaps (fallback-stabilize, `diesNextTurn`, unknown effect categories); greedy must call grounding; pricing vs recorded Groq pin; sanitize new fixture records (do not rewrite committed fixtures); `.env.example` `INFERENCE_*` vars; strengthen weak tests.
@@ -79,6 +80,7 @@ Small provably solvable task proving the interface is real; then publish.
 #### Parked / closed
 - **D-026** seed-spread correlation and greedy-suboptimal snapshot reselection — **won't-fix** under D-033 (would require suite regeneration; contradicts batch 5’s no-behavior-change gate). Remain known limitations.
 - **Coach** — cut by D-033 (unmeasured-if-UI-only contradicts D-018 / D-023).
+
 
 ### Stretch (optional)
 - Natural-language robot builder (NL → validated `AgentConfig`).

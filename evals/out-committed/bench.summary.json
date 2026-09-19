@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "singleModelPending": true,
+  "note": "partial bench: some model/variant rows skipped due to fixture_miss; multi-model/operator record still pending",
+  "models": [
+    "gemini:gemini-3.5-flash-lite"
+  ],
+  "variants": [
+    "base",
+    "grounded"
+  ],
+  "split": "heldout",
+  "snapshotSuite": "adversarial",
+  "consistency": 1,
+  "rows": [
+    {
+      "model": "gemini:gemini-3.5-flash-lite",
+      "variant": "base",
+      "split": "heldout",
+      "snapshotSuite": "adversarial",
+      "n": 20,
+      "optimalRate": 0.05,
+      "meanRegret": 4.25,
+      "medianRegret": 5,
+      "maxRegret": 5,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "deltaVsGreedy": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 20,
+          "optimalRate": 0.05,
+          "meanRegret": 4.25,
+          "medianRegret": 5,
+          "maxRegret": 5,
+          "highRegretCount": 0,
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 20,
+          "optimalRate": 0,
+          "meanRegret": 104.35,
+          "medianRegret": 5,
+          "maxRegret": 2002,
+          "highRegretCount": 1
+        },
+        "deltaOptimalRate": 0.05,
+        "deltaMeanRegret": -100.1
+      },
+      "deltaVsRandom": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial",
+        "baselineId": "random",
+        "policy": {
+          "n": 20,
+          "optimalRate": 0.05,
+          "meanRegret": 4.25,
+          "medianRegret": 5,
+          "maxRegret": 5,
+          "highRegretCount": 0,
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 20,
+          "optimalRate": 0.5,
+          "meanRegret": 52.175,
+          "medianRegret": 2.5,
+          "maxRegret": 2002,
+          "highRegretCount": 1
+        },
+        "deltaOptimalRate": -0.45,
+        "deltaMeanRegret": -47.925
+      }
+    }
+  ]
+}

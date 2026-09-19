@@ -545,6 +545,24 @@ Mean regret is dominated by rare high-stakes misses; rate alone hides that struc
 Consequences:
 Eval digests and ablation tables include median / max / highRegret≥100; CLI baseline deltas compare against the loaded suite’s measured greedy and random metrics.
 
+## D-032 Bench protocol
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+- **M-BENCH** compares models under a pinned provider+model with failover disabled (`INFERENCE_MAX_PROVIDERS=1`). The M-TOOLS adversarial record was a 71/8/1 gemini/openrouter/groq mixture — that is not a single-model claim.
+- Measurement set remains **held-out adversarial** (D-029 / D-030). Report optimality **and** regret distribution (D-031).
+- Axes: **prompt version** (`base` / `grounded` / …) and **model** (`--models provider:model`).
+- Fixture keys are **repeat-aware**: `repeat` enters the hash only when ≠ 0 so legacy fixtures stay valid; `--consistency N` uses `fetch.setRepeat(i)` without changing the HTTP body.
+- Cost is informational via committed `evals/pricing.json`; **null when unpriced** (never invent). Free-tier known models may be `0` while quota still binds.
+- Committed summary: `evals/out-committed/bench.summary.json`. Partial single-model proof is allowed when other pins/variants miss fixtures; do not invent rows from fallbacks.
+
+Rationale:
+Model comparison without a pin conflates provider routing with model quality. Repeat-aware keys enable self-consistency without rewriting recorded bodies.
+
+Consequences:
+`--mode bench` defaults to heldout + adversarial + max-matches 0. Remains in force for batches 3 and 10 under D-033. Multi-model rows await operator record.
+
 ## D-033 Product direction: an agent evaluation framework with an exact oracle
 Date: 2026-09-18
 Status: Accepted
@@ -557,7 +575,7 @@ Decision:
 1. **Environment interface** — The measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description), not on this game. The existing game becomes its first implementation. No measurement changes in the port.
 2. **Diagnostic layer** — Failure clustering by decision type (missed lethal, ignored incoming threat, wasted energy, over-defending at full health); ranked “what would help most” from variant results; stakes distribution of errors (frequent-and-cheap vs rare-and-fatal); one replayable counterexample per run (state, the agent’s own reason string, the optimal move, the cost); run-to-run diffs with confidence intervals.
 3. **Three new measurements** — Prompt-perturbation sensitivity (same decision, reworded and reordered: does the choice flip?); adversarial-context robustness (inject a false grounded fact or wrong tendency summary: does the agent trust it?); information-scaling curves (raw state → grounded → memory → both, reported as a curve).
-4. **BYOK model bench + committed leaderboard** — Pinned model per run, no failover (bench pin protocol landing with PR #23 / batch 3); rerun on demand, never on a schedule. The “leaderboard” is a **committed static comparison page**, not a live backend — D-020’s anti-scope against a real backend/leaderboard stays in force.
+4. **BYOK model bench + committed leaderboard** — Pinned model per run, no failover (bench pin protocol D-032 / batch 3); rerun on demand, never on a schedule. The “leaderboard” is a **committed static comparison page**, not a live backend — D-020’s anti-scope against a real backend/leaderboard stays in force.
 5. **UI** — Builder, Arena, results and diagnostics pages; renders the framework, owns no measurement logic.
 6. **Methodology writeup** — Told through the four failed measurement sets (standard had no stakes; pivotal was greedy-saturated; adversarial at regret≥100 gave n=1; the inert-seed duplicate miscount) and the falsified pre-registered hypothesis (D-024 / D-030), linking the committed reproduce logs.
 7. **Second reference environment** — A small, provably solvable task proving the interface is real rather than asserted.
@@ -607,7 +625,7 @@ Every conclusion must trace to a specific measurement. Where n is too small, the
 
 ### Decisions kept in force
 
-D-018, D-020 (coach line amended), D-022, D-027, D-029, D-031. The M-BENCH pin / repeat / cost protocol (recorded as D-032 on PR #23) lands with batch 3 and remains in force for batches 3 and 10 once that PR merges — this entry does not invent a D-032 body on `main`.
+D-018, D-020 (coach line amended), D-022, D-027, D-029, D-031, D-032. Pin / repeat / cost protocol remains in force for batches 3 and 10.
 
 ### D-026
 

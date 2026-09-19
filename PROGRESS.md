@@ -2,11 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `docs/d033-execution-groups`; base `main` @ `670b22a`
-- Current state: Docs follow-up — D-033 amend groups the **11 locked batches** into **5 execution batches** (A–E). Locked numbers/contents unchanged. M-BENCH headless remains **in review** (PR #23). Next after #23: **locked batch 4 / execution batch A** (hardening + interface share one replay gate).
-- Test count: **258** (`npm run coverage`: 255 passed, 3 skipped)
-- Verification: typecheck / lint / coverage (all green)
-- Working tree: `docs/d033-execution-groups` (docs fence: DECISIONS / ROADMAP / PROGRESS; README unchanged)
+- Branch: `feat/m-bench`; base includes `main` @ D-033 + execution-groups
+- Current state: **M-BENCH headless** (D-032) on this PR; D-033 direction + A–E execution groups merged from main. Completing pin-mismatch guard (location + CLI exit-2 tests). Next after merge: **execution batch A** (locked batches 4+5).
+- Test count: **286** (`npm run coverage`: 282 passed, 4 skipped)
+- Verification: typecheck / lint / coverage; keyless bench + replay
+- Working tree: `feat/m-bench` → PR #23
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -43,9 +43,11 @@
 - M-TOOLS ablation published (D-030) and metric choice (D-031).
 - Docs reconcile (PR #22): public docs vs measured reality.
 - D-033 product direction lock (PR #24): 11-batch plan; coach cut; D-026 won't-fix.
+- D-033 execution grouping (PR #25): locked batches → A–E.
+- M-BENCH headless on this branch: per-variant manifest, pin+repeat keys, bench metrics, `--mode bench`, D-032.
 
 ## Current Work
-- D-033 amend: group locked batches 4–11 into execution batches A–E (docs only).
+- Pin-mismatch guard completed (location in message; CLI exit-2 / match / unpinned tests) on `feat/m-bench`.
 
 ## Blockers
 - None.
@@ -55,10 +57,10 @@
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 - D-026 closed as won't-fix under D-033 (known limitations: small n, seed correlation).
 - Memory ablation variants remain unmeasured.
-- PR #23 (M-BENCH) in review; pin protocol lands with that PR (not yet on `main`).
+- Multi-model bench rows / grounded gemini adversarial fixtures await operator record.
 
 ## Changed Files In Current Work
-- `DECISIONS.md`, `ROADMAP.md`, `PROGRESS.md`
+- See `git status` / PR diff on `feat/m-bench`.
 
 ## Exact Next Step
-- Land PR #23 (M-BENCH), then **execution batch A** = locked batches **4 + 5** (correctness hardening + environment interface; shared byte-identical replay gate). Then B = 6+7, C = 8+9, D = 10, E = 11.
+- Finish pin-mismatch guard, land PR #23, then **execution batch A** = locked batches **4 + 5**.

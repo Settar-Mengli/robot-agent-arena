@@ -81,7 +81,7 @@ describe("prompt-variant ablation helpers", () => {
     expect(() => assertQuotaWithinCap(QUOTA_CALL_CAP + 1, true)).not.toThrow();
   });
 
-  it("manifest round-trip merges variants by id", () => {
+  it("manifest round-trip merges variants by id with per-variant scenarioIds", () => {
     const a = {
       version: 1 as const,
       splits: {
@@ -89,7 +89,10 @@ describe("prompt-variant ablation helpers", () => {
           scenarioIds: ["s1"],
           snapshots: true,
           providers: ["groq|m"],
-          variants: manifestVariantsFor(["base"])
+          variants: manifestVariantsFor(["base"], {
+            scenarioIds: ["s1"],
+            snapshots: true
+          })
         }
       }
     };
@@ -100,7 +103,10 @@ describe("prompt-variant ablation helpers", () => {
           scenarioIds: ["s2"],
           snapshots: false,
           providers: ["gemini|m"],
-          variants: manifestVariantsFor(["grounded", "base"])
+          variants: manifestVariantsFor(["grounded", "base"], {
+            scenarioIds: ["s2"],
+            snapshots: false
+          })
         }
       }
     };
@@ -112,6 +118,14 @@ describe("prompt-variant ablation helpers", () => {
       "grounded"
     ]);
     expect(merged.splits.dev!.variants![0]!.promptVersion).toBe("agent-v1");
+    // base keeps s1 and gains s2 from the second patch's base entry
+    expect(merged.splits.dev!.variants!.find((v) => v.id === "base")!.scenarioIds).toEqual([
+      "s1",
+      "s2"
+    ]);
+    expect(
+      merged.splits.dev!.variants!.find((v) => v.id === "grounded")!.scenarioIds
+    ).toEqual(["s2"]);
   });
 
   it("aggregates delta vs measured suite baseline", () => {

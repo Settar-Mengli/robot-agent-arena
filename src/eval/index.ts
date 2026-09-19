@@ -154,3 +154,63 @@ export {
   upsertBaselineBlock
 } from "./report";
 export type { BaselineReport, BaselineSplitReport } from "./report";
+
+export {
+  assertCommittedManifestScenarioIds,
+  assertScenarioIdsInSuite,
+  fixtureFileExists,
+  mergeManifest,
+  manifestPathFor,
+  manifestVariantsFor,
+  readManifest,
+  readManifestSync,
+  resolveVariantRun,
+  selectScenariosByIds,
+  variantsFromManifestSplit,
+  writeManifest
+} from "./manifest";
+export type {
+  FixtureManifest,
+  ManifestModelEntry,
+  ManifestSplit,
+  ManifestVariant,
+  ManifestVariantEntry
+} from "./manifest";
+
+export {
+  discoverVariantScenarioIds,
+  listFixtureHostModels,
+  scenarioMatchFixturesPresent
+} from "./fixture-presence";
+export type { HostModelPair } from "./fixture-presence";
+
+export {
+  KNOWN_PROVIDERS,
+  parseModelsFlag,
+  pinnedInferenceEnv,
+  pinMismatchMessage,
+  loadPricing,
+  lookupCostUsd,
+  pricingKey,
+  projectBenchQuotaCalls,
+  assertBenchQuotaWithinCap,
+  buildFailureTaxonomy,
+  computeConsistencyMetrics,
+  consistencySampleForSnapshot,
+  aggregateLiveLatencies,
+  buildBenchRow,
+  summarizeBench
+} from "./bench";
+export type {
+  KnownProvider,
+  ModelPin,
+  PricingEntry,
+  PricingTable,
+  FailureTaxonomy,
+  ConsistencySample,
+  ConsistencyMetrics,
+  BenchLatency,
+  BenchRow,
+  BenchRowKey,
+  BenchSummary
+} from "./bench";

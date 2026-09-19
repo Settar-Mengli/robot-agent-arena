@@ -16,15 +16,15 @@ npm run eval:record       # local only: call providers, reuse fixtures, write ne
 node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate   # keyless: random vs greedy vs optimal
 # Ablation (M-TOOLS) — local record; defaults --variants base,grounded, snapshots on, --max-matches 2:
 npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial
+# Bench (M-BENCH) — keyless pinned replay → committed summary (requires --models):
+node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite --variants base,grounded
 ```
 
-`eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures). **CI runs `npm run eval:replay -- --suite all`** (not the dev default) — held-out fixtures are committed, so `--suite heldout` / `all` work keyless. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings). **Replay follows the fixture manifest when present** (scenario ids per split); first-N-by-id is only the no-manifest fallback. Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice. LLM adversarial snapshot figures in this file are from a local record; reproduce keylessly with:
+`eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures). **CI runs `npm run eval:replay -- --suite all`** (not the dev default) — held-out fixtures are committed, so `--suite heldout` / `all` work keyless. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings). **Replay follows the fixture manifest when present** (per-variant `scenarioIds`; legacy split-level list for old readers). Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice. Optional `--models provider:model` pins a single provider with `maxProviders: 1` (no failover). LLM adversarial snapshot figures in this file are from a local record; reproduce keylessly with:
 
 ```bash
 npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite adversarial
 ```
-
-(Manifest has no `variants` field yet, so `--variants` must be passed explicitly.)
 
 ## Metric definitions
 
@@ -234,6 +234,41 @@ Providers across the record run: gemini 71 decisions (18× 429), openrouter 8 (2
 **D-024 prediction (historical):** grounded facts raise held-out adversarial snapshot optimality above the adversarial greedy baseline (0%) and beat greedy on match outcomes.
 
 **D-024 falsifier (applied):** grounded did not change any decision vs base on the measurement set; publish that failure here.
+
+## Bench (M-BENCH)
+
+Pinned single-model comparison on the **adversarial** measurement set (D-032). Columns exist so model choice is an evidence question, not folklore:
+
+| column | why |
+| --- | --- |
+| optimal rate + regret distribution | D-031: rate alone hides stakes-skewed failure modes |
+| validity / fallback taxonomy | separates bad JSON from provider outages |
+| latency p50/p95/p99 | live only; null under keyless replay |
+| cost USD | from `evals/pricing.json`; **null when unpriced** (never invent) |
+| self-consistency | `--consistency N` + repeat-aware fixture keys |
+| prompt version | `base` vs `grounded` is an axis, not a hidden constant |
+
+**Protocol:** `--models provider:model` sets `INFERENCE_PROVIDER_ORDER` + `INFERENCE_MAX_PROVIDERS=1` (no failover — the M-TOOLS record was a 71/8/1 mixture). Defaults: `--suite heldout`, `--snapshot-suite adversarial`, `--max-matches 0` (snapshots only), `--variants base,grounded`, T=0, consistency 1. Adversarial greedy/random baselines: `evals/out-committed/adversarial.baselines.json`.
+
+### Single-model table (committed summary)
+
+From `evals/out-committed/bench.summary.json` (keyless gemini-pinned replay). `singleModelPending: true` — awaits operator multi-model record. Grounded row omitted here: gemini adversarial fixtures miss for `grounded` (not invented).
+
+| model | variant | split / suite | n | optimal | mean / median / max regret | highRegret≥100 | validity | cost USD |
+| --- | --- | --- | ---: | ---: | --- | ---: | ---: | ---: |
+| gemini:gemini-3.5-flash-lite | base | heldout / adversarial | 20 | 5.0% | 4.25 / 5 / 5 | 0 | 100% | 0 (free-tier) |
+
+vs adversarial greedy (0% / mean 104.35): **+5.0pp** optimal, **−100.10** mean regret.
+
+### Operator multi-model command
+
+```bash
+# Local record (keys required), then keyless bench:
+npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial --max-matches 0 --models groq:MODEL,gemini:gemini-3.5-flash-lite,mistral:MODEL
+node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models groq:MODEL,gemini:gemini-3.5-flash-lite,mistral:MODEL --variants base,grounded
+```
+
+Replace `MODEL` with the free-tier ids you record. Quota: `models × variants × (snapshots + matches×17) × consistency` — refuse >300 without `--force-quota` (e.g. 3×2×20×3 = 360).
 
 ## Findings
 
