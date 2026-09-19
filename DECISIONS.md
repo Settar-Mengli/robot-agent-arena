@@ -718,3 +718,13 @@ Measurement honesty requires separating prompt-byte-frozen hardening (A1) from a
 
 Consequences:
 A2 implements this protocol; EVAL.md publishes the outcome; D-030’s historical 0/20 row stays the as-implemented record.
+
+### Amend — 2026-09-19 — Corrected facts shipped (results pending record)
+
+**A2 code complete** on `feat/a2-grounding-correction`. Shipped:
+
+- New prompt version **`agent-v4-grounded`** (`PROMPT_VERSIONS.groundedV2`), play option **`facts-v2`**, eval variant **`grounded-v2`**.
+- Three defects corrected in V2 facts only: (1) per-candidate `diesNextTurnAfterMove` after this-move defense/heal (global pre-action kept as `diesNextTurnPreAction`); (2) unaffordable candidates project fallback-stabilize (`FALLBACK_ENERGY_RECOVERY` / `FALLBACK_DEFENSE_GAIN`); (3) unknown effect categories return `unmodelledCategory` from `projectSkillEffects` (non-fatal); `computeGroundedFactsV2` throws if any candidate is marked; greedy skips marked skills.
+- **`agent-v2-grounded` / `computeGroundedFacts` / committed grounded fixtures / D-030 result preserved** unchanged as the historical record.
+
+Operator must run the D-034 record (keys) before EVAL results are filled; see EVAL.md corrected-arm section.

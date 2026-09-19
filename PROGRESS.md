@@ -1,12 +1,12 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-18
-- Branch: `feat/a1-hardening`; base `main` @ `fd737fe`
-- Current state: **A1 done** (prompt-byte-frozen hardening). Greedy→grounding landed (0 diffs). Next: **A2 (D-034, needs keys)**.
-- Test count: **290** (`npm run coverage`: 286 passed, 4 skipped)
+- Date: 2026-09-19
+- Branch: `feat/a2-grounding-correction`; base `main` @ `fc88685`
+- Current state: **A2 code complete** — corrected grounded facts (`agent-v4-grounded` / `grounded-v2`). **Results pending** operator D-034 record (needs keys).
+- Test count: **296** (`npm run coverage`: 292 passed, 4 skipped)
 - Verification: typecheck / lint / coverage / SNAPSHOT_DRIFT drift-guards / `eval:replay --suite all` (fixture_miss 0)
-- Working tree: A1 commits on `feat/a1-hardening`
+- Working tree: A2 commits on `feat/a2-grounding-correction`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -46,23 +46,24 @@
 - D-033 execution grouping (PR #25): locked batches → A–E.
 - M-BENCH headless (PR #23): per-variant manifest, pin+repeat keys, bench metrics, `--mode bench`, D-032; pin-mismatch guard.
 - Docs: split execution batch A into A1/A2/A3; pre-register D-034 (PR #26).
-- **A1 hardening** (`feat/a1-hardening`): greedy→grounding (proven); MemoScope maxTurns+catalog; CI `drift` job; pricing/env/sanitize-on-record; pinned published tests.
+- **A1 hardening** (PR #27): greedy→grounding (proven); MemoScope maxTurns+catalog; CI `drift` job; pricing/env/sanitize-on-record; pinned published tests.
+- **A2 code** (`feat/a2-grounding-correction`): `computeGroundedFactsV2` / `agent-v4-grounded` / `grounded-v2`; unmodelled marker + greedy skip; historical `agent-v2-grounded` preserved.
 
 ## Current Work
-- A1 complete on branch; PR open. Waiting on merge / A2 operator keys.
+- A2 code complete; EVAL D-034 results table empty pending operator record.
 
 ## Blockers
-- A2 requires an operator record run with API keys (D-034).
+- Operator record run with API keys required to fill D-034 results.
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 - D-026 closed as won't-fix under D-033 (known limitations: small n, seed correlation).
 - Memory ablation variants remain unmeasured.
-- Multi-model bench rows / grounded gemini adversarial fixtures await operator record (A2 needs keys).
+- Multi-model bench rows await operator record.
 
 ## Changed Files In Current Work
-- A1 scope: `src/eval/**`, `src/agent/baselines/greedy.ts`, listed tests, `evals/pricing.json`, `.env.example`, `.github/workflows/ci.yml`, DECISIONS / ROADMAP / PROGRESS
+- A2 scope: `src/agent/**` (grounding, prompt, llm-turn, types, greedy), `src/eval/policies.ts`, listed tests, DECISIONS / ROADMAP / PROGRESS / EVAL ablation section
 
 ## Exact Next Step
-- **A2 (D-034)** — fix grounding facts, bump prompt version, regenerate grounded fixtures, republish ablation (needs keys). Then A3 adapter-only interface.
+- Operator: `npm run eval:record -- --suite heldout --variants base,grounded-v2 --snapshot-suite adversarial --max-matches 2` (quota → 108 calls). Then publish D-034 results in EVAL.md. Then A3.
