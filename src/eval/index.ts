@@ -47,7 +47,7 @@ export type {
   PlayerPolicy
 } from "./policies";
 
-export { bestResponse, regret } from "./oracle";
+export { bestResponse, oracleMemoIdentity, regret } from "./oracle";
 export type {
   BestResponseOptions,
   BestResponseResult,

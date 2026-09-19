@@ -15,7 +15,7 @@ import type { PlayerPolicy } from "./policies";
  * via selectSimulationSkillId when the selector is omitted; with an injected
  * selector, memo keys need only {turn, player, cpu}.
  *
- * MemoScope is only valid for one (playerPolicy, cpuConfig, maxTurns)
+ * MemoScope is only valid for one (playerPolicy, agents, maxTurns, catalog)
  * combination: sharing a memo across different games silently corrupts values.
  */
 
@@ -27,6 +27,20 @@ export type MemoScope = {
   identity: string;
   map: Map<string, number>;
 };
+
+/** Stable identity string for MemoScope binding (must include numeric maxTurns + catalog). */
+export function oracleMemoIdentity(input: {
+  playerPolicy: string;
+  cpuAgentId: string;
+  playerAgentId: string;
+  maxTurns: number;
+  catalogSkillIds: readonly string[];
+}): string {
+  return (
+    `${input.playerPolicy}|${input.cpuAgentId}|${input.playerAgentId}` +
+    `|maxTurns=${input.maxTurns}|catalog=${input.catalogSkillIds.join(",")}`
+  );
+}
 
 export type BestResponseOptions = {
   maxNodes?: number;
@@ -57,7 +71,7 @@ function resolveMemoMap(scope: MemoScope | undefined): Map<string, number> {
   if (bound !== scope.identity) {
     throw new Error(
       `MemoScope reused with different identity: was '${bound}', now '${scope.identity}'. ` +
-        "Memo is only valid for one (playerPolicy, cpuConfig, maxTurns) combination."
+        "Memo is only valid for one (playerPolicy, agents, maxTurns, catalog) combination."
     );
   }
   return scope.map;
