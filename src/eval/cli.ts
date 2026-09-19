@@ -1131,7 +1131,8 @@ async function runLlmMode(
             const pinMsg = pinMismatchMessage(
               activePin,
               decision.provider,
-              decision.model
+              decision.model,
+              `snapshot ${decision.snapshotId}`
             );
             if (pinMsg !== null) {
               error(pinMsg);
@@ -1148,7 +1149,8 @@ async function runLlmMode(
           const pinMsg = pinMismatchMessage(
             activePin,
             trace?.provider,
-            trace?.model
+            trace?.model,
+            `scenario ${result.scenarioId} turn ${turn.turn}`
           );
           if (pinMsg !== null) {
             error(pinMsg);
@@ -1496,7 +1498,8 @@ export async function runBenchMode(
             const pinMsg = pinMismatchMessage(
               pin,
               decision.provider,
-              decision.model
+              decision.model,
+              `snapshot ${decision.snapshotId}`
             );
             if (pinMsg !== null) {
               error(pinMsg);

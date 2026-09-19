@@ -124,7 +124,8 @@ export function pinnedInferenceEnv(
 export function pinMismatchMessage(
   pin: ModelPin,
   provider: string | undefined,
-  model: string | undefined
+  model: string | undefined,
+  where?: string
 ): string | null {
   if (provider === undefined || model === undefined) {
     return null;
@@ -132,9 +133,10 @@ export function pinMismatchMessage(
   if (provider === pin.provider && model === pin.model) {
     return null;
   }
+  const location = where !== undefined && where.length > 0 ? ` (${where})` : "";
   return (
     `PIN MISMATCH: expected ${pin.provider}/${pin.model}, ` +
-    `but decision used ${provider}/${model}`
+    `but decision used ${provider}/${model}${location}`
   );
 }
 

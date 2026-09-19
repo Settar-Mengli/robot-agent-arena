@@ -4,7 +4,7 @@
 - Date: 2026-09-18
 - Branch: `feat/m-bench`; base includes `main` @ D-033 + execution-groups
 - Current state: **M-BENCH headless** (D-032) on this PR; D-033 direction + A–E execution groups merged from main. Completing pin-mismatch guard (location + CLI exit-2 tests). Next after merge: **execution batch A** (locked batches 4+5).
-- Test count: see latest `npm run coverage` after pin-guard commit
+- Test count: **286** (`npm run coverage`: 282 passed, 4 skipped)
 - Verification: typecheck / lint / coverage; keyless bench + replay
 - Working tree: `feat/m-bench` → PR #23
 
@@ -47,7 +47,7 @@
 - M-BENCH headless on this branch: per-variant manifest, pin+repeat keys, bench metrics, `--mode bench`, D-032.
 
 ## Current Work
-- Pin-mismatch guard completion (location in message; CLI exit-2 / match / unpinned tests) on `feat/m-bench`.
+- Pin-mismatch guard completed (location in message; CLI exit-2 / match / unpinned tests) on `feat/m-bench`.
 
 ## Blockers
 - None.

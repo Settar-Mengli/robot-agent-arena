@@ -1,10 +1,41 @@
-import { describe, expect, it } from "vitest";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   KNOWN_PROVIDERS,
   parseModelsFlag,
   pinnedInferenceEnv,
   pinMismatchMessage
 } from "../eval/bench";
+import { createMemoryStore } from "../eval";
+import { buildMatchSuite } from "../eval/scenarios";
+
+/** Mutable attribution returned by the completeChat stub (CLI guard tests). */
+const chatStub = {
+  provider: "groq",
+  model: "openai/gpt-oss-20b",
+  skillId: "skill-override-pulse"
+};
+
+vi.mock("../inference", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../inference")>();
+  return {
+    ...actual,
+    completeChat: vi.fn(async () => ({
+      text: JSON.stringify({
+        skillId: chatStub.skillId,
+        reason: "pin-guard-stub"
+      }),
+      provider: chatStub.provider,
+      model: chatStub.model,
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
+    }))
+  };
+});
+
+// Import after mock so runLlmMode uses stubbed completeChat.
+const { runLlmModeForTest } = await import("../eval/cli");
 
 describe("bench pin helpers", () => {
   it("parseModelsFlag accepts provider:model list", () => {
@@ -52,5 +83,97 @@ describe("bench pin helpers", () => {
     expect(pinMismatchMessage(pin, "gemini", "gemini-3.5-flash-lite")).toBeNull();
     expect(pinMismatchMessage(pin, undefined, undefined)).toBeNull();
     expect(pinMismatchMessage(pin, "groq", "x")).toMatch(/PIN MISMATCH/);
+  });
+
+  it("pinMismatchMessage names snapshot or scenario/turn location", () => {
+    const pin = { provider: "gemini", model: "gemini-3.5-flash-lite" };
+    expect(
+      pinMismatchMessage(pin, "groq", "x", "snapshot snap-1")
+    ).toBe(
+      "PIN MISMATCH: expected gemini/gemini-3.5-flash-lite, but decision used groq/x (snapshot snap-1)"
+    );
+    expect(
+      pinMismatchMessage(pin, "openrouter", "free", "scenario s1 turn 3")
+    ).toBe(
+      "PIN MISMATCH: expected gemini/gemini-3.5-flash-lite, but decision used openrouter/free (scenario s1 turn 3)"
+    );
+  });
+});
+
+describe("bench pin CLI guard", () => {
+  const scenario = buildMatchSuite("dev")[0]!;
+
+  beforeEach(() => {
+    chatStub.skillId = scenario.cpuConfig.skillIds[0]!;
+    chatStub.provider = "groq";
+    chatStub.model = "openai/gpt-oss-20b";
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  async function runPinnedRecord(modelsFlag: string | undefined): Promise<{
+    code: number;
+    lines: string[];
+  }> {
+    const lines: string[] = [];
+    const store = createMemoryStore();
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-guard-"));
+    const argv = [
+      "--mode",
+      "record",
+      "--max-matches",
+      "1",
+      "--all-seeds",
+      "--no-snapshots",
+      "--budget-ms",
+      "5000",
+      ...(modelsFlag !== undefined ? ["--models", modelsFlag] : [])
+    ];
+    const code = await runLlmModeForTest(argv, {
+      store,
+      env: {
+        GROQ_API_KEY: "test-fake-key-not-real",
+        INFERENCE_PROVIDER_ORDER: "groq",
+        INFERENCE_MAX_PROVIDERS: "1",
+        INFERENCE_MAX_RETRIES: "0"
+      },
+      outDir,
+      fixturesDir: outDir,
+      log: (line) => lines.push(line),
+      error: (line) => lines.push(line)
+    });
+    return { code, lines };
+  }
+
+  it("pinned run with mismatched provider exits 2 and names the mismatch", async () => {
+    chatStub.provider = "openrouter";
+    chatStub.model = "wrong-model";
+    const { code, lines } = await runPinnedRecord("groq:openai/gpt-oss-20b");
+    const text = lines.join("\n");
+    expect(code).toBe(2);
+    expect(text).toContain(
+      "PIN MISMATCH: expected groq/openai/gpt-oss-20b, but decision used openrouter/wrong-model"
+    );
+    expect(text).toMatch(/scenario .+ turn \d+/);
+  });
+
+  it("pinned run with matching provider exits 0", async () => {
+    chatStub.provider = "groq";
+    chatStub.model = "openai/gpt-oss-20b";
+    const { code, lines } = await runPinnedRecord("groq:openai/gpt-oss-20b");
+    expect(code).toBe(0);
+    expect(lines.join("\n")).not.toContain("PIN MISMATCH");
+    expect(lines.join("\n")).toContain("pinned model: groq/openai/gpt-oss-20b");
+  });
+
+  it("unpinned run does not fire the pin guard", async () => {
+    chatStub.provider = "openrouter";
+    chatStub.model = "anything";
+    const { code, lines } = await runPinnedRecord(undefined);
+    expect(code).toBe(0);
+    expect(lines.join("\n")).not.toContain("PIN MISMATCH");
+    expect(lines.join("\n")).not.toContain("pinned model:");
   });
 });
