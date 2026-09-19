@@ -22,8 +22,9 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - 1 localStorage save slot (PLANNED with UI).
 - Seeded RNG (DONE; restore-from-state DONE).
 - **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md (D-024 falsified; D-030).
-- **IN REVIEW:** M-BENCH headless (PR #23).
-- **PLANNED:** Correctness hardening → environment interface → UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
+- **DONE:** M-BENCH headless (PR #23 / D-032).
+- **NEXT:** Execution batch **A1** (prompt-byte-frozen hardening). Then A2 (D-034 grounding re-run) and A3 (adapter-only interface).
+- **PLANNED:** UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
 ## Milestones
@@ -38,11 +39,11 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
 - M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE**.
 - M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
-- M-BENCH headless model bench — **IN REVIEW** (PR #23 / D-032); multi-model pending operator record.
+- M-BENCH headless model bench — **DONE** (PR #23 / D-032); multi-model pending operator record.
 
 ### AI milestone spine (D-033 — 11 locked batches, 5 execution groups)
 
-Locked batch numbers and contents are unchanged (D-033). Execution groups **A–E** (D-033 amend) share one gate/audit where noted; both numberings stay in sync here and in PROGRESS.
+Locked batch numbers and contents are unchanged (D-033). Execution groups **A1–A3 / B–E** (D-033 amends) share one gate/audit where noted; both numberings stay in sync here and in PROGRESS.
 
 #### 1. Discrimination + parked fixes — DONE
 Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-provider keyless `--suite all` replay.
@@ -50,14 +51,17 @@ Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-pro
 #### 2. M-TOOLS grounding + memory — DONE
 Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: regret distribution with rate (D-031). Memory variants still unmeasured.
 
-#### 3. M-BENCH headless — IN REVIEW (PR #23)
-Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json` (D-032). Single-model gemini proof committed; multi-model awaits operator record.
+#### 3. M-BENCH headless — DONE (PR #23 / D-032)
+Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json`. Single-model gemini proof committed; multi-model awaits operator record.
 
-#### 4. Correctness hardening — NEXT (after #23) — execution batch A
-Silent risks on existing files, before any Report screen shows headline numbers: CI must re-prove pivotal / adversarial / bench / discriminate regen (today `skipIf`-gated); Oracle MemoScope identity; grounding gaps (fallback-stabilize, `diesNextTurn`, unknown effect categories); greedy must call grounding; pricing vs recorded Groq pin; sanitize new fixture records (do not rewrite committed fixtures); `.env.example` `INFERENCE_*` vars; strengthen weak tests.
+#### 4. Correctness hardening — NEXT — execution batch **A1** (prompt-byte frozen)
+CI must re-prove pivotal / adversarial / bench / discriminate regen (today `skipIf`-gated); Oracle MemoScope identity (numeric `maxTurns` + policy/catalog); pricing for recorded Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; strengthen weak tests; greedy→grounding **only if** differential proof shows zero choice changes. **Gate: every committed number byte-identical.** Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
 
-#### 5. Environment interface + port — execution batch A
-Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. **No behavior change**; committed artifacts must still replay. Shares gate with batch 4: every committed number byte-identical after the port.
+#### A2. Grounding correctness + ablation re-run (D-034) — after A1
+Fix `diesNextTurn` / fallback modelling; bump prompt version; regenerate grounded fixtures; republish ablation. **Not** under the byte-identical gate (prompt bytes change by design). Requires an **operator record run with keys**.
+
+#### 5. Environment interface + port — execution batch **A3** (adapter only)
+Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON — no new serialized state type. **Gate: byte-identical** (committed artifacts must still replay unchanged).
 
 #### 6. UI part 1 — scaffolding + Builder — execution batch B
 React, entry, state layer, component test env + Builder. Planned — not built.
@@ -69,7 +73,7 @@ Arena + results pages. Must design against the in-flight race (`playAgentTurn` a
 Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031).
 
 #### 9. Three new measurements — execution batch C
-Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 pattern). Same metrics/reporting surface as batch 8.
+Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 / D-034 pattern). Same metrics/reporting surface as batch 8.
 
 #### 10. BYOK + committed leaderboard + methodology writeup — execution batch D
 UI default: deterministic CPU + fixture-replayed LLM. Live BYOK: OpenRouter-only, key in memory, explicit warning. D-016 proxy deferred. Leaderboard = committed static comparison page (not a live backend — D-020 anti-scope stands). Methodology told through the failed measurement sets and the falsified hypothesis.

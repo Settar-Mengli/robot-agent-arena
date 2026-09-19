@@ -648,3 +648,61 @@ The **11 locked batches above are unchanged** in number and content. For executi
 - **Execution batch E** = locked batch **11** (second reference environment + publish).
 
 ROADMAP / PROGRESS show both numberings (locked batch + execution group letter) so neither drifts.
+
+### Amend — 2026-09-18 — Execution batch A splits into A1 / A2 / A3
+
+Locked batches **4** and **5** are unchanged in number and content. Execution batch **A** cannot share one gate. Three findings:
+
+1. Grounded facts are serialized into the prompt (`ENGINE_GROUNDED_FACTS\n${JSON.stringify(input.grounding)}` at `src/agent/prompt.ts:154`) and those messages are hashed into fixture keys (`src/eval/transport.ts:48–60`). Correcting the facts changes prompt bytes, invalidates grounded fixtures, and breaks committed bench/ablation rows — contradicting a single byte-identical gate for all of A.
+2. Committed snapshot suites embed a full `BattleRuntime` including turn history (e.g. `evals/suites/snapshots.adversarial.heldout.json:10–73`). An interface that introduces a new serialized state type cannot keep those files byte-identical; only an adapter preserving today’s JSON is compatible with that gate.
+3. Greedy re-implements combat arithmetic (`src/agent/baselines/greedy.ts:26–52`). Routing it through grounding needs a differential proof that no choice changes on any committed suite state before it can share the byte-identical gate.
+
+Therefore execution batch **A** (locked **4 + 5**) splits into:
+
+- **A1 — hardening, prompt-byte frozen.** Enable CI regen gates (pivotal / adversarial / bench / discriminate); Oracle MemoScope identity must include numeric `maxTurns` plus policy/catalog identity; add pricing for the recorded Groq pin `openai/gpt-oss-20b`; complete `.env.example` `INFERENCE_*` names; sanitize **new** fixture records only (do not rewrite committed fixtures); strengthen weak tests; greedy→grounding **only if** a differential proof shows zero choice changes on committed suite states. **Gate: every committed number byte-identical.**
+- **A2 — grounding correctness and ablation re-run (D-034).** Fix the facts, bump the prompt version, regenerate grounded fixtures, republish the ablation. Explicitly **not** under the byte-identical gate — prompt bytes change by design. Requires an operator record run with keys.
+- **A3 — environment interface, adapter only.** `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON; no new serialized state type. **Gate: byte-identical.**
+
+ROADMAP / PROGRESS show A1 / A2 / A3 alongside locked batch numbers 4 and 5.
+
+## D-034 Grounding correction and ablation re-run (pre-registered)
+Date: 2026-09-18
+Status: Accepted
+
+Decision:
+Written **before** correcting grounding facts (same pattern as D-024).
+
+### Context
+
+D-024 was falsified using grounding facts that were partly defective:
+
+- `diesNextTurn` is computed against the CPU’s **pre-action** defense: threat uses `projectSkillEffects(skill, player, cpu)` on the current CPU combatant (`src/agent/grounding.ts:163`) and then `diesNextTurn: maxIncomingDamage >= cpu.health` (`:188`), so it can report false when the CPU would guard this turn.
+- Fallback-stabilize effects are **not modelled** in grounding at all. The engine defines `FALLBACK_ENERGY_RECOVERY = 2` and `FALLBACK_DEFENSE_GAIN = 2` (`src/engine/constants.ts:21–22`) and applies them in `resolveFallback` (`src/engine/combat.ts:125–126`).
+
+This does **not** invalidate D-030’s published result: grounding **as implemented** changed **0 of 20** decisions on held-out adversarial. Corrected facts still deserve a re-run.
+
+### Prediction (pre-registered)
+
+With corrected facts (accurate `diesNextTurn` after this-turn CPU defense, and fallback effects modelled), the grounded arm will change **at least one** decision versus base on the held-out adversarial suite, and will **not increase** mean regret.
+
+### Pre-specified test
+
+- Same held-out adversarial suite (**n=20**).
+- Same pinned model per D-032; temperature **0**.
+- Arms: **base** vs **corrected-grounded** (new prompt version).
+- Report: optimality; regret mean / median / max; per-decision audit of which picks changed.
+
+### Falsifier
+
+If corrected grounding still changes **zero** decisions, publish that the failure is **not** attributable to fact quality, and record the next candidate explanation (the model may already infer these facts from raw state, or the adversarial set may be dominated by near-equal choices).
+
+### Bookkeeping
+
+- Corrected facts get a **new prompt version**.
+- Old grounded fixtures remain committed as the record of the D-024 / D-030 run and are **not** deleted or rewritten.
+
+Rationale:
+Measurement honesty requires separating prompt-byte-frozen hardening (A1) from a deliberate fixture-invalidating fact correction (A2 / this decision).
+
+Consequences:
+A2 implements this protocol; EVAL.md publishes the outcome; D-030’s historical 0/20 row stays the as-implemented record.

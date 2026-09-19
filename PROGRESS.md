@@ -2,11 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `feat/m-bench`; base includes `main` @ D-033 + execution-groups
-- Current state: **M-BENCH headless** (D-032) on this PR; D-033 direction + A–E execution groups merged from main. Completing pin-mismatch guard (location + CLI exit-2 tests). Next after merge: **execution batch A** (locked batches 4+5).
+- Branch: `docs/batch-a-split`; base `main` @ `01490b4`
+- Current state: Docs-only — split D-033 execution batch **A** into **A1 / A2 / A3**; pre-register **D-034** (corrected-grounding ablation). M-BENCH is on `main`. Next: **A1** (prompt-byte-frozen hardening).
 - Test count: **286** (`npm run coverage`: 282 passed, 4 skipped)
-- Verification: typecheck / lint / coverage; keyless bench + replay
-- Working tree: `feat/m-bench` → PR #23
+- Verification: typecheck / lint / coverage (all green)
+- Working tree: `docs/batch-a-split` (DECISIONS / ROADMAP / PROGRESS only)
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -44,10 +44,10 @@
 - Docs reconcile (PR #22): public docs vs measured reality.
 - D-033 product direction lock (PR #24): 11-batch plan; coach cut; D-026 won't-fix.
 - D-033 execution grouping (PR #25): locked batches → A–E.
-- M-BENCH headless on this branch: per-variant manifest, pin+repeat keys, bench metrics, `--mode bench`, D-032.
+- M-BENCH headless (PR #23): per-variant manifest, pin+repeat keys, bench metrics, `--mode bench`, D-032; pin-mismatch guard.
 
 ## Current Work
-- Pin-mismatch guard completed (location in message; CLI exit-2 / match / unpinned tests) on `feat/m-bench`.
+- Docs: split execution batch A into A1/A2/A3; pre-register D-034.
 
 ## Blockers
 - None.
@@ -57,10 +57,10 @@
 - Do not run `npm audit fix` or upgrade dependencies without explicit approval.
 - D-026 closed as won't-fix under D-033 (known limitations: small n, seed correlation).
 - Memory ablation variants remain unmeasured.
-- Multi-model bench rows / grounded gemini adversarial fixtures await operator record.
+- Multi-model bench rows / grounded gemini adversarial fixtures await operator record (A2 needs keys).
 
 ## Changed Files In Current Work
-- See `git status` / PR diff on `feat/m-bench`.
+- `DECISIONS.md`, `ROADMAP.md`, `PROGRESS.md`
 
 ## Exact Next Step
-- Finish pin-mismatch guard, land PR #23, then **execution batch A** = locked batches **4 + 5**.
+- **A1** — prompt-byte-frozen hardening (CI regen gates, MemoScope, pricing, `.env.example`, sanitize-new, weak tests; greedy→grounding only after differential proof). Then A2 (D-034) / A3 as gated.
