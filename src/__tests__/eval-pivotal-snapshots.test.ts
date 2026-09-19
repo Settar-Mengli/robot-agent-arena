@@ -36,13 +36,16 @@ function snapshotStateKey(snap: PivotalDecisionSnapshot): string {
 function fakeCandidate(
   id: string,
   spread: number,
-  turn = 1
+  turn = 1,
+  playerHp = 10
 ): PivotalDecisionSnapshot {
   return {
     id,
     scenarioId: id.split("__")[0]!,
     runtime: {
-      session: { turn }
+      session: { turn },
+      player: { health: playerHp, energy: 1, defense: 0 },
+      cpu: { health: 10, energy: 2, defense: 0 }
     },
     playerSkillId: "skill-core-identity",
     cpuConfigId: "c",
@@ -63,24 +66,25 @@ describe("pivotal snapshot selection", () => {
 
   it("short-suite path does not throw and warns", () => {
     const candidates = [
-      fakeCandidate("s1__t1", 150),
-      fakeCandidate("s2__t1", 200),
-      fakeCandidate("s3__t1", 50)
+      fakeCandidate("s1__t1", 150, 1, 1),
+      fakeCandidate("s2__t1", 200, 1, 2),
+      fakeCandidate("s3__t1", 50, 1, 3)
     ];
     const selected = selectPivotalSnapshots(candidates);
     expect(selected.count).toBe(2);
     expect(selected.snapshots.map((s) => s.id)).toEqual(["s2__t1", "s1__t1"]);
     expect(selected.warning).toBe(
-      `only 2 of ${PIVOTAL_TARGET_COUNT} pivotal points qualified at spread>=${PIVOTAL_MIN_SPREAD}`
+      `only 2 of ${PIVOTAL_TARGET_COUNT} distinct pivotal states qualified at spread>=${PIVOTAL_MIN_SPREAD}`
     );
   });
 
-  it("selection is deterministic", () => {
+  it("selection is deterministic and skips duplicate states", () => {
     const candidates = [
-      fakeCandidate("b__t1", 500, 1),
-      fakeCandidate("a__t2", 500, 2),
-      fakeCandidate("a__t1", 500, 1),
-      fakeCandidate("c__t1", 1000, 1)
+      fakeCandidate("b__t1", 500, 1, 1),
+      fakeCandidate("a__t2", 500, 2, 2),
+      fakeCandidate("a__t1", 500, 1, 3),
+      fakeCandidate("c__t1", 1000, 1, 4),
+      fakeCandidate("clone__t1", 999, 1, 4) // same state as c__t1 (turn/hp/skill)
     ];
     const once = selectPivotalSnapshots(candidates, { targetCount: 3 });
     const twice = selectPivotalSnapshots(candidates, { targetCount: 3 });
@@ -100,6 +104,7 @@ describe("pivotal snapshot selection", () => {
       expect(suite.minSpread).toBe(PIVOTAL_MIN_SPREAD);
       expect(suite.targetCount).toBe(PIVOTAL_TARGET_COUNT);
       expect(suite.count).toBe(suite.snapshots.length);
+      expect(suite.distinctStateCount).toBe(suite.snapshots.length);
       expect(suite.count).toBeLessThanOrEqual(PIVOTAL_TARGET_COUNT);
       for (const snap of suite.snapshots) {
         expect(snap.spread).toBeGreaterThanOrEqual(PIVOTAL_MIN_SPREAD);
@@ -133,7 +138,11 @@ describe("pivotal snapshot selection", () => {
           minSpread: generated.minSpread,
           targetCount: generated.targetCount,
           count: generated.count,
-          snapshots: generated.snapshots
+          distinctStateCount: generated.distinctStateCount,
+          snapshots: generated.snapshots,
+          ...(generated.warning !== undefined
+            ? { warning: generated.warning }
+            : {})
         }).toEqual(committed);
       }
     },
@@ -143,10 +152,10 @@ describe("pivotal snapshot selection", () => {
 
 describe("pivotal baselines (informational invariants)", () => {
   it("greedy metrics pin published pivotal baselines", () => {
-    // EVAL.md pivotal baselines: dev 100.00%/0.00, heldout 95.00%/100.10
+    // EVAL.md pivotal baselines after D-035 distinct-state regen
     const expected = {
-      dev: { optimalRate: 1, meanRegret: 0 },
-      heldout: { optimalRate: 0.95, meanRegret: 100.1 }
+      dev: { optimalRate: 0.875, meanRegret: 250.125 },
+      heldout: { optimalRate: 0.875, meanRegret: 250.25 }
     } as const;
     for (const split of ["dev", "heldout"] as const) {
       const suite = loadPivotal(`snapshots.pivotal.${split}.json`);
@@ -177,9 +186,8 @@ describe("pivotal baselines (informational invariants)", () => {
       "dev" | "heldout",
       { min: number; median: number; max: number }
     > = {
-      // 10×2003 + 10×2001 → even median (2001+2003)/2 = 2002
-      dev: { min: 2001, median: 2002, max: 2003 },
-      heldout: { min: 2002, median: 2007, max: 2008 }
+      dev: { min: 2001, median: 2003, max: 2007 },
+      heldout: { min: 2002, median: 2005, max: 2008 }
     };
 
     for (const split of ["dev", "heldout"] as const) {

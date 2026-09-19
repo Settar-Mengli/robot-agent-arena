@@ -2,7 +2,8 @@
   "scenariosScanned": 120,
   "minRegret": 1,
   "targetCount": 20,
-  "count": 20,
+  "count": 13,
+  "distinctStateCount": 13,
   "snapshots": [
     {
       "id": "mnemonic__seeded-random__fracture__s104__t20",
@@ -1595,1072 +1596,6 @@
       "greedySkillId": "skill-logic-storm"
     },
     {
-      "id": "aegis__greedy__sentinel-x__s102__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s102",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:102",
-          "seed": 102,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 102,
-          "state": 102,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s103__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s103",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:103",
-          "seed": 103,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 103,
-          "state": 103,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s104__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s104",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:104",
-          "seed": 104,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 104,
-          "state": 104,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s105__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s105",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:105",
-          "seed": 105,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 105,
-          "state": 105,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s106__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s106",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:106",
-          "seed": 106,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 106,
-          "state": 106,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s107__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s107",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:107",
-          "seed": 107,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 107,
-          "state": 107,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s108__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s108",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:108",
-          "seed": 108,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 108,
-          "state": 108,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s109__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s109",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:109",
-          "seed": 109,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 109,
-          "state": 109,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__greedy__sentinel-x__s110__t1",
-      "scenarioId": "aegis__greedy__sentinel-x__s110",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:110",
-          "seed": 110,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 110,
-          "state": 110,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__seeded-random__sentinel-x__s102__t1",
-      "scenarioId": "aegis__seeded-random__sentinel-x__s102",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:102",
-          "seed": 102,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 102,
-          "state": 102,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__seeded-random__sentinel-x__s103__t1",
-      "scenarioId": "aegis__seeded-random__sentinel-x__s103",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:103",
-          "seed": 103,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 103,
-          "state": 103,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__seeded-random__sentinel-x__s106__t1",
-      "scenarioId": "aegis__seeded-random__sentinel-x__s106",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:106",
-          "seed": 106,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 106,
-          "state": 106,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__seeded-random__sentinel-x__s107__t1",
-      "scenarioId": "aegis__seeded-random__sentinel-x__s107",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-sentinel-x:107",
-          "seed": 107,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-sentinel-x",
-            "displayName": "SENTINEL-X",
-            "modules": {
-              "coreIdentity": "Counter Logic",
-              "memory": "Adaptive Recall",
-              "sigilSecurity": "Echo Shield",
-              "rules": "Fail Closed",
-              "strategy": "Reactive Pressure"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-logic-storm"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-sentinel-x",
-          "displayName": "SENTINEL-X",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 107,
-          "state": 107,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-sentinel-x",
-      "values": {
-        "skill-null-pulse": 1021,
-        "skill-logic-storm": 1016
-      },
-      "best": [
-        "skill-null-pulse"
-      ],
-      "exact": true,
-      "spread": 5,
-      "greedyRegret": 5,
-      "greedySkillId": "skill-logic-storm"
-    },
-    {
       "id": "mnemonic__seeded-random__sentinel-x__s105__t13",
       "scenarioId": "mnemonic__seeded-random__sentinel-x__s105",
       "runtime": {
@@ -3642,88 +2577,6 @@
       "spread": 4,
       "greedyRegret": 4,
       "greedySkillId": "skill-logic-storm"
-    },
-    {
-      "id": "aegis__seeded-random__fracture__s102__t1",
-      "scenarioId": "aegis__seeded-random__fracture__s102",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-aegis:cpu-fracture:102",
-          "seed": 102,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-aegis",
-            "displayName": "AEGIS",
-            "modules": {
-              "coreIdentity": "Mirror Kernel",
-              "memory": "Ward Echo",
-              "sigilSecurity": "Prism Veil",
-              "rules": "Reflect First",
-              "strategy": "Anchor Then Strike"
-            },
-            "skillIds": [
-              "skill-core-identity",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-aegis",
-          "displayName": "AEGIS",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 102,
-          "state": 102,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1015,
-        "skill-signal-exposure": 1018
-      },
-      "best": [
-        "skill-signal-exposure"
-      ],
-      "exact": true,
-      "spread": 3,
-      "greedyRegret": 3,
-      "greedySkillId": "skill-override-pulse"
     },
     {
       "id": "mnemonic__seeded-random__fracture__s104__t15",
@@ -6223,6 +5076,2910 @@
       "spread": 2,
       "greedyRegret": 2,
       "greedySkillId": "skill-override-pulse"
+    },
+    {
+      "id": "mnemonic__seeded-random__fracture__s108__t1",
+      "scenarioId": "mnemonic__seeded-random__fracture__s108",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-mnemonic:cpu-fracture:108",
+          "seed": 108,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-mnemonic",
+            "displayName": "MNEMONIC",
+            "modules": {
+              "coreIdentity": "Archive Self",
+              "memory": "Recall Drift",
+              "sigilSecurity": "Soft Seal",
+              "rules": "Leak Then Hit",
+              "strategy": "Expose Weakness"
+            },
+            "skillIds": [
+              "skill-logic-drift",
+              "skill-signal-exposure"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-mnemonic",
+          "displayName": "MNEMONIC",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 108,
+          "state": 108,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-signal-exposure",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1019,
+        "skill-signal-exposure": 1021
+      },
+      "best": [
+        "skill-signal-exposure"
+      ],
+      "exact": true,
+      "spread": 2,
+      "greedyRegret": 2,
+      "greedySkillId": "skill-override-pulse"
+    },
+    {
+      "id": "mnemonic__seeded-random__sentinel-x__s105__t1",
+      "scenarioId": "mnemonic__seeded-random__sentinel-x__s105",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-mnemonic:cpu-sentinel-x:105",
+          "seed": 105,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-mnemonic",
+            "displayName": "MNEMONIC",
+            "modules": {
+              "coreIdentity": "Archive Self",
+              "memory": "Recall Drift",
+              "sigilSecurity": "Soft Seal",
+              "rules": "Leak Then Hit",
+              "strategy": "Expose Weakness"
+            },
+            "skillIds": [
+              "skill-logic-drift",
+              "skill-signal-exposure"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-sentinel-x",
+            "displayName": "SENTINEL-X",
+            "modules": {
+              "coreIdentity": "Counter Logic",
+              "memory": "Adaptive Recall",
+              "sigilSecurity": "Echo Shield",
+              "rules": "Fail Closed",
+              "strategy": "Reactive Pressure"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-logic-storm"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-mnemonic",
+          "displayName": "MNEMONIC",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-sentinel-x",
+          "displayName": "SENTINEL-X",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 105,
+          "state": 105,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-logic-drift",
+      "cpuConfigId": "cpu-sentinel-x",
+      "values": {
+        "skill-null-pulse": 1030,
+        "skill-logic-storm": 1028
+      },
+      "best": [
+        "skill-null-pulse"
+      ],
+      "exact": true,
+      "spread": 2,
+      "greedyRegret": 2,
+      "greedySkillId": "skill-logic-storm"
+    },
+    {
+      "id": "tempest__seeded-random__fracture__s108__t1",
+      "scenarioId": "tempest__seeded-random__fracture__s108",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-tempest:cpu-fracture:108",
+          "seed": 108,
+          "turn": 1,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-tempest",
+            "displayName": "TEMPEST",
+            "modules": {
+              "coreIdentity": "Gale Pattern",
+              "memory": "Storm Cache",
+              "sigilSecurity": "Thin Lattice",
+              "rules": "Open Breach",
+              "strategy": "Flood Then Pierce"
+            },
+            "skillIds": [
+              "skill-logic-storm",
+              "skill-signal-breach"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-tempest",
+          "displayName": "TEMPEST",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 108,
+          "state": 108,
+          "calls": 0
+        },
+        "turns": []
+      },
+      "playerSkillId": "skill-signal-breach",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": -1004,
+        "skill-signal-exposure": -1002
+      },
+      "best": [
+        "skill-signal-exposure"
+      ],
+      "exact": true,
+      "spread": 2,
+      "greedyRegret": 2,
+      "greedySkillId": "skill-override-pulse"
+    },
+    {
+      "id": "tempest__seeded-random__sentinel-x__s109__t3",
+      "scenarioId": "tempest__seeded-random__sentinel-x__s109",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-tempest:cpu-sentinel-x:109",
+          "seed": 109,
+          "turn": 3,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-tempest",
+            "displayName": "TEMPEST",
+            "modules": {
+              "coreIdentity": "Gale Pattern",
+              "memory": "Storm Cache",
+              "sigilSecurity": "Thin Lattice",
+              "rules": "Open Breach",
+              "strategy": "Flood Then Pierce"
+            },
+            "skillIds": [
+              "skill-logic-storm",
+              "skill-signal-breach"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-sentinel-x",
+            "displayName": "SENTINEL-X",
+            "modules": {
+              "coreIdentity": "Counter Logic",
+              "memory": "Adaptive Recall",
+              "sigilSecurity": "Echo Shield",
+              "rules": "Fail Closed",
+              "strategy": "Reactive Pressure"
+            },
+            "skillIds": [
+              "skill-null-pulse",
+              "skill-logic-storm"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-tempest",
+          "displayName": "TEMPEST",
+          "health": 21,
+          "maxHealth": 30,
+          "energy": 2,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-sentinel-x",
+          "displayName": "SENTINEL-X",
+          "health": 17,
+          "maxHealth": 30,
+          "energy": 5,
+          "maxEnergy": 10,
+          "defense": 2
+        },
+        "rng": {
+          "seed": 109,
+          "state": 109,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-tempest",
+              "displayName": "TEMPEST",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-sentinel-x",
+              "displayName": "SENTINEL-X",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-storm",
+                "resolvedSkillId": "skill-logic-storm",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 5,
+                "damageDealt": 9,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-logic-storm",
+                "resolvedSkillId": "skill-logic-storm",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 5,
+                "damageDealt": 9,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-tempest",
+              "displayName": "TEMPEST",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 3,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-sentinel-x",
+              "displayName": "SENTINEL-X",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 3,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 2,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-tempest",
+              "displayName": "TEMPEST",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 3,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-sentinel-x",
+              "displayName": "SENTINEL-X",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 3,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-breach",
+                "resolvedSkillId": "skill-signal-breach",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 3,
+                "damageDealt": 4,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-null-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-tempest",
+              "displayName": "TEMPEST",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-sentinel-x",
+              "displayName": "SENTINEL-X",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 5,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-logic-storm",
+      "cpuConfigId": "cpu-sentinel-x",
+      "values": {
+        "skill-null-pulse": 1007,
+        "skill-logic-storm": 1005
+      },
+      "best": [
+        "skill-null-pulse"
+      ],
+      "exact": true,
+      "spread": 2,
+      "greedyRegret": 2,
+      "greedySkillId": "skill-logic-storm"
+    },
+    {
+      "id": "aegis__seeded-random__fracture__s105__t2",
+      "scenarioId": "aegis__seeded-random__fracture__s105",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-aegis:cpu-fracture:105",
+          "seed": 105,
+          "turn": 2,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-aegis",
+            "displayName": "AEGIS",
+            "modules": {
+              "coreIdentity": "Mirror Kernel",
+              "memory": "Ward Echo",
+              "sigilSecurity": "Prism Veil",
+              "rules": "Reflect First",
+              "strategy": "Anchor Then Strike"
+            },
+            "skillIds": [
+              "skill-core-identity",
+              "skill-override-pulse"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-aegis",
+          "displayName": "AEGIS",
+          "health": 26,
+          "maxHealth": 30,
+          "energy": 7,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 30,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "rng": {
+          "seed": 105,
+          "state": 105,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-core-identity",
+                "resolvedSkillId": "skill-core-identity",
+                "effectCategory": "defense",
+                "fallback": false,
+                "energySpent": 1,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 3,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 4,
+                "defenseReduced": 3,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-aegis",
+              "displayName": "AEGIS",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 7,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-override-pulse",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1012,
+        "skill-signal-exposure": 1013
+      },
+      "best": [
+        "skill-signal-exposure"
+      ],
+      "exact": true,
+      "spread": 1,
+      "greedyRegret": 1,
+      "greedySkillId": "skill-override-pulse"
+    },
+    {
+      "id": "mnemonic__seeded-random__fracture__s101__t11",
+      "scenarioId": "mnemonic__seeded-random__fracture__s101",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-mnemonic:cpu-fracture:101",
+          "seed": 101,
+          "turn": 11,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-mnemonic",
+            "displayName": "MNEMONIC",
+            "modules": {
+              "coreIdentity": "Archive Self",
+              "memory": "Recall Drift",
+              "sigilSecurity": "Soft Seal",
+              "rules": "Leak Then Hit",
+              "strategy": "Expose Weakness"
+            },
+            "skillIds": [
+              "skill-logic-drift",
+              "skill-signal-exposure"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-mnemonic",
+          "displayName": "MNEMONIC",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 2,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 26,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 2
+        },
+        "rng": {
+          "seed": 101,
+          "state": 101,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 2,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 3,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 4,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 27,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 5,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 27,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 27,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 6,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 27,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 25,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 7,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 25,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 8,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 9,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 2,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 10,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-logic-drift",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1010,
+        "skill-signal-exposure": 1011
+      },
+      "best": [
+        "skill-signal-exposure"
+      ],
+      "exact": true,
+      "spread": 1,
+      "greedyRegret": 1,
+      "greedySkillId": "skill-override-pulse"
+    },
+    {
+      "id": "mnemonic__seeded-random__fracture__s107__t19",
+      "scenarioId": "mnemonic__seeded-random__fracture__s107",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-mnemonic:cpu-fracture:107",
+          "seed": 107,
+          "turn": 19,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-mnemonic",
+            "displayName": "MNEMONIC",
+            "modules": {
+              "coreIdentity": "Archive Self",
+              "memory": "Recall Drift",
+              "sigilSecurity": "Soft Seal",
+              "rules": "Leak Then Hit",
+              "strategy": "Expose Weakness"
+            },
+            "skillIds": [
+              "skill-logic-drift",
+              "skill-signal-exposure"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-mnemonic",
+          "displayName": "MNEMONIC",
+          "health": 23,
+          "maxHealth": 30,
+          "energy": 2,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 22,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 2
+        },
+        "rng": {
+          "seed": 107,
+          "state": 107,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 2,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 3,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 4,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 5,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 6,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 7,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 8,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 9,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 10,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 11,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 12,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 13,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 14,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 15,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 16,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 17,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-logic-drift",
+                "resolvedSkillId": "skill-logic-drift",
+                "effectCategory": "recovery",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 5,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 18,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-mnemonic",
+              "displayName": "MNEMONIC",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-logic-drift",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": -1002,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-signal-exposure"
+      ],
+      "exact": true,
+      "spread": 1,
+      "greedyRegret": 1,
+      "greedySkillId": "skill-override-pulse"
     }
-  ]
+  ],
+  "warning": "only 13 of 20 distinct adversarial states qualified at greedyRegret>=1"
 }

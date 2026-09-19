@@ -43,7 +43,14 @@ export function percentile(sorted: number[], p: number): number | null {
 }
 
 export type MatchAggregate = {
+  /** Distinct-battle count; Wilson denominator and rate denominator. */
   n: number;
+  /** Raw MatchResult list length before battle fingerprint dedupe. */
+  rawN: number;
+  /** Distinct strata (opponent × playerPolicy × cpuPolicy, seed excluded). */
+  strataCovered: number;
+  /** Alias of n — distinct battle fingerprints. */
+  distinctBattles: number;
   cpuWinRate: number;
   drawRate: number;
   lossRate: number;
@@ -52,11 +59,70 @@ export type MatchAggregate = {
   meanFinalHpMargin: number;
 };
 
+/** Full turn trajectory + outcome fingerprint (D-035). */
+export function battleFingerprint(result: MatchResult): string {
+  return JSON.stringify({
+    turns: result.turns.map((t) => ({
+      turn: t.turn,
+      playerSkillId: t.playerSkillId,
+      cpuSource: t.cpuSource
+    })),
+    outcome: result.outcome.result,
+    totalTurns: result.totalTurns,
+    finalHpMargin: result.finalHpMargin
+  });
+}
+
+/** Stratum without seed — opponent × player policy × cpu policy. */
+export function matchStratumKey(result: MatchResult): string {
+  return `${result.opponentId}|${result.playerPolicy}|${result.cpuPolicyId}`;
+}
+
+export function countMatchDiversity(results: readonly MatchResult[]): {
+  rawN: number;
+  strataCovered: number;
+  distinctBattles: number;
+} {
+  const strata = new Set<string>();
+  const battles = new Set<string>();
+  for (const result of results) {
+    strata.add(matchStratumKey(result));
+    battles.add(battleFingerprint(result));
+  }
+  return {
+    rawN: results.length,
+    strataCovered: strata.size,
+    distinctBattles: battles.size
+  };
+}
+
+/** First occurrence of each battle fingerprint (stable order). */
+export function uniqueBattles(
+  results: readonly MatchResult[]
+): MatchResult[] {
+  const seen = new Set<string>();
+  const out: MatchResult[] = [];
+  for (const result of results) {
+    const key = battleFingerprint(result);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    out.push(result);
+  }
+  return out;
+}
+
 export function aggregateMatches(results: readonly MatchResult[]): MatchAggregate {
-  const n = results.length;
+  const diversity = countMatchDiversity(results);
+  const unique = uniqueBattles(results);
+  const n = unique.length;
   if (n === 0) {
     return {
       n: 0,
+      rawN: diversity.rawN,
+      strataCovered: diversity.strataCovered,
+      distinctBattles: 0,
       cpuWinRate: 0,
       drawRate: 0,
       lossRate: 0,
@@ -72,7 +138,7 @@ export function aggregateMatches(results: readonly MatchResult[]): MatchAggregat
   let turns = 0;
   let margin = 0;
 
-  for (const result of results) {
+  for (const result of unique) {
     if (result.outcome.result === "cpu-victory") wins += 1;
     else if (result.outcome.result === "draw") draws += 1;
     else losses += 1;
@@ -82,6 +148,9 @@ export function aggregateMatches(results: readonly MatchResult[]): MatchAggregat
 
   return {
     n,
+    rawN: diversity.rawN,
+    strataCovered: diversity.strataCovered,
+    distinctBattles: n,
     cpuWinRate: wins / n,
     drawRate: draws / n,
     lossRate: losses / n,
@@ -111,7 +180,12 @@ export type ProviderLlmAggregate = {
 export type LlmAggregate = {
   decisionValidityRate: number | null;
   fallbackByReason: Record<string, number>;
+  /** Total fixture misses (matches + snapshots). */
   fixtureMissCount: number;
+  /** Fixture-miss failures on match DecisionTraces. */
+  fixtureMissMatches: number;
+  /** Fixture-miss failures on snapshot DecisionTraces. */
+  fixtureMissSnapshots: number;
   latencyP50: number | null;
   latencyP95: number | null;
   tokenTotals: {
@@ -121,6 +195,50 @@ export type LlmAggregate = {
   } | null;
   byProvider: Record<string, ProviderLlmAggregate>;
 };
+
+/** Same rule for match and snapshot traces (D-035 fixture coverage). */
+export function isFixtureMissFailure(failure: {
+  status?: number;
+  reason: string;
+}): boolean {
+  return (
+    failure.status === 599 || failure.reason.includes("fixture_miss")
+  );
+}
+
+export function countFixtureMissFailures(
+  failures: readonly { status?: number; reason: string }[] | undefined
+): number {
+  if (failures === undefined || failures.length === 0) {
+    return 0;
+  }
+  let n = 0;
+  for (const failure of failures) {
+    if (isFixtureMissFailure(failure)) {
+      n += 1;
+    }
+  }
+  return n;
+}
+
+export function traceHasFixtureMiss(trace: {
+  failures?: readonly { status?: number; reason: string }[];
+}): boolean {
+  return countFixtureMissFailures(trace.failures) > 0;
+}
+
+/** Attach snapshot miss tallies; fixtureMissCount becomes matches + snapshots. */
+export function withSnapshotFixtureMisses(
+  agg: LlmAggregate,
+  fixtureMissSnapshots: number
+): LlmAggregate {
+  const fixtureMissMatches = agg.fixtureMissMatches;
+  return {
+    ...agg,
+    fixtureMissSnapshots,
+    fixtureMissCount: fixtureMissMatches + fixtureMissSnapshots
+  };
+}
 
 type ProviderBucket = {
   decisions: number;
@@ -196,7 +314,7 @@ export function aggregateLlm(
   let validated = 0;
   let validOk = 0;
   const fallbackByReason: Record<string, number> = {};
-  let fixtureMissCount = 0;
+  let fixtureMissMatches = 0;
   const latencies: number[] = [];
   let prompt = 0;
   let completion = 0;
@@ -226,14 +344,7 @@ export function aggregateLlm(
         fallbackByReason[trace.fallbackReason] =
           (fallbackByReason[trace.fallbackReason] ?? 0) + 1;
       }
-      for (const failure of trace.failures ?? []) {
-        if (
-          failure.status === 599 ||
-          failure.reason.includes("fixture_miss")
-        ) {
-          fixtureMissCount += 1;
-        }
-      }
+      fixtureMissMatches += countFixtureMissFailures(trace.failures);
       latencies.push(trace.elapsedMs);
       if (trace.usage !== undefined) {
         usageSeen = true;
@@ -289,7 +400,9 @@ export function aggregateLlm(
     decisionValidityRate:
       validated === 0 ? null : validOk / validated,
     fallbackByReason,
-    fixtureMissCount,
+    fixtureMissCount: fixtureMissMatches,
+    fixtureMissMatches,
+    fixtureMissSnapshots: 0,
     latencyP50: replay ? null : percentile(latencies, 50),
     latencyP95: replay ? null : percentile(latencies, 95),
     tokenTotals: usageSeen
