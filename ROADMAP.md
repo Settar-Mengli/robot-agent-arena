@@ -23,7 +23,8 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Seeded RNG (DONE; restore-from-state DONE).
 - **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md (D-024 falsified; D-030).
 - **DONE:** M-BENCH headless (PR #23 / D-032).
-- **NEXT:** Execution batch **A1** (prompt-byte-frozen hardening). Then A2 (D-034 grounding re-run) and A3 (adapter-only interface).
+- **DONE:** Execution batch **A1** (prompt-byte-frozen hardening) — greedy→grounding proven choice-identical; MemoScope identity; CI drift job; pricing/env/sanitize; pinned tests.
+- **NEXT:** Execution batch **A2** (D-034 grounding correction + ablation re-run; needs keys). Then A3 (adapter-only interface).
 - **PLANNED:** UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -54,10 +55,10 @@ Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal gr
 #### 3. M-BENCH headless — DONE (PR #23 / D-032)
 Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json`. Single-model gemini proof committed; multi-model awaits operator record.
 
-#### 4. Correctness hardening — NEXT — execution batch **A1** (prompt-byte frozen)
-CI must re-prove pivotal / adversarial / bench / discriminate regen (today `skipIf`-gated); Oracle MemoScope identity (numeric `maxTurns` + policy/catalog); pricing for recorded Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; strengthen weak tests; greedy→grounding **only if** differential proof shows zero choice changes. **Gate: every committed number byte-identical.** Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
+#### 4. Correctness hardening — DONE — execution batch **A1** (prompt-byte frozen)
+CI re-proves pivotal / adversarial / bench / discriminate regen (`drift` job, `SNAPSHOT_DRIFT=1`); Oracle MemoScope identity (numeric `maxTurns` + catalog); pricing for Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; weak tests pin published values; greedy→grounding landed after differential proof (0 choice diffs). **Gate held:** committed numbers byte-identical. Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
 
-#### A2. Grounding correctness + ablation re-run (D-034) — after A1
+#### A2. Grounding correctness + ablation re-run (D-034) — NEXT
 Fix `diesNextTurn` / fallback modelling; bump prompt version; regenerate grounded fixtures; republish ablation. **Not** under the byte-identical gate (prompt bytes change by design). Requires an **operator record run with keys**.
 
 #### 5. Environment interface + port — execution batch **A3** (adapter only)

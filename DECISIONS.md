@@ -665,6 +665,18 @@ Therefore execution batch **A** (locked **4 + 5**) splits into:
 
 ROADMAP / PROGRESS show A1 / A2 / A3 alongside locked batch numbers 4 and 5.
 
+### Amend — 2026-09-18 — A1 hardening shipped (prompt-byte frozen)
+
+**A1 done** on `feat/a1-hardening`. Shipped under the byte-identical gate (no edits to `prompt.ts` / `grounding.ts`; committed `evals/suites`, `evals/fixtures`, `evals/out-committed` unchanged):
+
+- Greedy→grounding **landed**: differential proof over suite + match-walk decision states found **0 choice diffs**; `createGreedySelector` now calls `projectSkillEffects` / damage projections; permanent agreement test added.
+- Oracle `MemoScope` identity is `policy|agents|maxTurns=<n>|catalog=<skillIds>` via `oracleMemoIdentity`; reuse across maxTurns/catalog throws.
+- CI: separate `drift` job on every PR/push with `SNAPSHOT_DRIFT=1` re-proves pivotal / adversarial / bench / discriminate regen (verify stays fast; measured drift wall ~5 min).
+- Pricing entry `groq:openai/gpt-oss-20b`; `.env.example` `INFERENCE_*`; sanitize-on-record strips `id`/`created`/`extra_content`/`thought_signature` (new records only).
+- Weak tests pin published EVAL / `adversarial.baselines.json` values.
+
+Next: **A2 (D-034)** — grounding fact correction + ablation re-run (needs keys). Not under the byte-identical gate.
+
 ## D-034 Grounding correction and ablation re-run (pre-registered)
 Date: 2026-09-18
 Status: Accepted

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { bestResponse, regret, greedyPlayer, seededRandomPlayer } from "../eval";
-import { isBattleOver, startBattle, stepBattle } from "../engine";
+import {
+  bestResponse,
+  regret,
+  greedyPlayer,
+  seededRandomPlayer,
+  oracleMemoIdentity
+} from "../eval";
+import { isBattleOver, MVP_SKILL_CATALOG, startBattle, stepBattle } from "../engine";
 import type { BattleRuntime, SkillId } from "../engine";
 import { STRIKER } from "../eval/scenarios";
 import { FRACTURE } from "../data/opponents";
@@ -158,13 +164,65 @@ describe("bestResponse oracle", () => {
     const greedy = greedyPlayer(STRIKER);
     const random = seededRandomPlayer(STRIKER, 1);
     const scope = {
-      identity: "greedy|fracture",
+      identity: "greedy|fracture|maxTurns=6|catalog=a",
       map: new Map<string, number>()
     };
     bestResponse(runtime, greedy(runtime), greedy, { memo: scope });
-    scope.identity = "seeded|fracture";
+    scope.identity = "seeded|fracture|maxTurns=6|catalog=a";
     expect(() =>
       bestResponse(runtime, random(runtime), random, { memo: scope })
+    ).toThrow(/MemoScope reused with different identity/);
+  });
+
+  it("throws when MemoScope is reused across different maxTurns", () => {
+    const runtime = startBattle(STRIKER, FRACTURE, "memo-turns", 6);
+    const greedy = greedyPlayer(STRIKER);
+    const scope = {
+      identity: oracleMemoIdentity({
+        playerPolicy: "greedy",
+        cpuAgentId: FRACTURE.agentId,
+        playerAgentId: STRIKER.agentId,
+        maxTurns: 6,
+        catalogSkillIds: ["skill-a"]
+      }),
+      map: new Map<string, number>()
+    };
+    bestResponse(runtime, greedy(runtime), greedy, { memo: scope });
+    scope.identity = oracleMemoIdentity({
+      playerPolicy: "greedy",
+      cpuAgentId: FRACTURE.agentId,
+      playerAgentId: STRIKER.agentId,
+      maxTurns: 20,
+      catalogSkillIds: ["skill-a"]
+    });
+    expect(() =>
+      bestResponse(runtime, greedy(runtime), greedy, { memo: scope })
+    ).toThrow(/MemoScope reused with different identity/);
+  });
+
+  it("throws when MemoScope is reused across different catalogs", () => {
+    const runtime = startBattle(STRIKER, FRACTURE, "memo-catalog", 6);
+    const greedy = greedyPlayer(STRIKER);
+    const scope = {
+      identity: oracleMemoIdentity({
+        playerPolicy: "greedy",
+        cpuAgentId: FRACTURE.agentId,
+        playerAgentId: STRIKER.agentId,
+        maxTurns: 6,
+        catalogSkillIds: ["skill-a", "skill-b"]
+      }),
+      map: new Map<string, number>()
+    };
+    bestResponse(runtime, greedy(runtime), greedy, { memo: scope });
+    scope.identity = oracleMemoIdentity({
+      playerPolicy: "greedy",
+      cpuAgentId: FRACTURE.agentId,
+      playerAgentId: STRIKER.agentId,
+      maxTurns: 6,
+      catalogSkillIds: ["skill-a", "skill-c"]
+    });
+    expect(() =>
+      bestResponse(runtime, greedy(runtime), greedy, { memo: scope })
     ).toThrow(/MemoScope reused with different identity/);
   });
 
@@ -173,7 +231,13 @@ describe("bestResponse oracle", () => {
     const playerPolicy = greedyPlayer(STRIKER);
     const playerSkillId = playerPolicy(runtime);
     const scope = {
-      identity: "greedy|fracture|reuse",
+      identity: oracleMemoIdentity({
+        playerPolicy: "greedy",
+        cpuAgentId: FRACTURE.agentId,
+        playerAgentId: STRIKER.agentId,
+        maxTurns: 8,
+        catalogSkillIds: MVP_SKILL_CATALOG.skills.map((s) => s.skillId)
+      }),
       map: new Map<string, number>()
     };
     const first = bestResponse(runtime, playerSkillId, playerPolicy, {

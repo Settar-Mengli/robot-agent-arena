@@ -1,6 +1,7 @@
 import {
   findSkillDefinition,
   isBattleOver,
+  MAX_TURNS,
   MVP_SKILL_CATALOG,
   startBattle,
   stepBattle
@@ -8,7 +9,7 @@ import {
 import type { BattleRuntime, SkillId } from "../engine";
 import { createGreedySelector } from "../agent";
 import { resolvePlayerPolicy } from "./policies";
-import { bestResponse, regret } from "./oracle";
+import { bestResponse, oracleMemoIdentity, regret } from "./oracle";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
 
 export type DecisionSnapshot = {
@@ -111,7 +112,13 @@ function collectFromScenario(scenario: MatchScenario): DecisionSnapshot[] {
   const playerPolicy = resolvePlayerPolicy(scenario);
   const greedyCpu = createGreedySelector(scenario.cpuConfig);
   const memo = {
-    identity: `${scenario.playerPolicy}|${scenario.cpuConfig.agentId}|${scenario.playerConfig.agentId}|maxTurns`,
+    identity: oracleMemoIdentity({
+      playerPolicy: scenario.playerPolicy,
+      cpuAgentId: scenario.cpuConfig.agentId,
+      playerAgentId: scenario.playerConfig.agentId,
+      maxTurns: MAX_TURNS,
+      catalogSkillIds: MVP_SKILL_CATALOG.skills.map((s) => s.skillId)
+    }),
     map: new Map<string, number>()
   };
   const found: DecisionSnapshot[] = [];

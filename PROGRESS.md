@@ -2,11 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `docs/batch-a-split`; base `main` @ `01490b4`
-- Current state: Docs-only — split D-033 execution batch **A** into **A1 / A2 / A3**; pre-register **D-034** (corrected-grounding ablation). M-BENCH is on `main`. Next: **A1** (prompt-byte-frozen hardening).
-- Test count: **286** (`npm run coverage`: 282 passed, 4 skipped)
-- Verification: typecheck / lint / coverage (all green)
-- Working tree: `docs/batch-a-split` (DECISIONS / ROADMAP / PROGRESS only)
+- Branch: `feat/a1-hardening`; base `main` @ `fd737fe`
+- Current state: **A1 done** (prompt-byte-frozen hardening). Greedy→grounding landed (0 diffs). Next: **A2 (D-034, needs keys)**.
+- Test count: **290** (`npm run coverage`: 286 passed, 4 skipped)
+- Verification: typecheck / lint / coverage / SNAPSHOT_DRIFT drift-guards / `eval:replay --suite all` (fixture_miss 0)
+- Working tree: A1 commits on `feat/a1-hardening`
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -45,12 +45,14 @@
 - D-033 product direction lock (PR #24): 11-batch plan; coach cut; D-026 won't-fix.
 - D-033 execution grouping (PR #25): locked batches → A–E.
 - M-BENCH headless (PR #23): per-variant manifest, pin+repeat keys, bench metrics, `--mode bench`, D-032; pin-mismatch guard.
+- Docs: split execution batch A into A1/A2/A3; pre-register D-034 (PR #26).
+- **A1 hardening** (`feat/a1-hardening`): greedy→grounding (proven); MemoScope maxTurns+catalog; CI `drift` job; pricing/env/sanitize-on-record; pinned published tests.
 
 ## Current Work
-- Docs: split execution batch A into A1/A2/A3; pre-register D-034.
+- A1 complete on branch; PR open. Waiting on merge / A2 operator keys.
 
 ## Blockers
-- None.
+- A2 requires an operator record run with API keys (D-034).
 
 ## Tracked Issues
 - One npm audit vulnerability remains a tracked later investigation item.
@@ -60,7 +62,7 @@
 - Multi-model bench rows / grounded gemini adversarial fixtures await operator record (A2 needs keys).
 
 ## Changed Files In Current Work
-- `DECISIONS.md`, `ROADMAP.md`, `PROGRESS.md`
+- A1 scope: `src/eval/**`, `src/agent/baselines/greedy.ts`, listed tests, `evals/pricing.json`, `.env.example`, `.github/workflows/ci.yml`, DECISIONS / ROADMAP / PROGRESS
 
 ## Exact Next Step
-- **A1** — prompt-byte-frozen hardening (CI regen gates, MemoScope, pricing, `.env.example`, sanitize-new, weak tests; greedy→grounding only after differential proof). Then A2 (D-034) / A3 as gated.
+- **A2 (D-034)** — fix grounding facts, bump prompt version, regenerate grounded fixtures, republish ablation (needs keys). Then A3 adapter-only interface.

@@ -44,6 +44,30 @@ export type RecordingFetch = typeof fetch & {
   setRepeat: (n: number) => void;
 };
 
+const JUNK_TOP_LEVEL_KEYS = new Set(["id", "created"]);
+const JUNK_NESTED_KEYS = new Set(["extra_content", "thought_signature"]);
+
+/**
+ * Strip volatile provider junk before persisting a fixture.
+ * Does not mutate the live response object; never rewrites committed fixtures.
+ */
+export function sanitizeRecordedResponse(response: unknown): unknown {
+  if (response === null || typeof response !== "object") {
+    return response;
+  }
+  if (Array.isArray(response)) {
+    return response.map((item) => sanitizeRecordedResponse(item));
+  }
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(response as Record<string, unknown>)) {
+    if (JUNK_TOP_LEVEL_KEYS.has(key) || JUNK_NESTED_KEYS.has(key)) {
+      continue;
+    }
+    out[key] = sanitizeRecordedResponse(value);
+  }
+  return out;
+}
+
 /**
  * Hash host+model+messages+response_format+temperature.
  * Include `repeat` in the payload only when (repeat ?? 0) !== 0 so
@@ -155,7 +179,7 @@ export function createRecordingFetch(
           model: rawBody.model,
           messages: rawBody.messages
         },
-        response: parsed
+        response: sanitizeRecordedResponse(parsed)
       });
       counters.recorded += 1;
     } else {
