@@ -61,6 +61,7 @@ export function seededRandomPlayer(config: AgentConfig, seed: Seed): PlayerPolic
 export const LLM_VARIANTS = [
   "base",
   "grounded",
+  "grounded-v2",
   "memory",
   "grounded+memory"
 ] as const;
@@ -102,7 +103,7 @@ export function isLlmVariant(value: string): value is LlmVariant {
 /**
  * Parse `--variants` list. Record/live default: base,grounded.
  * Replay default when unset: base (legacy fixtures).
- * `all` expands to the four variants.
+ * `all` expands to every known variant (including grounded-v2).
  */
 export function parseVariantsList(
   raw: string | undefined,
@@ -147,6 +148,8 @@ export function variantToPlayOptions(
       return { grounding: "off", memory: "off" };
     case "grounded":
       return { grounding: "facts", memory: "off" };
+    case "grounded-v2":
+      return { grounding: "facts-v2", memory: "off" };
     case "memory":
       return { grounding: "off", memory: "match" };
     case "grounded+memory":
@@ -160,6 +163,8 @@ export function variantPromptVersion(variant: LlmVariant): string {
       return PROMPT_VERSIONS.v1;
     case "grounded":
       return PROMPT_VERSIONS.grounded;
+    case "grounded-v2":
+      return PROMPT_VERSIONS.groundedV2;
     case "memory":
       return PROMPT_VERSIONS.memory;
     case "grounded+memory":

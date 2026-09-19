@@ -38,6 +38,10 @@ describe("prompt-variant ablation helpers", () => {
       grounding: "facts",
       memory: "off"
     });
+    expect(variantToPlayOptions("grounded-v2")).toEqual({
+      grounding: "facts-v2",
+      memory: "off"
+    });
     expect(variantToPlayOptions("memory")).toEqual({
       grounding: "off",
       memory: "match"
@@ -47,9 +51,11 @@ describe("prompt-variant ablation helpers", () => {
       memory: "match"
     });
     expect(llmCpuPolicy({ variant: "grounded" }).id).toBe("llm:grounded");
+    expect(llmCpuPolicy({ variant: "grounded-v2" }).id).toBe("llm:grounded-v2");
     expect(llmCpuPolicy().id).toBe("llm:base");
     expect(variantPromptVersion("base")).toBe("agent-v1");
     expect(variantPromptVersion("grounded")).toBe("agent-v2-grounded");
+    expect(variantPromptVersion("grounded-v2")).toBe("agent-v4-grounded");
   });
 
   it("parses variants list with defaults and all", () => {
@@ -61,11 +67,12 @@ describe("prompt-variant ablation helpers", () => {
     expect(parseVariantsList("all", "record")).toEqual([
       "base",
       "grounded",
+      "grounded-v2",
       "memory",
       "grounded+memory"
     ]);
-    expect(parseVariantsList("grounded,base,grounded", "live")).toEqual([
-      "grounded",
+    expect(parseVariantsList("grounded-v2,base,grounded-v2", "live")).toEqual([
+      "grounded-v2",
       "base"
     ]);
     expect(() => parseVariantsList("nope", "record")).toThrow(/unknown variant/);
