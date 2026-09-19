@@ -5,27 +5,26 @@
 - Temporary app title: AGENT ARENA.
 - Pending final-name candidate: ARCZOLVEX.
 - ARCZOLVEX must remain a candidate only until legal finalization is complete.
-- AGENT ARENA is a 1v1 turn-based robot fighting game where players build, name, and configure robot agents.
-- **Strategic direction (D-014):** the product is an agentic-AI system whose environment is this deterministic game. The pure engine stays the untouched, tested backbone. AI is a strategy provider behind the existing `selectCpuSkillId` seam; UI showcases the agents after the AI layer and evals are proven (headless-first).
-- **Positioning (D-020):** an interactive agent-design sandbox that teaches AI-agent engineering through measurable consequence. The battle is the environment, not the point; the five modules and post-match report are the teaching surface; M-EVAL is core evidence. Focused sandbox/demo only — not a course, LMS, or content platform. Does not change the engine, seam, determinism (D-019), or the AI milestone spine below.
+- **Strategic direction (D-033):** an **agent evaluation framework** that measures and **diagnoses** agent decision quality against exact ground truth. The robot battle is the **reference environment**, not the end product. Bring-your-own-key model bench and a published methodology are in scope. The teaching sandbox (D-020) is delivered through measurement, not assertion.
+- **Engine spine (D-014, still true):** the pure TypeScript battle engine stays the untouched, tested backbone. AI is a strategy provider behind the existing `selectCpuSkillId` seam. UI renders the framework; it owns no measurement logic.
+- Does not change the engine purity boundary (D-003), the agent turn contract (D-022), or the determinism boundary (D-019).
 
 ## MVP Scope
-Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + localStorage; turn-based; fictional vocabulary). Sequencing is updated: AI layer and evals before UI.
+Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + localStorage; turn-based; fictional vocabulary). Sequencing follows D-033’s 11-batch plan.
 
 - Engine-first implementation (DONE).
 - Pure TypeScript battle engine (DONE).
 - Session-based 1v1 battle flow + interactive `startBattle` / `stepBattle` driver (DONE).
-- 4 screens: Home, Builder, Arena, Report — **re-sequenced to M-UI** (after M-EVAL); still in scope, later.
-- 5 modules: Core Identity, Memory, Sigil and Security, Rules, Strategy (framed as the agent-design teaching surface — D-020).
-- 8 canonical skills.
+- 5 modules: Core Identity, Memory, Sigil and Security, Rules, Strategy (agent-design surface — D-020).
+- 8 canonical skills; max 2 equipped (`MVP_SKILL_SLOT_LIMIT`); max 20 turns (`MAX_TURNS`).
 - Player agent naming.
 - 2 CPU opponents: FRACTURE and SENTINEL-X (catalog DONE).
-- 1 localStorage save slot (PLANNED with UI / persistence).
-- Max 20 turns.
+- 1 localStorage save slot (PLANNED with UI).
 - Seeded RNG (DONE; restore-from-state DONE).
-- Post-match report: explanatory lesson of which design choice caused the result, fictional vocabulary only (PLANNED; coach surfaces in Report later — D-020).
-- **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md.
-- **PLANNED:** Serverless inference proxy with M-UI; coach + screens (see AI milestone spine / D-025 as amended).
+- **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md (D-024 falsified; D-030).
+- **IN REVIEW:** M-BENCH headless (PR #23).
+- **PLANNED:** Correctness hardening → environment interface → UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
+- **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
 ## Milestones
 
@@ -35,39 +34,53 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - Interactive driver (`startBattle` / `stepBattle`) + RNG restore — DONE.
 - Infra: ESLint (engine-purity), coverage, CI, ARCHITECTURE + README — DONE.
 - CPU opponent catalog (FRACTURE, SENTINEL-X) — DONE.
-- M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred to M-UI per D-016 amendment).
+- M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred per D-016 / D-033 BYOK decision).
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
-- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE** (incl. independent held-out split, keyless replay, measured held-out LLM results).
-- M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030); next is M-BENCH.
+- M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE**.
+- M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
 
-### M5 / M6 (re-sequenced)
-Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**. They land as **M-UI** (and related persistence) after the AI spine below so no UI is thrown away when agents land.
+### AI milestone spine (D-033 — 11 batches)
 
-### AI milestone spine (headless-first, D-025 as amended)
+#### 1. Discrimination + parked fixes — DONE
+Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-provider keyless `--suite all` replay.
 
-#### M-INF — Inference layer (client DONE)
-Multi-provider free-tier LLM client: structured output, timeout, retry, provider fallback, external abort + per-attempt hook. Default order in `src/inference/providers.ts`: groq, cloudflare, gemini, mistral, openrouter. Serverless proxy deferred to M-UI (D-016 amendment).
+#### 2. M-TOOLS grounding + memory — DONE
+Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: regret distribution with rate (D-031). Memory variants still unmeasured.
 
-#### M-AGENT — LLM agent (DONE)
-Battle-state + personality → validated legal move via `playAgentTurn`; plain `stepBattle` seeded picker is fallback (D-015/D-022). Deterministic greedy baseline for evals. Optional `selectCpuSkillId` on `stepBattle`.
+#### 3. M-BENCH headless — IN REVIEW (PR #23)
+Pinned single-model runs, repeat-aware fixtures, taxonomy/cost/consistency, committed bench summary. Protocol lands with that PR; multi-model operator record may follow.
 
-#### M-EVAL — Eval harness (signature piece) — DONE
-Headless match + snapshot suites; exact fixed-policy best-response oracle; recorded-fixture transport; Vite `runnerImport` CLI; committed baseline in EVAL.md (D-023). Discrimination report: environment **DISCRIMINATES** (optimal ≫ greedy). On an earlier n=6 FRACTURE sample with **standard** snapshots, held-out LLM tied greedy; the adversarial ablation (M-TOOLS) is the measurement set that separates them. Fixture manifest + multi-provider keyless `--suite all` replay.
+#### 4. Correctness hardening — NEXT (after #23)
+Silent risks on existing files, before any Report screen shows headline numbers: CI must re-prove pivotal / adversarial / bench / discriminate regen (today `skipIf`-gated); Oracle MemoScope identity; grounding gaps (fallback-stabilize, `diesNextTurn`, unknown effect categories); greedy must call grounding; pricing vs recorded Groq pin; sanitize new fixture records (do not rewrite committed fixtures); `.env.example` `INFERENCE_*` vars; strengthen weak tests.
 
-#### M-TOOLS — Grounding + memory — DONE (ablation measured; grounding negative)
-Grounding + memory + variant ablation harness (D-027). Standard ablation inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial record: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: report regret distribution with rate (D-031). Memory variants still unmeasured.
+#### 5. Environment interface + port
+Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. **No behavior change**; committed artifacts must still replay.
 
-#### M-BENCH — Model comparison bench — NEXT
-BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025).
+#### 6. UI part 1 — scaffolding + Builder
+React, entry, state layer, component test env + Builder. Planned — not built.
 
-#### M-UI — Minimal functional UI (+ deferred serverless proxy)
-Part 1 Builder+Arena; part 2 Report + post-battle coach + bench surfacing (D-025 as amended; coach folded into M-UI part 2). Serverless inference proxy when the browser needs secret-safe calls.
+#### 7. UI part 2 — Arena + results
+Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built.
 
-#### Parked (D-026)
-Seed-spread correlation and greedy-suboptimal snapshot reselection — deferred until a future suite regeneration (M-ENV milestone dropped).
+#### 8. Diagnostic layer
+Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031).
+
+#### 9. Three new measurements
+Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 pattern).
+
+#### 10. BYOK + committed leaderboard + methodology writeup
+UI default: deterministic CPU + fixture-replayed LLM. Live BYOK: OpenRouter-only, key in memory, explicit warning. D-016 proxy deferred. Leaderboard = committed static comparison page (not a live backend — D-020 anti-scope stands). Methodology told through the failed measurement sets and the falsified hypothesis.
+
+#### 11. Second reference environment + publish
+Small provably solvable task proving the interface is real; then publish.
+
+#### Parked / closed
+- **D-026** seed-spread correlation and greedy-suboptimal snapshot reselection — **won't-fix** under D-033 (would require suite regeneration; contradicts batch 5’s no-behavior-change gate). Remain known limitations.
+- **Coach** — cut by D-033 (unmeasured-if-UI-only contradicts D-018 / D-023).
+
 ### Stretch (optional)
 - Natural-language robot builder (NL → validated `AgentConfig`).
-- An agent that adapts across matches (bandit/RL). Revisit a heavier backend/DB only if cross-match learning, leaderboards, or stored eval runs require real persistence beyond localStorage.
+- An agent that adapts across matches (bandit/RL). Revisit a heavier backend/DB only if cross-match learning or stored eval runs require real persistence beyond localStorage.
 
 ## Explicit Non-Goals
 - Online multiplayer.
@@ -76,12 +89,13 @@ Seed-spread correlation and greedy-suboptimal snapshot reselection — deferred 
 - Visual robot customization.
 - Sound.
 - Campaign.
-- Leaderboards.
+- Live / public PvP leaderboards (a **committed static** BYOK comparison page is in-scope under D-033).
+- Post-match LLM coach (cut by D-033).
 - Tools module (gameplay “Tools” module — distinct from M-TOOLS grounding).
 - Mobile layout.
 - Public final branding.
 - Real-world attack, jailbreak, or prompt-injection content.
-- Full service/DB/auth backend for MVP (minimal serverless inference proxy only — D-016).
+- Full service/DB/auth backend for MVP (minimal serverless inference proxy only if multi-provider live play is wanted — D-016 deferred).
 - Paid LLM usage (free-tier providers only — D-017).
 
 ## MVP Completion Criteria
@@ -89,7 +103,8 @@ Seed-spread correlation and greedy-suboptimal snapshot reselection — deferred 
 - Deterministic outcomes are produced with identical seeds and inputs.
 - Canonical skill catalog and agent configs are validated before battle sessions start.
 - FRACTURE and SENTINEL-X are selectable and functional CPU opponents.
-- Report output uses fictional vocabulary and avoids prohibited terms.
-- AI strategy provider + eval harness prove agent behavior headless before M-UI.
-- 4 MVP screens are connected through a full battle flow (after M-UI).
+- Report / results output uses fictional vocabulary and avoids prohibited terms.
+- AI strategy provider + eval harness prove agent behavior headless before UI.
+- Environment interface exists; the game is one implementation of it.
+- UI screens render the framework and own no measurement logic.
 - No non-MVP features are shipped.
