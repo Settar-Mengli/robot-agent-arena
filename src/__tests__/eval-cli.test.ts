@@ -185,6 +185,8 @@ describe("eval cli record summary", () => {
       [
         "--mode",
         "record",
+        "--variants",
+        "base",
         "--max-matches",
         "1",
         "--no-snapshots",
@@ -230,6 +232,8 @@ describe("eval cli record summary", () => {
       [
         "--mode",
         "record",
+        "--variants",
+        "base",
         "--max-matches",
         "1",
         "--no-snapshots",

@@ -123,6 +123,8 @@ describe("bench pin CLI guard", () => {
     const argv = [
       "--mode",
       "record",
+      "--variants",
+      "base",
       "--max-matches",
       "1",
       "--all-seeds",
@@ -175,5 +177,127 @@ describe("bench pin CLI guard", () => {
     expect(code).toBe(0);
     expect(lines.join("\n")).not.toContain("PIN MISMATCH");
     expect(lines.join("\n")).not.toContain("pinned model:");
+    expect(lines.join("\n")).toContain(
+      "warning: single-variant run is unpinned; results are not comparable across runs"
+    );
+  });
+
+  it("multi-variant record without --models exits 1 with attribution message", async () => {
+    const lines: string[] = [];
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-multi-"));
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "record",
+        "--variants",
+        "base,grounded",
+        "--max-matches",
+        "1",
+        "--no-snapshots",
+        "--budget-ms",
+        "2000"
+      ],
+      {
+        store: createMemoryStore(),
+        env: {
+          GROQ_API_KEY: "test-fake-key-not-real",
+          INFERENCE_PROVIDER_ORDER: "groq",
+          INFERENCE_MAX_PROVIDERS: "1",
+          INFERENCE_MAX_RETRIES: "0"
+        },
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+    expect(code).toBe(1);
+    expect(lines.join("\n")).toContain(
+      "Multi-variant comparison cannot be attributed when failover can reassign providers"
+    );
+    expect(lines.join("\n")).toContain("--models");
+  });
+
+  it("multi-variant record with --models proceeds past the pin requirement", async () => {
+    chatStub.provider = "groq";
+    chatStub.model = "openai/gpt-oss-20b";
+    const lines: string[] = [];
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-multi-ok-"));
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "record",
+        "--variants",
+        "base,grounded",
+        "--models",
+        "groq:openai/gpt-oss-20b",
+        "--max-matches",
+        "1",
+        "--all-seeds",
+        "--no-snapshots",
+        "--budget-ms",
+        "5000"
+      ],
+      {
+        store: createMemoryStore(),
+        env: {
+          GROQ_API_KEY: "test-fake-key-not-real",
+          INFERENCE_PROVIDER_ORDER: "groq",
+          INFERENCE_MAX_PROVIDERS: "1",
+          INFERENCE_MAX_RETRIES: "0"
+        },
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+    expect(code).toBe(0);
+    expect(lines.join("\n")).toContain("pinned model: groq/openai/gpt-oss-20b");
+    expect(lines.join("\n")).not.toContain(
+      "Multi-variant comparison cannot be attributed"
+    );
+  });
+
+  it("ablation snapshot pin mismatch exits 2", async () => {
+    chatStub.provider = "openrouter";
+    chatStub.model = "wrong-model";
+    chatStub.skillId = scenario.cpuConfig.skillIds[0]!;
+    const lines: string[] = [];
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-snap-"));
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "record",
+        "--variants",
+        "base",
+        "--models",
+        "groq:openai/gpt-oss-20b",
+        "--max-matches",
+        "0",
+        "--snapshot-suite",
+        "adversarial",
+        "--suite",
+        "dev",
+        "--budget-ms",
+        "5000"
+      ],
+      {
+        store: createMemoryStore(),
+        env: {
+          GROQ_API_KEY: "test-fake-key-not-real",
+          INFERENCE_PROVIDER_ORDER: "groq",
+          INFERENCE_MAX_PROVIDERS: "1",
+          INFERENCE_MAX_RETRIES: "0"
+        },
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+    expect(code).toBe(2);
+    expect(lines.join("\n")).toContain("PIN MISMATCH");
+    expect(lines.join("\n")).toMatch(/snapshot /);
   });
 });

@@ -769,8 +769,8 @@ async function runLlmMode(
   const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
   let env: EnvMap = deps.env ?? process.env;
 
-  // Commit 2: pin to first --models entry for record/live/replay.
-  // Multi-model looping lands in --mode bench (commit 4).
+  // Pin to first --models entry for record/live/replay (exactly one enforced after variants resolve).
+  // Multi-model looping lands in --mode bench.
   const activePin: ModelPin | undefined =
     args.models !== undefined && args.models.length > 0
       ? args.models[0]
@@ -882,6 +882,34 @@ async function runLlmMode(
     }
   } else {
     log(`variants: ${variants.join(",")}`);
+  }
+
+  const pinCount = args.models?.length ?? 0;
+  if (pinCount > 1) {
+    error(
+      "record/live/replay require exactly one --models provider:model pin; use --mode bench to loop multiple models"
+    );
+    return 1;
+  }
+  if (variants.length > 1) {
+    if (args.mode === "record" || args.mode === "live") {
+      if (pinCount !== 1) {
+        error(
+          "Multi-variant comparison cannot be attributed when failover can reassign providers. " +
+            "Pass --models provider:model with exactly one pin " +
+            "(e.g. --models groq:openai/gpt-oss-20b)."
+        );
+        return 1;
+      }
+    } else if (args.mode === "replay" && pinCount === 0) {
+      log(
+        "warning: multi-variant replay without --models is not attributable across providers; pass --models provider:model or use a pinned manifest"
+      );
+    }
+  } else if (variants.length === 1 && pinCount === 0) {
+    log(
+      "warning: single-variant run is unpinned; results are not comparable across runs (pass --models provider:model to pin)"
+    );
   }
 
   // Per (variant, split) scenario lists — replay uses resolveVariantRun so
