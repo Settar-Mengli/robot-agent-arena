@@ -498,5 +498,14 @@ describe("bench pin CLI guard", () => {
     expect(text).not.toMatch(/vs greedy/);
     expect(text).toContain("variant:base (not comparable)");
     expect(text).toContain("variant:grounded (not comparable)");
+
+    const replayPayload = JSON.parse(
+      await readFile(join(outDir, "replay.json"), "utf8")
+    ) as {
+      variants: Record<string, Record<string, unknown>>;
+    };
+    for (const [variantId, entry] of Object.entries(replayPayload.variants)) {
+      expect(entry, variantId).not.toHaveProperty("baselineDelta");
+    }
   });
 });
