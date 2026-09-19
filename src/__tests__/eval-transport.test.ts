@@ -102,6 +102,63 @@ describe("recorded LLM transport", () => {
     expect(llmAgg.fixtureMissCount).toBeGreaterThan(0);
   });
 
+  it("sanitize-on-record strips junk fields but keeps content and usage", async () => {
+    const store = createMemoryStore();
+    const realFetch = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: "chatcmpl-volatile",
+          created: 1_700_000_000,
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  skillId: "skill-override-pulse",
+                  reason: "eval"
+                }),
+                extra_content: { google: { thought_signature: "sig" } }
+              },
+              thought_signature: "top-sig"
+            }
+          ],
+          usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+          extra_content: { noise: true }
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    );
+    const recording = createRecordingFetch(realFetch, store);
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+    const init = {
+      method: "POST",
+      body: JSON.stringify({
+        model: "m",
+        messages: [{ role: "user", content: "sanitize-me" }]
+      })
+    };
+
+    const live = await recording(url, init);
+    const liveBody = (await live.json()) as Record<string, unknown>;
+    expect(liveBody.id).toBe("chatcmpl-volatile");
+
+    const stored = [...store.map.values()][0]!;
+    const storedText = JSON.stringify(stored.response);
+    expect(storedText).not.toContain("chatcmpl-volatile");
+    expect(storedText).not.toContain("thought_signature");
+    expect(storedText).not.toContain("extra_content");
+    expect(storedText).not.toMatch(/"created"/);
+    expect(storedText).not.toMatch(/"id"/);
+
+    const replayed = (await (
+      await createReplayFetch(store)(url, init)
+    ).json()) as {
+      choices: Array<{ message: { content: string } }>;
+      usage: { total_tokens: number };
+    };
+    expect(replayed.choices[0]!.message.content).toContain("skill-override-pulse");
+    expect(replayed.usage.total_tokens).toBe(15);
+  });
+
   it("recording fetch never persists headers or secrets", async () => {
     const store = createMemoryStore();
     const fakeKey = "sk-secret-Bearer-authorization-value";

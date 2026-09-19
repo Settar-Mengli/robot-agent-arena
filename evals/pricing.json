@@ -14,6 +14,12 @@
       "source": "groq-free-tier",
       "freeTier": true
     },
+    "groq:openai/gpt-oss-20b": {
+      "promptPer1M": 0,
+      "completionPer1M": 0,
+      "source": "groq-free-tier",
+      "freeTier": true
+    },
     "mistral:mistral-small-latest": {
       "promptPer1M": 0,
       "completionPer1M": 0,
