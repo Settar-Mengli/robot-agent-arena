@@ -529,3 +529,21 @@ Mean regret is dominated by rare high-stakes misses; rate alone hides that struc
 
 Consequences:
 Eval digests and ablation tables include median / max / highRegret≥100; CLI baseline deltas compare against the loaded suite’s measured greedy and random metrics.
+
+## D-032 Bench protocol
+Date: 2026-03-20
+Status: Accepted
+
+Decision:
+- **M-BENCH** compares models under a pinned provider+model with failover disabled (`INFERENCE_MAX_PROVIDERS=1`). The M-TOOLS adversarial record was a 71/8/1 gemini/openrouter/groq mixture — that is not a single-model claim.
+- Measurement set remains **held-out adversarial** (D-029 / D-030). Report optimality **and** regret distribution (D-031).
+- Axes: **prompt version** (`base` / `grounded` / …) and **model** (`--models provider:model`).
+- Fixture keys are **repeat-aware**: `repeat` enters the hash only when ≠ 0 so legacy fixtures stay valid; `--consistency N` uses `fetch.setRepeat(i)` without changing the HTTP body.
+- Cost is informational via committed `evals/pricing.json`; **null when unpriced** (never invent). Free-tier known models may be `0` while quota still binds.
+- Committed summary: `evals/out-committed/bench.summary.json`. Partial single-model proof is allowed when other pins/variants miss fixtures; do not invent rows from fallbacks.
+
+Rationale:
+Model comparison without a pin conflates provider routing with model quality. Repeat-aware keys enable self-consistency without rewriting recorded bodies.
+
+Consequences:
+`--mode bench` defaults to heldout + adversarial + max-matches 0. Next batch is **M-UI part 1**. Multi-model rows await operator record.

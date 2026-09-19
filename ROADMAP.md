@@ -38,7 +38,8 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - M-INF multi-provider OpenAI-compatible client (`src/inference/`) — DONE (serverless proxy deferred to M-UI per D-016 amendment).
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
 - M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE** (incl. independent held-out split, keyless replay, measured held-out LLM results).
-- M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030); next is M-BENCH.
+- M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
+- M-BENCH headless model bench — **DONE** (D-032); multi-model pending operator record; next **M-UI part 1**.
 
 ### M5 / M6 (re-sequenced)
 Former UI Integration (M5) and Persistence/Reporting (M6) are **not cancelled**. They land as **M-UI** (and related persistence) after the AI spine below so no UI is thrown away when agents land.
@@ -57,10 +58,10 @@ Headless match + snapshot suites; exact fixed-policy best-response oracle; recor
 #### M-TOOLS — Grounding + memory — DONE (ablation measured; grounding negative)
 Grounding + memory + variant ablation harness (D-027). Standard ablation inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial record: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: report regret distribution with rate (D-031). Memory variants still unmeasured.
 
-#### M-BENCH — Model comparison bench — NEXT
-BYOK model comparison, cost/latency per decision, prompt version axis, failure taxonomy, self-consistency (D-025).
+#### M-BENCH — Model comparison bench — DONE (headless; multi-model pending operator record)
+Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json` (D-032). Single-model gemini proof committed; multi-model awaits operator record.
 
-#### M-UI — Minimal functional UI (+ deferred serverless proxy)
+#### M-UI — Minimal functional UI (+ deferred serverless proxy) — NEXT
 Part 1 Builder+Arena; part 2 Report + post-battle coach + bench surfacing (D-025 as amended; coach folded into M-UI part 2). Serverless inference proxy when the browser needs secret-safe calls.
 
 #### Parked (D-026)

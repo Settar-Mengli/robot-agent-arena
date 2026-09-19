@@ -55,6 +55,17 @@ describe("bench mode / committed summary", () => {
     expect(keys).toEqual([...keys].sort());
   });
 
+  it("EVAL.md bench table strings ⊆ committed summary", () => {
+    const summary = readCommitted();
+    const evalMd = readFileSync(join(process.cwd(), "EVAL.md"), "utf8");
+    expect(evalMd).toContain("## Bench (M-BENCH)");
+    expect(evalMd).toContain("evals/out-committed/bench.summary.json");
+    for (const row of summary.rows) {
+      expect(evalMd).toContain(row.model);
+      expect(evalMd).toContain(`${(row.optimalRate * 100).toFixed(1)}%`);
+    }
+  });
+
   it("summarizeBench is deterministic", () => {
     const row: BenchRow = {
       model: "gemini:gemini-3.5-flash-lite",
