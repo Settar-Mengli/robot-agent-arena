@@ -6,14 +6,16 @@ import type {
   SkillDefinition
 } from "../engine";
 import { MVP_SKILL_CATALOG } from "../engine";
-import type { GroundedFacts } from "./grounding";
+import type { AnyGroundedFacts } from "./grounding";
+import { isGroundedFactsV2 } from "./grounding";
 import type { PlayerTendencies } from "./memory";
 
 export const PROMPT_VERSIONS = {
   v1: "agent-v1",
   grounded: "agent-v2-grounded",
   memory: "agent-v2-memory",
-  groundedMemory: "agent-v3-grounded-memory"
+  groundedMemory: "agent-v3-grounded-memory",
+  groundedV2: "agent-v4-grounded"
 } as const;
 
 /** Default path — fixtures and CI replay hash against this version. */
@@ -28,15 +30,18 @@ export interface BuildAgentMessagesInput {
   cpuConfig: AgentConfig;
   catalog?: SkillCatalog;
   /** Opt-in engine-computed facts. Absent → byte-identical to agent-v1. */
-  grounding?: GroundedFacts;
+  grounding?: AnyGroundedFacts;
   /** Opt-in per-match player tendency summary. Absent → unchanged default. */
   memory?: PlayerTendencies;
 }
 
 export function resolvePromptVersion(input: {
-  grounding?: GroundedFacts;
+  grounding?: AnyGroundedFacts;
   memory?: PlayerTendencies;
 }): string {
+  if (isGroundedFactsV2(input.grounding)) {
+    return PROMPT_VERSIONS.groundedV2;
+  }
   const hasGrounding = input.grounding !== undefined;
   const hasMemory = input.memory !== undefined;
   if (hasGrounding && hasMemory) {
@@ -131,10 +136,19 @@ export function buildAgentMessages(input: BuildAgentMessagesInput): ChatMessage[
 
   if (input.grounding !== undefined) {
     systemParts.push(
-      "A following user block labelled ENGINE_GROUNDED_FACTS is computed by the engine and is authoritative — do not recompute those numbers.",
-      "When ENGINE_GROUNDED_FACTS marks a skill lethal, prefer taking that lethal skill if affordable.",
-      "When ENGINE_GROUNDED_FACTS.threat.diesNextTurn is true, prefer a move that gains defense or heals if it prevents dying next turn."
+      "A following user block labelled ENGINE_GROUNDED_FACTS is computed by the engine and is authoritative — do not recompute those numbers."
     );
+    if (isGroundedFactsV2(input.grounding)) {
+      systemParts.push(
+        "When ENGINE_GROUNDED_FACTS marks a skill lethal (resolvedVia skill), prefer taking that lethal skill if affordable.",
+        "When ENGINE_GROUNDED_FACTS.threat.diesNextTurnPreAction is true, prefer a candidate with diesNextTurnAfterMove false (defense, heal, or fallback that survives)."
+      );
+    } else {
+      systemParts.push(
+        "When ENGINE_GROUNDED_FACTS marks a skill lethal, prefer taking that lethal skill if affordable.",
+        "When ENGINE_GROUNDED_FACTS.threat.diesNextTurn is true, prefer a move that gains defense or heals if it prevents dying next turn."
+      );
+    }
   }
 
   if (input.memory !== undefined) {

@@ -13,7 +13,13 @@ import {
   startBattle,
   stepBattle
 } from "../engine";
-import type { AgentConfig, CombatantState, SkillId } from "../engine";
+import type {
+  AgentConfig,
+  CombatantState,
+  SkillCatalog,
+  SkillDefinition,
+  SkillId
+} from "../engine";
 
 const modules = {
   coreIdentity: "Steady Vanguard",
@@ -50,6 +56,32 @@ function combatant(
 }
 
 describe("createGreedySelector", () => {
+  it("skips unmodelled projections and picks an evaluable skill", () => {
+    const mystery = {
+      skillId: "skill-synthetic-unmodelled",
+      displayName: "Mystery",
+      module: "strategy",
+      summary: "unmodelled",
+      energyCost: 1,
+      effect: { category: "mystery-beam", basePower: 99 }
+    } as unknown as SkillDefinition;
+    const catalog: SkillCatalog = {
+      skills: [...MVP_SKILL_CATALOG.skills, mystery]
+    };
+    const config = agent([
+      "skill-synthetic-unmodelled" as SkillId,
+      "skill-override-pulse"
+    ]);
+    const selector = createGreedySelector(config, catalog);
+    const self = combatant("cpu", { energy: 10 });
+    const target = combatant("player", { health: 8 });
+    // mystery would look lethal if zeros weren't marked; must pick override-pulse (7 dmg lethal)
+    expect(selector(self, target)).toBe("skill-override-pulse");
+    expect(
+      projectSkillEffects(mystery, self, target).unmodelledCategory
+    ).toBe("mystery-beam");
+  });
+
   it("exports named constants", () => {
     expect(LOW_HEALTH_RATIO).toBe(0.4);
     expect(ENERGY_DRAIN_WEIGHT).toBe(0.5);

@@ -235,6 +235,37 @@ Providers across the record run: gemini 71 decisions (18× 429), openrouter 8 (2
 
 **D-024 falsifier (applied):** grounded did not change any decision vs base on the measurement set; publish that failure here.
 
+### Corrected grounding arm (D-034) — RESULTS PENDING OPERATOR RECORD
+
+Historical `grounded` (`agent-v2-grounded`) remains the D-024/D-030 record and must not be rewritten. The corrected arm is a **new** variant:
+
+| | |
+| --- | --- |
+| variant | `grounded-v2` |
+| promptVersion | `agent-v4-grounded` |
+| play option | `facts-v2` |
+| fixes | post-action `diesNextTurnAfterMove`; fallback-stabilize projection when unaffordable; unmodelled categories refused in V2 facts |
+
+**Prediction (pre-registered):** corrected arm changes **≥1** decision vs `base` on held-out adversarial and does **not** increase mean regret.
+
+**Operator command (keys required):**
+
+```powershell
+npm run eval:record -- --suite heldout --variants base,grounded-v2 --snapshot-suite adversarial --max-matches 2
+```
+
+CLI quota projection for that argv (default single-model failover path, consistency 1):  
+`quota projection: models=1 variants=2 snapshots=20 matches=2 × ~17 × consistency=1 → 108 calls (cap 300)`
+
+### Results (held-out adversarial, n=20) — D-034 — PENDING
+
+| arm | promptVersion | optimal | mean / median / max regret | regret≥100 | validity | fallback | decisions changed vs base |
+| --- | --- | ---: | --- | ---: | ---: | ---: | ---: |
+| **base** | agent-v1 | — | — | — | — | — | — |
+| **grounded-v2** | agent-v4-grounded | — | — | — | — | — | — |
+
+Fill after the operator record; do not invent numbers.
+
 ## Bench (M-BENCH)
 
 Pinned single-model comparison on the **adversarial** measurement set (D-032). Columns exist so model choice is an evidence question, not folklore:

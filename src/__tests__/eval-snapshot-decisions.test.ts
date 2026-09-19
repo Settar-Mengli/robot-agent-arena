@@ -71,9 +71,22 @@ describe("auditable snapshot decisions", () => {
     expect(promptVersionMismatchMessage("grounded", decisions)).toMatch(
       /agent-v2-grounded/
     );
+    expect(promptVersionMismatchMessage("grounded-v2", decisions)).toMatch(
+      /PROMPT VERSION MISMATCH/
+    );
+    expect(promptVersionMismatchMessage("grounded-v2", decisions)).toMatch(
+      /agent-v4-grounded/
+    );
     expect(
       promptVersionMismatchMessage("base", decisions)
     ).toBeNull();
+    const v2Decisions = [
+      decisionRecordFromChoice(snap, skillId, {
+        promptVersion: "agent-v4-grounded",
+        source: "llm"
+      })
+    ];
+    expect(promptVersionMismatchMessage("grounded-v2", v2Decisions)).toBeNull();
   });
 
   it("digest lists distinct prompt versions", () => {

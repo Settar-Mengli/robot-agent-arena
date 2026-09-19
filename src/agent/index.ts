@@ -15,13 +15,19 @@ export {
 } from "./baselines/greedy";
 export {
   computeGroundedFacts,
+  computeGroundedFactsV2,
   damageAfterDefense,
+  isGroundedFactsV2,
   projectSkillEffects
 } from "./grounding";
 export type {
+  AnyGroundedFacts,
   GroundedFacts,
+  GroundedFactsV2,
   GroundedSkillFact,
-  GroundedThreatSkillFact
+  GroundedSkillFactV2,
+  GroundedThreatSkillFact,
+  ProjectedSkillEffects
 } from "./grounding";
 export { summarizePlayerTendencies } from "./memory";
 export type { PlayerTendencies } from "./memory";
