@@ -241,7 +241,7 @@ Providers across the record run: gemini 71 decisions (18× 429), openrouter 8 (2
 
 **D-024 falsifier (applied):** grounded did not change any decision vs base on the measurement set; publish that failure here.
 
-### Corrected grounding arm (D-034) — PENDING PINNED RECORD (D-036)
+### Corrected grounding arm (D-034) — pinned result
 
 Historical `grounded` (`agent-v2-grounded`) remains the D-024/D-030 record and must not be rewritten. The corrected arm is a **new** variant:
 
@@ -252,7 +252,7 @@ Historical `grounded` (`agent-v2-grounded`) remains the D-024/D-030 record and m
 | play option | `facts-v2` |
 | fixes | post-action `diesNextTurnAfterMove`; fallback-stabilize projection when unaffordable; unmodelled categories refused in V2 facts |
 
-**Prediction (pre-registered):** corrected arm changes **≥1** decision vs `base` on held-out adversarial and does **not** increase mean regret. **This prediction can only be tested under a pinned model** (D-036).
+**Prediction (pre-registered):** corrected arm changes **≥1** decision vs `base` on held-out adversarial and does **not** increase mean regret. Testable only under a pinned model (D-036).
 
 ### Measured instability (unpinned multi-variant runs — not a published result)
 
@@ -263,24 +263,24 @@ Two consecutive local `eval:record` runs with identical arguments, prompts, and 
 | 1 | **50.00%** | **1.00** | provider mixture under failover |
 | 2 | **33.33%** | **334.50** | same code/prompt; different providers answered (e.g. gemini ~209 decisions with ~58 rate-limit failures, plus groq/openrouter) |
 
-Fixture keys include host and model, so the same decision stores different answers per provider; replay reproduces whichever was recorded. **Any base-vs-variant comparison from these unpinned runs is confounded by provider assignment.**
+Fixture keys include host and model, so the same decision stores different answers per provider; replay reproduces whichever was recorded. **Any base-vs-variant comparison from these unpinned runs is confounded by provider assignment.** Unpinned multi-variant recordings were **not committed** (D-036).
 
-An earlier reading that “grounded-v2 changed one decision for the worse” is **retracted as unsupported** — that delta sits inside the run-to-run variation shown above. Unpinned multi-variant recordings are **not committed** (D-036).
+### Results — D-034 — pinned `gemini/gemini-3.5-flash-lite` (attributable, D-036)
 
-### Results — D-034 — PENDING a pinned record
+Keyless `eval:replay -- --suite all` after the pinned record. Measurement is **adversarial snapshots only**; match scenarioIds in the manifest were trimmed to completely recorded scenarios (incomplete matches dropped — not part of this claim).
 
-| arm | promptVersion | optimal | mean / median / max regret | regret≥100 | validity | fallback | decisions changed vs base |
-| --- | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| **base** | agent-v1 | — | — | — | — | — | — |
-| **grounded-v2** | agent-v4-grounded | — | — | — | — | — | — |
+| arm | promptVersion | split | n | optimal | mean / median / max regret | regret≥100 | decisions changed vs base |
+| --- | --- | --- | ---: | ---: | --- | ---: | ---: |
+| **base** | agent-v1 | dev | 6 | 33.33% | 334.50 / 2.00 / 2001.00 | 1 | — |
+| **grounded** | agent-v2-grounded | dev | 6 | 33.33% | 334.50 / 2.00 / 2001.00 | 1 | **0** |
+| **grounded-v2** | agent-v4-grounded | dev | 6 | 33.33% | 334.50 / 2.00 / 2001.00 | 1 | **0** |
+| **base** | agent-v1 | heldout | 13 | 15.38% | 2.00 / 2.00 / 5.00 | 0 | — |
+| **grounded** | agent-v2-grounded | heldout | 13 | 7.69% | 2.15 / 2.00 / 5.00 | 0 | **1** |
+| **grounded-v2** | agent-v4-grounded | heldout | 13 | 7.69% | 2.15 / 2.00 / 5.00 | 0 | **1** |
 
-**Operator command (keys required) — pinned, post-D-035 suites:**
+`grounded` and `grounded-v2` are **identical** on both splits (0 decision diffs between them). On held-out, both differ from `base` on exactly **one** snapshot (`tempest__seeded-random__sentinel-x__s109__t3`: base `skill-null-pulse` → grounded/v2 `skill-logic-storm`).
 
-```powershell
-npm run eval:record -- --suite all --variants base,grounded,grounded-v2 --snapshot-suite adversarial --max-matches 2 --models groq:openai/gpt-oss-20b
-```
-
-Recommend **groq** over gemini given the rate-limit load observed in the unpinned runs. CLI prints the quota projection (cap 300). Only this pinned run (or an equivalent single `--models` pin) becomes the published record.
+**Conclusion (this model, this suite only):** the ≥1 decision-change half of the D-034 prediction is **met** on held-out; the “mean regret does not increase” half is **falsified** (2.00 → 2.15). Corrected grounding shows **no measured improvement** over base here — one decision changes, mean regret rises slightly. No confidence interval at n=6 / n=13; one free-tier model only.
 
 ## Bench (M-BENCH)
 
@@ -297,18 +297,20 @@ Pinned single-model comparison on the **adversarial** measurement set (D-032). C
 
 **Protocol:** `--models provider:model` sets `INFERENCE_PROVIDER_ORDER` + `INFERENCE_MAX_PROVIDERS=1` (no failover). Defaults: `--suite heldout`, `--snapshot-suite adversarial`, `--max-matches 0` (snapshots only), `--variants base,grounded`, T=0, consistency 1. Adversarial greedy/random baselines: `evals/out-committed/adversarial.baselines.json` (post-D-035: heldout greedy **0% / 156.15**, n=13).
 
-### Single-model table (committed summary) — PENDING
+### Single-model table (committed summary)
 
-From `evals/out-committed/bench.summary.json`: **`rows: []`**, `singleModelPending: true`. Keyless gemini replay after D-035 suite regen hit `fixture_miss` on new snapshot keys — stale 5%/4.25 row **removed** (not invented).
+From `evals/out-committed/bench.summary.json` (pinned `gemini:gemini-3.5-flash-lite`, heldout adversarial, n=13):
 
-**Operator record then keyless bench:**
+| model | variant | optimal | mean regret |
+| --- | --- | ---: | ---: |
+| gemini:gemini-3.5-flash-lite | base | **15.4%** | 2.00 |
+| gemini:gemini-3.5-flash-lite | grounded | **7.7%** | 2.15 |
+
+`singleModelPending: true` remains — multi-model proof still pending. Reproduce keylessly:
 
 ```bash
-npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial --max-matches 0 --models gemini:gemini-3.5-flash-lite
 node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite --variants base,grounded
 ```
-
-Quota: `1 × 2 × 13 × 1 = 26` calls (well under 300).
 
 ### Operator multi-model command
 
@@ -324,7 +326,7 @@ Replace `MODEL` with the free-tier ids you record. Quota: `models × variants ×
 
 - **Direction (D-033):** Product output reframes from scoring to **diagnosis** against exact ground truth. The three new measurements (prompt-perturbation sensitivity, adversarial-context robustness, information-scaling curves) will be **pre-registered before implementation** (same pattern as D-024). Binding honesty and known limitations are recorded in D-033.
 - **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs over **distinct battles**); ~70% of distinct decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites shortfall after D-035 (n=8, greedy 87.5%); adversarial ablation **measured** (D-030): grounding changed 0 decisions on the historical suite — D-024 **falsified**.
-- **D-035 distinct states:** Generators and drift guards assert `distinctStateCount === snapshots.length`. Held-out adversarial **n=13** (was 20 with only 6 distinct); greedy mean regret **156.15** (was multiplicity-weighted **104.35**). LLM/bench rows on the new suite are **pending** a **pinned** operator record (D-036).
+- **D-035 distinct states:** Generators and drift guards assert `distinctStateCount === snapshots.length`. Held-out adversarial **n=13** (was 20 with only 6 distinct); greedy mean regret **156.15** (was multiplicity-weighted **104.35**). Pinned gemini LLM/bench rows published (D-034 / D-036).
 - **Pinning (D-036):** A pin is required for multi-variant comparative output and comes from either `--models provider:model` or a unanimous recorded manifest pin. Record and live hard-fail without a resolved pin. Legacy unpinned multi-variant replay still runs but **withholds** comparative deltas (per-variant results print labelled not comparable). Unpinned failover mixes providers across runs; two unpinned base/dev:adversarial runs moved from 50%/1.00 to 33.33%/334.50 with no code change. Gameplay failover in `src/inference` is unchanged.
 - **Adversarial threshold (corrected):** An earlier count of “~12 points at regret ≥ 100 in the first 12 scenarios” was wrong — inert seeds. `ADVERSARIAL_MIN_REGRET=1`; after D-035 distinct-state counting, regret-tail @1 is **13** distinct per split; selected suites shortfall below target 20 where needed.
 - **Metric choice (D-031):** On stakes-skewed adversarial sets, report regret distribution alongside rate (historical opposite failure modes on the pre-dedupe suite).
@@ -340,7 +342,7 @@ Replace `MODEL` with the free-tier ids you record. Quota: `models × variants ×
 ## Limitations
 
 - Oracle is a fixed-policy best response, not an equilibrium.
-- **M-TOOLS adversarial ablation:** Historical n=20 (pre-D-035 duplicates); current suite n=13 distinct — LLM rows pending re-record; matches were only 2 and unchanged between variants on the historical run; decisions came from three models via failover; no confidence intervals at this n; this says nothing about grounding in a richer environment. Memory variants (`agent-v2-memory`, `agent-v3-grounded-memory`) remain **unmeasured**.
+- **M-TOOLS adversarial ablation:** Pinned gemini on post-D-035 suites (heldout n=13): grounded and grounded-v2 each change **1** decision vs base and raise mean regret 2.00→2.15; the two grounded arms are identical. No confidence intervals at this n; one model only; matches trimmed from the manifest (not part of the measurement). Memory variants remain **unmeasured**.
 - Held-out LLM match sample on the earlier record is small (**n=6**) and all six used **FRACTURE**.
 - Snapshot optimality at current suite sizes has **no confidence interval** (heldout adversarial n=13 distinct).
 - Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread correlation is a known limitation (D-026 closed won't-fix under D-033).

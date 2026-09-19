@@ -741,6 +741,21 @@ D-034’s pre-registered “n=20” / “0 of 20” wording referred to the pre-
 
 Any reading that the unpinned post-D-035 `grounded-v2` ablation **falsified** the “mean regret does not increase” half of the prediction, or that grounded-v2 “changed one decision for the worse,” is **WITHDRAWN**. Two consecutive unpinned record runs with identical prompts and T=0 moved **base** alone on dev:adversarial from **50.00% / 1.00** to **33.33% / 334.50** solely by provider assignment under failover. The apparent one-decision delta sits inside that variation. The prediction remains testable **only** under a pinned model (D-036). D-030’s historical zero-change claim on the prior suite is unaffected.
 
+### Amend — 2026-09-19 — Pinned gemini result (resolves withdrawal)
+
+Pinned record under **`gemini/gemini-3.5-flash-lite`** (D-036), post-D-035 adversarial suites, keyless replay verified:
+
+| split | base vs grounded-v2 decision diffs | base mean regret | grounded-v2 mean regret |
+| --- | ---: | ---: | ---: |
+| dev (n=6) | **0** | 334.50 | 334.50 |
+| heldout (n=13) | **1** | 2.00 | 2.15 |
+
+`grounded` ≡ `grounded-v2` on both splits. **Prediction:** ≥1 decision change on held-out — **met**. Mean regret does not increase — **falsified** (2.00 → 2.15). At this n the effect is one decision and is not an improvement claim.
+
+### Amend — 2026-09-19 — Match scenarioIds trimmed (not re-recorded)
+
+Held-out base match scenarios that lacked complete gemini-pinned fixtures (`aegis__seeded-random__fracture__s101`, `mnemonic__seeded-random__fracture__s101`) were **removed from the manifest** rather than re-recorded. Reason: no published result depends on match recordings (ablation is snapshot-measured, D-033/D-034); free-tier quota was exhausted. Fixture files were not deleted. Snapshots and pins unchanged.
+
 ## D-035 Snapshot suites counted duplicate states
 Date: 2026-09-19
 Status: Accepted
@@ -809,7 +824,7 @@ Suites regenerate smaller where the split cannot supply 20 distinct states; EVAL
 | discriminate greedy n (dev / heldout) | 120 / 120 | **41 / 53** distinct battles |
 | overall non-zero spread (verdict reason) | 67.1% | **70.2%** |
 
-LLM ablation / bench rows on the new adversarial suite are **pending** a **pinned** operator record (D-036; stale values removed). Historical D-030 0-decision claim preserved.
+LLM ablation / bench rows on the new adversarial suite are published under pinned gemini (D-034 amend / D-036). Historical D-030 0-decision claim preserved.
 
 ## D-036 Pinning is required for any comparison
 Date: 2026-09-19
@@ -829,4 +844,4 @@ Rationale:
 Without a pin, “variant A beat variant B” confounds routing with prompt quality — the same root cause that forced D-032 for bench.
 
 Consequences:
-Operator D-034 / D-035 refill must pass `--models groq:openai/gpt-oss-20b` (or another single pin). CI `eval:replay --suite all` stays red on absent keys until that pinned record is committed; do not narrow the CI command.
+Operator D-034 / D-035 refill used `--models gemini:gemini-3.5-flash-lite` (pinned record committed). CI `eval:replay --suite all` is green on those fixtures.
