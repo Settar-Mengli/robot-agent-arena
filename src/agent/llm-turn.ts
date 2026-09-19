@@ -5,8 +5,8 @@ import {
   completeChat,
   type AttemptInfo
 } from "../inference";
-import { computeGroundedFacts } from "./grounding";
-import type { GroundedFacts } from "./grounding";
+import { computeGroundedFacts, computeGroundedFactsV2 } from "./grounding";
+import type { AnyGroundedFacts } from "./grounding";
 import { summarizePlayerTendencies } from "./memory";
 import type { PlayerTendencies } from "./memory";
 import { observePostPlayerState } from "./observe";
@@ -50,9 +50,18 @@ export async function playAgentTurn(
 
   const observation = observePostPlayerState(runtime, playerSkillId);
 
-  let groundedFacts: GroundedFacts | undefined;
+  let groundedFacts: AnyGroundedFacts | undefined;
   if (options.grounding === "facts" && observation !== null) {
     groundedFacts = computeGroundedFacts(
+      observation,
+      runtime.session.cpu,
+      runtime.session.player.skillIds,
+      runtime.session.turn,
+      runtime.session.maxTurns,
+      catalog
+    );
+  } else if (options.grounding === "facts-v2" && observation !== null) {
+    groundedFacts = computeGroundedFactsV2(
       observation,
       runtime.session.cpu,
       runtime.session.player.skillIds,

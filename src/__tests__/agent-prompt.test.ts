@@ -5,6 +5,7 @@ import {
   PROMPT_VERSIONS,
   buildAgentMessages,
   computeGroundedFacts,
+  computeGroundedFactsV2,
   resolvePromptVersion
 } from "../agent";
 import type { CombatantState } from "../engine";
@@ -91,6 +92,32 @@ describe("buildAgentMessages", () => {
     expect(messages[0]!.content).not.toMatch(/sk-|api[_-]?key|Bearer/i);
     expect(messages.some((m) => m.content.startsWith("ENGINE_GROUNDED_FACTS"))).toBe(
       true
+    );
+  });
+
+  it("facts-v2 path uses agent-v4-grounded and its own snapshot", () => {
+    const grounding = computeGroundedFactsV2(
+      { cpu, player },
+      SENTINEL_X,
+      ["skill-core-identity"],
+      1,
+      20
+    );
+    expect(resolvePromptVersion({ grounding })).toBe(PROMPT_VERSIONS.groundedV2);
+    const messages = buildAgentMessages({
+      turn: 1,
+      maxTurns: 20,
+      observation: { cpu, player },
+      cpuConfig: SENTINEL_X,
+      grounding
+    });
+    expect(messages).toMatchSnapshot();
+    expect(messages[0]!.content).toContain("diesNextTurnPreAction");
+    expect(messages.some((m) => m.content.startsWith("ENGINE_GROUNDED_FACTS"))).toBe(
+      true
+    );
+    expect(messages.find((m) => m.content.startsWith("ENGINE_GROUNDED_FACTS"))!.content).toContain(
+      '"factsVersion":2'
     );
   });
 

@@ -1,6 +1,6 @@
 import type { AttemptInfo, ChatMessage, CompleteChatOptions, TokenUsage } from "../inference";
 import type { CombatantState, SkillCatalog, SkillId } from "../engine";
-import type { GroundedFacts } from "./grounding";
+import type { AnyGroundedFacts } from "./grounding";
 import type { PlayerTendencies } from "./memory";
 
 export type ValidationOk = {
@@ -45,7 +45,7 @@ export interface PlayAgentTurnOptions {
   now?: () => number;
   catalog?: SkillCatalog;
   /** Default "off" — must stay off for fixture-compatible prompts. */
-  grounding?: "off" | "facts";
+  grounding?: "off" | "facts" | "facts-v2";
   /** Default "off" — per-match tendencies from runtime.turns. */
   memory?: "off" | "match";
 }
@@ -58,7 +58,7 @@ export interface DecisionTrace {
   observation: { cpu: CombatantState; player: CombatantState } | null;
   messages: ChatMessage[];
   attempts: AttemptInfo[];
-  groundedFacts?: GroundedFacts;
+  groundedFacts?: AnyGroundedFacts;
   playerTendencies?: PlayerTendencies;
   provider?: string;
   model?: string;

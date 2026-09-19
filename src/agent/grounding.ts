@@ -1,4 +1,6 @@
 import {
+  FALLBACK_DEFENSE_GAIN,
+  FALLBACK_ENERGY_RECOVERY,
   MAX_DEFENSE,
   MVP_SKILL_CATALOG,
   TURN_ENERGY_RECOVERY,
@@ -13,6 +15,16 @@ import {
  * Engine-derived facts for the agent prompt. Pure: no RNG, clock, or mutation.
  * Arithmetic mirrors combat resolution (applyDamage / heal / drain / defense).
  */
+
+export type ProjectedSkillEffects = {
+  damageAfterDefense: number;
+  lethal: boolean;
+  defenseGained: number;
+  healAmount: number;
+  energyDrained: number;
+  /** Set when effect.category is not modelled — zeros plus this marker (not a throw). */
+  unmodelledCategory?: string;
+};
 
 export type GroundedSkillFact = {
   skillId: SkillId;
@@ -45,6 +57,46 @@ export type GroundedFacts = {
   };
 };
 
+export type GroundedSkillFactV2 = {
+  skillId: SkillId;
+  energyCost: number;
+  affordable: boolean;
+  resolvedVia: "skill" | "fallback";
+  damageAfterDefense: number;
+  lethal: boolean;
+  defenseGained: number;
+  healAmount: number;
+  energyDrained: number;
+  /** True if max next-turn player damage kills CPU after this candidate's defense/heal. */
+  diesNextTurnAfterMove: boolean;
+};
+
+export type GroundedFactsV2 = {
+  factsVersion: 2;
+  turn: number;
+  turnsRemaining: number;
+  cpuSkills: GroundedSkillFactV2[];
+  threat: {
+    playerNextTurnEnergy: number;
+    playerSkills: GroundedThreatSkillFact[];
+    maxIncomingDamage: number;
+    /** Pre-action lethality (same formula as GroundedFacts.threat.diesNextTurn). */
+    diesNextTurnPreAction: boolean;
+  };
+};
+
+export type AnyGroundedFacts = GroundedFacts | GroundedFactsV2;
+
+export function isGroundedFactsV2(
+  facts: AnyGroundedFacts | undefined
+): facts is GroundedFactsV2 {
+  return (
+    facts !== undefined &&
+    "factsVersion" in facts &&
+    facts.factsVersion === 2
+  );
+}
+
 function requireSkill(catalog: SkillCatalog, skillId: SkillId): SkillDefinition {
   const skill = catalog.skills.find((entry) => entry.skillId === skillId);
   if (skill === undefined) {
@@ -68,17 +120,12 @@ export function projectSkillEffects(
   skill: SkillDefinition,
   actor: CombatantState,
   target: CombatantState
-): {
-  damageAfterDefense: number;
-  lethal: boolean;
-  defenseGained: number;
-  healAmount: number;
-  energyDrained: number;
-} {
+): ProjectedSkillEffects {
   let damage = 0;
   let defenseGained = 0;
   let healAmount = 0;
   let energyDrained = 0;
+  let unmodelledCategory: string | undefined;
 
   switch (skill.effect.category) {
     case "attack":
@@ -100,8 +147,11 @@ export function projectSkillEffects(
         actor.maxHealth - actor.health
       );
       break;
-    default:
+    default: {
+      const category = (skill.effect as { category: string }).category;
+      unmodelledCategory = String(category);
       break;
+    }
   }
 
   return {
@@ -109,8 +159,55 @@ export function projectSkillEffects(
     lethal: damage >= target.health && damage > 0,
     defenseGained,
     healAmount,
-    energyDrained
+    energyDrained,
+    ...(unmodelledCategory !== undefined ? { unmodelledCategory } : {})
   };
+}
+
+function projectFallbackStabilize(actor: CombatantState): {
+  defenseGained: number;
+  energyRecovered: number;
+  nextActor: CombatantState;
+} {
+  const nextEnergy = Math.min(
+    actor.energy + FALLBACK_ENERGY_RECOVERY,
+    actor.maxEnergy
+  );
+  const nextDefense = Math.min(actor.defense + FALLBACK_DEFENSE_GAIN, MAX_DEFENSE);
+  return {
+    defenseGained: nextDefense - actor.defense,
+    energyRecovered: nextEnergy - actor.energy,
+    nextActor: {
+      ...actor,
+      energy: nextEnergy,
+      defense: nextDefense
+    }
+  };
+}
+
+function maxIncomingDamageVs(
+  playerSkills: readonly GroundedThreatSkillFact[],
+  cpu: CombatantState,
+  player: CombatantState,
+  catalog: SkillCatalog
+): number {
+  let max = 0;
+  for (const fact of playerSkills) {
+    if (!fact.affordableNextTurn) {
+      continue;
+    }
+    const skill = requireSkill(catalog, fact.skillId);
+    const effects = projectSkillEffects(skill, player, cpu);
+    if (effects.unmodelledCategory !== undefined) {
+      throw new TypeError(
+        `unmodelled effect category in threat projection: ${effects.unmodelledCategory}`
+      );
+    }
+    if (effects.damageAfterDefense > max) {
+      max = effects.damageAfterDefense;
+    }
+  }
+  return max;
 }
 
 /**
@@ -186,6 +283,121 @@ export function computeGroundedFacts(
       playerSkills,
       maxIncomingDamage,
       diesNextTurn: maxIncomingDamage >= cpu.health && maxIncomingDamage > 0
+    }
+  };
+}
+
+/**
+ * Corrected grounded facts (D-034): fallback projection, per-candidate
+ * diesNextTurnAfterMove, and refuse unmodelled effect categories.
+ */
+export function computeGroundedFactsV2(
+  observation: { readonly cpu: CombatantState; readonly player: CombatantState },
+  cpuConfig: AgentConfig,
+  playerSkillIds: readonly SkillId[],
+  turn: number,
+  maxTurns: number,
+  catalog: SkillCatalog = MVP_SKILL_CATALOG
+): GroundedFactsV2 {
+  const { cpu, player } = observation;
+
+  const playerNextTurnEnergy = Math.min(
+    player.energy + TURN_ENERGY_RECOVERY,
+    player.maxEnergy
+  );
+
+  const playerSkills: GroundedThreatSkillFact[] = playerSkillIds.map((skillId) => {
+    const skill = requireSkill(catalog, skillId);
+    const affordableNextTurn = skill.energyCost <= playerNextTurnEnergy;
+    const effects = projectSkillEffects(skill, player, cpu);
+    if (effects.unmodelledCategory !== undefined) {
+      throw new TypeError(
+        `unmodelled effect category in grounded facts: ${effects.unmodelledCategory}`
+      );
+    }
+    return {
+      skillId,
+      energyCost: skill.energyCost,
+      affordableNextTurn,
+      damageAfterDefense: effects.damageAfterDefense,
+      lethal: effects.lethal
+    };
+  });
+
+  let maxIncomingDamage = 0;
+  for (const fact of playerSkills) {
+    if (fact.affordableNextTurn && fact.damageAfterDefense > maxIncomingDamage) {
+      maxIncomingDamage = fact.damageAfterDefense;
+    }
+  }
+  const diesNextTurnPreAction =
+    maxIncomingDamage >= cpu.health && maxIncomingDamage > 0;
+
+  const cpuSkills: GroundedSkillFactV2[] = cpuConfig.skillIds.map((skillId) => {
+    const skill = requireSkill(catalog, skillId);
+    const affordable = skill.energyCost <= cpu.energy;
+
+    if (!affordable) {
+      const fallback = projectFallbackStabilize(cpu);
+      const incoming = maxIncomingDamageVs(
+        playerSkills,
+        fallback.nextActor,
+        player,
+        catalog
+      );
+      return {
+        skillId,
+        energyCost: skill.energyCost,
+        affordable: false,
+        resolvedVia: "fallback",
+        damageAfterDefense: 0,
+        lethal: false,
+        defenseGained: fallback.defenseGained,
+        healAmount: 0,
+        energyDrained: 0,
+        diesNextTurnAfterMove:
+          incoming >= fallback.nextActor.health && incoming > 0
+      };
+    }
+
+    const effects = projectSkillEffects(skill, cpu, player);
+    if (effects.unmodelledCategory !== undefined) {
+      throw new TypeError(
+        `unmodelled effect category in grounded facts: ${effects.unmodelledCategory}`
+      );
+    }
+
+    const nextCpu: CombatantState = {
+      ...cpu,
+      health: Math.min(cpu.maxHealth, cpu.health + effects.healAmount),
+      defense: Math.min(MAX_DEFENSE, cpu.defense + effects.defenseGained)
+    };
+    const incoming = maxIncomingDamageVs(playerSkills, nextCpu, player, catalog);
+
+    return {
+      skillId,
+      energyCost: skill.energyCost,
+      affordable: true,
+      resolvedVia: "skill",
+      damageAfterDefense: effects.damageAfterDefense,
+      lethal: effects.lethal,
+      defenseGained: effects.defenseGained,
+      healAmount: effects.healAmount,
+      energyDrained: effects.energyDrained,
+      diesNextTurnAfterMove: incoming >= nextCpu.health && incoming > 0
+    };
+  });
+
+  return {
+    factsVersion: 2,
+    turn,
+    turnsRemaining: Math.max(0, maxTurns - turn),
+    cpuSkills,
+    threat: {
+      playerNextTurnEnergy,
+      playerSkills,
+      maxIncomingDamage,
+      diesNextTurnPreAction
     }
   };
 }

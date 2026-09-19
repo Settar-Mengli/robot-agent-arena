@@ -89,13 +89,18 @@ export function createGreedySelector(
 ): SelectCpuSkillId {
   return (self, target) => {
     const equipped = agent.skillIds.map((skillId) => requireSkill(catalog, skillId));
-    const affordable = equipped.filter((skill) => skill.energyCost <= self.energy);
+    const isEvaluable = (skill: SkillDefinition): boolean =>
+      projectSkillEffects(skill, self, target).unmodelledCategory === undefined;
 
-    if (affordable.length === 0) {
-      return equipped[0]!.skillId;
+    const affordable = equipped.filter((skill) => skill.energyCost <= self.energy);
+    const evaluableAffordable = affordable.filter(isEvaluable);
+
+    if (evaluableAffordable.length === 0) {
+      // Empty energy or only unmodelled options — last-resort without throwing.
+      return (affordable[0] ?? equipped[0]!).skillId;
     }
 
-    const lethal = affordable.filter(
+    const lethal = evaluableAffordable.filter(
       (skill) => dmg(skill, self, target) >= target.health
     );
     if (lethal.length > 0) {
@@ -104,13 +109,13 @@ export function createGreedySelector(
 
     const lowHealth = self.health <= Math.floor(self.maxHealth * LOW_HEALTH_RATIO);
     if (lowHealth) {
-      const recoveries = affordable.filter((skill) => heal(skill, self) > 0);
+      const recoveries = evaluableAffordable.filter((skill) => heal(skill, self) > 0);
       if (recoveries.length > 0) {
         return pickBest(recoveries, (skill) => heal(skill, self))!.skillId;
       }
     }
 
-    const offenseBest = pickBest(affordable, (skill) => {
+    const offenseBest = pickBest(evaluableAffordable, (skill) => {
       return (
         dmg(skill, self, target) +
         ENERGY_DRAIN_WEIGHT * drain(skill, self, target)
@@ -125,16 +130,16 @@ export function createGreedySelector(
       }
     }
 
-    const guards = affordable.filter((skill) => guard(skill, self) > 0);
+    const guards = evaluableAffordable.filter((skill) => guard(skill, self) > 0);
     if (guards.length > 0) {
       return pickBest(guards, (skill) => guard(skill, self))!.skillId;
     }
 
-    const heals = affordable.filter((skill) => heal(skill, self) > 0);
+    const heals = evaluableAffordable.filter((skill) => heal(skill, self) > 0);
     if (heals.length > 0) {
       return pickBest(heals, (skill) => heal(skill, self))!.skillId;
     }
 
-    return pickBest(affordable, () => 0)!.skillId;
+    return pickBest(evaluableAffordable, () => 0)!.skillId;
   };
 }
