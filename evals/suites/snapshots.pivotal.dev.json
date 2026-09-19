@@ -1,9 +1,2872 @@
 {
-  "scenariosScanned": 12,
+  "scenariosScanned": 120,
   "minSpread": 100,
   "targetCount": 20,
-  "count": 20,
+  "count": 8,
+  "distinctStateCount": 8,
   "snapshots": [
+    {
+      "id": "disruptor__greedy__fracture__s1__t19",
+      "scenarioId": "disruptor__greedy__fracture__s1",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-disruptor:cpu-fracture:1",
+          "seed": 1,
+          "turn": 19,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-disruptor",
+            "displayName": "DISRUPTOR",
+            "modules": {
+              "coreIdentity": "Noise Lattice",
+              "memory": "Signal Drift",
+              "sigilSecurity": "Soft Aegis",
+              "rules": "Break Sync",
+              "strategy": "Drain Then Strike"
+            },
+            "skillIds": [
+              "skill-signal-breach",
+              "skill-signal-exposure"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-disruptor",
+          "displayName": "DISRUPTOR",
+          "health": 7,
+          "maxHealth": 30,
+          "energy": 2,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 4,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 2
+        },
+        "rng": {
+          "seed": 1,
+          "state": 1,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-breach",
+                "resolvedSkillId": "skill-signal-breach",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 3,
+                "damageDealt": 4,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 5,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 2,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 5,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 26,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-breach",
+                "resolvedSkillId": "skill-signal-breach",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 3,
+                "damageDealt": 4,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 3,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-breach",
+                "resolvedSkillId": "skill-signal-breach",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 3,
+                "damageDealt": 2,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 1
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 4,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 5,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 6,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 7,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 8,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 9,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 10,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 11,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 12,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 13,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 14,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 15,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 16,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 6,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 17,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 6,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 7,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 6,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 18,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 7,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 6,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 7,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 4,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-signal-exposure",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1004,
+        "skill-signal-exposure": -1003
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true,
+      "spread": 2007
+    },
+    {
+      "id": "disruptor__seeded-random__fracture__s1__t19",
+      "scenarioId": "disruptor__seeded-random__fracture__s1",
+      "runtime": {
+        "session": {
+          "sessionId": "session:eval-disruptor:cpu-fracture:1",
+          "seed": 1,
+          "turn": 19,
+          "maxTurns": 20,
+          "status": "awaiting-player-action",
+          "player": {
+            "agentId": "eval-disruptor",
+            "displayName": "DISRUPTOR",
+            "modules": {
+              "coreIdentity": "Noise Lattice",
+              "memory": "Signal Drift",
+              "sigilSecurity": "Soft Aegis",
+              "rules": "Break Sync",
+              "strategy": "Drain Then Strike"
+            },
+            "skillIds": [
+              "skill-signal-breach",
+              "skill-signal-exposure"
+            ]
+          },
+          "cpu": {
+            "agentId": "cpu-fracture",
+            "displayName": "FRACTURE",
+            "modules": {
+              "coreIdentity": "Fractured Pattern",
+              "memory": "Short Recall",
+              "sigilSecurity": "Thin Aegis",
+              "rules": "Strike First",
+              "strategy": "Blunt Pressure"
+            },
+            "skillIds": [
+              "skill-override-pulse",
+              "skill-signal-exposure"
+            ]
+          }
+        },
+        "player": {
+          "side": "player",
+          "agentId": "eval-disruptor",
+          "displayName": "DISRUPTOR",
+          "health": 7,
+          "maxHealth": 30,
+          "energy": 2,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "cpu": {
+          "side": "cpu",
+          "agentId": "cpu-fracture",
+          "displayName": "FRACTURE",
+          "health": 6,
+          "maxHealth": 30,
+          "energy": 4,
+          "maxEnergy": 10,
+          "defense": 2
+        },
+        "rng": {
+          "seed": 1,
+          "state": 1,
+          "calls": 0
+        },
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 2,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-breach",
+                "resolvedSkillId": "skill-signal-breach",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 3,
+                "damageDealt": 4,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 5,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 3,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 5,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 24,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-breach",
+                "resolvedSkillId": "skill-signal-breach",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 3,
+                "damageDealt": 2,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 4,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 22,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 5,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 21,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 6,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 20,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 7,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 19,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 8,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 18,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 9,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 17,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 10,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 16,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 11,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 15,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 12,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 14,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 13,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 13,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 14,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 12,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 15,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 11,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 16,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 10,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          },
+          {
+            "turn": 17,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 9,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 2,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 7,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          },
+          {
+            "turn": 18,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 7,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 8,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-signal-exposure",
+                "resolvedSkillId": "skill-signal-exposure",
+                "effectCategory": "disrupt",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 2,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 2
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "fallback-stabilize",
+                "effectCategory": "fallback",
+                "fallback": true,
+                "energySpent": 0,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 2,
+                "healthRecovered": 0,
+                "energyRecovered": 2,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-disruptor",
+              "displayName": "DISRUPTOR",
+              "health": 7,
+              "maxHealth": 30,
+              "energy": 2,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 6,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 2
+            }
+          }
+        ]
+      },
+      "playerSkillId": "skill-signal-exposure",
+      "cpuConfigId": "cpu-fracture",
+      "values": {
+        "skill-override-pulse": 1006,
+        "skill-signal-exposure": -1001
+      },
+      "best": [
+        "skill-override-pulse"
+      ],
+      "exact": true,
+      "spread": 2007
+    },
     {
       "id": "bulwark__greedy__fracture__s1__t2",
       "scenarioId": "bulwark__greedy__fracture__s1",
@@ -161,1412 +3024,8 @@
       "spread": 2003
     },
     {
-      "id": "bulwark__greedy__fracture__s10__t2",
-      "scenarioId": "bulwark__greedy__fracture__s10",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:10",
-          "seed": 10,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 10,
-          "state": 10,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s2__t2",
-      "scenarioId": "bulwark__greedy__fracture__s2",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:2",
-          "seed": 2,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 2,
-          "state": 2,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s3__t2",
-      "scenarioId": "bulwark__greedy__fracture__s3",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:3",
-          "seed": 3,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 3,
-          "state": 3,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s4__t2",
-      "scenarioId": "bulwark__greedy__fracture__s4",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:4",
-          "seed": 4,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 4,
-          "state": 4,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s5__t2",
-      "scenarioId": "bulwark__greedy__fracture__s5",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:5",
-          "seed": 5,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 5,
-          "state": 5,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s6__t2",
-      "scenarioId": "bulwark__greedy__fracture__s6",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:6",
-          "seed": 6,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 6,
-          "state": 6,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s7__t2",
-      "scenarioId": "bulwark__greedy__fracture__s7",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:7",
-          "seed": 7,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 7,
-          "state": 7,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s8__t2",
-      "scenarioId": "bulwark__greedy__fracture__s8",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:8",
-          "seed": 8,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 8,
-          "state": 8,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s9__t2",
-      "scenarioId": "bulwark__greedy__fracture__s9",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:9",
-          "seed": 9,
-          "turn": 2,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 23,
-          "maxHealth": 30,
-          "energy": 4,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 9,
-          "state": 9,
-          "calls": 0
-        },
-        "turns": [
-          {
-            "turn": 1,
-            "startedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "startedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 30,
-              "maxHealth": 30,
-              "energy": 6,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "actions": [
-              {
-                "actor": "player",
-                "target": "cpu",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              },
-              {
-                "actor": "cpu",
-                "target": "player",
-                "selectedSkillId": "skill-override-pulse",
-                "resolvedSkillId": "skill-override-pulse",
-                "effectCategory": "attack",
-                "fallback": false,
-                "energySpent": 4,
-                "damageDealt": 7,
-                "defenseReduced": 0,
-                "defenseGained": 0,
-                "healthRecovered": 0,
-                "energyRecovered": 0,
-                "energyReduced": 0
-              }
-            ],
-            "endedPlayer": {
-              "side": "player",
-              "agentId": "eval-bulwark",
-              "displayName": "BULWARK",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            },
-            "endedCpu": {
-              "side": "cpu",
-              "agentId": "cpu-fracture",
-              "displayName": "FRACTURE",
-              "health": 23,
-              "maxHealth": 30,
-              "energy": 4,
-              "maxEnergy": 10,
-              "defense": 0
-            }
-          }
-        ]
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1003
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2003
-    },
-    {
-      "id": "bulwark__greedy__fracture__s1__t1",
-      "scenarioId": "bulwark__greedy__fracture__s1",
+      "id": "bulwark__seeded-random__fracture__s1__t1",
+      "scenarioId": "bulwark__seeded-random__fracture__s1",
       "runtime": {
         "session": {
           "sessionId": "session:eval-bulwark:cpu-fracture:1",
@@ -1635,18 +3094,18 @@
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
+        "skill-override-pulse": 1002,
         "skill-signal-exposure": -1001
       },
       "best": [
         "skill-override-pulse"
       ],
       "exact": true,
-      "spread": 2001
+      "spread": 2003
     },
     {
-      "id": "bulwark__greedy__fracture__s10__t1",
-      "scenarioId": "bulwark__greedy__fracture__s10",
+      "id": "bulwark__seeded-random__fracture__s10__t1",
+      "scenarioId": "bulwark__seeded-random__fracture__s10",
       "runtime": {
         "session": {
           "sessionId": "session:eval-bulwark:cpu-fracture:10",
@@ -1712,26 +3171,26 @@
         },
         "turns": []
       },
-      "playerSkillId": "skill-override-pulse",
+      "playerSkillId": "skill-null-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
+        "skill-override-pulse": 1002,
         "skill-signal-exposure": -1001
       },
       "best": [
         "skill-override-pulse"
       ],
       "exact": true,
-      "spread": 2001
+      "spread": 2003
     },
     {
-      "id": "bulwark__greedy__fracture__s2__t1",
-      "scenarioId": "bulwark__greedy__fracture__s2",
+      "id": "bulwark__seeded-random__fracture__s10__t2",
+      "scenarioId": "bulwark__seeded-random__fracture__s10",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:2",
-          "seed": 2,
-          "turn": 1,
+          "sessionId": "session:eval-bulwark:cpu-fracture:10",
+          "seed": 10,
+          "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
@@ -1769,7 +3228,7 @@
           "side": "player",
           "agentId": "eval-bulwark",
           "displayName": "BULWARK",
-          "health": 30,
+          "health": 28,
           "maxHealth": 30,
           "energy": 6,
           "maxEnergy": 10,
@@ -1781,197 +3240,113 @@
           "displayName": "FRACTURE",
           "health": 30,
           "maxHealth": 30,
-          "energy": 6,
+          "energy": 4,
           "maxEnergy": 10,
           "defense": 0
         },
         "rng": {
-          "seed": 2,
-          "state": 2,
+          "seed": 10,
+          "state": 10,
           "calls": 0
         },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2001
-    },
-    {
-      "id": "bulwark__greedy__fracture__s3__t1",
-      "scenarioId": "bulwark__greedy__fracture__s3",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:3",
-          "seed": 3,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
             },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
             },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-null-pulse",
+                "resolvedSkillId": "skill-null-pulse",
+                "effectCategory": "defense",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 5,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 2,
+                "defenseReduced": 5,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
           }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 3,
-          "state": 3,
-          "calls": 0
-        },
-        "turns": []
+        ]
       },
       "playerSkillId": "skill-override-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
+        "skill-override-pulse": 1002,
         "skill-signal-exposure": -1001
       },
       "best": [
         "skill-override-pulse"
       ],
       "exact": true,
-      "spread": 2001
+      "spread": 2003
     },
     {
-      "id": "bulwark__greedy__fracture__s4__t1",
-      "scenarioId": "bulwark__greedy__fracture__s4",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:4",
-          "seed": 4,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 4,
-          "state": 4,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2001
-    },
-    {
-      "id": "bulwark__greedy__fracture__s5__t1",
-      "scenarioId": "bulwark__greedy__fracture__s5",
+      "id": "bulwark__seeded-random__fracture__s5__t2",
+      "scenarioId": "bulwark__seeded-random__fracture__s5",
       "runtime": {
         "session": {
           "sessionId": "session:eval-bulwark:cpu-fracture:5",
           "seed": 5,
-          "turn": 1,
+          "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
@@ -2009,7 +3384,7 @@
           "side": "player",
           "agentId": "eval-bulwark",
           "displayName": "BULWARK",
-          "health": 30,
+          "health": 28,
           "maxHealth": 30,
           "energy": 6,
           "maxEnergy": 10,
@@ -2021,7 +3396,7 @@
           "displayName": "FRACTURE",
           "health": 30,
           "maxHealth": 30,
-          "energy": 6,
+          "energy": 4,
           "maxEnergy": 10,
           "defense": 0
         },
@@ -2030,28 +3405,104 @@
           "state": 5,
           "calls": 0
         },
-        "turns": []
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-null-pulse",
+                "resolvedSkillId": "skill-null-pulse",
+                "effectCategory": "defense",
+                "fallback": false,
+                "energySpent": 2,
+                "damageDealt": 0,
+                "defenseReduced": 0,
+                "defenseGained": 5,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 2,
+                "defenseReduced": 5,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 28,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
+          }
+        ]
       },
-      "playerSkillId": "skill-override-pulse",
+      "playerSkillId": "skill-null-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
+        "skill-override-pulse": 1001,
         "skill-signal-exposure": -1001
       },
       "best": [
         "skill-override-pulse"
       ],
       "exact": true,
-      "spread": 2001
+      "spread": 2002
     },
     {
-      "id": "bulwark__greedy__fracture__s6__t1",
-      "scenarioId": "bulwark__greedy__fracture__s6",
+      "id": "bulwark__seeded-random__fracture__s2__t2",
+      "scenarioId": "bulwark__seeded-random__fracture__s2",
       "runtime": {
         "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:6",
-          "seed": 6,
-          "turn": 1,
+          "sessionId": "session:eval-bulwark:cpu-fracture:2",
+          "seed": 2,
+          "turn": 2,
           "maxTurns": 20,
           "status": "awaiting-player-action",
           "player": {
@@ -2089,9 +3540,9 @@
           "side": "player",
           "agentId": "eval-bulwark",
           "displayName": "BULWARK",
-          "health": 30,
+          "health": 23,
           "maxHealth": 30,
-          "energy": 6,
+          "energy": 4,
           "maxEnergy": 10,
           "defense": 0
         },
@@ -2099,270 +3550,107 @@
           "side": "cpu",
           "agentId": "cpu-fracture",
           "displayName": "FRACTURE",
-          "health": 30,
+          "health": 23,
           "maxHealth": 30,
-          "energy": 6,
+          "energy": 4,
           "maxEnergy": 10,
           "defense": 0
         },
         "rng": {
-          "seed": 6,
-          "state": 6,
+          "seed": 2,
+          "state": 2,
           "calls": 0
         },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2001
-    },
-    {
-      "id": "bulwark__greedy__fracture__s7__t1",
-      "scenarioId": "bulwark__greedy__fracture__s7",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:7",
-          "seed": 7,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
+        "turns": [
+          {
+            "turn": 1,
+            "startedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
             },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
+            "startedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 30,
+              "maxHealth": 30,
+              "energy": 6,
+              "maxEnergy": 10,
+              "defense": 0
             },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
+            "actions": [
+              {
+                "actor": "player",
+                "target": "cpu",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              },
+              {
+                "actor": "cpu",
+                "target": "player",
+                "selectedSkillId": "skill-override-pulse",
+                "resolvedSkillId": "skill-override-pulse",
+                "effectCategory": "attack",
+                "fallback": false,
+                "energySpent": 4,
+                "damageDealt": 7,
+                "defenseReduced": 0,
+                "defenseGained": 0,
+                "healthRecovered": 0,
+                "energyRecovered": 0,
+                "energyReduced": 0
+              }
+            ],
+            "endedPlayer": {
+              "side": "player",
+              "agentId": "eval-bulwark",
+              "displayName": "BULWARK",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            },
+            "endedCpu": {
+              "side": "cpu",
+              "agentId": "cpu-fracture",
+              "displayName": "FRACTURE",
+              "health": 23,
+              "maxHealth": 30,
+              "energy": 4,
+              "maxEnergy": 10,
+              "defense": 0
+            }
           }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 7,
-          "state": 7,
-          "calls": 0
-        },
-        "turns": []
+        ]
       },
-      "playerSkillId": "skill-override-pulse",
+      "playerSkillId": "skill-null-pulse",
       "cpuConfigId": "cpu-fracture",
       "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
+        "skill-override-pulse": -1001,
+        "skill-signal-exposure": 1000
       },
       "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2001
-    },
-    {
-      "id": "bulwark__greedy__fracture__s8__t1",
-      "scenarioId": "bulwark__greedy__fracture__s8",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:8",
-          "seed": 8,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 8,
-          "state": 8,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
-      },
-      "best": [
-        "skill-override-pulse"
-      ],
-      "exact": true,
-      "spread": 2001
-    },
-    {
-      "id": "bulwark__greedy__fracture__s9__t1",
-      "scenarioId": "bulwark__greedy__fracture__s9",
-      "runtime": {
-        "session": {
-          "sessionId": "session:eval-bulwark:cpu-fracture:9",
-          "seed": 9,
-          "turn": 1,
-          "maxTurns": 20,
-          "status": "awaiting-player-action",
-          "player": {
-            "agentId": "eval-bulwark",
-            "displayName": "BULWARK",
-            "modules": {
-              "coreIdentity": "Stone Kernel",
-              "memory": "Hold Pattern",
-              "sigilSecurity": "Thick Ward",
-              "rules": "Absorb First",
-              "strategy": "Guard Then Counter"
-            },
-            "skillIds": [
-              "skill-null-pulse",
-              "skill-override-pulse"
-            ]
-          },
-          "cpu": {
-            "agentId": "cpu-fracture",
-            "displayName": "FRACTURE",
-            "modules": {
-              "coreIdentity": "Fractured Pattern",
-              "memory": "Short Recall",
-              "sigilSecurity": "Thin Aegis",
-              "rules": "Strike First",
-              "strategy": "Blunt Pressure"
-            },
-            "skillIds": [
-              "skill-override-pulse",
-              "skill-signal-exposure"
-            ]
-          }
-        },
-        "player": {
-          "side": "player",
-          "agentId": "eval-bulwark",
-          "displayName": "BULWARK",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "cpu": {
-          "side": "cpu",
-          "agentId": "cpu-fracture",
-          "displayName": "FRACTURE",
-          "health": 30,
-          "maxHealth": 30,
-          "energy": 6,
-          "maxEnergy": 10,
-          "defense": 0
-        },
-        "rng": {
-          "seed": 9,
-          "state": 9,
-          "calls": 0
-        },
-        "turns": []
-      },
-      "playerSkillId": "skill-override-pulse",
-      "cpuConfigId": "cpu-fracture",
-      "values": {
-        "skill-override-pulse": 1000,
-        "skill-signal-exposure": -1001
-      },
-      "best": [
-        "skill-override-pulse"
+        "skill-signal-exposure"
       ],
       "exact": true,
       "spread": 2001
     }
-  ]
+  ],
+  "warning": "only 8 of 20 distinct pivotal states qualified at spread>=100"
 }

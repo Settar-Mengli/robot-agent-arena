@@ -6,6 +6,7 @@ import {
   deriveReplayEnvFromFixtures,
   formatLlmSummary,
   resolveCliArgs,
+  resolveRunPin,
   runLlmModeForTest,
   selectScenariosForLlmMode
 } from "../eval/cli";
@@ -185,6 +186,8 @@ describe("eval cli record summary", () => {
       [
         "--mode",
         "record",
+        "--variants",
+        "base",
         "--max-matches",
         "1",
         "--no-snapshots",
@@ -230,6 +233,8 @@ describe("eval cli record summary", () => {
       [
         "--mode",
         "record",
+        "--variants",
+        "base",
         "--max-matches",
         "1",
         "--no-snapshots",
@@ -262,6 +267,8 @@ describe("eval cli record summary", () => {
         decisionValidityRate: 0.5,
         fallbackByReason: { all_providers_failed: 1 },
         fixtureMissCount: 0,
+        fixtureMissMatches: 0,
+        fixtureMissSnapshots: 0,
         latencyP50: null,
         latencyP95: null,
         tokenTotals: { prompt: 1, completion: 2, total: 3 },
@@ -318,11 +325,178 @@ describe("eval cli record summary", () => {
       "live latency p50/p95 (non-cached HTTP attempts):"
     );
     expect(text).toContain("fixture files on disk: 6");
+    expect(text).toContain("fixture_miss: 0 (matches 0, snapshots 0)");
     expect(text).toContain("providers:");
     expect(text).toContain("gemini|gemini-3.5-flash-lite:");
     expect(text).toContain("fail429=3");
     expect(text).toContain("groq|openai/gpt-oss-20b:");
     expect(text).toContain("openrouter|free-model:");
     expect(text).toContain("failnone=1");
+  });
+
+  it("replay with absent snapshot recordings exits 1 and counts snapshots only", async () => {
+    const lines: string[] = [];
+    const outDir = await mkdtemp(join(tmpdir(), "eval-cli-snap-miss-"));
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "replay",
+        "--suite",
+        "dev",
+        "--max-matches",
+        "0",
+        "--budget-ms",
+        "5000"
+      ],
+      {
+        store: createMemoryStore(),
+        env: envWithKeys(),
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+
+    expect(code).toBe(1);
+    const summary = lines.join("\n");
+    const missMatch = /fixture_miss: (\d+) \(matches (\d+), snapshots (\d+)\)/.exec(
+      summary
+    );
+    expect(missMatch).not.toBeNull();
+    const total = Number(missMatch![1]);
+    const matchMiss = Number(missMatch![2]);
+    const snapMiss = Number(missMatch![3]);
+    expect(matchMiss).toBe(0);
+    expect(snapMiss).toBeGreaterThan(0);
+    expect(total).toBe(snapMiss);
+    expect(summary).toContain(`fixture_miss count: ${total}`);
+    // Absent recordings must not inflate invalidDecisionRate.
+    expect(summary).toMatch(/invalid=0\.00%/);
+  });
+
+  it("replay with full fixture coverage reports fixture_miss zero", async () => {
+    const text = formatLlmSummary({
+      mode: "replay",
+      suite: "dev",
+      outRel: "evals/out/replay.json",
+      matches: 0,
+      sources: { llm: 0, fallback: 0, skipped: 0, total: 0 },
+      llmAgg: {
+        decisionValidityRate: null,
+        fallbackByReason: {},
+        fixtureMissCount: 0,
+        fixtureMissMatches: 0,
+        fixtureMissSnapshots: 0,
+        latencyP50: null,
+        latencyP95: null,
+        tokenTotals: null,
+        byProvider: {}
+      }
+    });
+    expect(text).toContain("fixture_miss: 0 (matches 0, snapshots 0)");
+  });
+});
+
+describe("resolveRunPin", () => {
+  it("uses unanimous manifest pin when CLI pin is absent", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              },
+              {
+                id: "grounded",
+                promptVersion: "agent-v2-grounded",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              }
+            ]
+          }
+        }
+      },
+      ["base", "grounded"],
+      ["heldout"],
+      undefined
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.pin).toEqual({
+      provider: "groq",
+      model: "openai/gpt-oss-20b"
+    });
+  });
+
+  it("fails when CLI pin disagrees with recorded manifest pin", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "groq",
+                model: "openai/gpt-oss-20b"
+              }
+            ]
+          }
+        }
+      },
+      ["base"],
+      ["heldout"],
+      { provider: "gemini", model: "gemini-3.5-flash-lite" }
+    );
+    expect(result.pin).toBeUndefined();
+    expect(result.error).toMatch(/PIN MISMATCH/);
+    expect(result.error).toContain("gemini:gemini-3.5-flash-lite");
+    expect(result.error).toContain("groq/openai/gpt-oss-20b");
+  });
+
+  it("leaves legacy unpinned manifests without a pin", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true
+              }
+            ]
+          }
+        }
+      },
+      ["base"],
+      ["heldout"],
+      undefined
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.pin).toBeUndefined();
   });
 });

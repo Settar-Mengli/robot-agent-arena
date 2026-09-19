@@ -16,10 +16,11 @@ import { runSuite, type MatchResult } from "./match";
 import {
   aggregateLlm,
   aggregateMatches,
+  countMatchDiversity,
   deltaVsSuiteBaseline,
   percentile,
+  withSnapshotFixtureMisses,
   type MatchAggregate,
-  type SnapshotPolicyMetrics,
   type SuiteBaselineDelta
 } from "./metrics";
 import {
@@ -442,9 +443,27 @@ export function selectScenariosForLlmMode(
 }
 
 export function countDistinctMatchups(
-  scenarios: readonly MatchScenario[]
-): number {
-  return new Set(scenarios.map(scenarioStratumKey)).size;
+  scenarios: readonly MatchScenario[],
+  results?: readonly MatchResult[]
+): {
+  strataCovered: number;
+  distinctBattles: number | null;
+  rawN: number;
+} {
+  const strataCovered = new Set(scenarios.map(scenarioStratumKey)).size;
+  if (results === undefined) {
+    return {
+      strataCovered,
+      distinctBattles: null,
+      rawN: scenarios.length
+    };
+  }
+  const diversity = countMatchDiversity(results);
+  return {
+    strataCovered,
+    distinctBattles: diversity.distinctBattles,
+    rawN: diversity.rawN
+  };
 }
 
 export function identicalOutcomeWarning(
@@ -511,6 +530,69 @@ function resolveSnapshotKinds(
 
 function snapshotResultKey(split: EvalSplit, kind: SnapshotSuiteKind): string {
   return kind === "standard" ? split : `${split}:${kind}`;
+}
+
+/**
+ * Resolve the active pin for a record/live/replay run.
+ * CLI --models wins when present; must match any recorded manifest pins.
+ * With no CLI pin, use a unanimous manifest pin or stay unpinned (legacy).
+ */
+export function resolveRunPin(
+  manifest: FixtureManifest | undefined,
+  variants: readonly LlmVariant[],
+  splits: readonly EvalSplit[],
+  cliPin: ModelPin | undefined
+): { pin?: ModelPin; error?: string } {
+  const recordedKeys = new Set<string>();
+  for (const variant of variants) {
+    for (const split of splits) {
+      const entry = manifest?.splits[split];
+      if (entry === undefined) continue;
+      const resolved = resolveVariantRun(entry, variant);
+      if (
+        typeof resolved.provider === "string" &&
+        resolved.provider.length > 0 &&
+        typeof resolved.model === "string" &&
+        resolved.model.length > 0
+      ) {
+        recordedKeys.add(`${resolved.provider}|${resolved.model}`);
+      }
+    }
+  }
+
+  if (cliPin !== undefined) {
+    const cliKey = `${cliPin.provider}|${cliPin.model}`;
+    for (const key of recordedKeys) {
+      if (key !== cliKey) {
+        return {
+          error:
+            `PIN MISMATCH: --models ${cliPin.provider}:${cliPin.model} does not match ` +
+            `recorded manifest pin ${key.replace("|", "/")}`
+        };
+      }
+    }
+    return { pin: cliPin };
+  }
+
+  if (recordedKeys.size === 0) {
+    return {};
+  }
+  if (recordedKeys.size > 1) {
+    return {
+      error:
+        `manifest variants disagree on pin: ${[...recordedKeys]
+          .map((k) => k.replace("|", "/"))
+          .join(", ")}`
+    };
+  }
+  const only = [...recordedKeys][0]!;
+  const sep = only.indexOf("|");
+  return {
+    pin: {
+      provider: only.slice(0, sep),
+      model: only.slice(sep + 1)
+    }
+  };
 }
 
 async function runBaseline(args: CliArgs): Promise<BaselineReport> {
@@ -611,12 +693,8 @@ function countSources(results: readonly MatchResult[]): {
   return { llm, fallback, skipped, total: llm + fallback + skipped };
 }
 
-function snapshotLlmSuccesses(metrics: SnapshotPolicyMetrics): number {
-  const invalidRate = metrics.invalidDecisionRate;
-  if (invalidRate === undefined) {
-    return 0;
-  }
-  return Math.round(metrics.n * (1 - invalidRate));
+function snapshotLlmSuccesses(result: SnapshotEvalResult): number {
+  return result.decisions.filter((d) => d.source === "llm").length;
 }
 
 async function countFixtureFiles(dir: string): Promise<number> {
@@ -657,7 +735,7 @@ export function formatLlmSummary(input: {
     `matches: ${input.matches}`,
     `decisions: ${input.sources.total} (llm=${input.sources.llm}, fallback=${input.sources.fallback}, skipped=${input.sources.skipped})`,
     `decision-validity: ${formatPct(input.llmAgg.decisionValidityRate)}`,
-    `fixture_miss: ${input.llmAgg.fixtureMissCount}`
+    `fixture_miss: ${input.llmAgg.fixtureMissCount} (matches ${input.llmAgg.fixtureMissMatches}, snapshots ${input.llmAgg.fixtureMissSnapshots})`
   ];
 
   const reasons = Object.entries(input.llmAgg.fallbackByReason).sort((a, b) =>
@@ -754,9 +832,7 @@ async function runLlmMode(
   const fixturesDir = deps.fixturesDir ?? join(ROOT, "evals/fixtures");
   let env: EnvMap = deps.env ?? process.env;
 
-  // Commit 2: pin to first --models entry for record/live/replay.
-  // Multi-model looping lands in --mode bench (commit 4).
-  const activePin: ModelPin | undefined =
+  const cliPin: ModelPin | undefined =
     args.models !== undefined && args.models.length > 0
       ? args.models[0]
       : undefined;
@@ -765,7 +841,7 @@ async function runLlmMode(
     try {
       const derived = await deriveReplayEnvFromFixtures(
         fixturesDir,
-        activePin?.provider ?? args.replayProvider
+        cliPin?.provider ?? args.replayProvider
       );
       env = { ...process.env, ...derived.env };
       log(
@@ -788,47 +864,12 @@ async function runLlmMode(
     log("Quota warning: free-tier providers may rate-limit or drop requests.");
   }
 
-  if (activePin !== undefined) {
-    env = pinnedInferenceEnv(env, activePin);
-    log(
-      `pinned model: ${activePin.provider}/${activePin.model} (maxProviders=1)`
-    );
-  }
-
-  const store = deps.store ?? createDirStore(fixturesDir);
-
-  let recordingFetch: RecordingFetch | undefined;
-  let fetchImpl: typeof fetch;
-
-  if (record) {
-    const realFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
-    recordingFetch = createRecordingFetch(realFetch, store, { force: false });
-    fetchImpl = recordingFetch;
-  } else if (args.mode === "live") {
-    fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis);
-  } else {
-    fetchImpl = deps.fetch ?? createReplayFetch(store);
-  }
-
   const maxMatches =
     args.maxMatchesExplicit && args.maxMatches !== undefined
       ? args.maxMatches
       : args.mode === "record" || args.mode === "live"
         ? 2
         : 4;
-
-  const inference = {
-    fetch: fetchImpl,
-    temperature: 0 as const,
-    env,
-    ...(activePin !== undefined ? { maxProviders: 1 as const } : {})
-  };
-
-  const baseTurnOptions = {
-    budgetMs: args.budgetMs,
-    inference,
-    ...(deps.skipGuards ? { now: () => 0 } : {})
-  };
 
   const manifestFile = join(fixturesDir, "manifest.json");
   const existingManifest =
@@ -868,6 +909,93 @@ async function runLlmMode(
   } else {
     log(`variants: ${variants.join(",")}`);
   }
+
+  const pinCount = args.models?.length ?? 0;
+  if (pinCount > 1) {
+    error(
+      "record/live/replay require exactly one --models provider:model pin; use --mode bench to loop multiple models"
+    );
+    return 1;
+  }
+
+  const pinResolve = resolveRunPin(
+    existingManifest,
+    variants,
+    splitsFor(args.suite),
+    cliPin
+  );
+  if (pinResolve.error !== undefined) {
+    error(pinResolve.error);
+    return 1;
+  }
+  const activePin = pinResolve.pin;
+
+  // A warning a reader can scroll past is not enforcement; withholding the
+  // comparative artifact is. Once the committed manifest carries pins (after
+  // the pinned operator record), the replay withhold branch is unreachable here.
+  const comparisonWithheld =
+    variants.length > 1 &&
+    args.mode === "replay" &&
+    activePin === undefined;
+
+  if (variants.length > 1) {
+    if (
+      (args.mode === "record" || args.mode === "live") &&
+      activePin === undefined
+    ) {
+      error(
+        "Multi-variant comparison cannot be attributed when failover can reassign providers. " +
+          "Pass --models provider:model with exactly one pin " +
+          "(e.g. --models groq:openai/gpt-oss-20b)."
+      );
+      return 1;
+    }
+    if (comparisonWithheld) {
+      log(
+        "comparison withheld: multi-variant replay is not attributable to a single model; " +
+          "per-variant results below are not comparable"
+      );
+    }
+  } else if (variants.length === 1 && activePin === undefined) {
+    log(
+      "warning: single-variant run is unpinned; results are not comparable across runs (pass --models provider:model to pin)"
+    );
+  }
+
+  if (activePin !== undefined) {
+    env = pinnedInferenceEnv(env, activePin);
+    log(
+      `pinned model: ${activePin.provider}/${activePin.model} (maxProviders=1)`
+    );
+  }
+
+  const store = deps.store ?? createDirStore(fixturesDir);
+
+  let recordingFetch: RecordingFetch | undefined;
+  let fetchImpl: typeof fetch;
+
+  if (record) {
+    const realFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
+    recordingFetch = createRecordingFetch(realFetch, store, { force: false });
+    fetchImpl = recordingFetch;
+  } else if (args.mode === "live") {
+    fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis);
+  } else {
+    fetchImpl = deps.fetch ?? createReplayFetch(store);
+  }
+
+  const inference = {
+    fetch: fetchImpl,
+    temperature: 0 as const,
+    env,
+    ...(activePin !== undefined ? { maxProviders: 1 as const } : {})
+  };
+
+  const baseTurnOptions = {
+    budgetMs: args.budgetMs,
+    inference,
+    ...(deps.skipGuards ? { now: () => 0 } : {})
+  };
 
   // Per (variant, split) scenario lists — replay uses resolveVariantRun so
   // grounded does not inherit base's longer scenarioIds (#21).
@@ -998,6 +1126,7 @@ async function runLlmMode(
   }> = [];
 
   let snapshotLlm = 0;
+  let snapshotFixtureMissTotal = 0;
   const suiteBaselines: Record<
     string,
     { greedy: SnapshotEvalResult; random: SnapshotEvalResult }
@@ -1068,14 +1197,22 @@ async function runLlmMode(
             }
           );
           snapshotResults[key] = evaluated;
-          snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+          snapshotLlm += snapshotLlmSuccesses(evaluated);
         }
       }
     }
 
-    const llmAgg = aggregateLlm(variantResults, {
-      replayMode: args.mode === "replay"
-    });
+    const snapshotFixtureMisses = Object.values(snapshotResults).reduce(
+      (sum, snap) => sum + snap.fixtureMissCount,
+      0
+    );
+    snapshotFixtureMissTotal += snapshotFixtureMisses;
+    const llmAgg = withSnapshotFixtureMisses(
+      aggregateLlm(variantResults, {
+        replayMode: args.mode === "replay"
+      }),
+      snapshotFixtureMisses
+    );
     const baselineDelta: Record<
       string,
       { greedy: SuiteBaselineDelta; random: SuiteBaselineDelta }
@@ -1103,7 +1240,12 @@ async function runLlmMode(
     byVariant[variant] = {
       results: variantResults,
       llm: llmAgg,
-      ...(args.snapshots ? { snapshots: snapshotResults, baselineDelta } : {})
+      ...(args.snapshots
+        ? {
+            snapshots: snapshotResults,
+            ...(comparisonWithheld ? {} : { baselineDelta })
+          }
+        : {})
     };
 
     log(
@@ -1111,7 +1253,9 @@ async function runLlmMode(
         mode:
           args.mode === "live" ? "live" : record ? "record" : "replay",
         suite: args.suite,
-        outRel: `variant:${variant}`,
+        outRel: comparisonWithheld
+          ? `variant:${variant} (not comparable)`
+          : `variant:${variant}`,
         matches: variantResults.length,
         sources: countSources(variantResults),
         llmAgg,
@@ -1159,13 +1303,15 @@ async function runLlmMode(
         }
       }
     }
-    for (const [suiteKey, deltas] of Object.entries(baselineDelta)) {
-      for (const delta of [deltas.greedy, deltas.random]) {
-        const m = delta.policy;
-        const b = delta.baseline;
-        log(
-          `vs ${delta.baselineId} [${suiteKey}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)} | policy mean/median/max/high>=100=${m.meanRegret.toFixed(2)}/${m.medianRegret.toFixed(2)}/${m.maxRegret.toFixed(2)}/${m.highRegretCount} | baseline mean/median/max/high>=100=${b.meanRegret.toFixed(2)}/${b.medianRegret.toFixed(2)}/${b.maxRegret.toFixed(2)}/${b.highRegretCount}`
-        );
+    if (!comparisonWithheld) {
+      for (const [suiteKey, deltas] of Object.entries(baselineDelta)) {
+        for (const delta of [deltas.greedy, deltas.random]) {
+          const m = delta.policy;
+          const b = delta.baseline;
+          log(
+            `vs ${delta.baselineId} [${suiteKey}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)} | policy mean/median/max/high>=100=${m.meanRegret.toFixed(2)}/${m.medianRegret.toFixed(2)}/${m.maxRegret.toFixed(2)}/${m.highRegretCount} | baseline mean/median/max/high>=100=${b.meanRegret.toFixed(2)}/${b.medianRegret.toFixed(2)}/${b.maxRegret.toFixed(2)}/${b.highRegretCount}`
+          );
+        }
       }
     }
   }
@@ -1223,7 +1369,10 @@ async function runLlmMode(
           variants: manifestVariantsFor([variant], {
             scenarioIds: selected.map((s) => s.id),
             snapshots: args.snapshots,
-            snapshotSuite: primaryKind
+            snapshotSuite: primaryKind,
+            ...(activePin !== undefined
+              ? { provider: activePin.provider, model: activePin.model }
+              : {})
           }),
           snapshotSuite: primaryKind
         };
@@ -1238,7 +1387,10 @@ async function runLlmMode(
   await mkdir(outDir, { recursive: true });
   const outName = record ? "record.json" : args.mode === "live" ? "live.json" : "replay.json";
   const outPath = join(outDir, outName);
-  const llmAgg = aggregateLlm(allResults, { replayMode: args.mode === "replay" });
+  const llmAgg = withSnapshotFixtureMisses(
+    aggregateLlm(allResults, { replayMode: args.mode === "replay" }),
+    snapshotFixtureMissTotal
+  );
   const payload = {
     variants: byVariant,
     results: allResults,
@@ -1256,18 +1408,24 @@ async function runLlmMode(
   const summaryMode: Mode =
     args.mode === "live" ? "live" : record ? "record" : "replay";
 
-  log(
-    formatLlmSummary({
-      mode: summaryMode,
-      suite: args.suite,
-      outRel,
-      matches: allResults.length,
-      sources,
-      llmAgg,
-      recordingStats,
-      fixtureFileCount
-    })
-  );
+  if (!comparisonWithheld) {
+    log(
+      formatLlmSummary({
+        mode: summaryMode,
+        suite: args.suite,
+        outRel,
+        matches: allResults.length,
+        sources,
+        llmAgg,
+        recordingStats,
+        fixtureFileCount
+      })
+    );
+  } else {
+    log(
+      `replay complete (comparison withheld): suite=${args.suite} out=${outRel} matches=${allResults.length}`
+    );
+  }
 
   const selectedScenarios: MatchScenario[] = [];
   for (const bySplit of Object.values(selectedByVariantSplit)) {
@@ -1275,9 +1433,9 @@ async function runLlmMode(
       if (scenarios) selectedScenarios.push(...scenarios);
     }
   }
-  const distinct = countDistinctMatchups(selectedScenarios);
+  const distinct = countDistinctMatchups(selectedScenarios, allResults);
   log(
-    `distinct matchups: ${distinct} of ${selectedScenarios.length} selected scenarios`
+    `distinct matchups: strata=${distinct.strataCovered} battles=${distinct.distinctBattles ?? "n/a"} of rawN=${distinct.rawN} selected scenarios`
   );
   const identical = identicalOutcomeWarning(allResults);
   if (identical !== undefined) {
@@ -1568,10 +1726,41 @@ export async function runBenchMode(
   }
 
   if (rows.length === 0) {
-    error(
-      "bench produced 0 rows (all fixture misses) — refusing empty summary; record missing fixtures first"
+    const pendingNote =
+      "D-035: all bench rows skipped (fixture_miss on regenerated adversarial suite); awaiting operator record — stale metrics removed";
+    log(
+      "bench produced 0 rows (all fixture misses) — writing pending empty summary (not inventing)"
     );
-    return 1;
+    const summary = summarizeBench({
+      rows: [],
+      models: args.models.map((m) => `${m.provider}:${m.model}`),
+      variants,
+      split: args.suite === "all" ? "all" : args.suite,
+      snapshotSuite: primaryKind,
+      consistency: args.consistency,
+      singleModelPending: true,
+      note: pendingNote
+    });
+    const outDir = deps.outDir ?? join(ROOT, "evals/out");
+    await mkdir(outDir, { recursive: true });
+    const outPath = join(outDir, "bench.json");
+    await writeFile(
+      outPath,
+      `${JSON.stringify({ summary, rows }, null, 2)}\n`,
+      "utf8"
+    );
+    const committedDir = join(ROOT, "evals/out-committed");
+    await mkdir(committedDir, { recursive: true });
+    const summaryPath = join(committedDir, "bench.summary.json");
+    await writeFile(
+      summaryPath,
+      `${JSON.stringify(summary, null, 2)}\n`,
+      "utf8"
+    );
+    log(`wrote ${relative(ROOT, outPath).replace(/\\/g, "/")}`);
+    log(`wrote ${relative(ROOT, summaryPath).replace(/\\/g, "/")}`);
+    log(`note: ${summary.note}`);
+    return 0;
   }
 
   const expectedRows = args.models.length * variants.length * splits.length;

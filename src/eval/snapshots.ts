@@ -25,7 +25,13 @@ export type DecisionSnapshot = {
 
 export type SnapshotSuite = {
   scenariosScanned: number;
+  targetCount: number;
+  count: number;
+  /** Must equal `snapshots.length`; asserted at generation and in drift guards. */
+  distinctStateCount: number;
   snapshots: DecisionSnapshot[];
+  /** Present when count < targetCount after scanning. */
+  warning?: string;
 };
 
 export const PIVOTAL_MIN_SPREAD = 100;
@@ -39,6 +45,7 @@ export type PivotalSnapshotSuite = {
   minSpread: number;
   targetCount: number;
   count: number;
+  distinctStateCount: number;
   snapshots: PivotalDecisionSnapshot[];
   /** Present when count < targetCount after a full scan. */
   warning?: string;
@@ -64,10 +71,64 @@ export type AdversarialSnapshotSuite = {
   minRegret: number;
   targetCount: number;
   count: number;
+  distinctStateCount: number;
   snapshots: AdversarialDecisionSnapshot[];
   /** Present when count < targetCount after a full scan. */
   warning?: string;
 };
+
+/**
+ * Decision-state fingerprint for snapshot dedupe (D-035).
+ * Defense is the only mutable non-HP/energy combatant field (no cooldowns in-engine).
+ */
+export function decisionStateKey(
+  runtime: BattleRuntime,
+  playerSkillId: SkillId
+): string {
+  const p = runtime.player;
+  const c = runtime.cpu;
+  return [
+    runtime.session.turn,
+    p.health,
+    p.energy,
+    p.defense,
+    c.health,
+    c.energy,
+    c.defense,
+    playerSkillId
+  ].join("|");
+}
+
+function snapshotDecisionStateKey(snap: DecisionSnapshot): string {
+  return decisionStateKey(snap.runtime, snap.playerSkillId);
+}
+
+/** Keep highest-ranked (first) instance of each distinct state, up to targetCount. */
+export function takeDistinctByState<T extends DecisionSnapshot>(
+  ranked: readonly T[],
+  targetCount: number
+): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const snap of ranked) {
+    const key = snapshotDecisionStateKey(snap);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    out.push(snap);
+    if (out.length >= targetCount) {
+      break;
+    }
+  }
+  return out;
+}
+
+function distinctStateCountAmong(
+  snaps: readonly DecisionSnapshot[]
+): number {
+  return new Set(snaps.map(snapshotDecisionStateKey)).size;
+}
 
 export type RegretTailCounts = Record<
   (typeof ADVERSARIAL_REGRET_TAIL_THRESHOLDS)[number],
@@ -161,44 +222,58 @@ function collectFromScenario(scenario: MatchScenario): DecisionSnapshot[] {
   return found;
 }
 
+/**
+ * Stable every-kth walk over sorted candidates, then fill remainder;
+ * keep only distinct decision states (D-035). Shortfall does not throw.
+ */
 function selectEveryKth(
   candidates: DecisionSnapshot[],
-  count: number
-): DecisionSnapshot[] {
-  if (candidates.length < count) {
-    throw new Error(
-      `need at least ${count} candidates, got ${candidates.length}`
-    );
+  targetCount: number
+): {
+  snapshots: DecisionSnapshot[];
+  count: number;
+  warning?: string;
+} {
+  if (candidates.length === 0) {
+    return {
+      snapshots: [],
+      count: 0,
+      warning: `only 0 of ${targetCount} distinct decision states available`
+    };
   }
 
-  const k = Math.max(1, Math.floor(candidates.length / count));
-  const selected: DecisionSnapshot[] = [];
-  for (
-    let i = 0;
-    selected.length < count && i < candidates.length;
-    i += k
-  ) {
-    selected.push(candidates[i]!);
+  const k = Math.max(1, Math.floor(candidates.length / Math.max(1, targetCount)));
+  const order: DecisionSnapshot[] = [];
+  const pushed = new Set<DecisionSnapshot>();
+  for (let i = 0; i < candidates.length; i += k) {
+    const candidate = candidates[i]!;
+    if (!pushed.has(candidate)) {
+      order.push(candidate);
+      pushed.add(candidate);
+    }
   }
-
-  if (selected.length < count) {
-    for (const candidate of candidates) {
-      if (selected.length >= count) {
-        break;
-      }
-      if (!selected.includes(candidate)) {
-        selected.push(candidate);
-      }
+  for (const candidate of candidates) {
+    if (!pushed.has(candidate)) {
+      order.push(candidate);
+      pushed.add(candidate);
     }
   }
 
-  return selected.slice(0, count);
+  const snapshots = takeDistinctByState(order, targetCount);
+  const count = snapshots.length;
+  if (count < targetCount) {
+    return {
+      snapshots,
+      count,
+      warning: `only ${count} of ${targetCount} distinct decision states available`
+    };
+  }
+  return { snapshots, count };
 }
 
 /**
- * Bounded snapshot generation: scan the first 12 scenarios (stable id order),
- * extend one-at-a-time if needed until 20 discriminative exact points exist.
- * Oracle memo is reused within each scenario walk.
+ * Bounded snapshot generation: scan until enough DISTINCT decision states exist
+ * (or the split is exhausted). Oracle memo is reused within each scenario walk.
  */
 export function generateSnapshots(split: EvalSplit): SnapshotSuite {
   const suite = buildMatchSuite(split);
@@ -210,8 +285,23 @@ export function generateSnapshots(split: EvalSplit): SnapshotSuite {
     candidates.push(...collectFromScenario(scenario));
     scenariosScanned = i + 1;
 
-    if (scenariosScanned >= INITIAL_SCAN && candidates.length >= TARGET_COUNT) {
+    if (
+      scenariosScanned >= INITIAL_SCAN &&
+      distinctStateCountAmong(candidates) >= TARGET_COUNT
+    ) {
       break;
+    }
+  }
+
+  // If still short on distinct states, scan the rest of the split.
+  if (distinctStateCountAmong(candidates) < TARGET_COUNT) {
+    for (let i = scenariosScanned; i < suite.length; i += 1) {
+      const scenario = suite[i]!;
+      candidates.push(...collectFromScenario(scenario));
+      scenariosScanned = i + 1;
+      if (distinctStateCountAmong(candidates) >= TARGET_COUNT) {
+        break;
+      }
     }
   }
 
@@ -222,8 +312,18 @@ export function generateSnapshots(split: EvalSplit): SnapshotSuite {
     return a.runtime.session.turn - b.runtime.session.turn;
   });
 
-  const snapshots = selectEveryKth(candidates, TARGET_COUNT);
-  return { scenariosScanned, snapshots };
+  const selected = selectEveryKth(candidates, TARGET_COUNT);
+  const result: SnapshotSuite = {
+    scenariosScanned,
+    targetCount: TARGET_COUNT,
+    count: selected.count,
+    distinctStateCount: selected.count,
+    snapshots: selected.snapshots
+  };
+  if (selected.warning !== undefined) {
+    result.warning = selected.warning;
+  }
+  return result;
 }
 
 function withSpread(snap: DecisionSnapshot): PivotalDecisionSnapshot {
@@ -249,8 +349,8 @@ export type SelectPivotalOptions = {
 };
 
 /**
- * Rank qualifying candidates by spread descending; take up to targetCount.
- * Never throws on shortfall — returns all qualifiers and a warning string.
+ * Rank qualifying candidates by spread descending; keep distinct states up to targetCount.
+ * Never throws on shortfall — returns all distinct qualifiers and a warning string.
  */
 export function selectPivotalSnapshots(
   candidates: readonly PivotalDecisionSnapshot[],
@@ -266,13 +366,13 @@ export function selectPivotalSnapshots(
     .filter((c) => c.spread >= minSpread)
     .slice()
     .sort(comparePivotal);
-  const snapshots = qualified.slice(0, targetCount);
+  const snapshots = takeDistinctByState(qualified, targetCount);
   const count = snapshots.length;
   if (count < targetCount) {
     return {
       snapshots,
       count,
-      warning: `only ${count} of ${targetCount} pivotal points qualified at spread>=${minSpread}`
+      warning: `only ${count} of ${targetCount} distinct pivotal states qualified at spread>=${minSpread}`
     };
   }
   return { snapshots, count };
@@ -285,7 +385,7 @@ export type GeneratePivotalOptions = SelectPivotalOptions & {
 
 /**
  * High-stakes snapshot suite: exact non-flat points with spread >= minSpread,
- * ranked by spread. Shortfall after full scan does not throw.
+ * ranked by spread, deduped by decision state. Shortfall after full scan does not throw.
  */
 export function generatePivotalSnapshots(
   split: EvalSplit,
@@ -298,6 +398,11 @@ export function generatePivotalSnapshots(
   const candidates: PivotalDecisionSnapshot[] = [];
   let scenariosScanned = 0;
 
+  const distinctQualified = (): number =>
+    distinctStateCountAmong(
+      candidates.filter((c) => c.spread >= minSpread)
+    );
+
   for (let i = 0; i < suite.length && i < limit; i += 1) {
     const scenario = suite[i]!;
     for (const snap of collectFromScenario(scenario)) {
@@ -305,11 +410,10 @@ export function generatePivotalSnapshots(
     }
     scenariosScanned = i + 1;
 
-    const qualifiedSoFar = candidates.filter((c) => c.spread >= minSpread).length;
     if (
       options.maxScenarios === undefined &&
       scenariosScanned >= INITIAL_SCAN &&
-      qualifiedSoFar >= targetCount
+      distinctQualified() >= targetCount
     ) {
       break;
     }
@@ -318,7 +422,7 @@ export function generatePivotalSnapshots(
   // If still short and we stopped early, scan the rest of the split.
   if (
     options.maxScenarios === undefined &&
-    candidates.filter((c) => c.spread >= minSpread).length < targetCount
+    distinctQualified() < targetCount
   ) {
     for (let i = scenariosScanned; i < suite.length; i += 1) {
       const scenario = suite[i]!;
@@ -326,9 +430,7 @@ export function generatePivotalSnapshots(
         candidates.push(withSpread(snap));
       }
       scenariosScanned = i + 1;
-      if (
-        candidates.filter((c) => c.spread >= minSpread).length >= targetCount
-      ) {
+      if (distinctQualified() >= targetCount) {
         break;
       }
     }
@@ -340,6 +442,7 @@ export function generatePivotalSnapshots(
     minSpread,
     targetCount,
     count: selected.count,
+    distinctStateCount: selected.count,
     snapshots: selected.snapshots
   };
   if (selected.warning !== undefined) {
@@ -349,21 +452,27 @@ export function generatePivotalSnapshots(
 }
 
 /**
- * Full-split scan: count exact non-flat candidates meeting each stake threshold.
+ * Full-split scan: count DISTINCT decision states meeting each stake threshold.
  */
 export function countStakeTail(split: EvalSplit): {
   scenariosScanned: number;
   counts: StakeTailCounts;
 } {
   const suite = buildMatchSuite(split);
-  const spreads: number[] = [];
+  const bestSpreadByState = new Map<string, number>();
   let scenariosScanned = 0;
   for (let i = 0; i < suite.length; i += 1) {
     for (const snap of collectFromScenario(suite[i]!)) {
-      spreads.push(valueSpread(snap.values));
+      const key = snapshotDecisionStateKey(snap);
+      const spread = valueSpread(snap.values);
+      const prev = bestSpreadByState.get(key);
+      if (prev === undefined || spread > prev) {
+        bestSpreadByState.set(key, spread);
+      }
     }
     scenariosScanned = i + 1;
   }
+  const spreads = [...bestSpreadByState.values()];
   const counts = {} as StakeTailCounts;
   for (const threshold of STAKE_TAIL_THRESHOLDS) {
     counts[threshold] = spreads.filter((s) => s >= threshold).length;
@@ -403,8 +512,8 @@ export type SelectAdversarialOptions = {
 };
 
 /**
- * Rank qualifying candidates by greedyRegret descending; take up to targetCount.
- * Never throws on shortfall — returns all qualifiers and a warning string.
+ * Rank qualifying candidates by greedyRegret descending; keep distinct states up to targetCount.
+ * Never throws on shortfall — returns all distinct qualifiers and a warning string.
  */
 export function selectAdversarialSnapshots(
   candidates: readonly AdversarialDecisionSnapshot[],
@@ -420,13 +529,13 @@ export function selectAdversarialSnapshots(
     .filter((c) => c.greedyRegret >= minRegret)
     .slice()
     .sort(compareAdversarial);
-  const snapshots = qualified.slice(0, targetCount);
+  const snapshots = takeDistinctByState(qualified, targetCount);
   const count = snapshots.length;
   if (count < targetCount) {
     return {
       snapshots,
       count,
-      warning: `only ${count} of ${targetCount} adversarial points qualified at greedyRegret>=${minRegret}`
+      warning: `only ${count} of ${targetCount} distinct adversarial states qualified at greedyRegret>=${minRegret}`
     };
   }
   return { snapshots, count };
@@ -469,6 +578,7 @@ export function generateAdversarialSnapshots(
     minRegret,
     targetCount,
     count: selected.count,
+    distinctStateCount: selected.count,
     snapshots: selected.snapshots
   };
   if (selected.warning !== undefined) {
@@ -478,21 +588,27 @@ export function generateAdversarialSnapshots(
 }
 
 /**
- * Full-split scan: count exact non-flat candidates meeting each greedyRegret threshold.
+ * Full-split scan: count DISTINCT decision states meeting each greedyRegret threshold.
  */
 export function countRegretTail(split: EvalSplit): {
   scenariosScanned: number;
   counts: RegretTailCounts;
 } {
   const suite = buildMatchSuite(split);
-  const regrets: number[] = [];
+  const bestRegretByState = new Map<string, number>();
   let scenariosScanned = 0;
   for (let i = 0; i < suite.length; i += 1) {
     for (const snap of collectFromScenario(suite[i]!)) {
-      regrets.push(withAdversarialFields(snap).greedyRegret);
+      const adv = withAdversarialFields(snap);
+      const key = snapshotDecisionStateKey(snap);
+      const prev = bestRegretByState.get(key);
+      if (prev === undefined || adv.greedyRegret > prev) {
+        bestRegretByState.set(key, adv.greedyRegret);
+      }
     }
     scenariosScanned = i + 1;
   }
+  const regrets = [...bestRegretByState.values()];
   const counts = {} as RegretTailCounts;
   for (const threshold of ADVERSARIAL_REGRET_TAIL_THRESHOLDS) {
     counts[threshold] = regrets.filter((r) => r >= threshold).length;

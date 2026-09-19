@@ -40,6 +40,7 @@ jobs:
           npx vitest run --dangerouslyIgnoreUnhandledErrors
           --testTimeout=600000
           -t "drift-guard"
+          src/__tests__/eval-snapshots.test.ts
           src/__tests__/eval-pivotal-snapshots.test.ts
           src/__tests__/eval-adversarial-snapshots.test.ts
           src/__tests__/eval-discriminate.test.ts

@@ -8,13 +8,23 @@ import {
 } from "../engine";
 import {
   aggregateLlm,
+  aggregateMatches,
+  battleFingerprint,
+  countFixtureMissFailures,
+  countMatchDiversity,
+  isFixtureMissFailure,
   percentile,
   randomPolicyExpectation,
+  uniqueBattles,
   wilsonInterval,
+  withSnapshotFixtureMisses,
   evalGreedySnapshots,
-  evalRandomSnapshots
+  evalRandomSnapshots,
+  evalLlmSnapshots,
+  createMemoryStore,
+  createReplayFetch
 } from "../eval";
-import type { DecisionSnapshot, MatchResult, SnapshotSuite } from "../eval";
+import type { MatchResult, SnapshotSuite } from "../eval";
 import type { DecisionTrace } from "../agent";
 
 const suite = JSON.parse(
@@ -75,6 +85,57 @@ describe("eval metrics", () => {
     expect(high).toBeCloseTo(0.5962, 3);
   });
 
+  it("aggregateMatches Wilson uses distinct battles not raw clones", () => {
+    const base: MatchResult = {
+      scenarioId: "a__s1",
+      seed: 1,
+      playerPolicy: "greedy",
+      cpuPolicyId: "greedy",
+      opponentId: "cpu-fracture",
+      turns: [
+        { turn: 1, playerSkillId: "skill-a", cpuSource: "greedy" },
+        { turn: 2, playerSkillId: "skill-b", cpuSource: "greedy" }
+      ],
+      outcome: { result: "cpu-victory", reason: "player-health-zero" },
+      totalTurns: 2,
+      finalHpMargin: 3
+    };
+    const clone: MatchResult = {
+      ...base,
+      scenarioId: "a__s2",
+      seed: 2
+    };
+    const different: MatchResult = {
+      ...base,
+      scenarioId: "b__s1",
+      seed: 3,
+      turns: [
+        { turn: 1, playerSkillId: "skill-a", cpuSource: "greedy" },
+        { turn: 2, playerSkillId: "skill-c", cpuSource: "greedy" }
+      ],
+      outcome: { result: "player-victory", reason: "cpu-health-zero" },
+      finalHpMargin: -2
+    };
+
+    expect(battleFingerprint(base)).toBe(battleFingerprint(clone));
+    expect(battleFingerprint(base)).not.toBe(battleFingerprint(different));
+
+    const diversity = countMatchDiversity([base, clone, different]);
+    expect(diversity.rawN).toBe(3);
+    expect(diversity.distinctBattles).toBe(2);
+    expect(diversity.strataCovered).toBe(1);
+
+    const agg = aggregateMatches([base, clone, different]);
+    expect(agg.rawN).toBe(3);
+    expect(agg.n).toBe(2);
+    expect(agg.distinctBattles).toBe(2);
+    expect(agg.cpuWinRate).toBe(0.5);
+    const naiveWilson = wilsonInterval(2, 3);
+    expect(agg.cpuWinWilson.low).not.toBeCloseTo(naiveWilson.low, 5);
+    expect(agg.cpuWinWilson).toEqual(wilsonInterval(1, 2));
+    expect(uniqueBattles([base, clone, different])).toHaveLength(2);
+  });
+
   it("percentiles", () => {
     expect(percentile([1, 2, 3, 4, 5], 50)).toBe(3);
     expect(percentile([], 50)).toBeNull();
@@ -97,16 +158,15 @@ describe("eval metrics", () => {
     expect(exp.optimalRate).toBe(optimalRate);
   });
 
-  it("greedy snapshot eval on standard dev slice pins published 100%/0", () => {
-    const snapshots: DecisionSnapshot[] = suite.snapshots.slice(0, 5);
-    const random = evalRandomSnapshots(snapshots);
-    const greedy = evalGreedySnapshots(snapshots);
-    expect(random.metrics.n).toBe(5);
+  it("greedy snapshot eval on standard dev suite pins published baseline", () => {
+    const greedy = evalGreedySnapshots(suite.snapshots);
+    const random = evalRandomSnapshots(suite.snapshots);
+    expect(greedy.metrics.n).toBe(suite.snapshots.length);
     expect(Number.isFinite(random.metrics.optimalRate)).toBe(true);
     expect(Number.isFinite(random.metrics.meanRegret)).toBe(true);
-    // EVAL.md: Dev standard snapshots remain 100% greedy-optimal.
-    expect(greedy.metrics.optimalRate).toBe(1);
-    expect(greedy.metrics.meanRegret).toBe(0);
+    // EVAL.md baseline after D-035: standard dev greedy 85% / mean regret 100.25
+    expect(greedy.metrics.optimalRate).toBe(0.85);
+    expect(greedy.metrics.meanRegret).toBeCloseTo(100.25, 2);
   });
 
   it("aggregateLlm rolls up per provider|model decisions and attempts", () => {
@@ -228,5 +288,72 @@ describe("eval metrics", () => {
     expect(openrouter.fallbackCount).toBe(1);
     expect(openrouter.attemptsOk).toBe(1);
     expect(openrouter.attemptsFailByStatus).toEqual({ none: 1 });
+  });
+
+  it("counts match fixture misses and merges snapshot misses separately", () => {
+    const results = [
+      makeResult([
+        makeTrace({
+          provider: "groq",
+          model: "m",
+          source: "fallback",
+          fallbackReason: "all_providers_failed",
+          failures: [
+            { provider: "groq", model: "m", status: 599, reason: "fixture_miss" }
+          ]
+        })
+      ])
+    ];
+    const base = aggregateLlm(results);
+    expect(base.fixtureMissMatches).toBe(1);
+    expect(base.fixtureMissSnapshots).toBe(0);
+    expect(base.fixtureMissCount).toBe(1);
+
+    const merged = withSnapshotFixtureMisses(base, 7);
+    expect(merged.fixtureMissMatches).toBe(1);
+    expect(merged.fixtureMissSnapshots).toBe(7);
+    expect(merged.fixtureMissCount).toBe(8);
+  });
+
+  it("isFixtureMissFailure matches status 599 or reason text", () => {
+    expect(
+      isFixtureMissFailure({ status: 599, reason: "fixture_miss" })
+    ).toBe(true);
+    expect(
+      isFixtureMissFailure({ reason: "http fixture_miss for key" })
+    ).toBe(true);
+    expect(isFixtureMissFailure({ status: 500, reason: "server" })).toBe(
+      false
+    );
+    expect(
+      countFixtureMissFailures([
+        { status: 599, reason: "fixture_miss" },
+        { status: 500, reason: "server" }
+      ])
+    ).toBe(1);
+  });
+
+  it("evalLlmSnapshots counts fixture misses without invalidDecisionRate", async () => {
+    const snaps = suite.snapshots.slice(0, 2);
+    const replay = createReplayFetch(createMemoryStore());
+    const result = await evalLlmSnapshots(
+      snaps,
+      {
+        inference: {
+          env: {
+            GROQ_API_KEY: "x",
+            INFERENCE_PROVIDER_ORDER: "groq",
+            INFERENCE_MAX_PROVIDERS: "1",
+            INFERENCE_MAX_RETRIES: "0"
+          },
+          fetch: replay
+        },
+        now: () => 0,
+        budgetMs: 5000
+      },
+      "test-policy"
+    );
+    expect(result.fixtureMissCount).toBeGreaterThan(0);
+    expect(result.metrics.invalidDecisionRate).toBe(0);
   });
 });

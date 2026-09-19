@@ -57,11 +57,13 @@ export type {
 export {
   countRegretTail,
   countStakeTail,
+  decisionStateKey,
   generateAdversarialSnapshots,
   generatePivotalSnapshots,
   generateSnapshots,
   selectAdversarialSnapshots,
   selectPivotalSnapshots,
+  takeDistinctByState,
   valueSpread,
   ADVERSARIAL_MIN_REGRET,
   ADVERSARIAL_TARGET_COUNT,
@@ -118,11 +120,19 @@ export type {
 export {
   aggregateLlm,
   aggregateMatches,
+  battleFingerprint,
+  countFixtureMissFailures,
+  countMatchDiversity,
   deltaVsSuiteBaseline,
+  isFixtureMissFailure,
+  matchStratumKey,
   metricsForChosenMoves,
   percentile,
   randomPolicyExpectation,
-  wilsonInterval
+  traceHasFixtureMiss,
+  uniqueBattles,
+  wilsonInterval,
+  withSnapshotFixtureMisses
 } from "./metrics";
 export type {
   LlmAggregate,

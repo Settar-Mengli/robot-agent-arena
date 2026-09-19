@@ -6,7 +6,10 @@
         "bulwark__greedy__fracture__s1",
         "bulwark__greedy__fracture__s10",
         "bulwark__greedy__fracture__s2",
-        "bulwark__greedy__fracture__s3"
+        "bulwark__greedy__fracture__s3",
+        "bulwark__seeded-random__fracture__s1",
+        "disruptor__greedy__fracture__s1",
+        "striker__greedy__fracture__s1"
       ],
       "snapshots": true,
       "providers": [
@@ -23,18 +26,41 @@
             "bulwark__greedy__fracture__s1",
             "bulwark__greedy__fracture__s10",
             "bulwark__greedy__fracture__s2",
-            "bulwark__greedy__fracture__s3"
+            "bulwark__greedy__fracture__s3",
+            "bulwark__seeded-random__fracture__s1",
+            "disruptor__greedy__fracture__s1",
+            "striker__greedy__fracture__s1"
           ],
-          "snapshots": true
+          "snapshots": true,
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite"
+        },
+        {
+          "id": "grounded",
+          "promptVersion": "agent-v2-grounded",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite"
+        },
+        {
+          "id": "grounded-v2",
+          "promptVersion": "agent-v4-grounded",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite"
         }
-      ]
+      ],
+      "snapshotSuite": "adversarial"
     },
     "heldout": {
       "scenarioIds": [
         "aegis__greedy__fracture__s101",
-        "aegis__seeded-random__fracture__s101",
         "mnemonic__greedy__fracture__s101",
-        "mnemonic__seeded-random__fracture__s101",
         "tempest__greedy__fracture__s101",
         "tempest__seeded-random__fracture__s101"
       ],
@@ -51,14 +77,14 @@
           "promptVersion": "agent-v1",
           "scenarioIds": [
             "aegis__greedy__fracture__s101",
-            "aegis__seeded-random__fracture__s101",
             "mnemonic__greedy__fracture__s101",
-            "mnemonic__seeded-random__fracture__s101",
             "tempest__greedy__fracture__s101",
             "tempest__seeded-random__fracture__s101"
           ],
           "snapshots": true,
-          "snapshotSuite": "adversarial"
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite"
         },
         {
           "id": "grounded",
@@ -68,7 +94,18 @@
             "mnemonic__greedy__fracture__s101"
           ],
           "snapshots": true,
-          "snapshotSuite": "adversarial"
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite"
+        },
+        {
+          "id": "grounded-v2",
+          "promptVersion": "agent-v4-grounded",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite"
         }
       ],
       "snapshotSuite": "adversarial"

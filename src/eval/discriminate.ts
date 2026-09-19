@@ -22,6 +22,7 @@ import {
   type OptimalCpuPolicy
 } from "./policies";
 import { buildMatchSuite, type EvalSplit } from "./scenarios";
+import { decisionStateKey } from "./snapshots";
 
 export const SPREAD_THRESHOLD = 0.25;
 
@@ -145,10 +146,10 @@ async function collectHeadroomForSplit(
   split: EvalSplit
 ): Promise<DecisionHeadroom> {
   const suite = buildMatchSuite(split);
-  let decisionPoints = 0;
   let flatCount = 0;
   let suboptimalCount = 0;
   const spreads: number[] = [];
+  const seenStates = new Set<string>();
 
   for (const scenario of suite) {
     const playerPolicy = resolvePlayerPolicy(scenario);
@@ -161,6 +162,7 @@ async function collectHeadroomForSplit(
 
     while (!isBattleOver(runtime.session)) {
       const playerSkillId = playerPolicy(runtime);
+      const stateKey = decisionStateKey(runtime, playerSkillId);
       const affordable = runtime.session.cpu.skillIds.filter((id) => {
         const skill = findSkillDefinition(MVP_SKILL_CATALOG, id);
         return skill !== undefined && skill.energyCost <= runtime.cpu.energy;
@@ -170,8 +172,8 @@ async function collectHeadroomForSplit(
 
       if (candidates.length >= 2) {
         const oracle = bestResponse(runtime, playerSkillId, playerPolicy);
-        if (oracle.exact) {
-          decisionPoints += 1;
+        if (oracle.exact && !seenStates.has(stateKey)) {
+          seenStates.add(stateKey);
           const vals = candidates.map((id) => oracle.values[id] ?? 0);
           const best = Math.max(...vals);
           const worst = Math.min(...vals);
@@ -195,7 +197,7 @@ async function collectHeadroomForSplit(
     spreads,
     flatCount,
     suboptimalCount,
-    decisionPoints
+    seenStates.size
   );
 }
 
