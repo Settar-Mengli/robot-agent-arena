@@ -121,14 +121,18 @@ export {
   aggregateLlm,
   aggregateMatches,
   battleFingerprint,
+  countFixtureMissFailures,
   countMatchDiversity,
   deltaVsSuiteBaseline,
+  isFixtureMissFailure,
   matchStratumKey,
   metricsForChosenMoves,
   percentile,
   randomPolicyExpectation,
+  traceHasFixtureMiss,
   uniqueBattles,
-  wilsonInterval
+  wilsonInterval,
+  withSnapshotFixtureMisses
 } from "./metrics";
 export type {
   LlmAggregate,

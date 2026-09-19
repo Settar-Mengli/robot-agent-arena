@@ -180,7 +180,12 @@ export type ProviderLlmAggregate = {
 export type LlmAggregate = {
   decisionValidityRate: number | null;
   fallbackByReason: Record<string, number>;
+  /** Total fixture misses (matches + snapshots). */
   fixtureMissCount: number;
+  /** Fixture-miss failures on match DecisionTraces. */
+  fixtureMissMatches: number;
+  /** Fixture-miss failures on snapshot DecisionTraces. */
+  fixtureMissSnapshots: number;
   latencyP50: number | null;
   latencyP95: number | null;
   tokenTotals: {
@@ -190,6 +195,50 @@ export type LlmAggregate = {
   } | null;
   byProvider: Record<string, ProviderLlmAggregate>;
 };
+
+/** Same rule for match and snapshot traces (D-035 fixture coverage). */
+export function isFixtureMissFailure(failure: {
+  status?: number;
+  reason: string;
+}): boolean {
+  return (
+    failure.status === 599 || failure.reason.includes("fixture_miss")
+  );
+}
+
+export function countFixtureMissFailures(
+  failures: readonly { status?: number; reason: string }[] | undefined
+): number {
+  if (failures === undefined || failures.length === 0) {
+    return 0;
+  }
+  let n = 0;
+  for (const failure of failures) {
+    if (isFixtureMissFailure(failure)) {
+      n += 1;
+    }
+  }
+  return n;
+}
+
+export function traceHasFixtureMiss(trace: {
+  failures?: readonly { status?: number; reason: string }[];
+}): boolean {
+  return countFixtureMissFailures(trace.failures) > 0;
+}
+
+/** Attach snapshot miss tallies; fixtureMissCount becomes matches + snapshots. */
+export function withSnapshotFixtureMisses(
+  agg: LlmAggregate,
+  fixtureMissSnapshots: number
+): LlmAggregate {
+  const fixtureMissMatches = agg.fixtureMissMatches;
+  return {
+    ...agg,
+    fixtureMissSnapshots,
+    fixtureMissCount: fixtureMissMatches + fixtureMissSnapshots
+  };
+}
 
 type ProviderBucket = {
   decisions: number;
@@ -265,7 +314,7 @@ export function aggregateLlm(
   let validated = 0;
   let validOk = 0;
   const fallbackByReason: Record<string, number> = {};
-  let fixtureMissCount = 0;
+  let fixtureMissMatches = 0;
   const latencies: number[] = [];
   let prompt = 0;
   let completion = 0;
@@ -295,14 +344,7 @@ export function aggregateLlm(
         fallbackByReason[trace.fallbackReason] =
           (fallbackByReason[trace.fallbackReason] ?? 0) + 1;
       }
-      for (const failure of trace.failures ?? []) {
-        if (
-          failure.status === 599 ||
-          failure.reason.includes("fixture_miss")
-        ) {
-          fixtureMissCount += 1;
-        }
-      }
+      fixtureMissMatches += countFixtureMissFailures(trace.failures);
       latencies.push(trace.elapsedMs);
       if (trace.usage !== undefined) {
         usageSeen = true;
@@ -358,7 +400,9 @@ export function aggregateLlm(
     decisionValidityRate:
       validated === 0 ? null : validOk / validated,
     fallbackByReason,
-    fixtureMissCount,
+    fixtureMissCount: fixtureMissMatches,
+    fixtureMissMatches,
+    fixtureMissSnapshots: 0,
     latencyP50: replay ? null : percentile(latencies, 50),
     latencyP95: replay ? null : percentile(latencies, 95),
     tokenTotals: usageSeen

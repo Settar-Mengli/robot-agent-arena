@@ -10,13 +10,19 @@ import {
   aggregateLlm,
   aggregateMatches,
   battleFingerprint,
+  countFixtureMissFailures,
   countMatchDiversity,
+  isFixtureMissFailure,
   percentile,
   randomPolicyExpectation,
   uniqueBattles,
   wilsonInterval,
+  withSnapshotFixtureMisses,
   evalGreedySnapshots,
-  evalRandomSnapshots
+  evalRandomSnapshots,
+  evalLlmSnapshots,
+  createMemoryStore,
+  createReplayFetch
 } from "../eval";
 import type { MatchResult, SnapshotSuite } from "../eval";
 import type { DecisionTrace } from "../agent";
@@ -282,5 +288,72 @@ describe("eval metrics", () => {
     expect(openrouter.fallbackCount).toBe(1);
     expect(openrouter.attemptsOk).toBe(1);
     expect(openrouter.attemptsFailByStatus).toEqual({ none: 1 });
+  });
+
+  it("counts match fixture misses and merges snapshot misses separately", () => {
+    const results = [
+      makeResult([
+        makeTrace({
+          provider: "groq",
+          model: "m",
+          source: "fallback",
+          fallbackReason: "all_providers_failed",
+          failures: [
+            { provider: "groq", model: "m", status: 599, reason: "fixture_miss" }
+          ]
+        })
+      ])
+    ];
+    const base = aggregateLlm(results);
+    expect(base.fixtureMissMatches).toBe(1);
+    expect(base.fixtureMissSnapshots).toBe(0);
+    expect(base.fixtureMissCount).toBe(1);
+
+    const merged = withSnapshotFixtureMisses(base, 7);
+    expect(merged.fixtureMissMatches).toBe(1);
+    expect(merged.fixtureMissSnapshots).toBe(7);
+    expect(merged.fixtureMissCount).toBe(8);
+  });
+
+  it("isFixtureMissFailure matches status 599 or reason text", () => {
+    expect(
+      isFixtureMissFailure({ status: 599, reason: "fixture_miss" })
+    ).toBe(true);
+    expect(
+      isFixtureMissFailure({ reason: "http fixture_miss for key" })
+    ).toBe(true);
+    expect(isFixtureMissFailure({ status: 500, reason: "server" })).toBe(
+      false
+    );
+    expect(
+      countFixtureMissFailures([
+        { status: 599, reason: "fixture_miss" },
+        { status: 500, reason: "server" }
+      ])
+    ).toBe(1);
+  });
+
+  it("evalLlmSnapshots counts fixture misses without invalidDecisionRate", async () => {
+    const snaps = suite.snapshots.slice(0, 2);
+    const replay = createReplayFetch(createMemoryStore());
+    const result = await evalLlmSnapshots(
+      snaps,
+      {
+        inference: {
+          env: {
+            GROQ_API_KEY: "x",
+            INFERENCE_PROVIDER_ORDER: "groq",
+            INFERENCE_MAX_PROVIDERS: "1",
+            INFERENCE_MAX_RETRIES: "0"
+          },
+          fetch: replay
+        },
+        now: () => 0,
+        budgetMs: 5000
+      },
+      "test-policy"
+    );
+    expect(result.fixtureMissCount).toBeGreaterThan(0);
+    expect(result.metrics.invalidDecisionRate).toBe(0);
   });
 });

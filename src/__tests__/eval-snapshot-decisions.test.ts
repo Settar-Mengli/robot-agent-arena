@@ -111,7 +111,8 @@ describe("auditable snapshot decisions", () => {
           promptVersion: "agent-v1",
           source: "llm"
         })
-      ]
+      ],
+      fixtureMissCount: 0
     };
     expect(distinctPromptVersions(result.decisions)).toEqual(["agent-v1"]);
     expect(formatSnapshotDecisionsDigest("base/dev", result)).toContain(

@@ -19,8 +19,8 @@ import {
   countMatchDiversity,
   deltaVsSuiteBaseline,
   percentile,
+  withSnapshotFixtureMisses,
   type MatchAggregate,
-  type SnapshotPolicyMetrics,
   type SuiteBaselineDelta
 } from "./metrics";
 import {
@@ -630,12 +630,8 @@ function countSources(results: readonly MatchResult[]): {
   return { llm, fallback, skipped, total: llm + fallback + skipped };
 }
 
-function snapshotLlmSuccesses(metrics: SnapshotPolicyMetrics): number {
-  const invalidRate = metrics.invalidDecisionRate;
-  if (invalidRate === undefined) {
-    return 0;
-  }
-  return Math.round(metrics.n * (1 - invalidRate));
+function snapshotLlmSuccesses(result: SnapshotEvalResult): number {
+  return result.decisions.filter((d) => d.source === "llm").length;
 }
 
 async function countFixtureFiles(dir: string): Promise<number> {
@@ -676,7 +672,7 @@ export function formatLlmSummary(input: {
     `matches: ${input.matches}`,
     `decisions: ${input.sources.total} (llm=${input.sources.llm}, fallback=${input.sources.fallback}, skipped=${input.sources.skipped})`,
     `decision-validity: ${formatPct(input.llmAgg.decisionValidityRate)}`,
-    `fixture_miss: ${input.llmAgg.fixtureMissCount}`
+    `fixture_miss: ${input.llmAgg.fixtureMissCount} (matches ${input.llmAgg.fixtureMissMatches}, snapshots ${input.llmAgg.fixtureMissSnapshots})`
   ];
 
   const reasons = Object.entries(input.llmAgg.fallbackByReason).sort((a, b) =>
@@ -1017,6 +1013,7 @@ async function runLlmMode(
   }> = [];
 
   let snapshotLlm = 0;
+  let snapshotFixtureMissTotal = 0;
   const suiteBaselines: Record<
     string,
     { greedy: SnapshotEvalResult; random: SnapshotEvalResult }
@@ -1087,14 +1084,22 @@ async function runLlmMode(
             }
           );
           snapshotResults[key] = evaluated;
-          snapshotLlm += snapshotLlmSuccesses(evaluated.metrics);
+          snapshotLlm += snapshotLlmSuccesses(evaluated);
         }
       }
     }
 
-    const llmAgg = aggregateLlm(variantResults, {
-      replayMode: args.mode === "replay"
-    });
+    const snapshotFixtureMisses = Object.values(snapshotResults).reduce(
+      (sum, snap) => sum + snap.fixtureMissCount,
+      0
+    );
+    snapshotFixtureMissTotal += snapshotFixtureMisses;
+    const llmAgg = withSnapshotFixtureMisses(
+      aggregateLlm(variantResults, {
+        replayMode: args.mode === "replay"
+      }),
+      snapshotFixtureMisses
+    );
     const baselineDelta: Record<
       string,
       { greedy: SuiteBaselineDelta; random: SuiteBaselineDelta }
@@ -1257,7 +1262,10 @@ async function runLlmMode(
   await mkdir(outDir, { recursive: true });
   const outName = record ? "record.json" : args.mode === "live" ? "live.json" : "replay.json";
   const outPath = join(outDir, outName);
-  const llmAgg = aggregateLlm(allResults, { replayMode: args.mode === "replay" });
+  const llmAgg = withSnapshotFixtureMisses(
+    aggregateLlm(allResults, { replayMode: args.mode === "replay" }),
+    snapshotFixtureMissTotal
+  );
   const payload = {
     variants: byVariant,
     results: allResults,

@@ -8,8 +8,10 @@ import {
   type ConsistencySample
 } from "./bench";
 import {
+  countFixtureMissFailures,
   metricsForChosenMoves,
   randomPolicyExpectation,
+  traceHasFixtureMiss,
   type SnapshotPolicyMetrics
 } from "./metrics";
 import { regret } from "./oracle";
@@ -37,6 +39,8 @@ export type SnapshotEvalResult = {
   policyId: string;
   metrics: SnapshotPolicyMetrics;
   decisions: SnapshotDecisionRecord[];
+  /** Fixture-miss failures on snapshot DecisionTraces (same rule as match aggregate). */
+  fixtureMissCount: number;
 };
 
 const NON_LLM_PROMPT_VERSION = "n/a";
@@ -168,7 +172,8 @@ export function evalRandomSnapshots(
       maxRegret,
       highRegretCount
     },
-    decisions
+    decisions,
+    fixtureMissCount: 0
   };
 }
 
@@ -193,7 +198,8 @@ export function evalGreedySnapshots(
   return {
     policyId: "greedy",
     metrics: metricsForChosenMoves(snapshots, chosen),
-    decisions
+    decisions,
+    fixtureMissCount: 0
   };
 }
 
@@ -211,6 +217,7 @@ export async function evalLlmSnapshots(
   const invalidFlags: boolean[] = [];
   const decisions: SnapshotDecisionRecord[] = [];
   const consistencySamples: ConsistencySample[] = [];
+  let fixtureMissCount = 0;
 
   for (const snap of snapshots) {
     const picks: SkillId[] = [];
@@ -229,6 +236,8 @@ export async function evalLlmSnapshots(
           ?.selectedSkillId ??
         snap.runtime.session.cpu.skillIds[0]!;
       picks.push(executed);
+      // Count every consistency repeat's fixture misses (same as match: per failure).
+      fixtureMissCount += countFixtureMissFailures(result.trace.failures);
       if (i === 0) {
         primaryTrace = result;
       }
@@ -239,9 +248,12 @@ export async function evalLlmSnapshots(
     const { trace } = primaryTrace!;
     const executed = picks[0]!;
     chosen.push(executed);
+    // Fixture-miss fallbacks are coverage failures, not invalid model output.
+    const miss = traceHasFixtureMiss(trace);
     invalidFlags.push(
-      trace.source === "fallback" ||
-        (trace.validation !== undefined && !trace.validation.ok)
+      !miss &&
+        (trace.source === "fallback" ||
+          (trace.validation !== undefined && !trace.validation.ok))
     );
     decisions.push(decisionFromTrace(snap, executed, trace));
     if (consistencyN > 1) {
@@ -252,7 +264,8 @@ export async function evalLlmSnapshots(
   const result: SnapshotEvalResult & { consistency?: ConsistencyMetrics } = {
     policyId,
     metrics: metricsForChosenMoves(snapshots, chosen, { invalidFlags }),
-    decisions
+    decisions,
+    fixtureMissCount
   };
   if (consistencyN > 1) {
     result.consistency = computeConsistencyMetrics(consistencySamples);
