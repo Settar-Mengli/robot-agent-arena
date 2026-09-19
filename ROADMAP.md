@@ -25,7 +25,8 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE:** M-BENCH headless (PR #23 / D-032).
 - **DONE:** Execution batch **A1** (prompt-byte-frozen hardening) — greedy→grounding proven choice-identical; MemoScope identity; CI drift job; pricing/env/sanitize; pinned tests.
 - **DONE (code):** Execution batch **A2** — corrected facts as `agent-v4-grounded` / `grounded-v2`; **results pending** operator record (D-034, needs keys).
-- **NEXT:** Operator D-034 record run, then A3 (adapter-only interface).
+- **DONE (code):** **D-035** — snapshot state dedupe + honest match/sample counts (`fix/duplicate-state-suites`). Suites regenerated (heldout adversarial **n=13**); LLM/bench rows **pending** operator re-record on new states.
+- **NEXT:** Operator record for D-034 **and** D-035 refill (adversarial ablation + bench on n=13), then A3 (adapter-only interface).
 - **PLANNED:** UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 

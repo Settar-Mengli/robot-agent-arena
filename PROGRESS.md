@@ -2,11 +2,28 @@
 
 ## Status Snapshot
 - Date: 2026-09-19
-- Branch: `feat/a2-grounding-correction`; base `main` @ `fc88685`
-- Current state: **A2 code complete** — corrected grounded facts (`agent-v4-grounded` / `grounded-v2`). **Results pending** operator D-034 record (needs keys).
-- Test count: **296** (`npm run coverage`: 292 passed, 4 skipped)
-- Verification: typecheck / lint / coverage / SNAPSHOT_DRIFT drift-guards / `eval:replay --suite all` (fixture_miss 0)
-- Working tree: A2 commits on `feat/a2-grounding-correction`
+- Branch: `fix/duplicate-state-suites`; base `main` @ `b0dac3c`
+- Current state: **D-035 shipped (code + regenerated suites)**. Snapshot suites assert distinct decision states; match Wilson/headroom use distinct battles/states. **LLM ablation + bench rows pending** operator re-record on new adversarial suite (n=13). D-034 grounded-v2 results still pending keys.
+- Test count: **299** (`npm run coverage`: 295 passed, 4 skipped)
+- Verification: typecheck / lint / coverage / SNAPSHOT_DRIFT drift-guards (byte-equality never weakened) / `eval:replay --suite all` (fixture_miss 0; snapshot **invalid** rates high on new states — fixtures do not cover them)
+- Working tree: commits on `fix/duplicate-state-suites` (do not merge until PR checks green)
+
+## Operator re-record (keys required)
+
+```powershell
+npm run eval:record -- --suite heldout --variants base,grounded,grounded-v2 --snapshot-suite adversarial --max-matches 2
+```
+
+Quota projection: `models=1 variants=3 snapshots=13 matches=2 × ~17 × consistency=1 → 141 calls (cap 300)`.
+
+Bench-only refill:
+
+```powershell
+npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial --max-matches 0 --models gemini:gemini-3.5-flash-lite
+node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite --variants base,grounded
+```
+
+Quota: `1 × 2 × 13 = 26` calls.
 
 ## Completed
 - Repository baseline and governance files exist.

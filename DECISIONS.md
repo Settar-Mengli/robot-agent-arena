@@ -531,6 +531,10 @@ An ablation that changes zero decisions cannot support the grounding hypothesis 
 Consequences:
 Next batch is **M-BENCH**. Do not treat grounding-as-implemented as settled positive evidence.
 
+### Amend — 2026-09-19 — Sample size wording (D-035)
+
+The historical ablation ran on a committed suite whose **20** rows were only **6** distinct decision states. Wording “0 of 20” is more precisely **0 of N distinct states** on that suite; the **zero-change** conclusion is unaffected (base ≡ grounded decision-for-decision). Historical fixtures are preserved. Current held-out adversarial suite after D-035 is **n=13** distinct; LLM re-measure is pending.
+
 ## D-031 Metric choice on stakes-skewed suites
 Date: 2026-09-18
 Status: Accepted
@@ -729,6 +733,10 @@ A2 implements this protocol; EVAL.md publishes the outcome; D-030’s historical
 
 Operator must run the D-034 record (keys) before EVAL results are filled; see EVAL.md corrected-arm section.
 
+### Amend — 2026-09-19 — Suite n after D-035
+
+D-034’s pre-registered “n=20” / “0 of 20” wording referred to the pre-dedupe adversarial suite. After D-035 the held-out adversarial suite is **n=13** distinct states. The zero-change conclusion for the **historical** grounded arm is unaffected. Operator record for `base` vs `grounded-v2` must use the regenerated suite (quota ≈94 calls at max-matches 2).
+
 ## D-035 Snapshot suites counted duplicate states
 Date: 2026-09-19
 Status: Accepted
@@ -768,4 +776,33 @@ Rationale:
 Sample-size honesty is a pre-condition for every published comparison; another one-off suite edit would leave the class of bug open.
 
 Consequences:
-Suites regenerate smaller where the split cannot supply 20 distinct states; EVAL.md numbers are corrected; match statistics and headroom denominators move to distinct-battle / distinct-state units in a follow-on change; operator re-record may be required for fixture-backed LLM rows on new states.
+Suites regenerate smaller where the split cannot supply 20 distinct states; EVAL.md numbers are corrected; match statistics and headroom denominators move to distinct-battle / distinct-state units; operator re-record is required for fixture-backed LLM/bench rows on new states.
+
+### Amend — 2026-09-19 — Shipped on `fix/duplicate-state-suites`
+
+**What shipped:** `decisionStateKey` + generator dedupe; suite schema `distinctStateCount`; always-on uniqueness test; full byte-equality drift guards (never weakened); match Wilson / rates over battle fingerprints; headroom first-visit-wins; regenerated suites + baselines + discriminate summary; pending empty bench summary.
+
+**New distinct counts (selected / target):**
+
+| suite | old n (distinct) | new n (= distinct) |
+| --- | ---: | ---: |
+| standard dev | 20 (2) | **20** |
+| standard heldout | 20 (2) | **20** |
+| pivotal dev | 20 (2) | **8** |
+| pivotal heldout | 20 (8) | **8** |
+| adversarial dev | 20 (3) | **6** |
+| adversarial heldout | 20 (6) | **13** |
+
+**Published numbers that moved (selected):**
+
+| metric | old | new |
+| --- | ---: | ---: |
+| heldout adversarial greedy mean regret | 104.35 | **156.15** |
+| heldout adversarial random mean regret | 52.18 | **78.08** |
+| dev adversarial greedy mean regret | 301.85 | **335.17** |
+| pivotal greedy (dev / heldout) | 100% / 95% | **87.5% / 87.5%** |
+| discriminate headroom points (dev / heldout) | 340 / 381 | **40 / 91** |
+| discriminate greedy n (dev / heldout) | 120 / 120 | **41 / 53** distinct battles |
+| overall non-zero spread (verdict reason) | 67.1% | **70.2%** |
+
+LLM ablation / bench rows on the new adversarial suite are **pending** operator record (stale values removed). Historical D-030 0-decision claim preserved.
