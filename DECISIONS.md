@@ -816,7 +816,7 @@ Date: 2026-09-19
 Status: Accepted
 
 Decision:
-Any **comparative** measurement across prompt variants (ablation, multi-variant record/live/replay) requires exactly one pinned `provider:model` via `--models`. The CLI **fails hard** without it on multi-variant record/live. The pin is written onto each manifest variant entry and replayed with `maxProviders=1` via the existing bench helper (`pinnedInferenceEnv`). Single-variant exploration may stay unpinned but is warned as not comparable across runs.
+Any **comparative** measurement across prompt variants (ablation, multi-variant record/live/replay) requires exactly one pinned `provider:model`. The pin comes from either `--models` or a unanimous recorded manifest pin. The CLI **fails hard** without a resolved pin on multi-variant record/live. Legacy unpinned multi-variant replay still runs (so CI is not blocked on old manifests) but **withholds** comparative output — a warning a reader can scroll past is not enforcement. The pin is written onto each manifest variant entry and replayed with `maxProviders=1` via the existing bench helper (`pinnedInferenceEnv`). Single-variant exploration may stay unpinned but is warned as not comparable across runs.
 
 Evidence (same defect as D-032, second location):
 Two unpinned multi-variant record runs, identical args/prompts/T=0, base **dev:adversarial**: run 1 → 50.00% optimal / mean regret 1.00; run 2 → 33.33% / 334.50. Only the answering provider mixture changed (gemini dominated with many 429s; groq/openrouter also served). Fixture keys include host+model, so failover reassigns which recorded answer a decision gets.

@@ -930,19 +930,30 @@ async function runLlmMode(
   }
   const activePin = pinResolve.pin;
 
+  // A warning a reader can scroll past is not enforcement; withholding the
+  // comparative artifact is. Once the committed manifest carries pins (after
+  // the pinned operator record), the replay withhold branch is unreachable here.
+  const comparisonWithheld =
+    variants.length > 1 &&
+    args.mode === "replay" &&
+    activePin === undefined;
+
   if (variants.length > 1) {
-    if (args.mode === "record" || args.mode === "live") {
-      if (pinCount !== 1) {
-        error(
-          "Multi-variant comparison cannot be attributed when failover can reassign providers. " +
-            "Pass --models provider:model with exactly one pin " +
-            "(e.g. --models groq:openai/gpt-oss-20b)."
-        );
-        return 1;
-      }
-    } else if (args.mode === "replay" && activePin === undefined) {
+    if (
+      (args.mode === "record" || args.mode === "live") &&
+      activePin === undefined
+    ) {
+      error(
+        "Multi-variant comparison cannot be attributed when failover can reassign providers. " +
+          "Pass --models provider:model with exactly one pin " +
+          "(e.g. --models groq:openai/gpt-oss-20b)."
+      );
+      return 1;
+    }
+    if (comparisonWithheld) {
       log(
-        "warning: multi-variant replay without a pin is not attributable across providers; pass --models provider:model or record under a pin"
+        "comparison withheld: multi-variant replay is not attributable to a single model; " +
+          "per-variant results below are not comparable"
       );
     }
   } else if (variants.length === 1 && activePin === undefined) {
@@ -1229,7 +1240,12 @@ async function runLlmMode(
     byVariant[variant] = {
       results: variantResults,
       llm: llmAgg,
-      ...(args.snapshots ? { snapshots: snapshotResults, baselineDelta } : {})
+      ...(args.snapshots
+        ? {
+            snapshots: snapshotResults,
+            ...(comparisonWithheld ? {} : { baselineDelta })
+          }
+        : {})
     };
 
     log(
@@ -1237,7 +1253,9 @@ async function runLlmMode(
         mode:
           args.mode === "live" ? "live" : record ? "record" : "replay",
         suite: args.suite,
-        outRel: `variant:${variant}`,
+        outRel: comparisonWithheld
+          ? `variant:${variant} (not comparable)`
+          : `variant:${variant}`,
         matches: variantResults.length,
         sources: countSources(variantResults),
         llmAgg,
@@ -1285,13 +1303,15 @@ async function runLlmMode(
         }
       }
     }
-    for (const [suiteKey, deltas] of Object.entries(baselineDelta)) {
-      for (const delta of [deltas.greedy, deltas.random]) {
-        const m = delta.policy;
-        const b = delta.baseline;
-        log(
-          `vs ${delta.baselineId} [${suiteKey}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)} | policy mean/median/max/high>=100=${m.meanRegret.toFixed(2)}/${m.medianRegret.toFixed(2)}/${m.maxRegret.toFixed(2)}/${m.highRegretCount} | baseline mean/median/max/high>=100=${b.meanRegret.toFixed(2)}/${b.medianRegret.toFixed(2)}/${b.maxRegret.toFixed(2)}/${b.highRegretCount}`
-        );
+    if (!comparisonWithheld) {
+      for (const [suiteKey, deltas] of Object.entries(baselineDelta)) {
+        for (const delta of [deltas.greedy, deltas.random]) {
+          const m = delta.policy;
+          const b = delta.baseline;
+          log(
+            `vs ${delta.baselineId} [${suiteKey}]: Δoptimal=${(delta.deltaOptimalRate * 100).toFixed(1)}pp Δregret=${delta.deltaMeanRegret.toFixed(2)} | policy mean/median/max/high>=100=${m.meanRegret.toFixed(2)}/${m.medianRegret.toFixed(2)}/${m.maxRegret.toFixed(2)}/${m.highRegretCount} | baseline mean/median/max/high>=100=${b.meanRegret.toFixed(2)}/${b.medianRegret.toFixed(2)}/${b.maxRegret.toFixed(2)}/${b.highRegretCount}`
+          );
+        }
       }
     }
   }
@@ -1388,18 +1408,24 @@ async function runLlmMode(
   const summaryMode: Mode =
     args.mode === "live" ? "live" : record ? "record" : "replay";
 
-  log(
-    formatLlmSummary({
-      mode: summaryMode,
-      suite: args.suite,
-      outRel,
-      matches: allResults.length,
-      sources,
-      llmAgg,
-      recordingStats,
-      fixtureFileCount
-    })
-  );
+  if (!comparisonWithheld) {
+    log(
+      formatLlmSummary({
+        mode: summaryMode,
+        suite: args.suite,
+        outRel,
+        matches: allResults.length,
+        sources,
+        llmAgg,
+        recordingStats,
+        fixtureFileCount
+      })
+    );
+  } else {
+    log(
+      `replay complete (comparison withheld): suite=${args.suite} out=${outRel} matches=${allResults.length}`
+    );
+  }
 
   const selectedScenarios: MatchScenario[] = [];
   for (const bySplit of Object.values(selectedByVariantSplit)) {

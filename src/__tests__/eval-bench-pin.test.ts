@@ -300,4 +300,203 @@ describe("bench pin CLI guard", () => {
     expect(lines.join("\n")).toContain("PIN MISMATCH");
     expect(lines.join("\n")).toMatch(/snapshot /);
   });
+
+  it("multi-variant live without --models exits 1 with attribution message", async () => {
+    const lines: string[] = [];
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-live-multi-"));
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "live",
+        "--variants",
+        "base,grounded",
+        "--max-matches",
+        "1",
+        "--no-snapshots",
+        "--budget-ms",
+        "2000"
+      ],
+      {
+        store: createMemoryStore(),
+        env: {
+          GROQ_API_KEY: "test-fake-key-not-real",
+          INFERENCE_PROVIDER_ORDER: "groq",
+          INFERENCE_MAX_PROVIDERS: "1",
+          INFERENCE_MAX_RETRIES: "0"
+        },
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+    expect(code).toBe(1);
+    expect(lines.join("\n")).toContain(
+      "Multi-variant comparison cannot be attributed when failover can reassign providers"
+    );
+    expect(lines.join("\n")).toContain("--models");
+  });
+
+  it("CLI pin disagreeing with manifest pin fails end-to-end via runLlmMode", async () => {
+    const { writeFile } = await import("node:fs/promises");
+    const lines: string[] = [];
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-disagree-"));
+    await writeFile(
+      join(outDir, "manifest.json"),
+      `${JSON.stringify(
+        {
+          version: 1,
+          splits: {
+            dev: {
+              scenarioIds: ["s1"],
+              snapshots: false,
+              providers: [],
+              variants: [
+                {
+                  id: "base",
+                  promptVersion: "agent-v1",
+                  scenarioIds: ["s1"],
+                  snapshots: false,
+                  provider: "groq",
+                  model: "openai/gpt-oss-20b"
+                }
+              ]
+            }
+          }
+        },
+        null,
+        2
+      )}\n`,
+      "utf8"
+    );
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "replay",
+        "--variants",
+        "base",
+        "--models",
+        "gemini:gemini-3.5-flash-lite",
+        "--max-matches",
+        "0",
+        "--no-snapshots",
+        "--suite",
+        "dev",
+        "--budget-ms",
+        "2000"
+      ],
+      {
+        store: createMemoryStore(),
+        env: {},
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+    expect(code).toBe(1);
+    expect(lines.join("\n")).toContain("PIN MISMATCH");
+    expect(lines.join("\n")).toContain("gemini:gemini-3.5-flash-lite");
+    expect(lines.join("\n")).toContain("groq/openai/gpt-oss-20b");
+  });
+
+  it("legacy unpinned multi-variant replay exits 0, withholds comparative deltas", async () => {
+    const { readFile, writeFile } = await import("node:fs/promises");
+    chatStub.provider = "groq";
+    chatStub.model = "openai/gpt-oss-20b";
+    const store = createMemoryStore();
+    const outDir = await mkdtemp(join(tmpdir(), "eval-pin-withhold-"));
+    const env = {
+      GROQ_API_KEY: "test-fake-key-not-real",
+      INFERENCE_PROVIDER_ORDER: "groq",
+      INFERENCE_MAX_PROVIDERS: "1",
+      INFERENCE_MAX_RETRIES: "0"
+    };
+    const recordCode = await runLlmModeForTest(
+      [
+        "--mode",
+        "record",
+        "--variants",
+        "base,grounded",
+        "--models",
+        "groq:openai/gpt-oss-20b",
+        "--max-matches",
+        "0",
+        "--snapshot-suite",
+        "adversarial",
+        "--suite",
+        "dev",
+        "--budget-ms",
+        "15000"
+      ],
+      {
+        store,
+        env,
+        outDir,
+        fixturesDir: outDir,
+        log: () => {},
+        error: () => {}
+      }
+    );
+    expect(recordCode).toBe(0);
+
+    const manifestPath = join(outDir, "manifest.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      splits: Record<
+        string,
+        {
+          variants?: Array<{
+            provider?: string;
+            model?: string;
+            [key: string]: unknown;
+          }>;
+        }
+      >;
+    };
+    for (const split of Object.values(manifest.splits)) {
+      for (const v of split.variants ?? []) {
+        delete v.provider;
+        delete v.model;
+      }
+    }
+    await writeFile(
+      manifestPath,
+      `${JSON.stringify(manifest, null, 2)}\n`,
+      "utf8"
+    );
+
+    const lines: string[] = [];
+    const code = await runLlmModeForTest(
+      [
+        "--mode",
+        "replay",
+        "--variants",
+        "base,grounded",
+        "--max-matches",
+        "0",
+        "--snapshot-suite",
+        "adversarial",
+        "--suite",
+        "dev",
+        "--budget-ms",
+        "15000"
+      ],
+      {
+        store,
+        env,
+        outDir,
+        fixturesDir: outDir,
+        log: (line) => lines.push(line),
+        error: (line) => lines.push(line)
+      }
+    );
+    const text = lines.join("\n");
+    expect(code).toBe(0);
+    expect(text).toContain("comparison withheld:");
+    expect(text).toContain("not comparable");
+    expect(text).not.toContain("Δoptimal=");
+    expect(text).not.toMatch(/vs greedy/);
+    expect(text).toContain("variant:base (not comparable)");
+    expect(text).toContain("variant:grounded (not comparable)");
+  });
 });
