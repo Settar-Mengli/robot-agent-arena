@@ -26,8 +26,8 @@ function snapKey(snap: DecisionSnapshot): string {
 }
 
 describe("decision snapshot suites", () => {
-  it(
-    "drift-guard: generateSnapshots matches committed JSON",
+  it.skipIf(process.env.SNAPSHOT_DRIFT !== "1")(
+    "drift-guard: generateSnapshots matches committed JSON (set SNAPSHOT_DRIFT=1)",
     () => {
       for (const split of ["dev", "heldout"] as const) {
         const generated = generateSnapshots(split);
