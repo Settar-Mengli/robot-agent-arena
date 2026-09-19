@@ -115,6 +115,9 @@ describe("discrimination helpers", () => {
         policy: "greedy",
         aggregate: {
           n: 10,
+          rawN: 10,
+          strataCovered: 6,
+          distinctBattles: 10,
           cpuWinRate: 0.1,
           cpuWinWilson: { low: 0.01, high: 0.4 },
           drawRate: 0,

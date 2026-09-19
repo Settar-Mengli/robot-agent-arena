@@ -120,10 +120,14 @@ export type {
 export {
   aggregateLlm,
   aggregateMatches,
+  battleFingerprint,
+  countMatchDiversity,
   deltaVsSuiteBaseline,
+  matchStratumKey,
   metricsForChosenMoves,
   percentile,
   randomPolicyExpectation,
+  uniqueBattles,
   wilsonInterval
 } from "./metrics";
 export type {

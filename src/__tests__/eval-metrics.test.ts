@@ -8,13 +8,17 @@ import {
 } from "../engine";
 import {
   aggregateLlm,
+  aggregateMatches,
+  battleFingerprint,
+  countMatchDiversity,
   percentile,
   randomPolicyExpectation,
+  uniqueBattles,
   wilsonInterval,
   evalGreedySnapshots,
   evalRandomSnapshots
 } from "../eval";
-import type { DecisionSnapshot, MatchResult, SnapshotSuite } from "../eval";
+import type { MatchResult, SnapshotSuite } from "../eval";
 import type { DecisionTrace } from "../agent";
 
 const suite = JSON.parse(
@@ -73,6 +77,57 @@ describe("eval metrics", () => {
     const { low, high } = wilsonInterval(50, 100);
     expect(low).toBeCloseTo(0.4038, 3);
     expect(high).toBeCloseTo(0.5962, 3);
+  });
+
+  it("aggregateMatches Wilson uses distinct battles not raw clones", () => {
+    const base: MatchResult = {
+      scenarioId: "a__s1",
+      seed: 1,
+      playerPolicy: "greedy",
+      cpuPolicyId: "greedy",
+      opponentId: "cpu-fracture",
+      turns: [
+        { turn: 1, playerSkillId: "skill-a", cpuSource: "greedy" },
+        { turn: 2, playerSkillId: "skill-b", cpuSource: "greedy" }
+      ],
+      outcome: { result: "cpu-victory", reason: "player-health-zero" },
+      totalTurns: 2,
+      finalHpMargin: 3
+    };
+    const clone: MatchResult = {
+      ...base,
+      scenarioId: "a__s2",
+      seed: 2
+    };
+    const different: MatchResult = {
+      ...base,
+      scenarioId: "b__s1",
+      seed: 3,
+      turns: [
+        { turn: 1, playerSkillId: "skill-a", cpuSource: "greedy" },
+        { turn: 2, playerSkillId: "skill-c", cpuSource: "greedy" }
+      ],
+      outcome: { result: "player-victory", reason: "cpu-health-zero" },
+      finalHpMargin: -2
+    };
+
+    expect(battleFingerprint(base)).toBe(battleFingerprint(clone));
+    expect(battleFingerprint(base)).not.toBe(battleFingerprint(different));
+
+    const diversity = countMatchDiversity([base, clone, different]);
+    expect(diversity.rawN).toBe(3);
+    expect(diversity.distinctBattles).toBe(2);
+    expect(diversity.strataCovered).toBe(1);
+
+    const agg = aggregateMatches([base, clone, different]);
+    expect(agg.rawN).toBe(3);
+    expect(agg.n).toBe(2);
+    expect(agg.distinctBattles).toBe(2);
+    expect(agg.cpuWinRate).toBe(0.5);
+    const naiveWilson = wilsonInterval(2, 3);
+    expect(agg.cpuWinWilson.low).not.toBeCloseTo(naiveWilson.low, 5);
+    expect(agg.cpuWinWilson).toEqual(wilsonInterval(1, 2));
+    expect(uniqueBattles([base, clone, different])).toHaveLength(2);
   });
 
   it("percentiles", () => {

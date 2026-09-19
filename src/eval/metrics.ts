@@ -43,7 +43,14 @@ export function percentile(sorted: number[], p: number): number | null {
 }
 
 export type MatchAggregate = {
+  /** Distinct-battle count; Wilson denominator and rate denominator. */
   n: number;
+  /** Raw MatchResult list length before battle fingerprint dedupe. */
+  rawN: number;
+  /** Distinct strata (opponent × playerPolicy × cpuPolicy, seed excluded). */
+  strataCovered: number;
+  /** Alias of n — distinct battle fingerprints. */
+  distinctBattles: number;
   cpuWinRate: number;
   drawRate: number;
   lossRate: number;
@@ -52,11 +59,70 @@ export type MatchAggregate = {
   meanFinalHpMargin: number;
 };
 
+/** Full turn trajectory + outcome fingerprint (D-035). */
+export function battleFingerprint(result: MatchResult): string {
+  return JSON.stringify({
+    turns: result.turns.map((t) => ({
+      turn: t.turn,
+      playerSkillId: t.playerSkillId,
+      cpuSource: t.cpuSource
+    })),
+    outcome: result.outcome.result,
+    totalTurns: result.totalTurns,
+    finalHpMargin: result.finalHpMargin
+  });
+}
+
+/** Stratum without seed — opponent × player policy × cpu policy. */
+export function matchStratumKey(result: MatchResult): string {
+  return `${result.opponentId}|${result.playerPolicy}|${result.cpuPolicyId}`;
+}
+
+export function countMatchDiversity(results: readonly MatchResult[]): {
+  rawN: number;
+  strataCovered: number;
+  distinctBattles: number;
+} {
+  const strata = new Set<string>();
+  const battles = new Set<string>();
+  for (const result of results) {
+    strata.add(matchStratumKey(result));
+    battles.add(battleFingerprint(result));
+  }
+  return {
+    rawN: results.length,
+    strataCovered: strata.size,
+    distinctBattles: battles.size
+  };
+}
+
+/** First occurrence of each battle fingerprint (stable order). */
+export function uniqueBattles(
+  results: readonly MatchResult[]
+): MatchResult[] {
+  const seen = new Set<string>();
+  const out: MatchResult[] = [];
+  for (const result of results) {
+    const key = battleFingerprint(result);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    out.push(result);
+  }
+  return out;
+}
+
 export function aggregateMatches(results: readonly MatchResult[]): MatchAggregate {
-  const n = results.length;
+  const diversity = countMatchDiversity(results);
+  const unique = uniqueBattles(results);
+  const n = unique.length;
   if (n === 0) {
     return {
       n: 0,
+      rawN: diversity.rawN,
+      strataCovered: diversity.strataCovered,
+      distinctBattles: 0,
       cpuWinRate: 0,
       drawRate: 0,
       lossRate: 0,
@@ -72,7 +138,7 @@ export function aggregateMatches(results: readonly MatchResult[]): MatchAggregat
   let turns = 0;
   let margin = 0;
 
-  for (const result of results) {
+  for (const result of unique) {
     if (result.outcome.result === "cpu-victory") wins += 1;
     else if (result.outcome.result === "draw") draws += 1;
     else losses += 1;
@@ -82,6 +148,9 @@ export function aggregateMatches(results: readonly MatchResult[]): MatchAggregat
 
   return {
     n,
+    rawN: diversity.rawN,
+    strataCovered: diversity.strataCovered,
+    distinctBattles: n,
     cpuWinRate: wins / n,
     drawRate: draws / n,
     lossRate: losses / n,

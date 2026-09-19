@@ -16,6 +16,7 @@ import { runSuite, type MatchResult } from "./match";
 import {
   aggregateLlm,
   aggregateMatches,
+  countMatchDiversity,
   deltaVsSuiteBaseline,
   percentile,
   type MatchAggregate,
@@ -442,9 +443,27 @@ export function selectScenariosForLlmMode(
 }
 
 export function countDistinctMatchups(
-  scenarios: readonly MatchScenario[]
-): number {
-  return new Set(scenarios.map(scenarioStratumKey)).size;
+  scenarios: readonly MatchScenario[],
+  results?: readonly MatchResult[]
+): {
+  strataCovered: number;
+  distinctBattles: number | null;
+  rawN: number;
+} {
+  const strataCovered = new Set(scenarios.map(scenarioStratumKey)).size;
+  if (results === undefined) {
+    return {
+      strataCovered,
+      distinctBattles: null,
+      rawN: scenarios.length
+    };
+  }
+  const diversity = countMatchDiversity(results);
+  return {
+    strataCovered,
+    distinctBattles: diversity.distinctBattles,
+    rawN: diversity.rawN
+  };
 }
 
 export function identicalOutcomeWarning(
@@ -1275,9 +1294,9 @@ async function runLlmMode(
       if (scenarios) selectedScenarios.push(...scenarios);
     }
   }
-  const distinct = countDistinctMatchups(selectedScenarios);
+  const distinct = countDistinctMatchups(selectedScenarios, allResults);
   log(
-    `distinct matchups: ${distinct} of ${selectedScenarios.length} selected scenarios`
+    `distinct matchups: strata=${distinct.strataCovered} battles=${distinct.distinctBattles ?? "n/a"} of rawN=${distinct.rawN} selected scenarios`
   );
   const identical = identicalOutcomeWarning(allResults);
   if (identical !== undefined) {

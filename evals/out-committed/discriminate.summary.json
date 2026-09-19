@@ -1,57 +1,57 @@
 {
   "verdict": "DISCRIMINATES",
-  "verdictReason": "optimal win-rate CI disjoint from greedy on dev; non-zero value spread on 67.1% of decision points (>25%)",
-  "overallNonZeroSpreadRate": 0.6712898751733704,
+  "verdictReason": "optimal win-rate CI disjoint from greedy on dev; non-zero value spread on 70.2% of decision points (>25%)",
+  "overallNonZeroSpreadRate": 0.7022900763358778,
   "splits": [
     {
       "split": "dev",
       "policies": [
         {
           "policy": "random",
-          "n": 120,
-          "cpuWinRate": 0.05,
+          "n": 44,
+          "cpuWinRate": 0.09090909090909091,
           "cpuWinWilson": {
-            "low": 0.023114049304474242,
-            "high": 0.10480419464586235
+            "low": 0.035921611478836546,
+            "high": 0.21159519397917487
           },
-          "drawRate": 0.09166666666666666,
-          "lossRate": 0.8583333333333333,
-          "meanTurns": 17.891666666666666,
-          "meanFinalHpMargin": -5.316666666666666
+          "drawRate": 0.022727272727272728,
+          "lossRate": 0.8863636363636364,
+          "meanTurns": 18.84090909090909,
+          "meanFinalHpMargin": -4.7727272727272725
         },
         {
           "policy": "greedy",
-          "n": 120,
-          "cpuWinRate": 0.10833333333333334,
+          "n": 41,
+          "cpuWinRate": 0.17073170731707318,
           "cpuWinWilson": {
-            "low": 0.06441079894107261,
-            "high": 0.17655508005273887
+            "low": 0.08525143995273898,
+            "high": 0.31262909954629764
           },
-          "drawRate": 0.09166666666666666,
-          "lossRate": 0.8,
-          "meanTurns": 17.891666666666666,
-          "meanFinalHpMargin": -4.458333333333333
+          "drawRate": 0.024390243902439025,
+          "lossRate": 0.8048780487804879,
+          "meanTurns": 18.75609756097561,
+          "meanFinalHpMargin": -3.5365853658536586
         },
         {
           "policy": "optimal",
-          "n": 120,
-          "cpuWinRate": 0.8333333333333334,
+          "n": 42,
+          "cpuWinRate": 0.7857142857142857,
           "cpuWinWilson": {
-            "low": 0.7565456060897621,
-            "high": 0.8894408798729517
+            "low": 0.6405986210195627,
+            "high": 0.8829433146894876
           },
           "drawRate": 0,
-          "lossRate": 0.16666666666666666,
-          "meanTurns": 14.683333333333334,
-          "meanFinalHpMargin": 8.05
+          "lossRate": 0.21428571428571427,
+          "meanTurns": 14.833333333333334,
+          "meanFinalHpMargin": 8.833333333333334
         }
       ],
       "headroom": {
-        "decisionPoints": 340,
-        "flatRate": 0.3323529411764706,
-        "nonZeroSpreadRate": 0.6676470588235295,
-        "greedySuboptimalRate": 0.11470588235294117,
-        "meanSpread": 319.33235294117645,
+        "decisionPoints": 40,
+        "flatRate": 0.325,
+        "nonZeroSpreadRate": 0.675,
+        "greedySuboptimalRate": 0.05,
+        "meanSpread": 351.85,
         "medianSpread": 2,
         "maxSpread": 2007
       },
@@ -63,52 +63,52 @@
       "policies": [
         {
           "policy": "random",
-          "n": 120,
-          "cpuWinRate": 0.06666666666666667,
+          "n": 56,
+          "cpuWinRate": 0.14285714285714285,
           "cpuWinWilson": {
-            "low": 0.03416489747129059,
-            "high": 0.12605267077718166
+            "low": 0.0742070004258528,
+            "high": 0.25736167420851525
           },
           "drawRate": 0,
-          "lossRate": 0.9333333333333333,
-          "meanTurns": 18.6,
-          "meanFinalHpMargin": -5.091666666666667
+          "lossRate": 0.8571428571428571,
+          "meanTurns": 19.571428571428573,
+          "meanFinalHpMargin": -3.232142857142857
         },
         {
           "policy": "greedy",
-          "n": 120,
-          "cpuWinRate": 0.09166666666666666,
+          "n": 53,
+          "cpuWinRate": 0.20754716981132076,
           "cpuWinWilson": {
-            "low": 0.051956646789424805,
-            "high": 0.15670990790625097
+            "low": 0.12004475729322059,
+            "high": 0.3345800245566921
           },
-          "drawRate": 0.11666666666666667,
-          "lossRate": 0.7916666666666666,
-          "meanTurns": 18.6,
-          "meanFinalHpMargin": -4.691666666666666
+          "drawRate": 0.018867924528301886,
+          "lossRate": 0.7735849056603774,
+          "meanTurns": 19.547169811320753,
+          "meanFinalHpMargin": -2.8679245283018866
         },
         {
           "policy": "optimal",
-          "n": 120,
-          "cpuWinRate": 0.8833333333333333,
+          "n": 65,
+          "cpuWinRate": 0.9384615384615385,
           "cpuWinWilson": {
-            "low": 0.8136649880680831,
-            "high": 0.9292194707890377
+            "low": 0.852176391786862,
+            "high": 0.9758113365634378
           },
           "drawRate": 0,
-          "lossRate": 0.11666666666666667,
-          "meanTurns": 17.85,
-          "meanFinalHpMargin": 13.975
+          "lossRate": 0.06153846153846154,
+          "meanTurns": 17.246153846153845,
+          "meanFinalHpMargin": 15.338461538461539
         }
       ],
       "headroom": {
-        "decisionPoints": 381,
-        "flatRate": 0.32545931758530183,
-        "nonZeroSpreadRate": 0.6745406824146982,
-        "greedySuboptimalRate": 0.09973753280839895,
-        "meanSpread": 107.26771653543307,
+        "decisionPoints": 91,
+        "flatRate": 0.2857142857142857,
+        "nonZeroSpreadRate": 0.7142857142857143,
+        "greedySuboptimalRate": 0.0989010989010989,
+        "meanSpread": 134.36263736263737,
         "medianSpread": 2,
-        "maxSpread": 2008
+        "maxSpread": 2007
       },
       "optimalInexactTurns": 0,
       "winRateCiDisjoint": true

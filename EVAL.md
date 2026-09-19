@@ -42,17 +42,17 @@ npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite
 
 | slice | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin (CPU−player) |
 | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| all | 120 | 5.00% [2.31%, 10.48%] | 9.17% | 85.83% | 17.89 | -5.32 |
-| cpu-fracture | 60 | 8.33% [3.61%, 18.07%] | 18.33% | 73.33% | 15.78 | -5.12 |
-| cpu-sentinel-x | 60 | 1.67% [0.29%, 8.86%] | 0.00% | 98.33% | 20.00 | -5.52 |
+| all | 44 | 9.09% [3.59%, 21.16%] | 2.27% | 88.64% | 18.84 | -4.77 |
+| cpu-fracture | 15 | 20.00% [7.05%, 45.19%] | 6.67% | 73.33% | 16.60 | -4.00 |
+| cpu-sentinel-x | 30 | 3.33% [0.59%, 16.67%] | 0.00% | 96.67% | 20.00 | -5.10 |
 
 #### Matches — greedy CPU
 
 | slice | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin (CPU−player) |
 | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| all | 120 | 10.83% [6.44%, 17.66%] | 9.17% | 80.00% | 17.89 | -4.46 |
-| cpu-fracture | 60 | 8.33% [3.61%, 18.07%] | 18.33% | 73.33% | 15.78 | -5.12 |
-| cpu-sentinel-x | 60 | 13.33% [6.91%, 24.17%] | 0.00% | 86.67% | 20.00 | -3.80 |
+| all | 41 | 17.07% [8.53%, 31.26%] | 2.44% | 80.49% | 18.76 | -3.54 |
+| cpu-fracture | 15 | 20.00% [7.05%, 45.19%] | 6.67% | 73.33% | 16.60 | -4.00 |
+| cpu-sentinel-x | 26 | 15.38% [6.15%, 33.53%] | 0.00% | 84.62% | 20.00 | -3.27 |
 
 #### Snapshots — random expectation
 
@@ -72,17 +72,17 @@ npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite
 
 | slice | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin (CPU−player) |
 | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| all | 120 | 6.67% [3.42%, 12.61%] | 0.00% | 93.33% | 18.60 | -5.09 |
-| cpu-fracture | 60 | 11.67% [5.77%, 22.18%] | 0.00% | 88.33% | 17.20 | -6.88 |
-| cpu-sentinel-x | 60 | 1.67% [0.29%, 8.86%] | 0.00% | 98.33% | 20.00 | -3.30 |
+| all | 56 | 14.29% [7.42%, 25.74%] | 0.00% | 85.71% | 19.57 | -3.23 |
+| cpu-fracture | 23 | 30.43% [15.60%, 50.87%] | 0.00% | 69.57% | 18.96 | -3.57 |
+| cpu-sentinel-x | 33 | 3.03% [0.54%, 15.32%] | 0.00% | 96.97% | 20.00 | -3.00 |
 
 #### Matches — greedy CPU
 
 | slice | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin (CPU−player) |
 | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| all | 120 | 9.17% [5.20%, 15.67%] | 11.67% | 79.17% | 18.60 | -4.69 |
-| cpu-fracture | 60 | 10.00% [4.66%, 20.15%] | 23.33% | 66.67% | 17.20 | -6.20 |
-| cpu-sentinel-x | 60 | 8.33% [3.61%, 18.07%] | 0.00% | 91.67% | 20.00 | -3.18 |
+| all | 53 | 20.75% [12.00%, 33.46%] | 1.89% | 77.36% | 19.55 | -2.87 |
+| cpu-fracture | 21 | 28.57% [13.81%, 49.96%] | 4.76% | 66.67% | 18.86 | -2.95 |
+| cpu-sentinel-x | 33 | 15.15% [6.65%, 30.92%] | 0.00% | 84.85% | 20.00 | -2.79 |
 
 #### Snapshots — random expectation
 
@@ -143,29 +143,27 @@ Independently verified: greedy CPU matches the LLM on **every** row (result and 
 
 ## Does the environment discriminate?
 
-Keyless run: `node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate` (full 120-scenario suites × random / greedy / optimal; 0 inexact oracle turns).
+Keyless run: `node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate` (full 120-scenario suites × random / greedy / optimal; 0 inexact oracle turns). Match aggregates and Wilson intervals use **distinct battle fingerprints** (D-035); headroom counts **distinct decision states** (first visit wins).
 
-> **D-035 note:** Match n=120 and headroom point counts below still treat seed clones as separate trials until commit 3 (distinct-battle / distinct-state denominators). Discrimination **direction** (optimal ≫ greedy) is unchanged.
+**Verdict: DISCRIMINATES** — optimal’s CPU win-rate Wilson CI is disjoint from greedy’s on both splits, and **70.2%** of distinct greedy-playthrough decision points have a non-zero oracle value spread (>25% threshold).
 
-**Verdict: DISCRIMINATES** — optimal’s CPU win-rate Wilson CI is disjoint from greedy’s on both splits, and **67.1%** of greedy-playthrough decision points have a non-zero oracle value spread (>25% threshold).
+| split | policy | n (distinct battles) | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| dev | random | 44 | 9.09% [3.59%, 21.16%] | 2.27% | 88.64% | 18.84 | -4.77 |
+| dev | greedy | 41 | 17.07% [8.53%, 31.26%] | 2.44% | 80.49% | 18.76 | -3.54 |
+| dev | optimal | 42 | 78.57% [64.06%, 88.29%] | 0.00% | 21.43% | 14.83 | 8.83 |
+| heldout | random | 56 | 14.29% [7.42%, 25.74%] | 0.00% | 85.71% | 19.57 | -3.23 |
+| heldout | greedy | 53 | 20.75% [12.00%, 33.46%] | 1.89% | 77.36% | 19.55 | -2.87 |
+| heldout | optimal | 65 | 93.85% [85.22%, 97.58%] | 0.00% | 6.15% | 17.25 | 15.34 |
 
-| split | policy | n | CPU win (Wilson 95%) | draw | loss | mean turns | mean HP margin |
-| --- | --- | ---: | --- | ---: | ---: | ---: | ---: |
-| dev | random | 120 | 5.00% [2.31%, 10.48%] | 9.17% | 85.83% | 17.89 | -5.32 |
-| dev | greedy | 120 | 10.83% [6.44%, 17.66%] | 9.17% | 80.00% | 17.89 | -4.46 |
-| dev | optimal | 120 | 83.33% [75.65%, 88.94%] | 0.00% | 16.67% | 14.68 | 8.05 |
-| heldout | random | 120 | 6.67% [3.42%, 12.61%] | 0.00% | 93.33% | 18.60 | -5.09 |
-| heldout | greedy | 120 | 9.17% [5.20%, 15.67%] | 11.67% | 79.17% | 18.60 | -4.69 |
-| heldout | optimal | 120 | 88.33% [81.37%, 92.92%] | 0.00% | 11.67% | 17.85 | 13.97 |
-
-Decision headroom (oracle values along greedy playthroughs):
+Decision headroom (oracle values along greedy playthroughs; distinct states):
 
 | split | points | flat | non-zero spread | greedy suboptimal | mean / median / max spread |
 | --- | ---: | ---: | ---: | ---: | --- |
-| dev | 340 | 33.2% | 66.8% | 11.5% | 319.33 / 2.00 / 2007.00 |
-| heldout | 381 | 32.5% | 67.5% | 10.0% | 107.27 / 2.00 / 2008.00 |
+| dev | 40 | 32.5% | 67.5% | 5.0% | 351.85 / 2.00 / 2007.00 |
+| heldout | 91 | 28.6% | 71.4% | 9.9% | 134.36 / 2.00 / 2007.00 |
 
-There is large room above greedy: optimal wins ~83–88% of matches while greedy wins ~9–11%. The earlier LLM↔greedy tie is therefore **not** evidence that the environment cannot separate good from bad play — only that today’s LLM mixture is not capturing that headroom.
+There is large room above greedy: optimal wins ~79–94% of distinct battles while greedy wins ~17–21%. The earlier LLM↔greedy tie is therefore **not** evidence that the environment cannot separate good from bad play — only that today’s LLM mixture is not capturing that headroom.
 
 ## Ablation (M-TOOLS)
 
@@ -315,7 +313,7 @@ Replace `MODEL` with the free-tier ids you record. Quota: `models × variants ×
 ## Findings
 
 - **Direction (D-033):** Product output reframes from scoring to **diagnosis** against exact ground truth. The three new measurements (prompt-perturbation sensitivity, adversarial-context robustness, information-scaling curves) will be **pre-registered before implementation** (same pattern as D-024). Binding honesty and known limitations are recorded in D-033.
-- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites shortfall after D-035 (n=8, greedy 87.5%); adversarial ablation **measured** (D-030): grounding changed 0 decisions on the historical suite — D-024 **falsified**.
+- **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs over **distinct battles**); ~70% of distinct decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites shortfall after D-035 (n=8, greedy 87.5%); adversarial ablation **measured** (D-030): grounding changed 0 decisions on the historical suite — D-024 **falsified**.
 - **D-035 distinct states:** Generators and drift guards assert `distinctStateCount === snapshots.length`. Held-out adversarial **n=13** (was 20 with only 6 distinct); greedy mean regret **156.15** (was multiplicity-weighted **104.35**). LLM/bench rows on the new suite are **pending** operator record.
 - **Adversarial threshold (corrected):** An earlier count of “~12 points at regret ≥ 100 in the first 12 scenarios” was wrong — inert seeds. `ADVERSARIAL_MIN_REGRET=1`; after D-035 distinct-state counting, regret-tail @1 is **13** distinct per split; selected suites shortfall below target 20 where needed.
 - **Metric choice (D-031):** On stakes-skewed adversarial sets, report regret distribution alongside rate (historical opposite failure modes on the pre-dedupe suite).
