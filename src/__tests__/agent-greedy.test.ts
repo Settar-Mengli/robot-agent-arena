@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   ENERGY_DRAIN_WEIGHT,
   LOW_HEALTH_RATIO,
-  createGreedySelector
+  createGreedySelector,
+  projectSkillEffects
 } from "../agent";
 import {
   FALLBACK_ACTION_ID,
@@ -200,6 +201,116 @@ describe("createGreedySelector", () => {
             });
             const chosen = selector(self, target);
             expect(skillIds).toContain(chosen);
+          }
+        }
+      }
+    }
+  });
+
+  it("agrees with grounding projections on a broad state grid", () => {
+    const allIds = MVP_SKILL_CATALOG.skills.map((skill) => skill.skillId);
+    const healths = [1, 12, 30];
+    const energies = [0, 2, 6, 10];
+    const defenses = [0, 4, MAX_DEFENSE];
+
+    function groundingBacked(
+      cfg: AgentConfig
+    ): (self: CombatantState, target: CombatantState) => SkillId {
+      return (self, target) => {
+        const equipped = cfg.skillIds.map(
+          (id) => MVP_SKILL_CATALOG.skills.find((s) => s.skillId === id)!
+        );
+        const affordable = equipped.filter((s) => s.energyCost <= self.energy);
+        if (affordable.length === 0) {
+          return equipped[0]!.skillId;
+        }
+        const dmg = (skill: (typeof equipped)[0]) =>
+          projectSkillEffects(skill, self, target).damageAfterDefense;
+        const drainAmt = (skill: (typeof equipped)[0]) =>
+          projectSkillEffects(skill, self, target).energyDrained;
+        const healAmt = (skill: (typeof equipped)[0]) =>
+          projectSkillEffects(skill, self, self).healAmount;
+        const guardAmt = (skill: (typeof equipped)[0]) =>
+          projectSkillEffects(skill, self, self).defenseGained;
+
+        const pick = (
+          candidates: typeof equipped,
+          scoreOf: (s: (typeof equipped)[0]) => number
+        ) => {
+          let best = candidates[0]!;
+          let bestScore = scoreOf(best);
+          for (let i = 1; i < candidates.length; i += 1) {
+            const skill = candidates[i]!;
+            const score = scoreOf(skill);
+            if (
+              score > bestScore ||
+              (score === bestScore && skill.energyCost < best.energyCost)
+            ) {
+              best = skill;
+              bestScore = score;
+            }
+          }
+          return best.skillId;
+        };
+
+        const lethal = affordable.filter((s) => dmg(s) >= target.health);
+        if (lethal.length > 0) {
+          return pick(lethal, dmg);
+        }
+        if (self.health <= Math.floor(self.maxHealth * LOW_HEALTH_RATIO)) {
+          const recoveries = affordable.filter((s) => healAmt(s) > 0);
+          if (recoveries.length > 0) {
+            return pick(recoveries, healAmt);
+          }
+        }
+        const offense = pick(
+          affordable,
+          (s) => dmg(s) + ENERGY_DRAIN_WEIGHT * drainAmt(s)
+        );
+        const offenseSkill = equipped.find((s) => s.skillId === offense)!;
+        if (
+          dmg(offenseSkill) + ENERGY_DRAIN_WEIGHT * drainAmt(offenseSkill) >
+          0
+        ) {
+          return offense;
+        }
+        const guards = affordable.filter((s) => guardAmt(s) > 0);
+        if (guards.length > 0) {
+          return pick(guards, guardAmt);
+        }
+        const heals = affordable.filter((s) => healAmt(s) > 0);
+        if (heals.length > 0) {
+          return pick(heals, healAmt);
+        }
+        return pick(affordable, () => 0);
+      };
+    }
+
+    // Representative loadouts (not full 2^8 — covered by differential proof)
+    const loadouts: SkillId[][] = [
+      ["skill-override-pulse", "skill-signal-exposure"],
+      ["skill-null-pulse", "skill-logic-storm"],
+      ["skill-core-identity", "skill-sigil-rule"],
+      allIds.slice(0, 2),
+      allIds.slice(2, 4),
+      allIds.slice(4, 6),
+      allIds.slice(6, 8)
+    ];
+
+    for (const skillIds of loadouts) {
+      const cfg = agent(skillIds);
+      const greedy = createGreedySelector(cfg);
+      const grounded = groundingBacked(cfg);
+      for (const health of healths) {
+        for (const energy of energies) {
+          for (const defense of defenses) {
+            const self = combatant("cpu", { health, energy, defense });
+            const target = combatant("player", {
+              health: 30 - health + 1,
+              energy: (energy + 3) % 11,
+              defense: (defense + 2) % (MAX_DEFENSE + 1)
+            });
+            expect(greedy(self, target)).toBe(grounded(self, target));
           }
         }
       }

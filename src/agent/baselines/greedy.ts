@@ -1,5 +1,4 @@
 import {
-  MAX_DEFENSE,
   MVP_SKILL_CATALOG,
   type AgentConfig,
   type CombatantState,
@@ -8,6 +7,7 @@ import {
   type SkillDefinition,
   type SkillId
 } from "../../engine";
+import { projectSkillEffects } from "../grounding";
 
 export const LOW_HEALTH_RATIO = 0.4;
 export const ENERGY_DRAIN_WEIGHT = 0.5;
@@ -23,33 +23,28 @@ function requireSkill(
   return skill;
 }
 
-function dmg(skill: SkillDefinition, target: CombatantState): number {
-  if (skill.effect.category !== "attack" && skill.effect.category !== "disrupt") {
-    return 0;
-  }
-  const basePower = skill.effect.basePower;
-  return Math.min(target.health, basePower - Math.min(target.defense, basePower));
+function dmg(
+  skill: SkillDefinition,
+  self: CombatantState,
+  target: CombatantState
+): number {
+  return projectSkillEffects(skill, self, target).damageAfterDefense;
 }
 
-function drain(skill: SkillDefinition, target: CombatantState): number {
-  if (skill.effect.category !== "disrupt") {
-    return 0;
-  }
-  return Math.min(skill.effect.energyDamage, target.energy);
+function drain(
+  skill: SkillDefinition,
+  self: CombatantState,
+  target: CombatantState
+): number {
+  return projectSkillEffects(skill, self, target).energyDrained;
 }
 
 function heal(skill: SkillDefinition, self: CombatantState): number {
-  if (skill.effect.category !== "recovery") {
-    return 0;
-  }
-  return Math.min(skill.effect.recoveryAmount, self.maxHealth - self.health);
+  return projectSkillEffects(skill, self, self).healAmount;
 }
 
 function guard(skill: SkillDefinition, self: CombatantState): number {
-  if (skill.effect.category !== "defense") {
-    return 0;
-  }
-  return Math.min(skill.effect.defenseAmount, MAX_DEFENSE - self.defense);
+  return projectSkillEffects(skill, self, self).defenseGained;
 }
 
 function pickBest(
@@ -86,6 +81,7 @@ function pickBest(
 /**
  * Deterministic greedy CPU selector for evals. Pure: no RNG, clock, or mutation.
  * `self` is the CPU combatant; `target` is the player (selector argument order).
+ * Combat arithmetic is projected via grounding (proven choice-identical on committed suites).
  */
 export function createGreedySelector(
   agent: AgentConfig,
@@ -99,9 +95,11 @@ export function createGreedySelector(
       return equipped[0]!.skillId;
     }
 
-    const lethal = affordable.filter((skill) => dmg(skill, target) >= target.health);
+    const lethal = affordable.filter(
+      (skill) => dmg(skill, self, target) >= target.health
+    );
     if (lethal.length > 0) {
-      return pickBest(lethal, (skill) => dmg(skill, target))!.skillId;
+      return pickBest(lethal, (skill) => dmg(skill, self, target))!.skillId;
     }
 
     const lowHealth = self.health <= Math.floor(self.maxHealth * LOW_HEALTH_RATIO);
@@ -113,11 +111,15 @@ export function createGreedySelector(
     }
 
     const offenseBest = pickBest(affordable, (skill) => {
-      return dmg(skill, target) + ENERGY_DRAIN_WEIGHT * drain(skill, target);
+      return (
+        dmg(skill, self, target) +
+        ENERGY_DRAIN_WEIGHT * drain(skill, self, target)
+      );
     });
     if (offenseBest !== undefined) {
       const offenseScore =
-        dmg(offenseBest, target) + ENERGY_DRAIN_WEIGHT * drain(offenseBest, target);
+        dmg(offenseBest, self, target) +
+        ENERGY_DRAIN_WEIGHT * drain(offenseBest, self, target);
       if (offenseScore > 0) {
         return offenseBest.skillId;
       }
