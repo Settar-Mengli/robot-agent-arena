@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, inference client, agent layer (LLM turn + greedy baseline), eval harness (M-EVAL), and M-TOOLS grounding ablation are complete and covered by automated tests. Headless-first per D-014 / D-025 as amended: M-TOOLS is done (D-024 falsified; D-030); **M-BENCH is next**; UI (screens, store, React) remains later and is not present in this repository yet.
+**Status today:** the battle engine, inference client, agent layer (LLM turn + greedy baseline), eval harness (M-EVAL), and M-TOOLS grounding ablation are complete and covered by automated tests. Headless-first per D-014 / D-033: M-TOOLS is done (D-024 falsified; D-030); **M-BENCH is in review** (PR #23); next after that is **correctness hardening** (batch 4), then the environment interface (batch 5). UI remains later and is not present in this repository yet.
 
 ## Layered architecture and dependency rule
 
@@ -42,6 +42,11 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 **Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023).
 
 **PLANNED for the UI milestone:** Zustand store, React components/screens (Home, Builder, Arena, Report), and a thin `lib` bridge so UI calls store/lib workflows rather than engine internals directly. React, Tailwind, and Zustand are locked in [DECISIONS.md](DECISIONS.md) (D-005) but are **not installed** yet.
+
+## PLANNED (D-033)
+
+Measurement core will depend on an **environment interface** (legal moves, apply move, terminal test, terminal value, prompt description). The robot battle game is the **first implementation** of that interface — not a permanent hard-wire of eval to engine internals. UI depends on both the measurement core and the environment; it **owns no measurement logic**. Second reference environment is batch 11. See [D-033](DECISIONS.md) for the locked 11-batch order.
+
 ## Determinism and the engine contract
 
 The engine is pure TypeScript:
@@ -121,7 +126,7 @@ Player actions resolve before CPU. If the player action ends the battle, the CPU
 - Suite layout: `src/__tests__/**/*.test.ts` (Vitest, Node environment)
 - Includes unit coverage for constants, RNG, skills/validation, session lifecycle, combat, outcome, simulation, and **seam parity** (`parity.test.ts`): replays `resolveBattle` histories through `resolveTurn` + `isBattleOver` and asserts identical turns/outcomes, including a mandatory turn-limit scenario
 - Local commands: `npm test`, `npm run coverage`, `npm run typecheck`, `npm run lint`
-- CI (`.github/workflows/ci.yml`) runs typecheck, lint, and coverage on every pull request and on pushes to `main`
+- CI (`.github/workflows/ci.yml`) runs typecheck, lint, coverage, and `npm run eval:replay -- --suite all` on every pull request and on pushes to `main`
 
 Do not treat any checked-in coverage percentage as a permanent contract; use the latest CI / local `npm run coverage` report.
 

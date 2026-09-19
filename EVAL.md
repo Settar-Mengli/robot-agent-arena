@@ -272,6 +272,7 @@ Replace `MODEL` with the free-tier ids you record. Quota: `models × variants ×
 
 ## Findings
 
+- **Direction (D-033):** Product output reframes from scoring to **diagnosis** against exact ground truth. The three new measurements (prompt-perturbation sensitivity, adversarial-context robustness, information-scaling curves) will be **pre-registered before implementation** (same pattern as D-024). Binding honesty and known limitations are recorded in D-033; measured numbers in this file are unchanged.
 - **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs); most decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites are greedy-saturated (D-028); adversarial ablation **measured** (D-030): grounding changed 0/20 decisions — D-024 **falsified**.
 - **Adversarial threshold (corrected):** An earlier count of “~12 points at regret ≥ 100 in the first 12 scenarios” was wrong — the first 12 scenarios by id are nearly the same matchup with inert seeds, so that count was one state repeated. The full-split scan found only **3 dev / 1 heldout** points with greedyRegret ≥ 100 (n too small for ablation). `ADVERSARIAL_MIN_REGRET` was therefore lowered to **1** (any greedy error); both splits now commit 20 points ranked by greedyRegret, still with greedy optimalRate **0%** by construction.
 - **Metric choice (D-031):** On the held-out adversarial set, greedy is 0% optimal / mean regret 104.35 while the LLM is 5% / 4.25 — opposite failure modes. Report regret distribution alongside rate.
@@ -290,7 +291,7 @@ Replace `MODEL` with the free-tier ids you record. Quota: `models × variants ×
 - **M-TOOLS adversarial ablation:** n=20 snapshots on one split; matches were only 2 and unchanged between variants; decisions came from three models via failover, so “the LLM” is a mixture; no confidence intervals at this n; this says nothing about grounding in a richer environment. Memory variants (`agent-v2-memory`, `agent-v3-grounded-memory`) remain **unmeasured**.
 - Held-out LLM match sample on the earlier record is small (**n=6**) and all six used **FRACTURE**.
 - Snapshot optimality at n=20 has **no confidence interval**.
-- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread correlation remains parked (D-026).
+- Snapshots are drawn from **greedy-CPU play**, so they reflect states that greedy reaches (not the full state space). Seed-spread correlation is a known limitation (D-026 closed won't-fix under D-033).
 - Free-tier model volatility can change live/record results.
 - Replay latency is not meaningful.
 - Fictional environment vocabulary only.
