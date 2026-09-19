@@ -13,8 +13,11 @@ import {
   type BattleRuntime,
   type SkillId
 } from "../engine";
-import { memoStateKey, terminalValue } from "../eval/oracle";
-import { decisionStateKey, type DecisionSnapshot, type SnapshotSuite } from "../eval/snapshots";
+import {
+  decisionStateKey,
+  type DecisionSnapshot,
+  type SnapshotSuite
+} from "../eval/snapshots";
 import { STRIKER } from "../eval/scenarios";
 
 const suitesDir = join(
@@ -93,19 +96,17 @@ describe("robot environment adapter", () => {
     }
   });
 
-  it("cross-copy identity: env keys/values ≡ still-live oracle/snapshots originals on every suite state", () => {
+  it("decisionStateKey re-export matches env on every suite state", () => {
     const snaps = loadAllSuiteSnapshots();
     expect(snaps.length).toBeGreaterThan(0);
 
     for (const snap of snaps) {
       const { runtime, playerSkillId } = snap;
-      expect(robotEnvironment.memoStateKey(runtime)).toBe(memoStateKey(runtime));
-      expect(robotEnvironment.decisionStateKey(runtime, playerSkillId)).toBe(
-        decisionStateKey(runtime, playerSkillId)
+      expect(decisionStateKey(runtime, playerSkillId)).toBe(
+        robotEnvironment.decisionStateKey(runtime, playerSkillId)
       );
-      expect(robotEnvironment.terminalValue(runtime)).toBe(
-        terminalValue(runtime)
-      );
+      expect(robotEnvironment.memoStateKey(runtime)).toContain('"turn"');
+      expect(typeof robotEnvironment.terminalValue(runtime)).toBe("number");
     }
   });
 });

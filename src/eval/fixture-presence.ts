@@ -4,12 +4,7 @@
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-  isBattleOver,
-  startBattle,
-  stepBattle,
-  MVP_SKILL_CATALOG
-} from "../engine";
+import { MVP_SKILL_CATALOG } from "../engine";
 import {
   buildAgentMessages,
   computeGroundedFacts,
@@ -17,6 +12,7 @@ import {
   summarizePlayerTendencies,
   validateAgentResponse
 } from "../agent";
+import { robotEnvironment } from "../env";
 import { createDirStore } from "./dir-store";
 import { createReplayFetch, fixtureKey } from "./transport";
 import {
@@ -100,18 +96,18 @@ export async function scenarioMatchFixturesPresent(
   const playOpts = variantToPlayOptions(variant);
   const playerPolicy = resolvePlayerPolicy(scenario);
 
-  let runtime = startBattle(
+  let runtime = robotEnvironment.start(
     scenario.playerConfig,
     scenario.cpuConfig,
     scenario.seed
   );
 
-  while (!isBattleOver(runtime.session)) {
+  while (!robotEnvironment.isTerminal(runtime)) {
     const playerSkillId = playerPolicy(runtime);
     const observation = observePostPlayerState(runtime, playerSkillId);
 
     if (observation === null) {
-      runtime = stepBattle(runtime, playerSkillId).runtime;
+      runtime = robotEnvironment.apply(runtime, playerSkillId).runtime;
       continue;
     }
 
@@ -171,7 +167,7 @@ export async function scenarioMatchFixturesPresent(
     const selectCpu = validation.ok
       ? () => validation.skillId
       : undefined;
-    runtime = stepBattle(runtime, playerSkillId, selectCpu).runtime;
+    runtime = robotEnvironment.apply(runtime, playerSkillId, selectCpu).runtime;
   }
 
   return true;

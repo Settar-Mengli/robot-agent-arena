@@ -1,6 +1,6 @@
-import { isBattleOver, startBattle } from "../engine";
 import type { BattleOutcome, SkillId } from "../engine";
 import type { DecisionTrace } from "../agent";
+import { robotEnvironment } from "../env";
 import type { CpuPolicy } from "./policies";
 import { resolvePlayerPolicy } from "./policies";
 import type { MatchScenario } from "./scenarios";
@@ -29,14 +29,14 @@ export async function runMatch(
   cpuPolicy: CpuPolicy
 ): Promise<MatchResult> {
   const playerPolicy = resolvePlayerPolicy(scenario);
-  let runtime = startBattle(
+  let runtime = robotEnvironment.start(
     scenario.playerConfig,
     scenario.cpuConfig,
     scenario.seed
   );
   const turns: MatchTurnRecord[] = [];
 
-  while (!isBattleOver(runtime.session)) {
+  while (!robotEnvironment.isTerminal(runtime)) {
     const playerSkillId = playerPolicy(runtime);
     const turn = runtime.session.turn;
     const { step, trace } = await cpuPolicy.decide(runtime, playerSkillId);

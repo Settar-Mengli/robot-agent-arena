@@ -1,13 +1,7 @@
-import {
-  findSkillDefinition,
-  isBattleOver,
-  MAX_TURNS,
-  MVP_SKILL_CATALOG,
-  startBattle,
-  stepBattle
-} from "../engine";
+import { MAX_TURNS, MVP_SKILL_CATALOG } from "../engine";
 import type { BattleRuntime, SkillId } from "../engine";
 import { createGreedySelector } from "../agent";
+import { robotEnvironment } from "../env";
 import { resolvePlayerPolicy } from "./policies";
 import { bestResponse, oracleMemoIdentity, regret } from "./oracle";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
@@ -80,24 +74,11 @@ export type AdversarialSnapshotSuite = {
 /**
  * Decision-state fingerprint for snapshot dedupe (D-035).
  * Defense is the only mutable non-HP/energy combatant field (no cooldowns in-engine).
+ * Implementation lives on the environment adapter (A3).
  */
-export function decisionStateKey(
-  runtime: BattleRuntime,
-  playerSkillId: SkillId
-): string {
-  const p = runtime.player;
-  const c = runtime.cpu;
-  return [
-    runtime.session.turn,
-    p.health,
-    p.energy,
-    p.defense,
-    c.health,
-    c.energy,
-    c.defense,
-    playerSkillId
-  ].join("|");
-}
+export const decisionStateKey = robotEnvironment.decisionStateKey.bind(
+  robotEnvironment
+);
 
 function snapshotDecisionStateKey(snap: DecisionSnapshot): string {
   return decisionStateKey(snap.runtime, snap.playerSkillId);
@@ -139,10 +120,7 @@ const TARGET_COUNT = 20;
 const INITIAL_SCAN = 12;
 
 function affordableCpuCount(runtime: BattleRuntime): number {
-  return runtime.session.cpu.skillIds.filter((skillId) => {
-    const skill = findSkillDefinition(MVP_SKILL_CATALOG, skillId);
-    return skill !== undefined && skill.energyCost <= runtime.cpu.energy;
-  }).length;
+  return robotEnvironment.legalActions(runtime, "cpu").length;
 }
 
 function valuesAreFlat(values: Record<SkillId, number>): boolean {
@@ -184,13 +162,13 @@ function collectFromScenario(scenario: MatchScenario): DecisionSnapshot[] {
   };
   const found: DecisionSnapshot[] = [];
 
-  let runtime = startBattle(
+  let runtime = robotEnvironment.start(
     scenario.playerConfig,
     scenario.cpuConfig,
     scenario.seed
   );
 
-  while (!isBattleOver(runtime.session)) {
+  while (!robotEnvironment.isTerminal(runtime)) {
     const playerSkillId = playerPolicy(runtime);
 
     if (affordableCpuCount(runtime) >= 2) {
@@ -216,7 +194,7 @@ function collectFromScenario(scenario: MatchScenario): DecisionSnapshot[] {
       }
     }
 
-    runtime = stepBattle(runtime, playerSkillId, greedyCpu).runtime;
+    runtime = robotEnvironment.apply(runtime, playerSkillId, greedyCpu).runtime;
   }
 
   return found;
