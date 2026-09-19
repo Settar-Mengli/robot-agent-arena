@@ -728,3 +728,44 @@ A2 implements this protocol; EVAL.md publishes the outcome; D-030’s historical
 - **`agent-v2-grounded` / `computeGroundedFacts` / committed grounded fixtures / D-030 result preserved** unchanged as the historical record.
 
 Operator must run the D-034 record (keys) before EVAL results are filled; see EVAL.md corrected-arm section.
+
+## D-035 Snapshot suites counted duplicate states
+Date: 2026-09-19
+Status: Accepted
+
+Decision:
+Committed snapshot suites must assert **distinct decision states**. The assertion lives in the generators and in the drift guards — an invariant that fails loudly at generation time, not another local correction.
+
+### Defect (re-verified on main @ b0dac3c)
+
+Distinct states by `{turn, playerHp, playerEnergy, playerDefense, cpuHp, cpuEnergy, cpuDefense, playerSkillId}` (defense is the only mutable non-HP/energy combatant field; there is no cooldown in the engine):
+
+| suite | n | distinct states | notes |
+| --- | ---: | ---: | --- |
+| standard dev | 20 | 2 | 2 states ×10 |
+| standard heldout | 20 | 2 | 2 states ×10 |
+| pivotal dev | 20 | 2 | 2 states ×10 |
+| pivotal heldout | 20 | 8 | |
+| adversarial dev | 20 | 3 | |
+| adversarial heldout | 20 | 6 | one state appears **15** times |
+
+**Cause:** With a deterministic player policy and an injected greedy CPU selector, the engine RNG seed is never consumed, so scenarios that differ only by seed produce identical battles. Selectors rank candidates and take the top `targetCount` by score (pivotal: `selectPivotalSnapshots` → `qualified.slice(0, targetCount)` at `src/eval/snapshots.ts:269`; adversarial: same pattern at `:423`; standard: `selectEveryKth` at `:164–196`). Tie-breaks use `scenarioId` then turn; nothing dedupes by decision state. Distinct `(scenarioId, turn)` rows are therefore often clones of the same combat state.
+
+**Weighting bias:** Published greedy mean regret is multiplicity-weighted over duplicate rows. On held-out adversarial, published **104.35** vs unweighted over 6 distinct states **≈336.5** — the bias **flattered** the published comparison (greedy looked less bad). Dev adversarial: published **301.85**, unweighted **≈668.3**. Match suites collapse similarly (greedy+greedy ≈6 distinct battles / 60 scenarios); Wilson intervals at n=120 overstate precision. `countDistinctMatchups` counts strata (seed excluded), not battle fingerprints, so it can report full stratum coverage while battles are clones.
+
+**What survives (do not over-correct):**
+- Greedy **0%** optimal on adversarial suites — true by construction of the selection rule (`greedyRegret >= 1`).
+- Grounding changing **zero** decisions in D-030 / D-034 — an agreement claim, independent of n.
+- Direction of the discrimination verdict (optimal ≫ greedy).
+
+**What does not survive:** published mean regrets, effective sample sizes, and Wilson intervals that treated seed clones as independent trials.
+
+### Third instance of the same root cause
+
+This is the third time inert / non-discriminative sampling produced inflated n: (1) held-out split duplicating dev; (2) stratified sampling collapsing to one matchup; (3) snapshot selection counting duplicate decision states. Local patches failed to prevent recurrence. **Fix:** generators keep the highest-ranked instance of each distinct state while filling `targetCount`, record honest `count` / `targetCount` / `distinctStateCount` on shortfall (no padding), and drift guards plus an always-on test assert `distinctStateCount === snapshots.length` with unique state keys.
+
+Rationale:
+Sample-size honesty is a pre-condition for every published comparison; another one-off suite edit would leave the class of bug open.
+
+Consequences:
+Suites regenerate smaller where the split cannot supply 20 distinct states; EVAL.md numbers are corrected; match statistics and headroom denominators move to distinct-battle / distinct-state units in a follow-on change; operator re-record may be required for fixture-backed LLM rows on new states.

@@ -35,6 +35,8 @@ npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite
 
 ## Baseline
 
+> **D-035 correction in progress.** Committed snapshot suites under-count distinct decision states (standard/pivotal-dev: **2 of 20**; pivotal-heldout: **8 of 20**; adversarial-dev: **3 of 20**; adversarial-heldout: **6 of 20**). Match Wilson intervals below treat seed clones as independent trials. Numbers in this section are being regenerated under D-035; do not cite them as final until the correction lands.
+
 <!-- baseline:start -->
 ### Split: dev
 
@@ -100,6 +102,8 @@ npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite
 
 ## LLM results
 
+> **D-035 correction in progress.** Snapshot optimality / regret figures below were measured on suites with duplicate decision states (held-out adversarial: **6** distinct of 20; published greedy mean regret **104.35** is multiplicity-weighted vs **≈336.5** unweighted). Numbers are being corrected; fixture-backed rows may go pending until an operator re-record.
+
 <!-- llm:start -->
 Measured local `eval:record`, suite `heldout`, `--max-matches 6` (archetype-first stratified): 6 distinct matchups — aegis / mnemonic / tempest × greedy / seeded-random vs FRACTURE. Decisions were served by a **mixture** of Gemini, OpenRouter, and Groq (failover).
 
@@ -141,6 +145,8 @@ Independently verified: greedy CPU matches the LLM on **every** row (result and 
 
 ## Does the environment discriminate?
 
+> **D-035 correction in progress.** Match n=120 Wilson intervals and headroom point counts below overstate precision when seed clones share a battle/decision state. Discrimination **direction** (optimal ≫ greedy) survives; the sample-size framing does not. Numbers are being regenerated under D-035.
+
 Keyless run: `node scripts/run-ts.mjs src/eval/cli.ts --mode discriminate` (full 120-scenario suites × random / greedy / optimal; 0 inexact oracle turns).
 
 **Verdict: DISCRIMINATES** — optimal’s CPU win-rate Wilson CI is disjoint from greedy’s on both splits, and **67.1%** of greedy-playthrough decision points have a non-zero oracle value spread (>25% threshold).
@@ -164,6 +170,8 @@ Decision headroom (oracle values along greedy playthroughs):
 There is large room above greedy: optimal wins ~83–88% of matches while greedy wins ~9–11%. The earlier LLM↔greedy tie is therefore **not** evidence that the environment cannot separate good from bad play — only that today’s LLM mixture is not capturing that headroom.
 
 ## Ablation (M-TOOLS)
+
+> **D-035 correction in progress.** Adversarial suite distinct states: dev **3 of 20**, heldout **6 of 20** (one state ×15). Published greedy mean regret **104.35** (heldout) / **301.85** (dev) are multiplicity-weighted; unweighted ≈**336.5** / ≈**668.3**. Greedy **0%** optimal and D-030/D-034 zero decision-change claims survive. Suite n and mean regrets are being corrected under D-035.
 
 Protocol (D-024 / D-027 / D-028 / D-029):
 
@@ -267,6 +275,8 @@ CLI quota projection for that argv (default single-model failover path, consiste
 Fill after the operator record; do not invent numbers.
 
 ## Bench (M-BENCH)
+
+> **D-035 correction in progress.** Bench rows below use held-out adversarial n=20 with only **6** distinct decision states; vs-greedy deltas that cite mean regret **104.35** inherit the multiplicity bias. Numbers are being corrected; new-state rows may be marked pending for an operator record.
 
 Pinned single-model comparison on the **adversarial** measurement set (D-032). Columns exist so model choice is an evidence question, not folklore:
 
