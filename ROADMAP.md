@@ -10,7 +10,7 @@
 - Does not change the engine purity boundary (D-003), the agent turn contract (D-022), or the determinism boundary (D-019).
 
 ## MVP Scope
-Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + localStorage; turn-based; fictional vocabulary). Sequencing follows D-033’s 11-batch plan.
+Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + localStorage; turn-based; fictional vocabulary). Sequencing follows D-033’s **11 locked batches**, grouped into **5 execution batches** A–E (amend).
 
 - Engine-first implementation (DONE).
 - Pure TypeScript battle engine (DONE).
@@ -39,7 +39,9 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE**.
 - M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
 
-### AI milestone spine (D-033 — 11 batches)
+### AI milestone spine (D-033 — 11 locked batches, 5 execution groups)
+
+Locked batch numbers and contents are unchanged (D-033). Execution groups **A–E** (D-033 amend) share one gate/audit where noted; both numberings stay in sync here and in PROGRESS.
 
 #### 1. Discrimination + parked fixes — DONE
 Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-provider keyless `--suite all` replay.
@@ -50,28 +52,28 @@ Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal gr
 #### 3. M-BENCH headless — IN REVIEW (PR #23)
 Pinned single-model runs, repeat-aware fixtures, taxonomy/cost/consistency, committed bench summary. Protocol lands with that PR; multi-model operator record may follow.
 
-#### 4. Correctness hardening — NEXT (after #23)
+#### 4. Correctness hardening — NEXT (after #23) — execution batch A
 Silent risks on existing files, before any Report screen shows headline numbers: CI must re-prove pivotal / adversarial / bench / discriminate regen (today `skipIf`-gated); Oracle MemoScope identity; grounding gaps (fallback-stabilize, `diesNextTurn`, unknown effect categories); greedy must call grounding; pricing vs recorded Groq pin; sanitize new fixture records (do not rewrite committed fixtures); `.env.example` `INFERENCE_*` vars; strengthen weak tests.
 
-#### 5. Environment interface + port
-Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. **No behavior change**; committed artifacts must still replay.
+#### 5. Environment interface + port — execution batch A
+Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. **No behavior change**; committed artifacts must still replay. Shares gate with batch 4: every committed number byte-identical after the port.
 
-#### 6. UI part 1 — scaffolding + Builder
+#### 6. UI part 1 — scaffolding + Builder — execution batch B
 React, entry, state layer, component test env + Builder. Planned — not built.
 
-#### 7. UI part 2 — Arena + results
-Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built.
+#### 7. UI part 2 — Arena + results — execution batch B
+Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built. Highest-risk execution group: first runtime deps, first non-headless code, in-flight race.
 
-#### 8. Diagnostic layer
+#### 8. Diagnostic layer — execution batch C
 Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031).
 
-#### 9. Three new measurements
-Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 pattern).
+#### 9. Three new measurements — execution batch C
+Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 pattern). Same metrics/reporting surface as batch 8.
 
-#### 10. BYOK + committed leaderboard + methodology writeup
+#### 10. BYOK + committed leaderboard + methodology writeup — execution batch D
 UI default: deterministic CPU + fixture-replayed LLM. Live BYOK: OpenRouter-only, key in memory, explicit warning. D-016 proxy deferred. Leaderboard = committed static comparison page (not a live backend — D-020 anti-scope stands). Methodology told through the failed measurement sets and the falsified hypothesis.
 
-#### 11. Second reference environment + publish
+#### 11. Second reference environment + publish — execution batch E
 Small provably solvable task proving the interface is real; then publish.
 
 #### Parked / closed

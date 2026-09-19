@@ -618,3 +618,15 @@ Measured reality: grounding changed 0 of 20 decisions, and rate vs value disagre
 
 Consequences:
 ROADMAP / PROGRESS / README follow this 11-batch order. Next after PR #23 is **batch 4 (correctness hardening)**, then the environment interface (batch 5). Coach is out of scope.
+
+### Amend — 2026-09-18 — Execution grouping (five execution batches)
+
+The **11 locked batches above are unchanged** in number and content. For execution they are **grouped into five execution batches**, because several share one gate and one audit:
+
+- **Execution batch A** = locked batches **4 + 5** (correctness hardening + environment interface). Both touch the same `src/eval` files and both must leave every committed number byte-identical, so they share one gate: all committed suites, summaries, and fixtures still replay unchanged.
+- **Execution batch B** = locked batches **6 + 7** (UI scaffolding + Builder + Arena + results). Splitting the UI means the second half rebuilds context. Highest risk in the plan: first runtime dependencies, first non-headless code, and the in-flight race already recorded in this entry.
+- **Execution batch C** = locked batches **8 + 9** (diagnostic layer + the three new measurements). Same metrics layer and reporting surface. The binding honesty constraint in this entry applies most sharply here.
+- **Execution batch D** = locked batch **10** (BYOK + leaderboard + methodology writeup).
+- **Execution batch E** = locked batch **11** (second reference environment + publish).
+
+ROADMAP / PROGRESS show both numberings (locked batch + execution group letter) so neither drifts.

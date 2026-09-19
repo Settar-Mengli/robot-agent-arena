@@ -2,11 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-18
-- Branch: `docs/d033-direction`; base `main` @ `982e8a4`
-- Current state: Docs-only lock of **D-033** (supersedes D-025 scope/batch order). D-026 closed won't-fix. Coach cut. M-BENCH headless remains **in review** (PR #23). Next after #23: **batch 4 — correctness hardening** (not UI).
+- Branch: `docs/d033-execution-groups`; base `main` @ `670b22a`
+- Current state: Docs follow-up — D-033 amend groups the **11 locked batches** into **5 execution batches** (A–E). Locked numbers/contents unchanged. M-BENCH headless remains **in review** (PR #23). Next after #23: **locked batch 4 / execution batch A** (hardening + interface share one replay gate).
 - Test count: **258** (`npm run coverage`: 255 passed, 3 skipped)
 - Verification: typecheck / lint / coverage (all green)
-- Working tree: `docs/d033-direction` (six docs files only)
+- Working tree: `docs/d033-execution-groups` (docs fence: DECISIONS / ROADMAP / PROGRESS; README unchanged)
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -42,9 +42,10 @@
 - Adversarial snapshot suites + D-029 (PR #18); min regret 1 (PR #19).
 - M-TOOLS ablation published (D-030) and metric choice (D-031).
 - Docs reconcile (PR #22): public docs vs measured reality.
+- D-033 product direction lock (PR #24): 11-batch plan; coach cut; D-026 won't-fix.
 
 ## Current Work
-- D-033: lock revised product direction (11-batch plan; BYOK / Arena race / coach cut; D-026 won't-fix). Docs only.
+- D-033 amend: group locked batches 4–11 into execution batches A–E (docs only).
 
 ## Blockers
 - None.
@@ -57,7 +58,7 @@
 - PR #23 (M-BENCH) in review; pin protocol lands with that PR (not yet on `main`).
 
 ## Changed Files In Current Work
-- `DECISIONS.md`, `ROADMAP.md`, `PROGRESS.md`, `README.md`, `ARCHITECTURE.md`, `EVAL.md`
+- `DECISIONS.md`, `ROADMAP.md`, `PROGRESS.md`
 
 ## Exact Next Step
-- Land PR #23 (M-BENCH), then **batch 4 — correctness hardening** (CI regen gates, MemoScope, grounding, greedy→grounding, pricing, `.env.example`, weak tests). Environment interface is batch 5.
+- Land PR #23 (M-BENCH), then **execution batch A** = locked batches **4 + 5** (correctness hardening + environment interface; shared byte-identical replay gate). Then B = 6+7, C = 8+9, D = 10, E = 11.
