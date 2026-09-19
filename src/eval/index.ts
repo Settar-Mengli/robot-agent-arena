@@ -198,7 +198,8 @@ export {
   computeConsistencyMetrics,
   consistencySampleForSnapshot,
   aggregateLiveLatencies,
-  buildBenchRow
+  buildBenchRow,
+  summarizeBench
 } from "./bench";
 export type {
   KnownProvider,
@@ -210,5 +211,6 @@ export type {
   ConsistencyMetrics,
   BenchLatency,
   BenchRow,
-  BenchRowKey
+  BenchRowKey,
+  BenchSummary
 } from "./bench";

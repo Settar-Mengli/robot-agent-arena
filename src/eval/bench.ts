@@ -435,3 +435,56 @@ export function buildBenchRow(
   }
   return row;
 }
+
+export type BenchSummary = {
+  version: 1;
+  singleModelPending: boolean;
+  note: string;
+  models: string[];
+  variants: string[];
+  split: string;
+  snapshotSuite: string;
+  consistency: number;
+  rows: BenchRow[];
+};
+
+function stableRowKey(row: BenchRow): string {
+  return `${row.model}|${row.variant}|${row.split}|${row.snapshotSuite}`;
+}
+
+/** Deterministic committed summary: rows only, stable key order, no timestamps. */
+export function summarizeBench(options: {
+  rows: readonly BenchRow[];
+  models: readonly string[];
+  variants: readonly string[];
+  split: string;
+  snapshotSuite: string;
+  consistency: number;
+  singleModelPending?: boolean;
+  note?: string;
+}): BenchSummary {
+  const rows = [...options.rows].sort((a, b) => {
+    const ka = stableRowKey(a);
+    const kb = stableRowKey(b);
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+  const singleModelPending =
+    options.singleModelPending ?? options.models.length < 2;
+  return {
+    version: 1,
+    singleModelPending,
+    note:
+      options.note ??
+      (singleModelPending
+        ? "single-model proof pending operator multi-model record"
+        : "multi-model bench summary"),
+    models: [...options.models].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
+    variants: [...options.variants].sort((a, b) =>
+      a < b ? -1 : a > b ? 1 : 0
+    ),
+    split: options.split,
+    snapshotSuite: options.snapshotSuite,
+    consistency: options.consistency,
+    rows
+  };
+}
