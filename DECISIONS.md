@@ -845,3 +845,26 @@ Without a pin, “variant A beat variant B” confounds routing with prompt qual
 
 Consequences:
 Operator D-034 / D-035 refill used `--models gemini:gemini-3.5-flash-lite` (pinned record committed). CI `eval:replay --suite all` is green on those fixtures.
+
+## D-037 Environment interface (A3), adapter-only
+Date: 2026-09-19
+Status: Accepted
+
+Decision:
+Locked batch 5 / execution **A3** lands an `Environment` contract in `src/env/` with the robot game as `robotEnvironment`. State type is concrete `BattleRuntime` (no generics until batch 11). Methods: `start`, `apply`, `isTerminal`, `equippedActions`, `legalActions`, `terminalValue`, `memoStateKey`, `decisionStateKey`.
+
+**On the interface (not oracle-private):** `terminalValue` and both state keys. A second environment must supply scoring and memo/dedupe fingerprints; leaving them private would reopen the interface in batch 11.
+
+**`equippedActions` ≠ `legalActions`:** the oracle enumerates all equipped CPU skills (unaffordable still stepped; engine fallback). Snapshots, metrics, and discriminate filter by current energy. Both shapes are preserved exactly.
+
+**Out of scope for A3:** prompt construction, grounding fact shapes, observation probe semantics, catalog prompt payloads (`src/agent/prompt.ts` / `grounding.ts` untouched — fixture key preimages). `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON. Agent `observe` / `llm-turn` still call `stepBattle` directly (gameplay path, not measurement core).
+
+**Gate:** byte-identical committed suites, summaries, fixtures, and EVAL numbers; SNAPSHOT_DRIFT drift-guards plus a committed differential proof (suite states + match walks) asserting adapter ≡ engine.
+
+**Batch 11 will need:** a different `State` / `Action` (generics or a second concrete adapter), pluggable prompt description without `MVP_SKILL_CATALOG`, and likely a new snapshot serialization decision — not a silent change to `BattleRuntime` JSON.
+
+Rationale:
+D-033’s product is an evaluation framework; hard-wiring measurement to engine internals blocks a second reference environment.
+
+Consequences:
+ARCHITECTURE layering is `eval → env → engine`. ESLint restricts `src/env` to engine-only imports. CI drift job lists `env-differential.test.ts` (flag set unchanged from issue #28).

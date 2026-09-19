@@ -4,18 +4,19 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, inference client, agent layer (LLM turn + greedy baseline), eval harness (M-EVAL), and M-TOOLS grounding ablation are complete and covered by automated tests. Headless-first per D-014 / D-033: M-TOOLS is done (D-024 falsified; D-030); **M-BENCH is in review** (PR #23); next after that is **correctness hardening** (batch 4), then the environment interface (batch 5). UI remains later and is not present in this repository yet.
+**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), and eval harness (through A3) are complete and covered by automated tests. Headless-first per D-014 / D-033: A1–A3 done; next is an A-to-Z recon then UI (execution batch B). UI is not present in this repository yet.
 
 ## Layered architecture and dependency rule
 
-**Intended layering** (engine-first, UI later):
+**Layering** (engine-first, UI later):
 
 ```
 data  →  engine
          ↑
+         env (robotEnvironment)  ←  eval (measurement core)
+         ↑
 inference (standalone)  →  agent  →  (lib bridge)  →  store  →  components / screens
          ↑__________________|
-eval  →  engine, agent, inference   (nothing imports eval; lint-enforced)
 ```
 
 Dependencies should point inward toward the engine. Game logic must not live in React components. Browser APIs, persistence, and UI state stay outside `src/engine`.
@@ -29,6 +30,7 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 | Canonical skill catalog (data) | `src/engine/skills.ts` |
 | Validation | `src/engine/validation.ts` |
 | Session lifecycle, combat, outcome, RNG, simulation | other `src/engine/*.ts` files |
+| Environment interface + robot adapter | `src/env/` |
 | CPU opponent catalog | `src/data/opponents.ts` |
 | Multi-provider LLM client | `src/inference/` |
 | LLM opponent turn + greedy baseline | `src/agent/` |
@@ -37,15 +39,15 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 
 `src/data/` exists (opponents). There are **no** top-level `src/types/`, `src/store/`, `src/components/`, or `src/lib/` directories yet.
 
-**Layer rules (ESLint-enforced):** `src/inference/` is standalone (must not import engine, agent, or eval). `src/agent/` may import engine and inference but not eval. `src/engine/` must import neither agent, inference, nor eval. `src/eval/` may import engine, agent, and inference; nothing imports eval.
+**Layer rules (ESLint-enforced):** `src/inference/` is standalone (must not import engine, agent, or eval). `src/agent/` may import engine and inference but not eval. `src/engine/` must import neither agent, inference, nor eval. `src/env/` may import engine only (not agent, eval, or inference). `src/eval/` may import env, engine, agent, and inference; nothing imports eval.
 
-**Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023).
+**Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023). Dynamics go through the environment adapter (`robotEnvironment`); terminal scoring and memo/decision state keys live on the interface.
 
 **PLANNED for the UI milestone:** Zustand store, React components/screens (Home, Builder, Arena, Report), and a thin `lib` bridge so UI calls store/lib workflows rather than engine internals directly. React, Tailwind, and Zustand are locked in [DECISIONS.md](DECISIONS.md) (D-005) but are **not installed** yet.
 
-## PLANNED (D-033)
+## Environment interface (A3 / D-033 batch 5)
 
-Measurement core will depend on an **environment interface** (legal moves, apply move, terminal test, terminal value, prompt description). The robot battle game is the **first implementation** of that interface — not a permanent hard-wire of eval to engine internals. UI depends on both the measurement core and the environment; it **owns no measurement logic**. Second reference environment is batch 11. See [D-033](DECISIONS.md) for the locked 11-batch order.
+The measurement core depends on the **environment interface** in `src/env/` (`start`, `apply`, `isTerminal`, `equippedActions`, `legalActions`, `terminalValue`, `memoStateKey`, `decisionStateKey`). The robot game implements it as `robotEnvironment` by delegating to the engine. **Scoring and state keys are on the interface** (a second environment must supply them). Policies, prompt construction, grounding facts, and scenario content stay deliberately game-specific outside `src/env`. `DecisionSnapshot.runtime` remains today’s `BattleRuntime` JSON. Second reference environment is locked batch 11.
 
 ## Determinism and the engine contract
 
