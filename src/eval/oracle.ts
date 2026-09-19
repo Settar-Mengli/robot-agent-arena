@@ -91,7 +91,8 @@ function resolveOutcome(runtime: BattleRuntime): BattleOutcome {
   return determineTurnLimitOutcome(runtime.player, runtime.cpu);
 }
 
-function terminalValue(runtime: BattleRuntime): number {
+/** Exported for A3 dual-window cross-copy tests; deleted when rewired to env. */
+export function terminalValue(runtime: BattleRuntime): number {
   const outcome = resolveOutcome(runtime);
 
   let base = 0;
@@ -104,7 +105,8 @@ function terminalValue(runtime: BattleRuntime): number {
   return base + (runtime.cpu.health - runtime.player.health);
 }
 
-function stateKey(runtime: BattleRuntime): string {
+/** Exported for A3 dual-window cross-copy tests; deleted when rewired to env. */
+export function memoStateKey(runtime: BattleRuntime): string {
   return JSON.stringify({
     turn: runtime.session.turn,
     player: runtime.player,
@@ -125,7 +127,7 @@ function valueOfState(runtime: BattleRuntime, ctx: SearchCtx): number {
     return terminalValue(runtime);
   }
 
-  const key = stateKey(runtime);
+  const key = memoStateKey(runtime);
   const cached = ctx.memo.get(key);
   if (cached !== undefined) {
     return cached;

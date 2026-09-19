@@ -80,6 +80,24 @@ export default tseslint.config(
     }
   },
   {
+    files: ["src/env/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "**/agent",
+            "**/agent/**",
+            "**/eval",
+            "**/eval/**",
+            "**/inference",
+            "**/inference/**"
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ["src/agent/baselines/**/*.ts"],
     rules: {
       "no-restricted-properties": [
