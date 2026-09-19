@@ -24,9 +24,10 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md (D-024 falsified; D-030).
 - **DONE:** M-BENCH headless (PR #23 / D-032).
 - **DONE:** Execution batch **A1** (prompt-byte-frozen hardening) — greedy→grounding proven choice-identical; MemoScope identity; CI drift job; pricing/env/sanitize; pinned tests.
-- **DONE (code):** Execution batch **A2** — corrected facts as `agent-v4-grounded` / `grounded-v2`; **results pending** operator record (D-034, needs keys).
-- **DONE (code):** **D-035** — snapshot state dedupe + honest match/sample counts (`fix/duplicate-state-suites`). Suites regenerated (heldout adversarial **n=13**); LLM/bench rows **pending** operator re-record on new states.
-- **NEXT:** Operator record for D-034 **and** D-035 refill (adversarial ablation + bench on n=13), then A3 (adapter-only interface).
+- **DONE (code):** Execution batch **A2** — corrected facts as `agent-v4-grounded` / `grounded-v2`; **result pending** a **pinned** operator record (D-034 + D-036).
+- **DONE (code):** **D-035** — snapshot state dedupe + honest match/sample counts (`fix/duplicate-state-suites`). Suites regenerated (heldout adversarial **n=13**); LLM/bench rows **pending** pinned re-record.
+- **DONE (code):** **D-036** — multi-variant comparisons require `--models` pin; manifest records pin; unpinned mixture recordings are not published.
+- **NEXT:** Operator **pinned** record for D-034 / D-035 refill, then A3 (adapter-only interface).
 - **PLANNED:** UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -60,8 +61,8 @@ Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture k
 #### 4. Correctness hardening — DONE — execution batch **A1** (prompt-byte frozen)
 CI re-proves pivotal / adversarial / bench / discriminate regen (`drift` job, `SNAPSHOT_DRIFT=1`); Oracle MemoScope identity (numeric `maxTurns` + catalog); pricing for Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; weak tests pin published values; greedy→grounding landed after differential proof (0 choice diffs). **Gate held:** committed numbers byte-identical. Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
 
-#### A2. Grounding correctness + ablation re-run (D-034) — CODE DONE; RESULTS PENDING
-Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2` (post-action diesNextTurn, fallback projection, loud unmodelled marker). Old `agent-v2-grounded` fixtures and D-030 preserved. **Not** under the byte-identical gate. **Operator record with keys still required** before EVAL results are filled.
+#### A2. Grounding correctness + ablation re-run (D-034) — CODE DONE; RESULT PENDING PINNED RECORD
+Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2`. Old `agent-v2-grounded` fixtures and D-030 preserved. Unpinned comparative readings retracted (D-036). **Operator pinned record still required** before EVAL results are filled.
 
 #### 5. Environment interface + port — execution batch **A3** (adapter only)
 Measurement core depends on a contract (legal moves, apply move, terminal test, terminal value, prompt description). Existing game is the first implementation. `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON — no new serialized state type. **Gate: byte-identical** (committed artifacts must still replay unchanged).

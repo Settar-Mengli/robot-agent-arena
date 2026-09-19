@@ -241,7 +241,7 @@ Providers across the record run: gemini 71 decisions (18× 429), openrouter 8 (2
 
 **D-024 falsifier (applied):** grounded did not change any decision vs base on the measurement set; publish that failure here.
 
-### Corrected grounding arm (D-034) — RESULTS PENDING OPERATOR RECORD
+### Corrected grounding arm (D-034) — PENDING PINNED RECORD (D-036)
 
 Historical `grounded` (`agent-v2-grounded`) remains the D-024/D-030 record and must not be rewritten. The corrected arm is a **new** variant:
 
@@ -252,25 +252,35 @@ Historical `grounded` (`agent-v2-grounded`) remains the D-024/D-030 record and m
 | play option | `facts-v2` |
 | fixes | post-action `diesNextTurnAfterMove`; fallback-stabilize projection when unaffordable; unmodelled categories refused in V2 facts |
 
-**Prediction (pre-registered):** corrected arm changes **≥1** decision vs `base` on held-out adversarial and does **not** increase mean regret.
+**Prediction (pre-registered):** corrected arm changes **≥1** decision vs `base` on held-out adversarial and does **not** increase mean regret. **This prediction can only be tested under a pinned model** (D-036).
 
-**Operator command (keys required) — use post-D-035 suite (n=13):**
+### Measured instability (unpinned multi-variant runs — not a published result)
 
-```powershell
-npm run eval:record -- --suite heldout --variants base,grounded-v2 --snapshot-suite adversarial --max-matches 2
-```
+Two consecutive local `eval:record` runs with identical arguments, prompts, and temperature 0, **without** `--models`, produced contradictory **base** figures on **dev:adversarial** (n=6):
 
-CLI quota projection:  
-`quota projection: models=1 variants=2 snapshots=13 matches=2 × ~17 × consistency=1 → 94 calls (cap 300)`
+| run | base optimal | base mean regret | what differed |
+| --- | ---: | ---: | --- |
+| 1 | **50.00%** | **1.00** | provider mixture under failover |
+| 2 | **33.33%** | **334.50** | same code/prompt; different providers answered (e.g. gemini ~209 decisions with ~58 rate-limit failures, plus groq/openrouter) |
 
-### Results (held-out adversarial, n=13 distinct) — D-034 — PENDING
+Fixture keys include host and model, so the same decision stores different answers per provider; replay reproduces whichever was recorded. **Any base-vs-variant comparison from these unpinned runs is confounded by provider assignment.**
+
+An earlier reading that “grounded-v2 changed one decision for the worse” is **retracted as unsupported** — that delta sits inside the run-to-run variation shown above. Unpinned multi-variant recordings are **not committed** (D-036).
+
+### Results — D-034 — PENDING a pinned record
 
 | arm | promptVersion | optimal | mean / median / max regret | regret≥100 | validity | fallback | decisions changed vs base |
 | --- | --- | ---: | --- | ---: | ---: | ---: | ---: |
 | **base** | agent-v1 | — | — | — | — | — | — |
 | **grounded-v2** | agent-v4-grounded | — | — | — | — | — | — |
 
-Fill after the operator record; do not invent numbers.
+**Operator command (keys required) — pinned, post-D-035 suites:**
+
+```powershell
+npm run eval:record -- --suite all --variants base,grounded,grounded-v2 --snapshot-suite adversarial --max-matches 2 --models groq:openai/gpt-oss-20b
+```
+
+Recommend **groq** over gemini given the rate-limit load observed in the unpinned runs. CLI prints the quota projection (cap 300). Only this pinned run (or an equivalent single `--models` pin) becomes the published record.
 
 ## Bench (M-BENCH)
 
@@ -314,7 +324,8 @@ Replace `MODEL` with the free-tier ids you record. Quota: `models × variants ×
 
 - **Direction (D-033):** Product output reframes from scoring to **diagnosis** against exact ground truth. The three new measurements (prompt-perturbation sensitivity, adversarial-context robustness, information-scaling curves) will be **pre-registered before implementation** (same pattern as D-024). Binding honesty and known limitations are recorded in D-033.
 - **Environment discrimination:** The environment **does discriminate**. Optimal-play CPU is far above greedy on both splits (disjoint win-rate CIs over **distinct battles**); ~70% of distinct decision points have non-zero value spread. D-025 amend: **M-ENV dropped**; batch 2 is **M-TOOLS**. First ablation on standard suites was **inconclusive**; pivotal suites shortfall after D-035 (n=8, greedy 87.5%); adversarial ablation **measured** (D-030): grounding changed 0 decisions on the historical suite — D-024 **falsified**.
-- **D-035 distinct states:** Generators and drift guards assert `distinctStateCount === snapshots.length`. Held-out adversarial **n=13** (was 20 with only 6 distinct); greedy mean regret **156.15** (was multiplicity-weighted **104.35**). LLM/bench rows on the new suite are **pending** operator record.
+- **D-035 distinct states:** Generators and drift guards assert `distinctStateCount === snapshots.length`. Held-out adversarial **n=13** (was 20 with only 6 distinct); greedy mean regret **156.15** (was multiplicity-weighted **104.35**). LLM/bench rows on the new suite are **pending** a **pinned** operator record (D-036).
+- **Pinning (D-036):** Multi-variant comparisons require exactly one `--models provider:model`. Unpinned failover mixes providers across runs; two unpinned base/dev:adversarial runs moved from 50%/1.00 to 33.33%/334.50 with no code change. Gameplay failover in `src/inference` is unchanged.
 - **Adversarial threshold (corrected):** An earlier count of “~12 points at regret ≥ 100 in the first 12 scenarios” was wrong — inert seeds. `ADVERSARIAL_MIN_REGRET=1`; after D-035 distinct-state counting, regret-tail @1 is **13** distinct per split; selected suites shortfall below target 20 where needed.
 - **Metric choice (D-031):** On stakes-skewed adversarial sets, report regret distribution alongside rate (historical opposite failure modes on the pre-dedupe suite).
 - **Held-out LLM vs greedy (earlier standard-suite sample):** On the stratified held-out sample (n=6 matchups, FRACTURE only), greedy matched the LLM on outcomes. That sample is **not** the adversarial measurement set.

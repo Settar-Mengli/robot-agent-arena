@@ -735,7 +735,11 @@ Operator must run the D-034 record (keys) before EVAL results are filled; see EV
 
 ### Amend — 2026-09-19 — Suite n after D-035
 
-D-034’s pre-registered “n=20” / “0 of 20” wording referred to the pre-dedupe adversarial suite. After D-035 the held-out adversarial suite is **n=13** distinct states. The zero-change conclusion for the **historical** grounded arm is unaffected. Operator record for `base` vs `grounded-v2` must use the regenerated suite (quota ≈94 calls at max-matches 2).
+D-034’s pre-registered “n=20” / “0 of 20” wording referred to the pre-dedupe adversarial suite. After D-035 the held-out adversarial suite is **n=13** distinct states. The zero-change conclusion for the **historical** grounded arm is unaffected. Operator record for `base` vs `grounded-v2` must use the regenerated suite under a **pinned** model (D-036).
+
+### Amend — 2026-09-19 — Comparative claim WITHDRAWN pending pinned run
+
+Any reading that the unpinned post-D-035 `grounded-v2` ablation **falsified** the “mean regret does not increase” half of the prediction, or that grounded-v2 “changed one decision for the worse,” is **WITHDRAWN**. Two consecutive unpinned record runs with identical prompts and T=0 moved **base** alone on dev:adversarial from **50.00% / 1.00** to **33.33% / 334.50** solely by provider assignment under failover. The apparent one-decision delta sits inside that variation. The prediction remains testable **only** under a pinned model (D-036). D-030’s historical zero-change claim on the prior suite is unaffected.
 
 ## D-035 Snapshot suites counted duplicate states
 Date: 2026-09-19
@@ -805,4 +809,24 @@ Suites regenerate smaller where the split cannot supply 20 distinct states; EVAL
 | discriminate greedy n (dev / heldout) | 120 / 120 | **41 / 53** distinct battles |
 | overall non-zero spread (verdict reason) | 67.1% | **70.2%** |
 
-LLM ablation / bench rows on the new adversarial suite are **pending** operator record (stale values removed). Historical D-030 0-decision claim preserved.
+LLM ablation / bench rows on the new adversarial suite are **pending** a **pinned** operator record (D-036; stale values removed). Historical D-030 0-decision claim preserved.
+
+## D-036 Pinning is required for any comparison
+Date: 2026-09-19
+Status: Accepted
+
+Decision:
+Any **comparative** measurement across prompt variants (ablation, multi-variant record/live/replay) requires exactly one pinned `provider:model` via `--models`. The CLI **fails hard** without it on multi-variant record/live. The pin is written onto each manifest variant entry and replayed with `maxProviders=1` via the existing bench helper (`pinnedInferenceEnv`). Single-variant exploration may stay unpinned but is warned as not comparable across runs.
+
+Evidence (same defect as D-032, second location):
+Two unpinned multi-variant record runs, identical args/prompts/T=0, base **dev:adversarial**: run 1 → 50.00% optimal / mean regret 1.00; run 2 → 33.33% / 334.50. Only the answering provider mixture changed (gemini dominated with many 429s; groq/openrouter also served). Fixture keys include host+model, so failover reassigns which recorded answer a decision gets.
+
+This **generalises D-032** from `--mode bench` to every comparative measurement path. **Gameplay failover in `src/inference` is deliberately unchanged** — only the eval harness refuses unattributable comparisons.
+
+**Recordings from unpinned multi-variant runs are not committed.** Local leftovers from those runs stay out of git. **Only recordings from a pinned multi-variant run become the published record.** After the operator’s pinned run, matching keys regenerate or reuse by content hash — no manual salvage of the unpinned mixture.
+
+Rationale:
+Without a pin, “variant A beat variant B” confounds routing with prompt quality — the same root cause that forced D-032 for bench.
+
+Consequences:
+Operator D-034 / D-035 refill must pass `--models groq:openai/gpt-oss-20b` (or another single pin). CI `eval:replay --suite all` stays red on absent keys until that pinned record is committed; do not narrow the CI command.
