@@ -207,9 +207,9 @@ describe("eval cli record summary", () => {
     expect(summary).toContain("mode: record");
     expect(summary).toContain("suite: dev");
     expect(summary).toContain("output:");
-    expect(summary).toContain("matches:");
+    expect(summary).toContain("matches: 1");
     expect(summary).toContain("decisions:");
-    expect(summary).toContain("decision-validity:");
+    expect(summary).toContain("decision-validity: 100.00%");
     expect(summary).toContain("served from cache:");
     expect(summary).toContain(
       "live latency p50/p95 (non-cached HTTP attempts):"

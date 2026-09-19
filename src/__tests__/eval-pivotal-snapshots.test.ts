@@ -142,13 +142,19 @@ describe("pivotal snapshot selection", () => {
 });
 
 describe("pivotal baselines (informational invariants)", () => {
-  it("greedy and random metrics are finite on pivotal suites", () => {
+  it("greedy metrics pin published pivotal baselines", () => {
+    // EVAL.md pivotal baselines: dev 100.00%/0.00, heldout 95.00%/100.10
+    const expected = {
+      dev: { optimalRate: 1, meanRegret: 0 },
+      heldout: { optimalRate: 0.95, meanRegret: 100.1 }
+    } as const;
     for (const split of ["dev", "heldout"] as const) {
       const suite = loadPivotal(`snapshots.pivotal.${split}.json`);
       const greedy = evalGreedySnapshots(suite.snapshots);
       const random = evalRandomSnapshots(suite.snapshots);
       expect(greedy.metrics.n).toBe(suite.count);
-      expect(Number.isFinite(greedy.metrics.optimalRate)).toBe(true);
+      expect(greedy.metrics.optimalRate).toBe(expected[split].optimalRate);
+      expect(greedy.metrics.meanRegret).toBeCloseTo(expected[split].meanRegret, 2);
       expect(Number.isFinite(random.metrics.meanRegret)).toBe(true);
     }
   });

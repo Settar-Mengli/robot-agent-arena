@@ -157,15 +157,18 @@ describe("adversarial snapshot selection", () => {
     }
   });
 
-  it("random and catalog-optimal baselines behave as expected", () => {
+  it("random and catalog-optimal baselines pin published adversarial values", () => {
     for (const split of ["dev", "heldout"] as const) {
       const suite = loadAdversarial(`snapshots.adversarial.${split}.json`);
-      const random = evalRandomSnapshots(suite.snapshots);
       const optimal = evalCatalogOptimalSnapshots(suite.snapshots);
-      expect(Number.isFinite(random.metrics.optimalRate)).toBe(true);
       expect(optimal.optimalRate).toBe(1);
       expect(optimal.meanRegret).toBe(0);
     }
+    // adversarial.baselines.json heldout random (EVAL 50.00% / 52.18)
+    const heldout = loadAdversarial("snapshots.adversarial.heldout.json");
+    const heldoutRandom = evalRandomSnapshots(heldout.snapshots);
+    expect(heldoutRandom.metrics.optimalRate).toBe(0.5);
+    expect(heldoutRandom.metrics.meanRegret).toBeCloseTo(52.175, 3);
   });
 
   it("suite baseline deltas use measured adversarial greedy, not standard 50%/0.50", () => {
