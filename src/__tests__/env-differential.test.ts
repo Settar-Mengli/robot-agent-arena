@@ -89,6 +89,7 @@ function walkScenario(scenario: MatchScenario, stats: DiffStats): void {
   let steps = 0;
   while (!robotEnvironment.isTerminal(envRuntime) && steps < 40) {
     const playerSkillId = playerPolicy(envRuntime);
+    // Policy on adapter- vs engine-produced combatants (port can diverge via bad apply).
     const greedyEnv = greedy(envRuntime.cpu, envRuntime.player);
     const greedyEngine = greedy(engineRuntime.cpu, engineRuntime.player);
     stats.statesCompared += 1;
@@ -98,17 +99,8 @@ function walkScenario(scenario: MatchScenario, stats: DiffStats): void {
 
     compareApply(envRuntime, playerSkillId, greedyEnv, stats);
 
-    if (robotEnvironment.equippedActions(envRuntime, "cpu").length >= 2) {
-      const a = bestResponse(envRuntime, playerSkillId, playerPolicy);
-      const b = bestResponse(envRuntime, playerSkillId, playerPolicy);
-      stats.statesCompared += 1;
-      if (
-        JSON.stringify(a.values) !== JSON.stringify(b.values) ||
-        JSON.stringify(a.best) !== JSON.stringify(b.best)
-      ) {
-        stats.differences += 1;
-      }
-    }
+    // Match-walk oracle vs oracle dropped: once runtimes are byte-identical,
+    // pure bestResponse equality is redundant with serialization.
 
     const nextEnv = robotEnvironment.apply(envRuntime, playerSkillId, greedy);
     const nextEngine = stepBattle(engineRuntime, playerSkillId, greedy);
@@ -129,7 +121,7 @@ function walkScenario(scenario: MatchScenario, stats: DiffStats): void {
 
 describe("env adapter differential", () => {
   it.skipIf(process.env.SNAPSHOT_DRIFT !== "1")(
-    "drift-guard: env adapter ≡ engine across suites and match walks",
+    "drift-guard: env apply ≡ stepBattle; suite oracle ≡ committed; match-walk parallel greedy/runtime",
     () => {
       const started = performance.now();
       const stats: DiffStats = { statesCompared: 0, differences: 0 };
@@ -142,15 +134,6 @@ describe("env adapter differential", () => {
         const scenario = byId.get(snap.scenarioId);
         expect(scenario).toBeDefined();
         const playerPolicy: PlayerPolicy = resolvePlayerPolicy(scenario!);
-
-        const greedy = createGreedySelector(runtime.session.cpu);
-        stats.statesCompared += 1;
-        if (
-          greedy(runtime.cpu, runtime.player) !==
-          greedy(runtime.cpu, runtime.player)
-        ) {
-          stats.differences += 1;
-        }
 
         for (const cpuSkillId of robotEnvironment.equippedActions(
           runtime,

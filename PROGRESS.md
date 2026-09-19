@@ -3,7 +3,7 @@
 ## Status Snapshot
 - Date: 2026-09-19
 - Branch: `feat/a3-env-interface` (A3); base `main` @ 95bb5d5
-- Current state: **A3 complete on branch** — environment interface + robot adapter, eval rewire, differential proof (18296 states / 0 diffs), docs.
+- Current state: **A3 complete on branch** — environment interface + robot adapter, eval rewire, differential proof (**13842** states / 0 diffs: apply≡engine, suite oracle≡committed, match-walk parallel greedy/runtime), docs.
 - Next: **A-to-Z recon**, then execution batch **B** (UI scaffolding + Builder).
 - Verification: typecheck / lint / coverage / SNAPSHOT_DRIFT drift-guards (incl. env differential) / `eval:replay --suite all` (zero absent)
 

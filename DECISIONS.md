@@ -859,7 +859,7 @@ Locked batch 5 / execution **A3** lands an `Environment` contract in `src/env/` 
 
 **Out of scope for A3:** prompt construction, grounding fact shapes, observation probe semantics, catalog prompt payloads (`src/agent/prompt.ts` / `grounding.ts` untouched — fixture key preimages). `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON. Agent `observe` / `llm-turn` still call `stepBattle` directly (gameplay path, not measurement core).
 
-**Gate:** byte-identical committed suites, summaries, fixtures, and EVAL numbers; SNAPSHOT_DRIFT drift-guards plus a committed differential proof (suite states + match walks) asserting adapter ≡ engine.
+**Gate:** byte-identical committed suites, summaries, fixtures, and EVAL numbers; SNAPSHOT_DRIFT drift-guards plus a committed differential proof covering (1) adapter `apply`/`start` vs engine `stepBattle`/`startBattle`, (2) suite `bestResponse` vs committed suite JSON, and (3) match-walk parallel greedy choices + byte-identical runtime serialization. Not a second independent oracle implementation — once parallel runtimes are byte-identical, oracle equality follows from purity.
 
 **Batch 11 will need:** a different `State` / `Action` (generics or a second concrete adapter), pluggable prompt description without `MVP_SKILL_CATALOG`, and likely a new snapshot serialization decision — not a silent change to `BattleRuntime` JSON.
 
