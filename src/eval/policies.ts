@@ -1,5 +1,9 @@
 import { createGreedySelector, playAgentTurn, PROMPT_VERSIONS } from "../agent";
-import type { DecisionTrace, PlayAgentTurnOptions } from "../agent";
+import type {
+  DecisionTrace,
+  PlayAgentTurnOptions,
+  PlayAgentTurnResult
+} from "../agent";
 import {
   createSeededRng,
   findSkillDefinition,
@@ -304,7 +308,7 @@ export function llmCpuPolicy(options: LlmCpuPolicyOptions = {}): CpuPolicy {
   return {
     id: llmPolicyIdForVariant(variant),
     decide: async (runtime, playerSkillId) => {
-      const { step, trace } = await playAgentTurn(
+      const { step, trace }: PlayAgentTurnResult = await playAgentTurn(
         runtime,
         playerSkillId,
         playOptions

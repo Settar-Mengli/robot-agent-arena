@@ -37,6 +37,7 @@ export type {
   AgentTurnSource,
   DecisionTrace,
   PlayAgentTurnOptions,
+  PlayAgentTurnResult,
   ValidationErr,
   ValidationErrorCode,
   ValidationOk,
