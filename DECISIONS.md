@@ -933,3 +933,31 @@ Rationale:
 
 Consequences:
 Arena/Builder must use this contract (or an equivalent epoch guard). Wiring real `playAgentTurn` / BYOK is a later batch.
+
+## D-042 UI turn result, Arena wiring, and deferred B.3 / B.4
+Date: 2026-09-20
+Status: Accepted
+
+Decision:
+Execution **B.2** (locked batch 7) ships Arena + results with these contracts:
+
+1. **`UiTurnResult = { step; trace? }`** — assignable from `PlayAgentTurnResult`; greedy CPU returns `{ step }` only (no fabricated traces; no eval imports).
+2. **`dispatchTurn` reserves `turnEpoch` and marks in-flight before invoking injected `playTurn`.** Sync throws and promise rejections share one epoch-checked `failTurn` path (`lastError`, idle, clear flight; **runtime unchanged**). `clearBattle` / `resetBattle` bump epoch so a later settle cannot overwrite them. Terminal sessions reject with `battle_over`.
+3. **Greedy adapter** (`createGreedyPlayTurn`) uses direct `stepBattle` + `createGreedySelector(runtime.session.cpu)` so CPU config cannot disagree with the live battle.
+4. **Builder:** Validate stays non-navigating; **Continue to battle setup** shows only while `validated !== null`; any edit invalidates. App preserves player/opponent/seed draft; Builder `initialConfig` restores fields without minting a new `agentId` when provided. Restart rebuilds from the same triple; return-to-Builder calls `clearBattle`.
+
+**Deferred (named, not done in B.2):**
+- **B.3 — Fixture-replayed LLM UI** — browser-safe fixture playback for LLM turns (D-033 default path); no Node eval harness in the browser.
+- **B.4 — MVP localStorage save slot** — one slot (D-006 / AGENT_RULES).
+
+Live BYOK remains execution batch D / locked batch 10.
+
+Rationale:
+Resolves the open design note in the D-033 B.1/B.2 amend: CPU play must not invent traces, and leave-while-pending must be proven via an injected deferred `playTurn` (no production delays). Fixture-replay and save slot stay product defaults but are sequenced after Arena/results so B.2 stays mergeable.
+
+Consequences:
+ROADMAP / PROGRESS list B.3 then B.4 after B.2. Do not mark fixture-replay LLM UI or save slot complete until those execution slices land.
+
+### Amend — 2026-09-20 — B.1 merged; B.2 implements D-042
+
+B.1 (shell + Builder) is on main. B.2 implements D-042 above. Follow-ups are **B.3** then **B.4** (not locked-batch renumbers — execution-only slices after locked batch 7).

@@ -29,11 +29,39 @@ function emptyModules(): ModuleFields {
   };
 }
 
-export function BuilderForm() {
-  const [agentId] = useState(() => crypto.randomUUID());
-  const [displayName, setDisplayName] = useState("");
-  const [modules, setModules] = useState<ModuleFields>(emptyModules);
-  const [skillIds, setSkillIds] = useState<SkillId[]>([]);
+function modulesFromConfig(config: AgentConfig): ModuleFields {
+  return {
+    coreIdentity: config.modules.coreIdentity,
+    memory: config.modules.memory,
+    sigilSecurity: config.modules.sigilSecurity,
+    rules: config.modules.rules,
+    strategy: config.modules.strategy
+  };
+}
+
+export type BuilderFormProps = {
+  /** When set, fields and agentId are seeded from this config (no new UUID). */
+  initialConfig?: AgentConfig | null;
+  /** Called only from Continue — does not re-validate. */
+  onContinue?: (config: AgentConfig) => void;
+};
+
+export function BuilderForm({
+  initialConfig = null,
+  onContinue
+}: BuilderFormProps) {
+  const [agentId] = useState(
+    () => initialConfig?.agentId ?? crypto.randomUUID()
+  );
+  const [displayName, setDisplayName] = useState(
+    () => initialConfig?.displayName ?? ""
+  );
+  const [modules, setModules] = useState<ModuleFields>(() =>
+    initialConfig ? modulesFromConfig(initialConfig) : emptyModules()
+  );
+  const [skillIds, setSkillIds] = useState<SkillId[]>(
+    () => initialConfig?.skillIds ?? []
+  );
   const [errors, setErrors] = useState<string[]>([]);
   const [validated, setValidated] = useState<AgentConfig | null>(null);
 
@@ -209,6 +237,15 @@ export function BuilderForm() {
               <dd>{validated.skillIds.join(", ")}</dd>
             </div>
           </dl>
+          {onContinue ? (
+            <button
+              type="button"
+              className="mt-4 rounded bg-emerald-600 px-4 py-2 font-medium text-stone-950 hover:bg-emerald-500"
+              onClick={() => onContinue(validated)}
+            >
+              Continue to battle setup
+            </button>
+          ) : null}
         </div>
       ) : null}
     </section>

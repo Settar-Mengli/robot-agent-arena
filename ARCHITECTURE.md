@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), and eval harness (through A3) are complete and covered by automated tests. Headless-first per D-014 / D-033: A1–A3 done; next is an A-to-Z recon then UI (execution batch B). UI is not present in this repository yet.
+**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3), and UI through execution **B.2** (Builder + Arena + results) are in the repository. Headless-first per D-014 / D-033: A1–A3 done; UI foundation + B.1 + B.2 shipped. Next execution slices: **B.3** fixture-replayed LLM UI, then **B.4** save slot; then diagnostic / BYOK batches.
 
 ## Layered architecture and dependency rule
 
@@ -35,15 +35,16 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 | Multi-provider LLM client | `src/inference/` |
 | LLM opponent turn + greedy baseline | `src/agent/` |
 | Eval harness (oracle, suites, CLI) | `src/eval/`, `evals/`, `EVAL.md` |
-| Tests | `src/__tests__/` |
+| UI (Builder, Arena, results, battle-view store) | `src/ui/` |
+| Tests | `src/__tests__/`, `src/ui/**/*.test.*` |
 
-`src/data/` exists (opponents). There are **no** top-level `src/types/`, `src/store/`, `src/components/`, or `src/lib/` directories yet.
+`src/data/` exists (opponents). There are **no** top-level `src/types/`, `src/store/`, `src/components/`, or `src/lib/` directories — UI store/components live under `src/ui/`.
 
 **Layer rules (ESLint-enforced):** `src/inference/` is standalone (must not import engine, agent, or eval). `src/agent/` may import engine and inference but not eval. `src/engine/` must import neither agent, inference, nor eval. `src/env/` may import engine only (not agent, eval, or inference). `src/eval/` may import env, engine, agent, and inference; nothing imports eval.
 
 **Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023). Dynamics go through the environment adapter (`robotEnvironment`); terminal scoring and memo/decision state keys live on the interface.
 
-**UI (execution B.1):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder lives under `src/ui/builder/` and validates configs through `src/engine` (`validateAgentConfigInput`, `MVP_SKILL_CATALOG`). Vanilla Zustand battle-view store is under `src/ui/store/` (D-041); Arena/results are **not** built yet (execution B.2).
+**UI (execution B.1 + B.2):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder (`src/ui/builder/`) validates configs through `src/engine`. Arena + results (`src/ui/arena/`) play turns through the vanilla Zustand battle-view store (`src/ui/store/`, D-041 / D-042) with a greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Fixture-replayed LLM UI (**B.3**) and save slot (**B.4**) are not built yet.
 
 ## Environment interface (A3 / D-033 batch 5)
 

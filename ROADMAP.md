@@ -28,8 +28,8 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** **D-035** — snapshot state dedupe + honest match/sample counts. Suites regenerated (heldout adversarial **n=13**).
 - **DONE (code):** **D-036** — multi-variant comparisons require `--models` pin; manifest records pin; unpinned mixture recordings are not published.
 - **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
-- **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (this branch).
-- **NEXT:** Operator preview smoke for B.1; then execution **B.2** (Arena + results).
+- **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (PR #33); execution **B.2** Arena + results (D-042).
+- **NEXT:** Operator preview smoke for B.2; then **B.3** fixture-replayed LLM UI → **B.4** MVP save slot.
 - **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -70,10 +70,16 @@ Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2`. Old
 Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON. Committed differential proof under `SNAPSHOT_DRIFT`. **Gate held:** byte-identical artifacts. Next: A-to-Z recon, then batch B (UI).
 
 #### 6. UI part 1 — scaffolding + Builder — locked batch 6 / execution **B.1**
-**Foundation** (D-038–D-041, PR #32) + **B.1 shell/Builder**: `index.html` → `src/ui/main.tsx`, Tailwind, Builder validates `AgentConfig` via engine APIs, CI `vite build`. No Arena/turn wiring.
+**DONE.** Foundation (D-038–D-041, PR #32) + B.1 shell/Builder (PR #33): `index.html` → `src/ui/main.tsx`, Tailwind, Builder validates `AgentConfig` via engine APIs, CI `vite build`.
 
 #### 7. UI part 2 — Arena + results — locked batch 7 / execution **B.2**
-Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built. Resolve UI turn-result contract (CPU `step` + optional genuine agent trace) before wiring play.
+**DONE (code).** Arena + results on the epoch-guarded battle-view store (D-041 / D-042): `UiTurnResult = { step; trace? }`, reserve-before-`playTurn`, greedy CPU from `runtime.session.cpu`, Builder Continue-when-validated, restart/clear with preserved draft. Leave-while-pending proven via injected deferred `playTurn`.
+
+#### 7b. Fixture-replayed LLM UI — execution **B.3** (after B.2)
+Browser-safe fixture playback for LLM turns (D-033 default: deterministic CPU + fixture-replayed LLM). No Node eval harness in the browser. **Not started.**
+
+#### 7c. MVP localStorage save slot — execution **B.4** (after B.3)
+One save slot (D-006 / AGENT_RULES). **Not started.**
 
 #### 8. Diagnostic layer — execution batch C
 Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031).
@@ -82,7 +88,7 @@ Headless first, then surfaced in the UI. Binding honesty: every conclusion trace
 Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 / D-034 pattern). Same metrics/reporting surface as batch 8.
 
 #### 10. BYOK + committed leaderboard + methodology writeup — execution batch D
-UI default: deterministic CPU + fixture-replayed LLM. Live BYOK: OpenRouter-only, key in memory, explicit warning. D-016 proxy deferred. Leaderboard = committed static comparison page (not a live backend — D-020 anti-scope stands). Methodology told through the failed measurement sets and the falsified hypothesis.
+UI default: deterministic CPU + fixture-replayed LLM (fixture path lands in **B.3**). Live BYOK: OpenRouter-only, key in memory, explicit warning. D-016 proxy deferred. Leaderboard = committed static comparison page (not a live backend — D-020 anti-scope stands). Methodology told through the failed measurement sets and the falsified hypothesis.
 
 #### 11. Second reference environment + publish — execution batch E
 Small provably solvable task proving the interface is real; then publish.

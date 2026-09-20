@@ -51,8 +51,58 @@ describe("BuilderForm", () => {
     expect(summary).toHaveTextContent("UNIT-ALPHA");
     expect(summary).toHaveAttribute("role", "status");
     expect(
-      screen.queryByRole("button", { name: /Start Battle/i })
+      screen.queryByRole("button", { name: /Continue to battle setup/i })
     ).toBeNull();
+  });
+
+  it("shows Continue only while validated, and calls onContinue with that config", () => {
+    const continues: string[] = [];
+    render(
+      <BuilderForm
+        onContinue={(config) => {
+          continues.push(config.displayName);
+        }}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: /Continue to battle setup/i })
+    ).toBeNull();
+
+    fillValidForm();
+    submitForm();
+    const continueBtn = screen.getByRole("button", {
+      name: /Continue to battle setup/i
+    });
+    fireEvent.click(continueBtn);
+    expect(continues).toEqual(["UNIT-ALPHA"]);
+
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "EDITED" }
+    });
+    expect(
+      screen.queryByRole("button", { name: /Continue to battle setup/i })
+    ).toBeNull();
+  });
+
+  it("seeds fields from initialConfig without minting a new agentId", () => {
+    const initial = {
+      agentId: "fixed-agent-id",
+      displayName: "SEEDED",
+      modules: {
+        coreIdentity: "Steady Vanguard",
+        memory: "Pattern Recall",
+        sigilSecurity: "Aegis Layer",
+        rules: "Never Skip Verification",
+        strategy: "Measured Pressure"
+      },
+      skillIds: ["skill-override-pulse", "skill-logic-storm"] as const
+    };
+    render(<BuilderForm initialConfig={{ ...initial, skillIds: [...initial.skillIds] }} />);
+    expect(screen.getByLabelText("Display name")).toHaveValue("SEEDED");
+    submitForm();
+    expect(screen.getByTestId("validated-config")).toHaveTextContent(
+      "fixed-agent-id"
+    );
   });
 
   it("keeps agentId stable when the display name changes after re-validate", () => {
