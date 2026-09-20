@@ -68,7 +68,7 @@ Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2`. Old
 Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON. Committed differential proof under `SNAPSHOT_DRIFT`. **Gate held:** byte-identical artifacts. Next: A-to-Z recon, then batch B (UI).
 
 #### 6. UI part 1 — scaffolding + Builder — execution batch B
-React, entry, state layer, component test env + Builder. Planned — not built.
+**Foundation landed** (D-038–D-041): UI eslint fence, dual tsconfig (DOM/jsx in `src/ui` only), vitest `node`+`ui` projects, `PlayAgentTurnResult`, pure epoch-guarded battle-view store. **Still planned:** React entry (`index.html` / `main.tsx`), styling, Builder components.
 
 #### 7. UI part 2 — Arena + results — execution batch B
 Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built. Highest-risk execution group: first runtime deps, first non-headless code, in-flight race.

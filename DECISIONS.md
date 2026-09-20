@@ -868,3 +868,55 @@ D-033’s product is an evaluation framework; hard-wiring measurement to engine 
 
 Consequences:
 ARCHITECTURE layering is `eval → env → engine`. ESLint restricts `src/env` to engine-only imports. CI drift job lists `env-differential.test.ts` (flag set unchanged from issue #28).
+
+## D-038 UI layer eslint fence
+Date: 2026-09-20
+Status: Accepted
+
+Decision:
+`src/ui/**` is a first-class layer with `no-restricted-imports` denying `**/eval`, `**/eval/**`, `node:*`, `fs` / `fs/**`, `path` / `path/**`, `child_process`, `os`, `worker_threads`, and `module`. Proof-of-bite is a node-suite test that runs ESLint `lintText` against a virtual `src/ui/` path (no on-disk violating file).
+
+Rationale:
+Browser code must not pull the Node-only eval harness or filesystem APIs. Matching other per-layer blocks keeps the fence discoverable.
+
+Consequences:
+UI imports of eval or Node builtins fail lint. A future root-level entry (`main.tsx` outside `src/ui/`) is **not** covered — carry-forward before shipping an app shell.
+
+## D-039 Dual tsconfig: DOM/jsx scoped to src/ui
+Date: 2026-09-20
+Status: Accepted
+
+Decision:
+Root `tsconfig.json` keeps `"lib": ["ES2022"]` (no `jsx`) and `exclude: ["src/ui"]`. `tsconfig.ui.json` extends root and **overrides** `include`, `exclude`, `compilerOptions.lib` (`ES2022`+`DOM`+`DOM.Iterable`), and `compilerOptions.jsx` (`react-jsx`). Typecheck runs both projects. Child `exclude` must be set explicitly so root’s `exclude: ["src/ui"]` is not inherited (otherwise zero inputs).
+
+Rationale:
+Adding `"dom"` at the root would expose DOM globals to engine, agent, inference, and eval under `tsc`.
+
+Consequences:
+Root `lib` staying free of `"dom"` is **load-bearing** for the engine boundary. The Commit 2 probe (temporary engine file referencing `document`) is a **one-shot demonstration**, not a standing guard. A later batch adding `"dom"` to the root would **silently remove** the separation.
+
+## D-040 Vitest node + ui projects; coverage at root
+Date: 2026-09-20
+Status: Accepted
+
+Decision:
+`vitest.config.ts` uses `test.projects`: project `node` keeps `include: ["src/__tests__/**/*.test.ts"]` and `environment: "node"`; project `ui` uses `include: ["src/ui/**/*.test.ts", "src/ui/**/*.test.tsx"]` and `environment: "jsdom"`. Coverage stays on the **root** `test.coverage` block (not per-project).
+
+Rationale:
+Preserve byte-identical collection of the existing node suite while enabling component/DOM tests without overlapping globs.
+
+Consequences:
+New UI tests must live under `src/ui/` so they do not inflate the node project count. Unfiltered `vitest run` executes both projects.
+
+## D-041 Battle-view in-flight turn contract
+Date: 2026-09-20
+Status: Accepted
+
+Decision:
+`src/ui/store` holds a vanilla Zustand (`zustand/vanilla`) battle-view store with an explicit `InFlightTurn` and monotonic `turnEpoch`. `dispatchTurn` injects `playTurn` (no provider calls in the store). Three failure modes are prevented **by construction**: (1) no pre-await `runtime` write (no optimistic apply); (2) second dispatch while `status === "inFlight"` returns `already_in_flight`; (3) resolve commits only when `epoch === turnEpoch` (stale ignored; `resetBattle` bumps epoch to invalidate in-flight).
+
+Rationale:
+`playAgentTurn` always returns the same `{ step, trace }` shape after `stepBattle` on every exit path; the UI must apply runtime only after await and must not lose races. Vanilla `createStore` keeps the model pure and testable without React components (stack library is Zustand per D-005; vanilla vs React bindings is a batch choice, not a D-005 mandate).
+
+Consequences:
+Arena/Builder must use this contract (or an equivalent epoch guard). Wiring real `playAgentTurn` / BYOK is a later batch.
