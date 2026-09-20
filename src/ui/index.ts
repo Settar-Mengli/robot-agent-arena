@@ -1,2 +1,6 @@
-/** UI layer placeholder — no components in this batch. */
-export {};
+/** UI layer — store model only in this batch. */
+export {
+  createBattleViewStore,
+  type BattleViewStore,
+  type InFlightTurn
+} from "./store";
