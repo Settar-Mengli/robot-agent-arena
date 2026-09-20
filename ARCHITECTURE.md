@@ -43,7 +43,7 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 
 **Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023). Dynamics go through the environment adapter (`robotEnvironment`); terminal scoring and memo/decision state keys live on the interface.
 
-**PLANNED for the UI milestone:** Zustand store, React components/screens (Home, Builder, Arena, Report), and a thin `lib` bridge so UI calls store/lib workflows rather than engine internals directly. React, Tailwind, and Zustand are locked in [DECISIONS.md](DECISIONS.md) (D-005) but are **not installed** yet.
+**UI (execution B.1):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder lives under `src/ui/builder/` and validates configs through `src/engine` (`validateAgentConfigInput`, `MVP_SKILL_CATALOG`). Vanilla Zustand battle-view store is under `src/ui/store/` (D-041); Arena/results are **not** built yet (execution B.2).
 
 ## Environment interface (A3 / D-033 batch 5)
 

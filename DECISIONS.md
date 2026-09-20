@@ -653,6 +653,19 @@ The **11 locked batches above are unchanged** in number and content. For executi
 
 ROADMAP / PROGRESS show both numberings (locked batch + execution group letter) so neither drifts.
 
+### Amend — 2026-09-20 — Execution batch B subdivides into B.1 / B.2
+
+Locked batches **6** and **7** are unchanged in number and content. After foundation (D-038–D-041) landed on main, remaining UI work is executed as:
+
+- **B.1 — app shell + Builder.** Root `index.html` → `src/ui/main.tsx`; Tailwind; Builder produces validated `AgentConfig` via `validateAgentConfigInput`; local form state; production `vite build` in CI; no Arena or turn execution.
+- **B.2 — Arena + results.** Must use the epoch-guarded battle-view store (D-041). **Design to resolve (not decided here):** a UI-owned turn-result shape that applies CPU `step` results and may carry an optional genuine agent `DecisionTrace` — without importing eval types or fabricating traces.
+
+Rationale:
+Foundation already shipped; Builder does not need turn wiring. Keeping locked 6/7 intact avoids rewriting the product plan while allowing a second gate before Arena/in-flight risk.
+
+Consequences:
+ROADMAP / PROGRESS show B.1 / B.2 beside locked batches 6 and 7. Store contract widening is deferred to B.2 design, not implemented in B.1.
+
 ### Amend — 2026-09-18 — Execution batch A splits into A1 / A2 / A3
 
 Locked batches **4** and **5** are unchanged in number and content. Execution batch **A** cannot share one gate. Three findings:
