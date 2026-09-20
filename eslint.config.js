@@ -98,6 +98,29 @@ export default tseslint.config(
     }
   },
   {
+    files: ["src/ui/**/*.ts", "src/ui/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "**/eval",
+            "**/eval/**",
+            "node:*",
+            "fs",
+            "fs/**",
+            "path",
+            "path/**",
+            "child_process",
+            "os",
+            "worker_threads",
+            "module"
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ["src/agent/baselines/**/*.ts"],
     rules: {
       "no-restricted-properties": [

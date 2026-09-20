@@ -79,3 +79,9 @@ export interface DecisionTrace {
     durationMs?: number;
   }>;
 }
+
+/** Named result of `playAgentTurn` — `step` tracks `stepBattle`'s return shape. */
+export type PlayAgentTurnResult = {
+  step: ReturnType<typeof import("../engine").stepBattle>;
+  trace: DecisionTrace;
+};

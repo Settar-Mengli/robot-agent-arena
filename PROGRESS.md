@@ -1,11 +1,11 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-19
-- Branch: `feat/a3-env-interface` (A3); base `main` @ 95bb5d5
-- Current state: **A3 complete on branch** — environment interface + robot adapter, eval rewire, differential proof (**13842** states / 0 diffs: apply≡engine, suite oracle≡committed, match-walk parallel greedy/runtime), docs.
-- Next: **A-to-Z recon**, then execution batch **B** (UI scaffolding + Builder).
-- Verification: typecheck / lint / coverage / SNAPSHOT_DRIFT drift-guards (incl. env differential) / `eval:replay --suite all` (zero absent)
+- Date: 2026-09-20
+- Branch: `feat/ui-foundation` (batch B foundation); base `main` @ 5807470
+- Current state: **UI foundation complete on branch** — eslint `src/ui` fence, dual tsconfig, vitest node+ui projects, `PlayAgentTurnResult`, pure in-flight battle-view store + tests (D-038–D-041). No components / entry / Tailwind yet.
+- Next: Builder + Arena UI (still batch B); fence root-level entry before app shell.
+- Verification: typecheck (root + ui) / lint / vitest (node + ui) / `eval:replay --suite all` (types-only commit; zero fixture diffs)
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -14,8 +14,11 @@
 - **A1 hardening** (PR #27); **A2** (`grounded-v2` / pinned ablation).
 - **D-035** distinct-state snapshot suites; **D-036** pinning enforcement.
 - **A3** environment interface (`src/env`), adapter-only port, committed differential proof.
+- **Batch B foundation** — UI layer fence, deps, tsconfig split, vitest projects, turn-result type, store contract.
 
 ## Open
-- A-to-Z recon; batch B and later roadmap items.
+- Batch B remainder: entry, styling, Builder, Arena (in-flight race already modeled in store).
+- Root-level entry eslint coverage (carry-forward from D-038).
+- A-to-Z recon; later roadmap items.
 - Multi-model bench proof (`singleModelPending` still true).
 - Memory variants unmeasured.

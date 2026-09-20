@@ -17,13 +17,14 @@ import {
 import type {
   DecisionTrace,
   PlayAgentTurnOptions,
+  PlayAgentTurnResult,
   ValidationResult
 } from "./types";
 import { validateAgentResponse } from "./validate";
 
 const DEFAULT_BUDGET_MS = 10000;
 
-function cpuActionIds(step: ReturnType<typeof stepBattle>): {
+function cpuActionIds(step: PlayAgentTurnResult["step"]): {
   executedSkillId?: SkillId;
   resolvedSkillId?: string;
 } {
@@ -41,7 +42,7 @@ export async function playAgentTurn(
   runtime: BattleRuntime,
   playerSkillId: SkillId,
   options: PlayAgentTurnOptions = {}
-): Promise<{ step: ReturnType<typeof stepBattle>; trace: DecisionTrace }> {
+): Promise<PlayAgentTurnResult> {
   const budgetMs = options.budgetMs ?? DEFAULT_BUDGET_MS;
   const now = options.now ?? (() => performance.now());
   const catalog = options.catalog ?? MVP_SKILL_CATALOG;

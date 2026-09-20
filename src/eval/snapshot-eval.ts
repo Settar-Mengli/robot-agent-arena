@@ -1,5 +1,9 @@
 import { createGreedySelector, playAgentTurn } from "../agent";
-import type { DecisionTrace, PlayAgentTurnOptions } from "../agent";
+import type {
+  DecisionTrace,
+  PlayAgentTurnOptions,
+  PlayAgentTurnResult
+} from "../agent";
 import type { SkillId } from "../engine";
 import {
   computeConsistencyMetrics,
@@ -221,7 +225,7 @@ export async function evalLlmSnapshots(
 
   for (const snap of snapshots) {
     const picks: SkillId[] = [];
-    let primaryTrace: Awaited<ReturnType<typeof playAgentTurn>> | undefined;
+    let primaryTrace: PlayAgentTurnResult | undefined;
 
     for (let i = 0; i < consistencyN; i += 1) {
       consistencyOptions.setRepeat?.(i);
