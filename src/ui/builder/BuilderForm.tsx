@@ -37,11 +37,23 @@ export function BuilderForm() {
   const [errors, setErrors] = useState<string[]>([]);
   const [validated, setValidated] = useState<AgentConfig | null>(null);
 
+  function invalidateResults() {
+    setValidated(null);
+    setErrors([]);
+  }
+
+  function updateDisplayName(value: string) {
+    invalidateResults();
+    setDisplayName(value);
+  }
+
   function updateModule(key: AgentModule, value: string) {
+    invalidateResults();
     setModules((current) => ({ ...current, [key]: value }));
   }
 
   function toggleSkill(skillId: SkillId) {
+    invalidateResults();
     setSkillIds((current) => {
       if (current.includes(skillId)) {
         return current.filter((id) => id !== skillId);
@@ -89,7 +101,7 @@ export function BuilderForm() {
             name="displayName"
             type="text"
             value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
+            onChange={(event) => updateDisplayName(event.target.value)}
             className="mt-2 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
             autoComplete="off"
           />
@@ -178,6 +190,7 @@ export function BuilderForm() {
 
       {validated !== null ? (
         <div
+          role="status"
           className="mt-6 rounded border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-emerald-100"
           data-testid="validated-config"
         >

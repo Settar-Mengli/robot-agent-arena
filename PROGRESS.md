@@ -3,9 +3,10 @@
 ## Status Snapshot
 - Date: 2026-09-20
 - Branch: `feat/ui-builder` (execution **B.1**); base `main` includes UI foundation (#32)
-- Current state: **B.1 implemented** — Vite app shell under `src/ui`, Tailwind 4.3.3, Builder → validated `AgentConfig` via engine validation, coverage includes `.tsx` / excludes `*.test.*`, CI `npm run build`. Battle-view store untouched.
-- Next: Operator production preview smoke (`npm run build` + `npx vite preview`); then execution **B.2** (Arena + results; resolve UI turn-result contract first).
-- Verification (agent): typecheck / lint / vitest (330 passed / 6 skipped) / coverage report keys / build / `eval:replay --suite all` (fixture_miss 0). **Preview smoke: pending operator results.**
+- Current state: **B.1 implemented** — Vite app shell under `src/ui`, Tailwind 4.3.3, Builder → validated `AgentConfig` via engine validation (results invalidate on edit), coverage includes `.tsx` / excludes `*.test.*`, CI `npm run build`. Battle-view store untouched.
+- Next: Operator **follow-up** production preview smoke (`npm run build` + `npx vite preview`) after invalidation/favicon fixes; then execution **B.2** (Arena + results; resolve UI turn-result contract first).
+- Verification (agent): typecheck / lint / vitest / coverage report keys / build / `eval:replay --suite all` (fixture_miss 0).
+- Browser smoke: **original** run was **operator-observed** (shell/Builder OK; empty name rejected; valid config OK; skill-limit disable OK; agentId stable; console had `/favicon.ico` 404 only). **Follow-up** browser verification after this patch set remains **pending**.
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -18,7 +19,7 @@
 - **Execution B.1** — app shell + Builder + Tailwind + CI build step.
 
 ## Open
-- Operator browser smoke on Vite preview (B.1 acceptance incomplete until results supplied).
+- Operator follow-up preview smoke (invalidation + data-URI favicon).
 - Execution **B.2**: Arena + results; UI turn-result contract design (CPU step + optional genuine agent trace).
 - A-to-Z recon; later roadmap items.
 - Multi-model bench proof (`singleModelPending` still true).
