@@ -1,4 +1,5 @@
-/** UI layer — store model only in this batch. */
+/** UI layer — app shell and store model. */
+export { App } from "./App";
 export {
   createBattleViewStore,
   type BattleViewStore,

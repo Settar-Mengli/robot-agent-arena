@@ -24,11 +24,13 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md (D-024 falsified; D-030).
 - **DONE:** M-BENCH headless (PR #23 / D-032).
 - **DONE:** Execution batch **A1** (prompt-byte-frozen hardening) — greedy→grounding proven choice-identical; MemoScope identity; CI drift job; pricing/env/sanitize; pinned tests.
-- **DONE (code):** Execution batch **A2** — corrected facts as `agent-v4-grounded` / `grounded-v2`; **result pending** a **pinned** operator record (D-034 + D-036).
-- **DONE (code):** **D-035** — snapshot state dedupe + honest match/sample counts (`fix/duplicate-state-suites`). Suites regenerated (heldout adversarial **n=13**); LLM/bench rows **pending** pinned re-record.
+- **DONE (code):** Execution batch **A2** — corrected facts as `agent-v4-grounded` / `grounded-v2`; pinned gemini ablation published (D-034 + D-036).
+- **DONE (code):** **D-035** — snapshot state dedupe + honest match/sample counts. Suites regenerated (heldout adversarial **n=13**).
 - **DONE (code):** **D-036** — multi-variant comparisons require `--models` pin; manifest records pin; unpinned mixture recordings are not published.
-- **NEXT:** Operator **pinned** record for D-034 / D-035 refill, then A3 (adapter-only interface).
-- **PLANNED:** UI (Builder, Arena, results/diagnostics) → diagnostic layer → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
+- **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
+- **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (this branch).
+- **NEXT:** Operator preview smoke for B.1; then execution **B.2** (Arena + results).
+- **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
 ## Milestones
@@ -67,11 +69,11 @@ Corrected facts as `agent-v4-grounded` / variant `grounded-v2` / `facts-v2`. Old
 #### 5. Environment interface + port — DONE — execution batch **A3** (adapter only)
 Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.runtime` stays today’s `BattleRuntime` JSON. Committed differential proof under `SNAPSHOT_DRIFT`. **Gate held:** byte-identical artifacts. Next: A-to-Z recon, then batch B (UI).
 
-#### 6. UI part 1 — scaffolding + Builder — execution batch B
-**Foundation landed** (D-038–D-041): UI eslint fence, dual tsconfig (DOM/jsx in `src/ui` only), vitest `node`+`ui` projects, `PlayAgentTurnResult`, pure epoch-guarded battle-view store. **Still planned:** React entry (`index.html` / `main.tsx`), styling, Builder components.
+#### 6. UI part 1 — scaffolding + Builder — locked batch 6 / execution **B.1**
+**Foundation** (D-038–D-041, PR #32) + **B.1 shell/Builder**: `index.html` → `src/ui/main.tsx`, Tailwind, Builder validates `AgentConfig` via engine APIs, CI `vite build`. No Arena/turn wiring.
 
-#### 7. UI part 2 — Arena + results — execution batch B
-Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built. Highest-risk execution group: first runtime deps, first non-headless code, in-flight race.
+#### 7. UI part 2 — Arena + results — locked batch 7 / execution **B.2**
+Arena + results pages. Must design against the in-flight race (`playAgentTurn` always `stepBattle`s on failure; apply runtime only after await). Planned — not built. Resolve UI turn-result contract (CPU `step` + optional genuine agent trace) before wiring play.
 
 #### 8. Diagnostic layer — execution batch C
 Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031).

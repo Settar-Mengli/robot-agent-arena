@@ -1,3 +1,4 @@
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -5,8 +6,14 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "json-summary"],
-      include: ["src/**/*.ts"],
-      exclude: ["src/__tests__/**", "src/**/types.ts", "src/**/index.ts"]
+      include: ["src/**/*.ts", "src/**/*.tsx"],
+      exclude: [
+        "src/__tests__/**",
+        "src/**/types.ts",
+        "src/**/index.ts",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx"
+      ]
     },
     projects: [
       {
@@ -17,6 +24,7 @@ export default defineConfig({
         }
       },
       {
+        plugins: [react()],
         test: {
           name: "ui",
           include: ["src/ui/**/*.test.ts", "src/ui/**/*.test.tsx"],
