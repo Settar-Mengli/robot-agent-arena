@@ -9,9 +9,9 @@
         "src/engine/skills.ts",
         "src/agent/grounding.ts"
       ],
-      "sha256": "ceb5f12e127da5e2f7b411d85b8327120b3b1e59066151914bb274960cab3a9d"
+      "sha256": "5f5114933765eeb36bcec11c36eafb418763713ad711c47e4d23665bc6a69404"
     },
-    "skillCatalog": "8d249f1f07060d47f4e14ac2513264889cf07d216b6a1dcda5e7349a3e120168",
+    "skillCatalog": "44e255b081819027224d622065c89e3420fa29730a58831bb3dae1a8ac099b37",
     "oracleSource": "66df2cef3439ca845097cedef4709fd41c67f98b3773ef2d4ed8148a1cac4176"
   },
   "suite": {
@@ -2037,6 +2037,7 @@
     "B.2d Decision Lab is a partial diagnostic slice; B.3/B.4 and full batch-8 diagnostics remain open.",
     "Cohort is heldout adversarial snapshots only (n=13).",
     "Fixture misses are shown as unavailable; no invented model choices.",
+    "Input hashes are SHA-256 of UTF-8 text after normalizing newlines to LF (CRLF and lone CR).",
     "LLM arms are pinned gemini:gemini-3.5-flash-lite base (agent-v1) and grounded (agent-v2-grounded).",
     "Latency/cost from live inference are not claimed; this pack is offline replay evidence.",
     "Oracle is exact best response vs a fixed player policy, not a game-theoretic equilibrium.",

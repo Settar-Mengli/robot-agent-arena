@@ -1,6 +1,11 @@
 /**
  * Offline Decision Lab pack exporter.
  * Uses createReplayFetch only — no network fallback.
+ *
+ * Provenance `inputHashes` are SHA-256 of UTF-8 text after LF newline
+ * normalization (CRLF→LF, lone CR→LF), so Windows and Linux working trees
+ * with the same logical source produce identical packs under `.gitattributes`
+ * `eol=lf`.
  */
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -38,6 +43,8 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SUITE_REL = "evals/suites/snapshots.adversarial.heldout.json";
 const MANIFEST_REL = "evals/fixtures/manifest.json";
 const PACK_REL = "src/ui/lab/pack/decision-lab.v1.json";
+const SKILLS_REL = "src/engine/skills.ts";
+const ORACLE_REL = "src/eval/oracle.ts";
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
 
 const FIXED_PLAYER_POLICY =
@@ -50,7 +57,8 @@ const LIMITATIONS = [
   "Fixture misses are shown as unavailable; no invented model choices.",
   "Latency/cost from live inference are not claimed; this pack is offline replay evidence.",
   "Sample size is small — insufficient evidence for broad model rankings.",
-  "B.2d Decision Lab is a partial diagnostic slice; B.3/B.4 and full batch-8 diagnostics remain open."
+  "B.2d Decision Lab is a partial diagnostic slice; B.3/B.4 and full batch-8 diagnostics remain open.",
+  "Input hashes are SHA-256 of UTF-8 text after normalizing newlines to LF (CRLF and lone CR)."
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
 const REPRODUCE = [
@@ -58,8 +66,25 @@ const REPRODUCE = [
   "npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite adversarial --models gemini:gemini-3.5-flash-lite"
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
+/**
+ * Normalize newlines to LF before hashing provenance inputs.
+ * CRLF → LF, then any remaining lone CR → LF.
+ */
+export function normalizeNewlinesToLf(text: string): string {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
 function sha256Hex(bytes: Buffer | string): string {
   return createHash("sha256").update(bytes).digest("hex");
+}
+
+/** SHA-256 hex of UTF-8 bytes of LF-normalized text. */
+export function sha256TextLf(text: string): string {
+  return sha256Hex(normalizeNewlinesToLf(text));
+}
+
+async function defaultReadText(root: string, relPath: string): Promise<string> {
+  return (await readFile(join(root, relPath))).toString("utf8");
 }
 
 function sortBest(best: readonly string[]): string[] {
@@ -256,26 +281,32 @@ export type BuildLabPackOptions = {
   fetch?: RepeatAwareFetch;
   /** When true, skip writing to disk (tests). */
   dryRun?: boolean;
+  /**
+   * Test seam: return UTF-8 file text for a path relative to `root`
+   * (before LF normalization). Defaults to reading the real file.
+   */
+  readText?: (relPath: string) => Promise<string>;
 };
 
 export async function buildDecisionLabPack(
   options: BuildLabPackOptions = {}
 ): Promise<{ pack: DecisionLabPackV1; json: string }> {
   const root = options.root ?? ROOT;
-  const suitePath = join(root, SUITE_REL);
-  const manifestPath = join(root, MANIFEST_REL);
-  const suiteBytes = await readFile(suitePath);
-  const manifestBytes = await readFile(manifestPath);
+  const readText =
+    options.readText ?? ((rel: string) => defaultReadText(root, rel));
 
-  const promptParts: Buffer[] = [];
+  const suiteText = await readText(SUITE_REL);
+  const manifestText = await readText(MANIFEST_REL);
+
+  const promptTexts: string[] = [];
   for (const rel of PROMPT_TEMPLATE_FILES) {
-    promptParts.push(await readFile(join(root, rel)));
+    promptTexts.push(await readText(rel));
   }
-  const promptConcat = Buffer.concat(promptParts);
-  const skillCatalogBytes = await readFile(join(root, "src/engine/skills.ts"));
-  const oracleBytes = await readFile(join(root, "src/eval/oracle.ts"));
+  const promptConcat = promptTexts.join("");
+  const skillCatalogText = await readText(SKILLS_REL);
+  const oracleText = await readText(ORACLE_REL);
 
-  const suiteJson = JSON.parse(suiteBytes.toString("utf8")) as {
+  const suiteJson = JSON.parse(suiteText) as {
     count: number;
     distinctStateCount: number;
     snapshots: DecisionSnapshot[];
@@ -390,14 +421,14 @@ export async function buildDecisionLabPack(
   const pack: DecisionLabPackV1 = {
     schemaVersion: 1,
     inputHashes: {
-      suite: sha256Hex(suiteBytes),
-      fixtureManifest: sha256Hex(manifestBytes),
+      suite: sha256TextLf(suiteText),
+      fixtureManifest: sha256TextLf(manifestText),
       promptTemplates: {
         files: [...PROMPT_TEMPLATE_FILES],
-        sha256: sha256Hex(promptConcat)
+        sha256: sha256TextLf(promptConcat)
       },
-      skillCatalog: sha256Hex(skillCatalogBytes),
-      oracleSource: sha256Hex(oracleBytes)
+      skillCatalog: sha256TextLf(skillCatalogText),
+      oracleSource: sha256TextLf(oracleText)
     },
     suite: {
       split: "heldout",

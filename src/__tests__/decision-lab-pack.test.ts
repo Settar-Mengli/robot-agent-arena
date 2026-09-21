@@ -7,7 +7,11 @@ import {
   type FixtureStore
 } from "../eval/transport";
 import { evalLlmSnapshots } from "../eval/snapshot-eval";
-import { buildDecisionLabPack } from "../eval/lab-pack";
+import {
+  buildDecisionLabPack,
+  normalizeNewlinesToLf,
+  sha256TextLf
+} from "../eval/lab-pack";
 import type { DecisionSnapshot } from "../eval/snapshots";
 
 function memoryStore(map: Map<string, FixtureRecord> = new Map()): FixtureStore {
@@ -18,6 +22,33 @@ function memoryStore(map: Map<string, FixtureRecord> = new Map()): FixtureStore 
     }
   };
 }
+
+describe("lab-pack LF hash normalization", () => {
+  it("identical content with CRLF vs LF produces identical hashes", () => {
+    const lf = "line1\nline2\nline3";
+    const crlf = "line1\r\nline2\r\nline3";
+    const loneCr = "line1\rline2\rline3";
+    expect(normalizeNewlinesToLf(crlf)).toBe(lf);
+    expect(normalizeNewlinesToLf(loneCr)).toBe(lf);
+    expect(sha256TextLf(crlf)).toBe(sha256TextLf(lf));
+    expect(sha256TextLf(loneCr)).toBe(sha256TextLf(lf));
+  });
+
+  it("CRLF injected readText yields the same pack bytes as LF", async () => {
+    const root = process.cwd();
+    const lfPack = await buildDecisionLabPack({ dryRun: true });
+    const crlfPack = await buildDecisionLabPack({
+      dryRun: true,
+      readText: async (rel) => {
+        const text = await readFile(join(root, rel), "utf8");
+        // Simulate a Windows working tree with CRLF endings.
+        return normalizeNewlinesToLf(text).replace(/\n/g, "\r\n");
+      }
+    });
+    expect(crlfPack.json).toBe(lfPack.json);
+    expect(crlfPack.pack.inputHashes).toEqual(lfPack.pack.inputHashes);
+  });
+});
 
 describe("evalLlmSnapshots onDecision seam", () => {
   it("omitting onDecision leaves metrics/decisions unchanged vs no-op", async () => {
