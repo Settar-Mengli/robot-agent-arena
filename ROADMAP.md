@@ -29,7 +29,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** **D-036** — multi-variant comparisons require `--models` pin; manifest records pin; unpinned mixture recordings are not published.
 - **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
 - **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (PR #33); execution **B.2** Arena + results (D-042).
-- **NEXT:** Operator preview smoke for B.2; then **B.3** fixture-replayed LLM UI → **B.4** MVP save slot.
+- **NEXT:** **B.3** fixture-replayed LLM UI → **B.4** MVP save slot.
 - **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -73,7 +73,7 @@ Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.ru
 **DONE.** Foundation (D-038–D-041, PR #32) + B.1 shell/Builder (PR #33): `index.html` → `src/ui/main.tsx`, Tailwind, Builder validates `AgentConfig` via engine APIs, CI `vite build`.
 
 #### 7. UI part 2 — Arena + results — locked batch 7 / execution **B.2**
-**DONE (code).** Arena + results on the epoch-guarded battle-view store (D-041 / D-042): `UiTurnResult = { step; trace? }`, reserve-before-`playTurn`, greedy CPU from `runtime.session.cpu`, Builder Continue-when-validated, restart/clear with preserved draft. Leave-while-pending proven via injected deferred `playTurn`.
+**DONE.** Arena + results on the epoch-guarded battle-view store (D-041 / D-042): `UiTurnResult = { step; trace? }`, reserve-before-`playTurn`, greedy CPU from `runtime.session.cpu`, Builder Continue-when-validated, restart/clear with preserved draft. Leave-while-pending proven via injected deferred `playTurn`. Operator production-preview smoke passed (opponent selection, fallback progression, results, restart, preserved Builder draft, clean console).
 
 #### 7b. Fixture-replayed LLM UI — execution **B.3** (after B.2)
 Browser-safe fixture playback for LLM turns (D-033 default: deterministic CPU + fixture-replayed LLM). No Node eval harness in the browser. **Not started.**

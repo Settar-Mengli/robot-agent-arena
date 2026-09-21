@@ -1,12 +1,12 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-20
-- Branch: working tree (execution **B.2**)
-- Current state: **B.2 implemented** — Arena + results on the App-owned epoch store; `UiTurnResult`; greedy CPU from `runtime.session.cpu`; Builder Continue-when-validated; restart/clear with preserved draft; deferred-promise leave race covered in tests.
-- Next: Operator preview smoke for B.2; then **B.3** (fixture-replayed LLM UI) → **B.4** (MVP save slot).
+- Date: 2026-09-21
+- Branch: `feat/ui-arena` (execution **B.2**)
+- Current state: **B.2 complete** — Arena + results on the App-owned epoch store; `UiTurnResult`; greedy CPU from `runtime.session.cpu`; Builder Continue-when-validated; restart/clear with preserved draft; deferred-promise leave race covered in tests.
+- Next: **B.3** (fixture-replayed LLM UI) → **B.4** (MVP save slot).
 - Verification (agent): typecheck / lint / vitest / coverage / build / `eval:replay --suite all` (run at commit gate).
-- Browser smoke: **pending operator** (`build` + `vite preview`).
+- Browser smoke (**operator-observed**, production `build` + `vite preview`): Builder → setup (incl. SENTINEL-X) → battle through turn-limit results → restart; unaffordable/fallback progression; return to Builder preserves configuration; console clean.
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -20,7 +20,6 @@
 - **Execution B.2** — Arena + results; D-042 UI turn contract; greedy adapter; flow + leave-while-pending tests.
 
 ## Open
-- Operator preview smoke for B.2.
 - Execution **B.3**: fixture-replayed LLM UI (browser-safe; D-033 default path).
 - Execution **B.4**: MVP localStorage save slot.
 - A-to-Z recon; later roadmap items (diagnostic / BYOK / second env).

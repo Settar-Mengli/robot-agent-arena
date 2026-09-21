@@ -1,4 +1,4 @@
-import { createGreedySelector } from "../../agent";
+import { createGreedySelector } from "../../agent/baselines/greedy";
 import { stepBattle } from "../../engine";
 import type { PlayTurnFn } from "../store/battle-view";
 
