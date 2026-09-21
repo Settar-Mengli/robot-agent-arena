@@ -1,12 +1,12 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-20
-- Branch: `feat/ui-builder` (execution **B.1**); base `main` includes UI foundation (#32)
-- Current state: **B.1 complete pending PR merge** — Vite app shell under `src/ui`, Tailwind 4.3.3, Builder → validated `AgentConfig` via engine validation (results invalidate on edit), coverage includes `.tsx` / excludes `*.test.*`, CI `npm run build`. Battle-view store untouched.
-- Next: Merge B.1 PR when CI green; then execution **B.2** (Arena + results; resolve UI turn-result contract first).
-- Verification (agent): typecheck / lint / vitest / coverage report keys / build / `eval:replay --suite all` (fixture_miss 0).
-- Browser smoke (**operator-observed**, production preview): shell/Builder render; validation works; skill selection / limit disable works; results clear immediately on edits; agentId stays stable; console clean (favicon 404 resolved by data-URI icon).
+- Date: 2026-09-21
+- Branch: `feat/ui-arena` (execution **B.2**)
+- Current state: **B.2 complete** — Arena + results on the App-owned epoch store; `UiTurnResult`; greedy CPU from `runtime.session.cpu`; Builder Continue-when-validated; restart/clear with preserved draft; deferred-promise leave race covered in tests.
+- Next: **B.3** (fixture-replayed LLM UI) → **B.4** (MVP save slot).
+- Verification (agent): typecheck / lint / vitest / coverage / build / `eval:replay --suite all` (run at commit gate).
+- Browser smoke (**operator-observed**, production `build` + `vite preview`): Builder → setup (incl. SENTINEL-X) → battle through turn-limit results → restart; unaffordable/fallback progression; return to Builder preserves configuration; console clean.
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -16,11 +16,13 @@
 - **D-035** distinct-state snapshot suites; **D-036** pinning enforcement.
 - **A3** environment interface (`src/env`), adapter-only port, committed differential proof.
 - **Batch B foundation** (PR #32) — UI layer fence, deps, tsconfig split, vitest projects, turn-result type, store contract.
-- **Execution B.1** — app shell + Builder + Tailwind + CI build step + follow-up invalidation/favicon/a11y.
+- **Execution B.1** (PR #33) — app shell + Builder + Tailwind + CI build.
+- **Execution B.2** — Arena + results; D-042 UI turn contract; greedy adapter; flow + leave-while-pending tests.
 
 ## Open
-- Execution **B.2**: Arena + results; UI turn-result contract design (CPU step + optional genuine agent trace).
-- A-to-Z recon; later roadmap items.
+- Execution **B.3**: fixture-replayed LLM UI (browser-safe; D-033 default path).
+- Execution **B.4**: MVP localStorage save slot.
+- A-to-Z recon; later roadmap items (diagnostic / BYOK / second env).
 - Multi-model bench proof (`singleModelPending` still true).
 - Memory variants unmeasured.
 - README status line still stale (edit requires AGENT_RULES approval).
