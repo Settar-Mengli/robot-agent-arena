@@ -4,6 +4,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx"
   },
-  "include": ["src/ui/**/*.ts", "src/ui/**/*.tsx"],
+  "include": [
+    "src/ui/**/*.ts",
+    "src/ui/**/*.tsx",
+    "src/decision-lab/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist", "coverage"]
 }

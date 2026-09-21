@@ -116,7 +116,9 @@ export function BuilderForm({
         Builder
       </h2>
       <p className="mt-2 text-stone-400">
-        Configure an agent. Validation uses the engine catalog and limits.
+        Configure an agent. Skills affect Arena combat. Module text does not
+        change the greedy CPU opponent; modules apply to LLM prompts when LLM
+        play exists (B.3+). Validation uses the engine catalog and limits.
       </p>
 
       <form className="mt-8 space-y-8" onSubmit={onSubmit} noValidate>
@@ -137,6 +139,10 @@ export function BuilderForm({
 
         <fieldset>
           <legend className="text-sm text-stone-300">Modules</legend>
+          <p className="mt-1 text-xs text-stone-500">
+            Stored on the agent config for future LLM Arena. Not used by the
+            current greedy CPU opponent.
+          </p>
           <div className="mt-3 space-y-4">
             {AGENT_MODULES.map((key) => (
               <div key={key}>

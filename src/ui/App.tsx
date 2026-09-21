@@ -10,12 +10,13 @@ import { CPU_OPPONENTS } from "../data/opponents";
 import { ArenaView } from "./arena/ArenaView";
 import { ResultsView } from "./arena/ResultsView";
 import { BuilderForm } from "./builder/BuilderForm";
+import { DecisionLabView } from "./lab/DecisionLabView";
 import {
   createBattleViewStore,
   type PlayTurnFn
 } from "./store/battle-view";
 
-type Screen = "builder" | "setup" | "battle";
+type Screen = "builder" | "setup" | "battle" | "lab";
 
 const DEFAULT_SEED = "arena-1";
 
@@ -95,8 +96,38 @@ export function App({ playTurn }: AppProps = {}) {
         <h1 className="mt-2 text-4xl font-semibold tracking-tight">
           AGENT ARENA
         </h1>
+        <nav className="mt-4 flex flex-wrap gap-3" aria-label="Primary">
+          <button
+            type="button"
+            className={
+              screen === "builder" || screen === "setup" || screen === "battle"
+                ? "text-sm font-medium text-amber-400"
+                : "text-sm text-stone-400 hover:text-stone-200"
+            }
+            onClick={() => {
+              if (screen === "lab") {
+                setScreen("builder");
+              }
+            }}
+          >
+            Builder / Arena
+          </button>
+          <button
+            type="button"
+            className={
+              screen === "lab"
+                ? "text-sm font-medium text-amber-400"
+                : "text-sm text-stone-400 hover:text-stone-200"
+            }
+            onClick={() => setScreen("lab")}
+          >
+            Decision Lab
+          </button>
+        </nav>
       </header>
       <main className="mx-auto max-w-3xl px-6 py-10">
+        {screen === "lab" ? <DecisionLabView /> : null}
+
         {screen === "builder" ? (
           <BuilderForm
             initialConfig={playerConfig}
@@ -166,11 +197,13 @@ function BattleSetup(props: {
         Battle setup
       </h2>
       <p className="mt-2 text-stone-400">
-        Player: {props.player.displayName}. Choose opponent and seed.
+        Player: {props.player.displayName}. Opponent is a{" "}
+        <strong className="font-medium text-stone-200">greedy CPU</strong>{" "}
+        baseline (deterministic; not an LLM). Choose opponent and seed.
       </p>
 
       <fieldset className="mt-8">
-        <legend className="text-sm text-stone-300">Opponent</legend>
+        <legend className="text-sm text-stone-300">Opponent (greedy CPU)</legend>
         <ul className="mt-3 space-y-2">
           {CPU_OPPONENTS.map((cpu) => (
             <li key={cpu.agentId}>

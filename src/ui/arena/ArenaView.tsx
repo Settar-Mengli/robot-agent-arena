@@ -63,6 +63,11 @@ export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
           {inFlight ? " · resolving…" : null}
         </p>
       </div>
+      <p className="mt-2 text-sm text-stone-500">
+        Opponent is a{" "}
+        <strong className="font-medium text-stone-300">greedy CPU</strong>{" "}
+        baseline (deterministic heuristic; not an LLM).
+      </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
         <CombatantPanel
@@ -75,7 +80,7 @@ export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
           defense={runtime.player.defense}
         />
         <CombatantPanel
-          title="CPU"
+          title="CPU (greedy)"
           name={runtime.cpu.displayName}
           health={runtime.cpu.health}
           maxHealth={runtime.cpu.maxHealth}
