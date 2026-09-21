@@ -30,6 +30,10 @@ export interface CompleteChatOptions {
   env?: NodeJS.ProcessEnv | Record<string, string | undefined>;
   /** Override fetch (tests). */
   fetch?: typeof fetch;
+  /** Override sleep for backoff tests. */
+  sleep?: (ms: number) => Promise<void>;
+  /** Override RNG for backoff jitter tests. */
+  random?: () => number;
 }
 
 export interface TokenUsage {

@@ -17,6 +17,11 @@ import type {
   TokenUsage
 } from "./types";
 import { AllProvidersFailedError } from "./types";
+import {
+  computeBackoffMs,
+  parseRetryAfterMs,
+  sleepMs
+} from "./rate-limit";
 
 interface ChatCompletionsResponse {
   choices?: Array<{ message?: { content?: string | null } }>;
@@ -94,8 +99,10 @@ async function attemptProvider(
     });
 
     if (!response.ok) {
+      const retryAfterMs = parseRetryAfterMs(response.headers.get("retry-after"));
       throw Object.assign(new Error(`HTTP ${response.status}`), {
-        status: response.status
+        status: response.status,
+        ...(retryAfterMs !== undefined ? { retryAfterMs } : {})
       });
     }
 
@@ -130,13 +137,26 @@ async function attemptProvider(
   }
 }
 
-function failureReason(error: unknown): { reason: string; status?: number } {
+function failureReason(error: unknown): {
+  reason: string;
+  status?: number;
+  retryAfterMs?: number;
+} {
   if (error instanceof Error) {
     const status =
       "status" in error && typeof (error as { status?: unknown }).status === "number"
         ? (error as { status: number }).status
         : undefined;
-    return { reason: error.message || "unknown error", status };
+    const retryAfterMs =
+      "retryAfterMs" in error &&
+      typeof (error as { retryAfterMs?: unknown }).retryAfterMs === "number"
+        ? (error as { retryAfterMs: number }).retryAfterMs
+        : undefined;
+    return {
+      reason: error.message || "unknown error",
+      status,
+      ...(retryAfterMs !== undefined ? { retryAfterMs } : {})
+    };
   }
   return { reason: "unknown error" };
 }
@@ -216,7 +236,7 @@ export async function completeChat(
         return result;
       } catch (error) {
         const durationMs = performance.now() - started;
-        const { reason, status } = failureReason(error);
+        const { reason, status, retryAfterMs } = failureReason(error);
         lastReason = reason;
         lastStatus = status;
         lastDurationMs = durationMs;
@@ -251,6 +271,11 @@ export async function completeChat(
         if (!canRetry) {
           break;
         }
+        const backoff = computeBackoffMs(attempt, {
+          retryAfterMs,
+          random: opts.random
+        });
+        await sleepMs(backoff, opts.sleep);
       }
     }
 

@@ -320,7 +320,9 @@ describe("eval cli record summary", () => {
           { host: "api.groq.com", model: "m", durationMs: 10 },
           { host: "api.groq.com", model: "m", durationMs: 20 },
           { host: "api.groq.com", model: "m", durationMs: 30 }
-        ]
+        ],
+        failByStatus: { "429": 1 },
+        failBodyByStatus: { "429": "Resource exhausted" }
       },
       fixtureFileCount: 6
     });
@@ -329,6 +331,8 @@ describe("eval cli record summary", () => {
     expect(text).toContain(
       "live latency p50/p95 (non-cached HTTP attempts):"
     );
+    expect(text).toContain("live HTTP fail by status: 429=1");
+    expect(text).toContain("live HTTP fail bodies (redacted): 429: Resource exhausted");
     expect(text).toContain("fixture files on disk: 6");
     expect(text).toContain("fixture_miss: 0 (matches 0, snapshots 0)");
     expect(text).toContain("providers:");
@@ -445,7 +449,7 @@ describe("resolveRunPin", () => {
     });
   });
 
-  it("fails when CLI pin disagrees with recorded manifest pin", () => {
+  it("fails on replay when CLI pin is not among recorded pins", () => {
     const result = resolveRunPin(
       {
         version: 1,
@@ -469,12 +473,104 @@ describe("resolveRunPin", () => {
       },
       ["base"],
       ["heldout"],
-      { provider: "gemini", model: "gemini-3.5-flash-lite" }
+      { provider: "gemini", model: "gemini-3.5-flash-lite" },
+      "replay"
     );
     expect(result.pin).toBeUndefined();
     expect(result.error).toMatch(/PIN MISMATCH/);
     expect(result.error).toContain("gemini:gemini-3.5-flash-lite");
     expect(result.error).toContain("groq/openai/gpt-oss-20b");
+  });
+
+  it("allows a second pin on record even when gemini is already recorded (D-046)", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "gemini",
+                model: "gemini-3.5-flash-lite",
+                models: [
+                  {
+                    provider: "gemini",
+                    model: "gemini-3.5-flash-lite",
+                    scenarioIds: [],
+                    snapshots: true,
+                    snapshotSuite: "adversarial"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      ["base", "grounded"],
+      ["heldout"],
+      { provider: "groq", model: "openai/gpt-oss-20b" },
+      "record"
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.pin).toEqual({
+      provider: "groq",
+      model: "openai/gpt-oss-20b"
+    });
+  });
+
+  it("accepts CLI pin that matches one of multiple recorded pins", () => {
+    const result = resolveRunPin(
+      {
+        version: 1,
+        splits: {
+          heldout: {
+            scenarioIds: ["s1"],
+            snapshots: true,
+            providers: [],
+            variants: [
+              {
+                id: "base",
+                promptVersion: "agent-v1",
+                scenarioIds: ["s1"],
+                snapshots: true,
+                provider: "gemini",
+                model: "gemini-3.5-flash-lite",
+                models: [
+                  {
+                    provider: "gemini",
+                    model: "gemini-3.5-flash-lite",
+                    scenarioIds: [],
+                    snapshots: true
+                  },
+                  {
+                    provider: "groq",
+                    model: "openai/gpt-oss-20b",
+                    scenarioIds: [],
+                    snapshots: true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      ["base"],
+      ["heldout"],
+      { provider: "groq", model: "openai/gpt-oss-20b" },
+      "replay"
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.pin).toEqual({
+      provider: "groq",
+      model: "openai/gpt-oss-20b"
+    });
   });
 
   it("leaves legacy unpinned manifests without a pin", () => {

@@ -457,6 +457,7 @@ describe("bench pin CLI guard", () => {
       for (const v of split.variants ?? []) {
         delete v.provider;
         delete v.model;
+        delete v.models;
       }
     }
     await writeFile(

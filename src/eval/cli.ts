@@ -9,6 +9,7 @@ import {
   parseVariantsList,
   llmPolicyIdForVariant,
   variantToPlayOptions,
+  variantPromptVersion,
   randomCpuPolicy,
   type LlmVariant
 } from "./policies";
@@ -41,6 +42,7 @@ import {
   type RecordingFetchStats,
   type RepeatAwareFetch
 } from "./transport";
+import { RateLimitStopError } from "../inference/rate-limit";
 import {
   buildLiveProfile,
   liveSamplesFromRecordingCalls
@@ -55,7 +57,6 @@ import {
 import {
   assertScenarioIdsInSuite,
   mergeManifest,
-  manifestVariantsFor,
   readManifest,
   resolveVariantRun,
   selectScenariosByIds,
@@ -113,6 +114,11 @@ type CliArgs = {
   modelsRaw?: string;
   models?: ModelPin[];
   consistency: number;
+  /** Minimum ms between live record calls (cache hits exempt). */
+  recordDelayMs: number;
+  recordDelayMsExplicit: boolean;
+  /** Stop record after this many consecutive HTTP 429s. */
+  maxConsecutive429s: number;
 };
 
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -169,7 +175,13 @@ function parseArgs(argv: string[]): CliArgs {
     forceQuota: false,
     snapshotSuite: "standard",
     snapshotSuiteExplicit: false,
-    consistency: 1
+    consistency: 1,
+    recordDelayMs: 0,
+    recordDelayMsExplicit: false,
+    maxConsecutive429s: (() => {
+      const n = Number(process.env.RECORD_MAX_CONSECUTIVE_429S ?? 5);
+      return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 5;
+    })()
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -239,6 +251,23 @@ function parseArgs(argv: string[]): CliArgs {
         throw new Error(`--consistency must be an integer >= 1, got ${next}`);
       }
       args.consistency = n;
+      i += 1;
+    } else if (flag === "--record-delay-ms" && next) {
+      const n = Number(next);
+      if (!Number.isFinite(n) || n < 0 || !Number.isInteger(n)) {
+        throw new Error(`--record-delay-ms must be an integer >= 0, got ${next}`);
+      }
+      args.recordDelayMs = n;
+      args.recordDelayMsExplicit = true;
+      i += 1;
+    } else if (flag === "--max-consecutive-429s" && next) {
+      const n = Number(next);
+      if (!Number.isFinite(n) || n < 1 || !Number.isInteger(n)) {
+        throw new Error(
+          `--max-consecutive-429s must be an integer >= 1, got ${next}`
+        );
+      }
+      args.maxConsecutive429s = n;
       i += 1;
     }
   }
@@ -562,45 +591,85 @@ function snapshotResultKey(split: EvalSplit, kind: SnapshotSuiteKind): string {
 }
 
 /**
- * Resolve the active pin for a record/live/replay run.
- * CLI --models wins when present; must match any recorded manifest pins.
- * With no CLI pin, use a unanimous manifest pin or stay unpinned (legacy).
+ * Collect recorded pins from variant-level provider/model and models[].
  */
-export function resolveRunPin(
+export function collectManifestPins(
   manifest: FixtureManifest | undefined,
   variants: readonly LlmVariant[],
-  splits: readonly EvalSplit[],
-  cliPin: ModelPin | undefined
-): { pin?: ModelPin; error?: string } {
+  splits: readonly EvalSplit[]
+): Set<string> {
   const recordedKeys = new Set<string>();
   for (const variant of variants) {
     for (const split of splits) {
       const entry = manifest?.splits[split];
       if (entry === undefined) continue;
-      const resolved = resolveVariantRun(entry, variant);
-      if (
-        typeof resolved.provider === "string" &&
-        resolved.provider.length > 0 &&
-        typeof resolved.model === "string" &&
-        resolved.model.length > 0
-      ) {
-        recordedKeys.add(`${resolved.provider}|${resolved.model}`);
+      if (entry.variants !== undefined && entry.variants.length > 0) {
+        const v = entry.variants.find((x) => x.id === variant);
+        if (v === undefined) continue;
+        if (
+          typeof v.provider === "string" &&
+          v.provider.length > 0 &&
+          typeof v.model === "string" &&
+          v.model.length > 0
+        ) {
+          recordedKeys.add(`${v.provider}|${v.model}`);
+        }
+        for (const m of v.models ?? []) {
+          if (m.provider.length > 0 && m.model.length > 0) {
+            recordedKeys.add(`${m.provider}|${m.model}`);
+          }
+        }
+      } else {
+        const resolved = resolveVariantRun(entry, variant);
+        if (
+          typeof resolved.provider === "string" &&
+          resolved.provider.length > 0 &&
+          typeof resolved.model === "string" &&
+          resolved.model.length > 0
+        ) {
+          recordedKeys.add(`${resolved.provider}|${resolved.model}`);
+        }
       }
     }
   }
+  return recordedKeys;
+}
+
+/**
+ * Resolve the active pin for a record/live/replay run.
+ * CLI --models wins when present.
+ * - record/live: CLI pin may be a *new* second pin (D-046); accepted even if
+ *   other pins already appear in the manifest.
+ * - replay: CLI pin must match one of the recorded pins when any exist.
+ * With no CLI pin, use a unanimous recorded pin or stay unpinned (legacy).
+ * Multiple recorded pins without CLI → error (must pass --models).
+ */
+export function resolveRunPin(
+  manifest: FixtureManifest | undefined,
+  variants: readonly LlmVariant[],
+  splits: readonly EvalSplit[],
+  cliPin: ModelPin | undefined,
+  mode: Mode = "replay"
+): { pin?: ModelPin; error?: string } {
+  const recordedKeys = collectManifestPins(manifest, variants, splits);
 
   if (cliPin !== undefined) {
     const cliKey = `${cliPin.provider}|${cliPin.model}`;
-    for (const key of recordedKeys) {
-      if (key !== cliKey) {
-        return {
-          error:
-            `PIN MISMATCH: --models ${cliPin.provider}:${cliPin.model} does not match ` +
-            `recorded manifest pin ${key.replace("|", "/")}`
-        };
-      }
+    if (recordedKeys.size === 0 || recordedKeys.has(cliKey)) {
+      return { pin: cliPin };
     }
-    return { pin: cliPin };
+    if (mode === "record" || mode === "live") {
+      // D-046: additive second pin during operator record.
+      return { pin: cliPin };
+    }
+    return {
+      error:
+        `PIN MISMATCH: --models ${cliPin.provider}:${cliPin.model} is not among ` +
+        `recorded manifest pins (${[...recordedKeys]
+          .map((k) => k.replace("|", "/"))
+          .sort()
+          .join(", ")}); pass a recorded pin or record it first`
+    };
   }
 
   if (recordedKeys.size === 0) {
@@ -609,9 +678,10 @@ export function resolveRunPin(
   if (recordedKeys.size > 1) {
     return {
       error:
-        `manifest variants disagree on pin: ${[...recordedKeys]
+        `manifest has multiple pins (${[...recordedKeys]
           .map((k) => k.replace("|", "/"))
-          .join(", ")}`
+          .sort()
+          .join(", ")}); pass --models provider:model to select one`
     };
   }
   const only = [...recordedKeys][0]!;
@@ -790,9 +860,31 @@ export function formatLlmSummary(input: {
       `skipped non-2xx: ${input.recordingStats.skippedNon2xx}`,
       `live latency p50/p95 (non-cached HTTP attempts): ${formatMs(p50)} / ${formatMs(p95)}`
     );
+    const statusParts = Object.entries(input.recordingStats.failByStatus ?? {})
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .map(([status, count]) => `${status}=${count}`);
+    if (statusParts.length > 0) {
+      lines.push(`live HTTP fail by status: ${statusParts.join(", ")}`);
+    }
+    const bodyParts = Object.entries(input.recordingStats.failBodyByStatus ?? {})
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .map(([status, body]) => `${status}: ${body}`);
+    if (bodyParts.length > 0) {
+      lines.push(`live HTTP fail bodies (redacted): ${bodyParts.join(" | ")}`);
+    }
     if (input.fixtureFileCount !== undefined) {
       lines.push(`fixture files on disk: ${input.fixtureFileCount}`);
     }
+  }
+
+  if (
+    input.mode === "record" &&
+    (input.sources.fallback > 0 ||
+      (input.recordingStats?.skippedNon2xx ?? 0) > 0)
+  ) {
+    lines.push(
+      "PARTIAL RECORD: quality metrics below that include fallbacks are not publishable; see llmOk-only snapshot lines"
+    );
   }
 
   if (input.llmAgg.tokenTotals !== null) {
@@ -830,6 +922,30 @@ export function formatLlmSummary(input: {
     for (const split of Object.keys(input.snapshots).sort()) {
       const snap = input.snapshots[split]!;
       const m = snap.metrics;
+      if (input.mode === "record") {
+        const llmOk = snap.decisions.filter((d) => d.source === "llm");
+        const failed = snap.decisions.length - llmOk.length;
+        if (failed > 0) {
+          if (llmOk.length === 0) {
+            lines.push(
+              `snapshots[${split}]: PARTIAL llmOk=0 failed=${failed} (no publishable optimal%/regret)`
+            );
+          } else {
+            // Rebuild chosen ids from llm-ok decisions only — metrics need snapshot order.
+            // Approximate: report counts + mean over llmOk decision regrets.
+            const optimal = llmOk.filter((d) => d.optimal).length;
+            const meanRegret =
+              llmOk.reduce((s, d) => s + d.regret, 0) / llmOk.length;
+            lines.push(
+              `snapshots[${split}]: PARTIAL llmOk=${llmOk.length} failed=${failed} ` +
+                `optimal(llmOk)=${formatPct(optimal / llmOk.length)} ` +
+                `meanRegret(llmOk)=${meanRegret.toFixed(2)} ` +
+                `(full-set n=${m.n} optimal=${formatPct(m.optimalRate)} includes fallbacks — not publishable)`
+            );
+          }
+          continue;
+        }
+      }
       lines.push(
         `snapshots[${split}]: n=${m.n} optimal=${formatPct(m.optimalRate)} meanRegret=${m.meanRegret.toFixed(2)} invalid=${formatPct(m.invalidDecisionRate ?? null)}`
       );
@@ -951,7 +1067,8 @@ async function runLlmMode(
     existingManifest,
     variants,
     splitsFor(args.suite),
-    cliPin
+    cliPin,
+    args.mode
   );
   if (pinResolve.error !== undefined) {
     error(pinResolve.error);
@@ -1005,8 +1122,23 @@ async function runLlmMode(
 
   if (record) {
     const realFetch = deps.fetch ?? globalThis.fetch.bind(globalThis);
-    recordingFetch = createRecordingFetch(realFetch, store, { force: false });
+    const liveDelayMs = args.recordDelayMsExplicit
+      ? args.recordDelayMs
+      : deps.skipGuards
+        ? 0
+        : (() => {
+            const n = Number(process.env.RECORD_LIVE_DELAY_MS ?? 2000);
+            return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 2000;
+          })();
+    recordingFetch = createRecordingFetch(realFetch, store, {
+      force: false,
+      liveDelayMs,
+      maxConsecutive429s: args.maxConsecutive429s
+    });
     fetchImpl = recordingFetch;
+    log(
+      `record pacing: liveDelayMs=${liveDelayMs} maxConsecutive429s=${args.maxConsecutive429s}`
+    );
   } else if (args.mode === "live") {
     fetchImpl = deps.fetch ?? globalThis.fetch.bind(globalThis);
   } else {
@@ -1396,14 +1528,30 @@ async function runLlmMode(
           scenarioIds: selected.map((s) => s.id),
           snapshots: args.snapshots,
           providers: [...providerKeys].sort(),
-          variants: manifestVariantsFor([variant], {
-            scenarioIds: selected.map((s) => s.id),
-            snapshots: args.snapshots,
-            snapshotSuite: primaryKind,
-            ...(activePin !== undefined
-              ? { provider: activePin.provider, model: activePin.model }
-              : {})
-          }),
+          variants: [
+            {
+              id: variant,
+              promptVersion: variantPromptVersion(variant),
+              scenarioIds: selected.map((s) => s.id),
+              snapshots: args.snapshots,
+              snapshotSuite: primaryKind,
+              ...(activePin !== undefined
+                ? {
+                    provider: activePin.provider,
+                    model: activePin.model,
+                    models: [
+                      {
+                        provider: activePin.provider,
+                        model: activePin.model,
+                        scenarioIds: selected.map((s) => s.id),
+                        snapshots: args.snapshots,
+                        snapshotSuite: primaryKind
+                      }
+                    ]
+                  }
+                : {})
+            }
+          ],
           snapshotSuite: primaryKind
         };
       }
@@ -1545,7 +1693,10 @@ export async function computeBaselineReport(
     forceQuota: false,
     snapshotSuite: "standard",
     snapshotSuiteExplicit: false,
-    consistency: 1
+    consistency: 1,
+    recordDelayMs: 0,
+    recordDelayMsExplicit: true,
+    maxConsecutive429s: 5
   });
 }
 
@@ -1911,6 +2062,10 @@ export async function main(argv: string[]): Promise<number> {
     console.error(`unknown mode: ${args.mode}`);
     return 1;
   } catch (error) {
+    if (error instanceof RateLimitStopError) {
+      console.error(error.message);
+      return 1;
+    }
     console.error(error);
     return 1;
   }

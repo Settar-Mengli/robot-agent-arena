@@ -63,8 +63,12 @@ function sortUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
-function modelKey(provider: string, model: string): string {
-  return `${provider}|${model}`;
+function modelKey(
+  provider: string,
+  model: string,
+  snapshotSuite?: string
+): string {
+  return `${provider}|${model}|${snapshotSuite ?? ""}`;
 }
 
 function normalizeModelEntry(entry: ManifestModelEntry): ManifestModelEntry {
@@ -91,7 +95,7 @@ function mergeModels(
   const byKey = new Map<string, ManifestModelEntry>();
   for (const raw of [...(left ?? []), ...(right ?? [])]) {
     const entry = normalizeModelEntry(raw);
-    const key = modelKey(entry.provider, entry.model);
+    const key = modelKey(entry.provider, entry.model, entry.snapshotSuite);
     const prev = byKey.get(key);
     if (prev === undefined) {
       byKey.set(key, entry);
@@ -110,8 +114,8 @@ function mergeModels(
     });
   }
   return [...byKey.values()].sort((a, b) => {
-    const ka = modelKey(a.provider, a.model);
-    const kb = modelKey(b.provider, b.model);
+    const ka = modelKey(a.provider, a.model, a.snapshotSuite);
+    const kb = modelKey(b.provider, b.model, b.snapshotSuite);
     return ka < kb ? -1 : ka > kb ? 1 : 0;
   });
 }
@@ -161,19 +165,58 @@ function mergeVariants(
       byId.set(entry.id, entry);
       continue;
     }
-    const models = mergeModels(prev.models, entry.models);
-    const provider = entry.provider ?? prev.provider;
-    const model = entry.model ?? prev.model;
+
+    // Promote both legacy pins into models[] so a second pin (D-046) does not
+    // overwrite the first pin's provenance.
+    let models = mergeModels(prev.models, entry.models);
+    if (
+      typeof prev.provider === "string" &&
+      prev.provider.length > 0 &&
+      typeof prev.model === "string" &&
+      prev.model.length > 0
+    ) {
+      models = mergeModels(models, [
+        {
+          provider: prev.provider,
+          model: prev.model,
+          scenarioIds: prev.scenarioIds,
+          snapshots: prev.snapshots,
+          ...(prev.snapshotSuite !== undefined
+            ? { snapshotSuite: prev.snapshotSuite }
+            : {})
+        }
+      ]);
+    }
+    if (
+      typeof entry.provider === "string" &&
+      entry.provider.length > 0 &&
+      typeof entry.model === "string" &&
+      entry.model.length > 0
+    ) {
+      models = mergeModels(models, [
+        {
+          provider: entry.provider,
+          model: entry.model,
+          scenarioIds: entry.scenarioIds,
+          snapshots: entry.snapshots,
+          ...(entry.snapshotSuite !== undefined
+            ? { snapshotSuite: entry.snapshotSuite }
+            : {})
+        }
+      ]);
+    }
+
+    const provider = prev.provider ?? entry.provider;
+    const model = prev.model ?? entry.model;
+    // Do not let a later suite recording overwrite an earlier suite at variant level.
+    const snapshotSuite = prev.snapshotSuite ?? entry.snapshotSuite;
+
     byId.set(entry.id, {
       id: entry.id,
       promptVersion: entry.promptVersion || prev.promptVersion,
       scenarioIds: sortUnique([...prev.scenarioIds, ...entry.scenarioIds]),
       snapshots: prev.snapshots || entry.snapshots,
-      ...(entry.snapshotSuite !== undefined || prev.snapshotSuite !== undefined
-        ? {
-            snapshotSuite: entry.snapshotSuite ?? prev.snapshotSuite
-          }
-        : {}),
+      ...(snapshotSuite !== undefined ? { snapshotSuite } : {}),
       ...(provider !== undefined ? { provider } : {}),
       ...(model !== undefined ? { model } : {}),
       ...(models !== undefined ? { models } : {})
@@ -342,9 +385,13 @@ export function resolveVariantRun(
     let model = entry.model;
 
     if (pin !== undefined && entry.models !== undefined && entry.models.length > 0) {
-      const modelEntry = entry.models.find(
+      const matches = entry.models.filter(
         (m) => m.provider === pin.provider && m.model === pin.model
       );
+      const modelEntry =
+        matches.find((m) => m.snapshotSuite === snapshotSuite) ??
+        matches.find((m) => m.snapshotSuite === entry.snapshotSuite) ??
+        matches[0];
       if (modelEntry !== undefined) {
         scenarioIds = modelEntry.scenarioIds;
         if (modelEntry.snapshots !== undefined) {

@@ -864,6 +864,10 @@ This **generalises D-032** from `--mode bench` to every comparative measurement 
 
 **Recordings from unpinned multi-variant runs are not committed.** Local leftovers from those runs stay out of git. **Only recordings from a pinned multi-variant run become the published record.** After the operator’s pinned run, matching keys regenerate or reuse by content hash — no manual salvage of the unpinned mixture.
 
+### Amend — 2026-09-21 — Multiple recorded pins (D-046)
+
+A run still uses **exactly one** active `--models` pin (D-036). The fixture **manifest** may retain **multiple** recorded pins under `variants[].models[]` (legacy `provider`/`model` kept for the first pin). On **record/live**, a CLI pin that is not yet in the manifest is accepted and merged (second pin). On **replay**, a CLI pin must match one of the recorded pins; an unknown pin still hard-fails with `PIN MISMATCH`. When multiple pins exist and CLI omits `--models`, the CLI asks you to select one.
+
 Rationale:
 Without a pin, “variant A beat variant B” confounds routing with prompt quality — the same root cause that forced D-032 for bench.
 
