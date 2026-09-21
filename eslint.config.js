@@ -121,6 +121,33 @@ export default tseslint.config(
     }
   },
   {
+    files: ["src/decision-lab/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "**/eval",
+            "**/eval/**",
+            "node:*",
+            "fs",
+            "fs/**",
+            "path",
+            "path/**",
+            "child_process",
+            "os",
+            "worker_threads",
+            "module",
+            "react",
+            "react-dom",
+            "react/*",
+            "react-dom/*"
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ["src/agent/baselines/**/*.ts"],
     rules: {
       "no-restricted-properties": [

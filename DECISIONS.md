@@ -961,3 +961,21 @@ ROADMAP / PROGRESS list B.3 then B.4 after B.2. Do not mark fixture-replay LLM U
 ### Amend — 2026-09-20 — B.1 merged; B.2 implements D-042
 
 B.1 (shell + Builder) is on main. B.2 implements D-042 above. Follow-ups are **B.3** then **B.4** (not locked-batch renumbers — execution-only slices after locked batch 7).
+
+### Amend — 2026-09-21 — D-043 Decision Lab (execution B.2d)
+
+Decision:
+Insert execution **B.2d — Decision Lab** after **B.2** and **before** **B.3**. Retain **B.3** (fixture-replayed LLM Arena) and **B.4** (save slot) as named, **not started**, not redefined. B.2d is a **partial diagnostic slice**; locked batch 8 / execution C is **not** complete.
+
+Ship in one PR:
+
+1. **Shared pack contract** (`src/decision-lab/pack-v1.ts`): types + `assertDecisionLabPackV1`; no Node/eval/DOM. Deterministic pack (inputHashes only; no timestamps/commit SHAs).
+2. **Exporter** (`src/eval/lab-pack.ts`, `npm run lab:pack`): heldout adversarial n=13; greedy + LLM `base`/`grounded` via `createReplayFetch` only; optional `onDecision` on `evalLlmSnapshots` (default omitted → bench byte-unchanged); fixture_miss → `unavailable` (never fallback skill as recorded); single committed pack at `src/ui/lab/pack/decision-lab.v1.json`.
+3. **UI Lab**: Browse / Inspector (oracle ties, all `best` ids) / Compare (base vs grounded on recorded∩recorded) / downloadable report; schema assert error state; no eval/Node imports.
+4. **Product clarity:** Arena opponent is greedy CPU; Builder skills affect Arena; modules do not change greedy combat (LLM prompt surface for B.3+).
+
+Rationale:
+Operators need inspectable per-decision evidence without waiting for full diagnostic batch C or live LLM Arena (B.3). Offline pack keeps UI browser-safe and CI deterministic.
+
+Consequences:
+ROADMAP / PROGRESS list **B.2d** then **B.3** then **B.4**. Do not mark locked batch 8 complete. README status may be corrected to reflect shipped UI + Decision Lab.

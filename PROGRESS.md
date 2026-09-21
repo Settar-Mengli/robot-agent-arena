@@ -2,11 +2,11 @@
 
 ## Status Snapshot
 - Date: 2026-09-21
-- Branch: `feat/ui-arena` (execution **B.2**)
-- Current state: **B.2 complete** — Arena + results on the App-owned epoch store; `UiTurnResult`; greedy CPU from `runtime.session.cpu`; Builder Continue-when-validated; restart/clear with preserved draft; deferred-promise leave race covered in tests.
+- Branch: `feat/decision-lab` (execution **B.2d**)
+- Current state: **B.2d Decision Lab complete** (partial diagnostic slice) — offline pack export + Lab Browse/Inspector/Compare/report; Arena greedy + Builder module clarity; B.2 Arena/results remain. Locked batch 8 / execution C **not** complete. **B.3** / **B.4** not started.
 - Next: **B.3** (fixture-replayed LLM UI) → **B.4** (MVP save slot).
-- Verification (agent): typecheck / lint / vitest / coverage / build / `eval:replay --suite all` (run at commit gate).
-- Browser smoke (**operator-observed**, production `build` + `vite preview`): Builder → setup (incl. SENTINEL-X) → battle through turn-limit results → restart; unaffordable/fallback progression; return to Builder preserves configuration; console clean.
+- Verification (agent): typecheck / lint / vitest / coverage / build / `eval:replay --suite all` / `lab:pack` drift (run at commit gate).
+- Browser smoke (**operator-observed**, production `build` + `vite preview`): Lab load → inspect → compare (n/exclusions) → download report; Builder/Arena greedy label; console clean; Lab makes no network calls.
 
 ## Completed
 - Repository baseline and governance files exist.
@@ -18,11 +18,12 @@
 - **Batch B foundation** (PR #32) — UI layer fence, deps, tsconfig split, vitest projects, turn-result type, store contract.
 - **Execution B.1** (PR #33) — app shell + Builder + Tailwind + CI build.
 - **Execution B.2** — Arena + results; D-042 UI turn contract; greedy adapter; flow + leave-while-pending tests.
+- **Execution B.2d** — Decision Lab evidence pack + inspector/compare UI (D-043); does not finish batch 8 / C.
 
 ## Open
 - Execution **B.3**: fixture-replayed LLM UI (browser-safe; D-033 default path).
 - Execution **B.4**: MVP localStorage save slot.
-- A-to-Z recon; later roadmap items (diagnostic / BYOK / second env).
+- Locked batch 8 / execution C full diagnostics (B.2d is partial only).
+- A-to-Z recon; later roadmap items (BYOK / second env).
 - Multi-model bench proof (`singleModelPending` still true).
 - Memory variants unmeasured.
-- README status line still stale (edit requires AGENT_RULES approval).

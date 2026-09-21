@@ -49,6 +49,7 @@ function goToArena() {
   expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /Start battle/i }));
   expect(screen.getByTestId("arena-view")).toBeInTheDocument();
+  expect(screen.getByText(/greedy CPU/i)).toBeInTheDocument();
 }
 
 function deferred<T>(): {

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "inputHashes": {
+    "suite": "0000000000000000000000000000000000000000000000000000000000000000",
+    "fixtureManifest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "promptTemplates": {
+      "files": [
+        "src/agent/prompt.ts",
+        "src/engine/skills.ts",
+        "src/agent/grounding.ts"
+      ],
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "skillCatalog": "0000000000000000000000000000000000000000000000000000000000000000",
+    "oracleSource": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "suite": {
+    "split": "test",
+    "kind": "ties-fixture",
+    "path": "src/ui/lab/__fixtures__/oracle-ties.pack.json",
+    "snapshotCount": 1
+  },
+  "oracleDefaults": {
+    "perspective": "cpu",
+    "fixedPlayerPolicy": "test fixed player policy",
+    "kind": "best_response_fixed_player_policy"
+  },
+  "modelPin": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
+  "cases": [
+    {
+      "snapshotId": "ties-case-1",
+      "scenarioId": "ties-scenario",
+      "turn": 3,
+      "observation": {
+        "cpu": {
+          "displayName": "CPU-TIE",
+          "health": 20,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        },
+        "player": {
+          "displayName": "PLAYER-TIE",
+          "health": 20,
+          "maxHealth": 30,
+          "energy": 6,
+          "maxEnergy": 10,
+          "defense": 0
+        }
+      },
+      "equippedSkillIds": ["skill-alpha", "skill-beta", "skill-gamma"],
+      "affordability": [
+        { "skillId": "skill-alpha", "energyCost": 2, "affordable": true },
+        { "skillId": "skill-beta", "energyCost": 2, "affordable": true },
+        { "skillId": "skill-gamma", "energyCost": 5, "affordable": true }
+      ],
+      "oracle": {
+        "perspective": "cpu",
+        "fixedPlayerPolicy": "test fixed player policy",
+        "horizon": { "turn": 3, "maxTurns": 20, "turnsRemaining": 17 },
+        "values": {
+          "skill-alpha": 100,
+          "skill-beta": 100,
+          "skill-gamma": 50
+        },
+        "best": ["skill-alpha", "skill-beta"],
+        "ties": true,
+        "exact": true
+      },
+      "policies": {
+        "greedy": {
+          "status": "recorded",
+          "source": "greedy",
+          "promptVersion": "n/a",
+          "executedSkillId": "skill-gamma",
+          "optimal": false,
+          "regret": 50,
+          "chosenValue": 50,
+          "bestValue": 100,
+          "taxonomy": "suboptimal"
+        },
+        "llm:base": {
+          "status": "recorded",
+          "source": "llm",
+          "promptVersion": "agent-v1",
+          "executedSkillId": "skill-alpha",
+          "optimal": true,
+          "regret": 0,
+          "chosenValue": 100,
+          "bestValue": 100,
+          "taxonomy": "optimal"
+        },
+        "llm:grounded": {
+          "status": "unavailable",
+          "reason": "fixture_miss",
+          "taxonomy": "unavailable",
+          "detail": "test fixture miss for grounded arm"
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Test-only constructed pack with oracle ties; not committed evidence."
+  ],
+  "reproduce": ["n/a — test fixture"]
+}

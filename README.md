@@ -6,21 +6,13 @@ Configure agent design choices. Run them in a deterministic battle environment. 
 
 **Published negative result (held-out adversarial, n=20):** grounding changed **0/20** decisions (D-024 falsified). Greedy: **0%** optimal / mean regret **104.35**. LLM (failover mixture): **5%** / **4.25**. Details in [EVAL.md](EVAL.md).
 
-**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), eval harness, and M-TOOLS grounding ablation are complete. **M-BENCH** headless is in review (PR #23). Next after that is **correctness hardening** (batch 4), then the environment interface (batch 5). UI, diagnostics, BYOK leaderboard, and a second reference environment are **planned** — not built. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships; default is deterministic CPU + fixture replay).
+**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), eval harness, grounding ablation, and environment interface are complete. **UI:** Builder, Arena (greedy CPU opponent), results, and **Decision Lab** (offline evidence pack — Browse / Inspector / Compare) ship on main. Next: **B.3** fixture-replayed LLM Arena → **B.4** save slot. Full diagnostic batch (locked 8 / C), BYOK leaderboard, and a second reference environment remain **planned**. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships; default is deterministic CPU + fixture replay).
 
 ## What it is
 
 AGENT ARENA measures agent decision quality in a seeded, pure TypeScript battle environment (identical setups → identical resolution). Identity, memory, tools/skills, guardrails/rules, and strategy are the design surface; the engine is the first **reference environment** behind a planned environment interface (D-033). Binding honesty: every public conclusion must trace to a measurement (D-020 / D-031 / D-033). Fictional vocabulary only; no real-world attack, jailbreak, or prompt-injection content.
 
 Temporary product title: **AGENT ARENA**. Repository name: `robot-agent-arena`. See [DECISIONS.md](DECISIONS.md) for naming policy.
-
-## Live demo
-
-_Coming with the UI batches (6–7)._
-
-## Screenshots
-
-_Screenshots coming with the UI._
 
 ## Tech stack
 
@@ -30,13 +22,11 @@ _Screenshots coming with the UI._
 - Vite
 - Vitest (+ `@vitest/coverage-v8`)
 - ESLint 10 (flat config, engine-purity and layer-boundary rules)
+- React + Tailwind CSS + Zustand
 
-**PLANNED for UI (not installed yet)**
+**Planned**
 
-- React
-- Tailwind CSS
-- Zustand
-- localStorage persistence (one save slot)
+- localStorage persistence (one save slot) — execution **B.4**, not shipped
 
 ## Getting started
 
@@ -112,17 +102,17 @@ For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 1. **Done:** Discrimination + parked fixes
 2. **Done:** M-TOOLS grounding/memory ablation (D-024 falsified)
-3. **In review:** M-BENCH headless (PR #23)
-4. **Next after #23:** Correctness hardening (not UI)
-5. Environment interface + port (no behavior change; artifacts must still replay)
-6. UI part 1 — scaffolding + Builder
-7. UI part 2 — Arena + results (must design against the in-flight race)
-8. Diagnostic layer (headless first, then UI)
+3. **Done:** M-BENCH headless
+4. **Done:** Correctness hardening (A1/A2)
+5. **Done:** Environment interface + port (A3)
+6. **Done:** UI part 1 — scaffolding + Builder (B.1)
+7. **Done:** UI part 2 — Arena + results (B.2); **B.2d** Decision Lab (partial diagnostics — not batch 8)
+8. Diagnostic layer (headless first, then UI) — **not started** (B.2d is a partial slice only)
 9. Three new measurements (pre-register before implement)
 10. BYOK + committed static leaderboard + methodology writeup
 11. Second reference environment + publish
 
-Coach is **cut** (unmeasured-if-UI-only contradicts D-018 / D-023). Order locked in [D-033](DECISIONS.md).
+Execution follow-ups after B.2d: **B.3** fixture-replayed LLM Arena → **B.4** save slot. Coach is **cut** (unmeasured-if-UI-only contradicts D-018 / D-023). Order locked in [D-033](DECISIONS.md) with B.2d amend [D-043](DECISIONS.md).
 
 Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md).
 

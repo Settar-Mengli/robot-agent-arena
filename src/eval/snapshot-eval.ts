@@ -214,6 +214,14 @@ export async function evalLlmSnapshots(
   consistencyOptions: {
     consistency?: number;
     setRepeat?: (n: number) => void;
+    /**
+     * Optional additive seam: invoked once per snapshot after the primary
+     * (consistency index 0) turn. Omitted by default — return shape unchanged.
+     */
+    onDecision?: (
+      snap: DecisionSnapshot,
+      primaryResult: PlayAgentTurnResult
+    ) => void;
   } = {}
 ): Promise<SnapshotEvalResult & { consistency?: ConsistencyMetrics }> {
   const consistencyN = Math.max(1, consistencyOptions.consistency ?? 1);
@@ -249,7 +257,8 @@ export async function evalLlmSnapshots(
 
     consistencyOptions.setRepeat?.(0);
 
-    const { trace } = primaryTrace!;
+    const primary = primaryTrace!;
+    const { trace } = primary;
     const executed = picks[0]!;
     chosen.push(executed);
     // Fixture-miss fallbacks are coverage failures, not invalid model output.
@@ -260,6 +269,7 @@ export async function evalLlmSnapshots(
           (trace.validation !== undefined && !trace.validation.ok))
     );
     decisions.push(decisionFromTrace(snap, executed, trace));
+    consistencyOptions.onDecision?.(snap, primary);
     if (consistencyN > 1) {
       consistencySamples.push(consistencySampleForSnapshot(snap, picks));
     }
