@@ -42,6 +42,10 @@ import {
   type RepeatAwareFetch
 } from "./transport";
 import {
+  buildLiveProfile,
+  liveSamplesFromRecordingCalls
+} from "./live-profile";
+import {
   buildEvalMarkdownShell,
   renderBaselineBlock,
   upsertBaselineBlock,
@@ -98,7 +102,13 @@ type CliArgs = {
   replayProvider?: string;
   variantsRaw?: string;
   forceQuota: boolean;
-  snapshotSuite: "standard" | "pivotal" | "adversarial" | "both" | "all";
+  snapshotSuite:
+    | "standard"
+    | "pivotal"
+    | "adversarial"
+    | "adversarial-heldout-ext"
+    | "both"
+    | "all";
   snapshotSuiteExplicit: boolean;
   modelsRaw?: string;
   models?: ModelPin[];
@@ -208,11 +218,12 @@ function parseArgs(argv: string[]): CliArgs {
         next !== "standard" &&
         next !== "pivotal" &&
         next !== "adversarial" &&
+        next !== "adversarial-heldout-ext" &&
         next !== "both" &&
         next !== "all"
       ) {
         throw new Error(
-          `--snapshot-suite must be standard|pivotal|adversarial|both|all, got ${next}`
+          `--snapshot-suite must be standard|pivotal|adversarial|adversarial-heldout-ext|both|all, got ${next}`
         );
       }
       args.snapshotSuite = next;
@@ -484,13 +495,31 @@ export function identicalOutcomeWarning(
   return `warning: all ${results.length} matches ended identically (${first.outcome.result}, ${first.totalTurns} turns) — this sample may not discriminate between policies`;
 }
 
-type SnapshotSuiteKind = "standard" | "pivotal" | "adversarial";
+type SnapshotSuiteKind =
+  | "standard"
+  | "pivotal"
+  | "adversarial"
+  | "adversarial-heldout-ext";
 
 async function loadCommittedSnapshots(
   split: EvalSplit,
   kind: SnapshotSuiteKind = "standard",
   root: string = ROOT
 ): Promise<DecisionSnapshot[]> {
+  if (kind === "adversarial-heldout-ext") {
+    if (split !== "heldout") {
+      return [];
+    }
+    const path = join(
+      root,
+      "evals/suites",
+      "snapshots.adversarial.heldout-ext.json"
+    );
+    const raw = JSON.parse(await readFile(path, "utf8")) as {
+      snapshots: DecisionSnapshot[];
+    };
+    return raw.snapshots;
+  }
   const file =
     kind === "pivotal"
       ? `snapshots.pivotal.${split}.json`
@@ -1064,6 +1093,7 @@ async function runLlmMode(
                   | "standard"
                   | "pivotal"
                   | "adversarial"
+                  | "adversarial-heldout-ext"
                   | undefined
               };
         if (args.mode === "replay" && resolved.snapshots === false) {
@@ -1400,6 +1430,22 @@ async function runLlmMode(
 
   const sources = countSources(allResults);
   const recordingStats = recordingFetch?.stats();
+  if (
+    record &&
+    recordingStats !== undefined &&
+    recordingStats.liveCalls.length > 0
+  ) {
+    const today = new Date().toISOString().slice(0, 10);
+    const profile = buildLiveProfile(
+      liveSamplesFromRecordingCalls(recordingStats.liveCalls, {
+        suite: args.snapshotSuite
+      }),
+      { recordedFrom: today, recordedTo: today }
+    );
+    const livePath = join(outDir, "bench.live-profile.json");
+    await writeFile(livePath, `${JSON.stringify(profile, null, 2)}\n`, "utf8");
+    log(`live-profile (live calls only): ${relative(ROOT, livePath).replace(/\\/g, "/")}`);
+  }
   const fixtureFileCount = record
     ? await countFixtureFiles(fixturesDir)
     : undefined;

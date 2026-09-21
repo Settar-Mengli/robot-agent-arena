@@ -77,9 +77,13 @@ export async function playAgentTurn(
     playerTendencies = summarizePlayerTendencies(runtime);
   }
 
+  const responseFormat = options.responseFormat ?? "json";
+  const useJson = options.json ?? responseFormat !== "freetext";
+
   const promptVersion = resolvePromptVersion({
     grounding: groundedFacts,
-    memory: playerTendencies
+    memory: playerTendencies,
+    responseFormat
   });
 
   const baseTrace = (): Pick<
@@ -122,7 +126,8 @@ export async function playAgentTurn(
     cpuConfig: runtime.session.cpu,
     catalog,
     grounding: groundedFacts,
-    memory: playerTendencies
+    memory: playerTendencies,
+    responseFormat
   });
 
   const budgetSignal = AbortSignal.timeout(budgetMs);
@@ -136,7 +141,7 @@ export async function playAgentTurn(
   try {
     const result = await completeChat(messages, {
       ...inference,
-      json: true,
+      json: useJson,
       temperature: inference.temperature ?? 0,
       signal: combined,
       onAttempt: (info) => {
@@ -148,7 +153,8 @@ export async function playAgentTurn(
       result.text,
       runtime.session.cpu.skillIds,
       observation.cpu.energy,
-      catalog
+      catalog,
+      { allowFreeText: responseFormat === "freetext" }
     );
 
     if (validation.ok) {

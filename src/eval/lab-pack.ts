@@ -19,10 +19,14 @@ import {
 } from "../engine";
 import {
   assertDecisionLabPackV1,
+  assertDecisionLabPackV2,
   classifyRecordedTaxonomy,
+  llmPolicyKey,
   PROMPT_TEMPLATE_FILES,
   type DecisionLabCase,
+  type DecisionLabCaseV2,
   type DecisionLabPackV1,
+  type DecisionLabPackV2,
   type DecisionLabPolicyEvidence,
   type DecisionLabSanitizedTrace
 } from "../decision-lab";
@@ -41,8 +45,9 @@ import { createReplayFetch, type RepeatAwareFetch } from "./transport";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SUITE_REL = "evals/suites/snapshots.adversarial.heldout.json";
+const SUITE_EXT_REL = "evals/suites/snapshots.adversarial.heldout-ext.json";
 const MANIFEST_REL = "evals/fixtures/manifest.json";
-const PACK_REL = "src/ui/lab/pack/decision-lab.v1.json";
+const PACK_REL = "src/ui/lab/pack/decision-lab.v2.json";
 const SKILLS_REL = "src/engine/skills.ts";
 const ORACLE_REL = "src/eval/oracle.ts";
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -51,13 +56,15 @@ const FIXED_PLAYER_POLICY =
   "scenario playerPolicy (fixed; best response vs known policy — not an equilibrium)";
 
 const LIMITATIONS = [
-  "Cohort is heldout adversarial snapshots only (n=13).",
-  "LLM arms are pinned gemini:gemini-3.5-flash-lite base (agent-v1) and grounded (agent-v2-grounded).",
+  "Primary cohort is heldout adversarial snapshots (n=13).",
+  "Extended suite adversarial-heldout-ext included; LLM arms unavailable until operator record.",
+  "LLM arms for gemini:gemini-3.5-flash-lite base (agent-v1) and grounded (agent-v2-grounded) when fixtures exist.",
+  "Groq openai/gpt-oss-20b arms are unavailable until operator multi-model record (D-046).",
   "Oracle is exact best response vs a fixed player policy, not a game-theoretic equilibrium.",
   "Fixture misses are shown as unavailable; no invented model choices.",
   "Latency/cost from live inference are not claimed; this pack is offline replay evidence.",
   "Sample size is small — insufficient evidence for broad model rankings.",
-  "B.2d Decision Lab is a partial diagnostic slice; B.3/B.4 and full batch-8 diagnostics remain open.",
+  "Evidence+Ship Decision Lab pack v2; B.3/B.4 and full batch-8 diagnostics remain open.",
   "Input hashes are SHA-256 of UTF-8 text after normalizing newlines to LF (CRLF and lone CR)."
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
@@ -290,7 +297,7 @@ export type BuildLabPackOptions = {
 
 export async function buildDecisionLabPack(
   options: BuildLabPackOptions = {}
-): Promise<{ pack: DecisionLabPackV1; json: string }> {
+): Promise<{ pack: DecisionLabPackV2; json: string }> {
   const root = options.root ?? ROOT;
   const readText =
     options.readText ?? ((rel: string) => defaultReadText(root, rel));
@@ -418,7 +425,7 @@ export async function buildDecisionLabPack(
     };
   });
 
-  const pack: DecisionLabPackV1 = {
+  const packV1: DecisionLabPackV1 = {
     schemaVersion: 1,
     inputHashes: {
       suite: sha256TextLf(suiteText),
@@ -434,7 +441,7 @@ export async function buildDecisionLabPack(
       split: "heldout",
       kind: "adversarial",
       path: SUITE_REL,
-      snapshotCount: 13
+      snapshotCount: snapshots.length
     },
     oracleDefaults: {
       perspective: "cpu",
@@ -450,8 +457,136 @@ export async function buildDecisionLabPack(
     reproduce: REPRODUCE
   };
 
-  assertDecisionLabPackV1(pack);
-  const json = `${JSON.stringify(pack, null, 2)}\n`;
+  assertDecisionLabPackV1(packV1);
+
+  const unavailable = (detail: string): DecisionLabPolicyEvidence => ({
+    status: "unavailable",
+    reason: "fixture_miss",
+    taxonomy: "unavailable",
+    detail
+  });
+
+  const gemini = { provider: "gemini", model: "gemini-3.5-flash-lite" };
+  const groq = { provider: "groq", model: "openai/gpt-oss-20b" };
+  const variants = ["base", "grounded"] as const;
+
+  const extText = await readText(SUITE_EXT_REL);
+  const extJson = JSON.parse(extText) as {
+    count: number;
+    snapshots: DecisionSnapshot[];
+  };
+  const extSnaps = [...extJson.snapshots].sort((a, b) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+  );
+  const extGreedy = evalGreedySnapshots(extSnaps);
+  const extGreedyById = new Map(
+    extGreedy.decisions.map((d) => [d.snapshotId, d.executedSkillId as SkillId])
+  );
+
+  const v2Cases: DecisionLabCaseV2[] = [];
+
+  for (const c of cases) {
+    const policies: Record<string, DecisionLabPolicyEvidence> = {
+      greedy: c.policies.greedy,
+      [llmPolicyKey(gemini.provider, gemini.model, "base")]: c.policies["llm:base"],
+      [llmPolicyKey(gemini.provider, gemini.model, "grounded")]:
+        c.policies["llm:grounded"],
+      [llmPolicyKey(groq.provider, groq.model, "base")]: unavailable(
+        "awaiting operator groq record"
+      ),
+      [llmPolicyKey(groq.provider, groq.model, "grounded")]: unavailable(
+        "awaiting operator groq record"
+      )
+    };
+    v2Cases.push({
+      suiteId: "heldout-adversarial",
+      snapshotId: c.snapshotId,
+      scenarioId: c.scenarioId,
+      turn: c.turn,
+      observation: c.observation,
+      equippedSkillIds: c.equippedSkillIds,
+      affordability: c.affordability,
+      oracle: c.oracle,
+      policies
+    });
+  }
+
+  for (const snap of extSnaps) {
+    const greedySkill = extGreedyById.get(snap.id);
+    if (greedySkill === undefined) {
+      throw new Error(`missing greedy decision for ext ${snap.id}`);
+    }
+    const policies: Record<string, DecisionLabPolicyEvidence> = {
+      greedy: greedyPolicy(snap, greedySkill)
+    };
+    for (const pin of [gemini, groq]) {
+      for (const variant of variants) {
+        policies[llmPolicyKey(pin.provider, pin.model, variant)] = unavailable(
+          "awaiting operator record on adversarial-heldout-ext"
+        );
+      }
+    }
+    v2Cases.push({
+      suiteId: "heldout-adversarial-ext",
+      snapshotId: snap.id,
+      scenarioId: snap.scenarioId,
+      turn: snap.runtime.session.turn,
+      observation: observationFromSnap(snap),
+      equippedSkillIds: [...snap.runtime.session.cpu.skillIds],
+      affordability: affordabilityFor(snap),
+      oracle: oracleFor(snap),
+      policies
+    });
+  }
+
+  const pack: DecisionLabPackV2 = {
+    schemaVersion: 2,
+    inputHashes: {
+      suite: sha256TextLf(suiteText + "\n" + extText),
+      fixtureManifest: sha256TextLf(manifestText),
+      promptTemplates: {
+        files: [...PROMPT_TEMPLATE_FILES],
+        sha256: sha256TextLf(promptConcat)
+      },
+      skillCatalog: sha256TextLf(skillCatalogText),
+      oracleSource: sha256TextLf(oracleText)
+    },
+    suites: [
+      {
+        id: "heldout-adversarial",
+        split: "heldout",
+        kind: "adversarial",
+        path: SUITE_REL,
+        snapshotCount: snapshots.length
+      },
+      {
+        id: "heldout-adversarial-ext",
+        split: "heldout",
+        kind: "adversarial-heldout-ext",
+        path: SUITE_EXT_REL,
+        snapshotCount: extSnaps.length
+      }
+    ],
+    modelPins: [gemini, groq],
+    variants: [...variants],
+    cases: v2Cases,
+    limitations: LIMITATIONS,
+    reproduce: REPRODUCE
+  };
+
+  // Thin ext cases to summary if pack would exceed ~300KB
+  let json = `${JSON.stringify(pack, null, 2)}\n`;
+  if (json.length > 300_000) {
+    pack.cases = pack.cases.filter((c) => c.suiteId === "heldout-adversarial");
+    pack.suites = pack.suites.filter((s) => s.id === "heldout-adversarial");
+    pack.limitations = [
+      ...LIMITATIONS,
+      "Extended suite thinned from pack (>~300KB); full ext evidence remains in suites/fixtures/bench."
+    ].sort((a, b) => (a < b ? -1 : 1));
+    json = `${JSON.stringify(pack, null, 2)}\n`;
+  }
+
+  assertDecisionLabPackV2(pack);
 
   if (options.dryRun !== true) {
     const outPath = join(root, PACK_REL);
@@ -469,18 +604,6 @@ export async function main(_argv: string[] = []): Promise<number> {
   console.log(
     `wrote ${PACK_REL} (${pack.cases.length} cases, ${json.length} bytes)`
   );
-  let recorded = 0;
-  let unavailable = 0;
-  for (const c of pack.cases) {
-    for (const key of ["llm:base", "llm:grounded"] as const) {
-      if (c.policies[key].status === "recorded") {
-        recorded += 1;
-      } else {
-        unavailable += 1;
-      }
-    }
-  }
-  console.log(`llm cells: recorded=${recorded} unavailable=${unavailable}`);
   console.log(`path=${outPath}`);
   return 0;
 }

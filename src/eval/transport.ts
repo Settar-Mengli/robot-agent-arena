@@ -27,12 +27,21 @@ export type RecordingFetchOptions = {
   force?: boolean;
 };
 
+/** One real network attempt during record (never a fixture cache hit). */
+export type RecordingLiveCall = {
+  host: string;
+  model: string;
+  durationMs: number;
+};
+
 export type RecordingFetchStats = {
   hits: number;
   recorded: number;
   skippedNon2xx: number;
   /** Wall durations (ms) of realFetch calls only — excludes cache hits. */
   liveLatenciesMs: number[];
+  /** Per-call live samples (excludes cache hits). */
+  liveCalls: RecordingLiveCall[];
 };
 
 export type RepeatAwareFetch = typeof fetch & {
@@ -146,7 +155,8 @@ export function createRecordingFetch(
     hits: 0,
     recorded: 0,
     skippedNon2xx: 0,
-    liveLatenciesMs: []
+    liveLatenciesMs: [],
+    liveCalls: []
   };
   let repeatSlot = 0;
 
@@ -168,7 +178,13 @@ export function createRecordingFetch(
 
     const started = performance.now();
     const response = await realFetch(input, init);
-    counters.liveLatenciesMs.push(performance.now() - started);
+    const durationMs = performance.now() - started;
+    counters.liveLatenciesMs.push(durationMs);
+    counters.liveCalls.push({
+      host: new URL(url).host,
+      model: typeof rawBody.model === "string" ? rawBody.model : String(rawBody.model ?? ""),
+      durationMs
+    });
 
     if (response.ok) {
       const parsed = (await response.clone().json()) as unknown;
@@ -194,7 +210,8 @@ export function createRecordingFetch(
       hits: counters.hits,
       recorded: counters.recorded,
       skippedNon2xx: counters.skippedNon2xx,
-      liveLatenciesMs: [...counters.liveLatenciesMs]
+      liveLatenciesMs: [...counters.liveLatenciesMs],
+      liveCalls: counters.liveCalls.map((c) => ({ ...c }))
     }),
     setRepeat: (n: number): void => {
       repeatSlot = n;

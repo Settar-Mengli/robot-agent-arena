@@ -19,6 +19,10 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run build
+      - name: Build with Pages base path
+        env:
+          VITE_BASE: /robot-agent-arena/
+        run: npm run build
       - run: npm run coverage
       - run: npm run eval:replay -- --suite all
 
@@ -44,6 +48,7 @@ jobs:
           src/__tests__/eval-snapshots.test.ts
           src/__tests__/eval-pivotal-snapshots.test.ts
           src/__tests__/eval-adversarial-snapshots.test.ts
+          src/__tests__/eval-heldout-ext-snapshots.test.ts
           src/__tests__/eval-discriminate.test.ts
           src/__tests__/eval-bench-mode.test.ts
           src/__tests__/env-differential.test.ts

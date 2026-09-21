@@ -67,7 +67,8 @@ export const LLM_VARIANTS = [
   "grounded",
   "grounded-v2",
   "memory",
-  "grounded+memory"
+  "grounded+memory",
+  "freetext"
 ] as const;
 
 export type LlmVariant = (typeof LLM_VARIANTS)[number];
@@ -146,7 +147,7 @@ export function parseVariantsList(
 
 export function variantToPlayOptions(
   variant: LlmVariant
-): Pick<PlayAgentTurnOptions, "grounding" | "memory"> {
+): Pick<PlayAgentTurnOptions, "grounding" | "memory" | "json" | "responseFormat"> {
   switch (variant) {
     case "base":
       return { grounding: "off", memory: "off" };
@@ -158,6 +159,13 @@ export function variantToPlayOptions(
       return { grounding: "off", memory: "match" };
     case "grounded+memory":
       return { grounding: "facts", memory: "match" };
+    case "freetext":
+      return {
+        grounding: "off",
+        memory: "off",
+        json: false,
+        responseFormat: "freetext"
+      };
   }
 }
 
@@ -173,6 +181,8 @@ export function variantPromptVersion(variant: LlmVariant): string {
       return PROMPT_VERSIONS.memory;
     case "grounded+memory":
       return PROMPT_VERSIONS.groundedMemory;
+    case "freetext":
+      return PROMPT_VERSIONS.freeText;
   }
 }
 

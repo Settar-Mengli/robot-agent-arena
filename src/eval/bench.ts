@@ -370,6 +370,8 @@ export type BenchRow = BenchRowKey & {
   costUsd: number | null;
   taxonomy: FailureTaxonomy;
   consistency?: ConsistencyMetrics;
+  optimalRateWilson?: { low: number; high: number };
+  meanRegretCi?: { low: number; high: number; mean: number };
 };
 
 export function buildBenchRow(
@@ -412,7 +414,9 @@ export function buildBenchRow(
       validationCodes: {},
       fallbackReasons: {},
       attemptFailByStatus: {}
-    }
+    },
+    optimalRateWilson: metrics.optimalRateWilson,
+    meanRegretCi: metrics.meanRegretCi
   };
   if (options.greedyBaseline !== undefined) {
     row.deltaVsGreedy = deltaVsSuiteBaseline(

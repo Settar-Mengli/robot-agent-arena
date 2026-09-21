@@ -31,7 +31,7 @@ Ask before installing packages, deleting files, renaming files or folders, chang
 
 ## Scope Rules
 - Keep the MVP to 4 screens, 5 modules, 8 skills, 2 CPU opponents, one save slot, max 20 turns, seeded RNG, and fictional report output.
-- Do not add online multiplayer, real-time battle, node graph builder, visual customization, sound, campaign, leaderboards, tools module, mobile layout, or public final branding unless explicitly approved.
+- Do not add online multiplayer, real-time battle, node graph builder, visual customization, sound, campaign, live/public PvP leaderboards, tools module, mobile layout, or public final branding unless explicitly approved. A committed static comparison page is in-scope under D-033 (not a live backend).
 - Do not run `npm audit fix`, dependency upgrades, or package installation unless explicitly approved.
 
 ## Process Rules

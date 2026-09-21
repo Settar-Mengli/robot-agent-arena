@@ -20,6 +20,15 @@ npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite
 node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite --variants base,grounded
 ```
 
+### Evidence+Ship (ES) — record then bench
+
+**Order:** run all `eval:record` first (operator, local keys). Only after fixtures exist, run `--mode bench` (keyless replay; never live). See [OPERATOR_RECORDING_RUNBOOK.md](docs/OPERATOR_RECORDING_RUNBOOK.md).
+
+- Additive suite: `--snapshot-suite adversarial-heldout-ext` (D-044; honest n after widen-once seeds 201–280).
+- Second pin: `groq:openai/gpt-oss-20b` beside `gemini:gemini-3.5-flash-lite` (D-046).
+- Free-text variant: `--variants freetext` (code shipped phase 1; fixtures quota-gated / D-047).
+- Live profile: written under `evals/out/bench.live-profile.json` from **live recording calls only** (cache hits excluded).
+
 `eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures). **CI runs `npm run eval:replay -- --suite all`** (not the dev default) — held-out fixtures are committed, so `--suite heldout` / `all` work keyless. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings). **Replay follows the fixture manifest when present** (per-variant `scenarioIds`; legacy split-level list for old readers). Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice. Optional `--models provider:model` pins a single provider with `maxProviders: 1` (no failover). LLM adversarial snapshot figures in this file are from a local record; reproduce keylessly with:
 
 ```bash

@@ -315,7 +315,12 @@ describe("eval cli record summary", () => {
         hits: 4,
         recorded: 2,
         skippedNon2xx: 1,
-        liveLatenciesMs: [10, 20, 30]
+        liveLatenciesMs: [10, 20, 30],
+        liveCalls: [
+          { host: "api.groq.com", model: "m", durationMs: 10 },
+          { host: "api.groq.com", model: "m", durationMs: 20 },
+          { host: "api.groq.com", model: "m", durationMs: 30 }
+        ]
       },
       fixtureFileCount: 6
     });

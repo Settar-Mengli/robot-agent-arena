@@ -4,9 +4,9 @@ An **agent evaluation framework** that measures and **diagnoses** agent decision
 
 Configure agent design choices. Run them in a deterministic battle environment. See which decisions were suboptimal, by how much, and why — cited to an exact oracle.
 
-**Published negative result (held-out adversarial, n=20):** grounding changed **0/20** decisions (D-024 falsified). Greedy: **0%** optimal / mean regret **104.35**. LLM (failover mixture): **5%** / **4.25**. Details in [EVAL.md](EVAL.md).
+**Published negative result (held-out adversarial):** grounding changed **0** decisions on the historical pre-dedupe suite (D-024 falsified; D-030). Current held-out adversarial suite is **n=13** distinct states (D-035); greedy **0%** optimal / mean regret **156.15**. Pinned gemini ablation and bench rows: see [EVAL.md](EVAL.md).
 
-**Status:** Engine, multi-provider inference client, agent layer (LLM turn + greedy baseline), eval harness, grounding ablation, and environment interface are complete. **UI:** Builder, Arena (greedy CPU opponent), results, and **Decision Lab** (offline evidence pack — Browse / Inspector / Compare) ship on main. Next: **B.3** fixture-replayed LLM Arena → **B.4** save slot. Full diagnostic batch (locked 8 / C), BYOK leaderboard, and a second reference environment remain **planned**. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships; default is deterministic CPU + fixture replay).
+**Status:** Engine, multi-provider inference client, agent layer, eval harness, grounding ablation, environment interface, and **UI** (Builder, Arena greedy CPU, results, Decision Lab) ship on main. **Next:** execution **Evidence+Ship (ES)** — multi-model evidence, CIs, extended suite, GitHub Pages (`https://settar-mengli.github.io/robot-agent-arena/`) — then **B.3** fixture-replayed LLM Arena → **B.4** save slot. Full diagnostic batch (locked 8 / C), BYOK, and a second reference environment remain **planned**. The Pages/app demo is a **static** site with **recorded** evidence — **no live AI** in the browser. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships).
 
 ## What it is
 
@@ -46,11 +46,12 @@ npm run lint        # eslint .
 npm test            # vitest run
 npm run coverage    # vitest run --coverage
 npm run test:watch  # vitest
-npm run dev         # vite (no app UI yet)
+npm run dev         # vite (Builder / Arena / Lab UI)
 npm run eval        # baseline eval (no keys)
 npm run eval:report # baseline + refresh EVAL.md block
 npm run eval:replay # LLM via recorded fixtures
 npm run eval:record # local only — writes fixtures (needs keys)
+npm run lab:pack    # regenerate Decision Lab evidence pack
 ```
 
 ## Evals
@@ -85,7 +86,7 @@ PROGRESS.md        # Current status
 AGENT_RULES.md     # Contributor / agent operating rules
 ```
 
-**PLANNED (UI batches):** `store/`, `components/` / screens, and a thin `lib/` bridge. Those directories do not exist yet. Measurement core will depend on an environment interface; the game is the first implementation (D-033).
+**PLANNED:** `src/ui` save slot (B.4); fixture-replayed LLM Arena (B.3). Measurement core uses `src/env`; Decision Lab shared types live in `src/decision-lab/`.
 
 ## Testing
 
@@ -107,12 +108,13 @@ For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 5. **Done:** Environment interface + port (A3)
 6. **Done:** UI part 1 — scaffolding + Builder (B.1)
 7. **Done:** UI part 2 — Arena + results (B.2); **B.2d** Decision Lab (partial diagnostics — not batch 8)
-8. Diagnostic layer (headless first, then UI) — **not started** (B.2d is a partial slice only)
+7a. Evidence + Ship (ES) — CIs, ext suite, multi-model, Pages — **in progress**
+8. Diagnostic layer (headless first, then UI) — **not started** (B.2d/ES are partial slices only)
 9. Three new measurements (pre-register before implement)
 10. BYOK + committed static leaderboard + methodology writeup
 11. Second reference environment + publish
 
-Execution follow-ups after B.2d: **B.3** fixture-replayed LLM Arena → **B.4** save slot. Coach is **cut** (unmeasured-if-UI-only contradicts D-018 / D-023). Order locked in [D-033](DECISIONS.md) with B.2d amend [D-043](DECISIONS.md).
+Execution follow-ups: **ES** → **B.3** fixture-replayed LLM Arena → **B.4** save slot. Coach is **cut**. Order locked in [D-033](DECISIONS.md) with B.2d [D-043](DECISIONS.md) and ES [D-048](DECISIONS.md).
 
 Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md).
 

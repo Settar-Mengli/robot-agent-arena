@@ -4,7 +4,7 @@ import { createGreedySelector } from "../agent";
 import { robotEnvironment } from "../env";
 import { resolvePlayerPolicy } from "./policies";
 import { bestResponse, oracleMemoIdentity, regret } from "./oracle";
-import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
+import { buildMatchSuite, buildMatchSuiteWithSeeds, type EvalSplit, type MatchScenario } from "./scenarios";
 
 export type DecisionSnapshot = {
   id: string;
@@ -53,6 +53,20 @@ export type StakeTailCounts = Record<
 export const ADVERSARIAL_MIN_REGRET = 1;
 export const ADVERSARIAL_TARGET_COUNT = 20;
 export const ADVERSARIAL_REGRET_TAIL_THRESHOLDS = [1, 100, 500, 1000] as const;
+
+/** D-044: first pass seeds for heldout-ext. */
+export const HELDOUT_EXT_SEEDS = Array.from(
+  { length: 40 },
+  (_, i) => 201 + i
+) as readonly number[];
+
+/** D-044: one-time widen if targetCount not met. */
+export const HELDOUT_EXT_SEEDS_WIDENED = Array.from(
+  { length: 80 },
+  (_, i) => 201 + i
+) as readonly number[];
+
+export const HELDOUT_EXT_TARGET_COUNT = 40;
 
 export type AdversarialDecisionSnapshot = DecisionSnapshot & {
   spread: number;
@@ -563,6 +577,89 @@ export function generateAdversarialSnapshots(
     result.warning = selected.warning;
   }
   return result;
+}
+
+export type HeldoutExtSuiteMeta = {
+  seedBand: "201-240" | "201-280";
+  seedsUsed: number;
+};
+
+/**
+ * D-044 additive heldout-ext suite: seeds 201–240, target 40; widen once to 201–280.
+ * Excludes any decisionStateKey that appears in the standard heldout/dev snapshot suites
+ * (leakage guard).
+ */
+export function generateAdversarialHeldoutExtSnapshots(
+  options: {
+    minRegret?: number;
+    targetCount?: number;
+    /** Precomputed forbidden keys; default scans existing generators. */
+    forbiddenStateKeys?: ReadonlySet<string>;
+  } = {}
+): AdversarialSnapshotSuite & HeldoutExtSuiteMeta {
+  const minRegret = options.minRegret ?? ADVERSARIAL_MIN_REGRET;
+  const targetCount = options.targetCount ?? HELDOUT_EXT_TARGET_COUNT;
+  const forbidden =
+    options.forbiddenStateKeys ?? collectExistingSuiteStateKeys();
+
+  const tryBand = (
+    seeds: readonly number[],
+    band: HeldoutExtSuiteMeta["seedBand"]
+  ): AdversarialSnapshotSuite & HeldoutExtSuiteMeta => {
+    const suite = buildMatchSuiteWithSeeds("heldout", seeds);
+    const candidates: AdversarialDecisionSnapshot[] = [];
+    let scenariosScanned = 0;
+    for (let i = 0; i < suite.length; i += 1) {
+      for (const snap of collectFromScenario(suite[i]!)) {
+        const adv = withAdversarialFields(snap);
+        if (forbidden.has(snapshotDecisionStateKey(snap))) {
+          continue;
+        }
+        candidates.push(adv);
+      }
+      scenariosScanned = i + 1;
+    }
+    const selected = selectAdversarialSnapshots(candidates, {
+      minRegret,
+      targetCount
+    });
+    const result: AdversarialSnapshotSuite & HeldoutExtSuiteMeta = {
+      scenariosScanned,
+      minRegret,
+      targetCount,
+      count: selected.count,
+      distinctStateCount: selected.count,
+      snapshots: selected.snapshots,
+      seedBand: band,
+      seedsUsed: seeds.length
+    };
+    if (selected.warning !== undefined) {
+      result.warning = selected.warning;
+    }
+    return result;
+  };
+
+  const first = tryBand(HELDOUT_EXT_SEEDS, "201-240");
+  if (first.count >= targetCount) {
+    return first;
+  }
+  return tryBand(HELDOUT_EXT_SEEDS_WIDENED, "201-280");
+}
+
+function collectExistingSuiteStateKeys(): Set<string> {
+  const keys = new Set<string>();
+  for (const split of ["dev", "heldout"] as const) {
+    for (const snap of generateSnapshots(split).snapshots) {
+      keys.add(snapshotDecisionStateKey(snap));
+    }
+    for (const snap of generatePivotalSnapshots(split).snapshots) {
+      keys.add(snapshotDecisionStateKey(snap));
+    }
+    for (const snap of generateAdversarialSnapshots(split).snapshots) {
+      keys.add(snapshotDecisionStateKey(snap));
+    }
+  }
+  return keys;
 }
 
 /**

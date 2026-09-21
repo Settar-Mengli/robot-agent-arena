@@ -5,12 +5,18 @@ import type { LlmVariant } from "./policies";
 import { isLlmVariant, variantPromptVersion } from "./policies";
 import { buildMatchSuite, type EvalSplit, type MatchScenario } from "./scenarios";
 
+export type ManifestSnapshotSuite =
+  | "standard"
+  | "pivotal"
+  | "adversarial"
+  | "adversarial-heldout-ext";
+
 export type ManifestModelEntry = {
   provider: string;
   model: string;
   scenarioIds: string[];
   snapshots?: boolean;
-  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  snapshotSuite?: ManifestSnapshotSuite;
 };
 
 export type ManifestVariantEntry = {
@@ -18,7 +24,7 @@ export type ManifestVariantEntry = {
   promptVersion: string;
   scenarioIds: string[];
   snapshots: boolean;
-  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  snapshotSuite?: ManifestSnapshotSuite;
   /** Pinned provider for this recorded variant run (D-036). */
   provider?: string;
   /** Pinned model for this recorded variant run (D-036). */
@@ -38,7 +44,7 @@ export type ManifestSplit = {
   /** Optional; absent = legacy base-only replay. */
   variants?: ManifestVariantEntry[];
   /** Legacy split-level suite; prefer variants[].snapshotSuite. */
-  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  snapshotSuite?: ManifestSnapshotSuite;
 };
 
 export type FixtureManifest = {
@@ -306,7 +312,7 @@ export function resolveVariantRun(
 ): {
   scenarioIds: string[];
   snapshots: boolean;
-  snapshotSuite?: "standard" | "pivotal" | "adversarial";
+  snapshotSuite?: ManifestSnapshotSuite;
   promptVersion: string;
   provider?: string;
   model?: string;
@@ -377,7 +383,7 @@ export function manifestVariantsFor(
   options: {
     scenarioIds: readonly string[];
     snapshots: boolean;
-    snapshotSuite?: "standard" | "pivotal" | "adversarial";
+    snapshotSuite?: ManifestSnapshotSuite;
     provider?: string;
     model?: string;
   }

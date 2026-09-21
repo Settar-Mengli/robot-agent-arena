@@ -135,12 +135,14 @@ describe("lab-pack replay safety", () => {
         fetch: emptyReplay,
         dryRun: true
       });
-      expect(pack.cases).toHaveLength(13);
-      for (const c of pack.cases) {
-        expect(c.policies["llm:base"].status).toBe("unavailable");
-        expect(c.policies["llm:grounded"].status).toBe("unavailable");
-        expect("executedSkillId" in c.policies["llm:base"]).toBe(false);
-        expect("executedSkillId" in c.policies["llm:grounded"]).toBe(false);
+      expect(pack.schemaVersion).toBe(2);
+      expect(pack.cases.length).toBeGreaterThanOrEqual(13);
+      for (const c of pack.cases.filter((x) => x.suiteId === "heldout-adversarial")) {
+        const geminiBase = c.policies["llm:gemini:gemini-3.5-flash-lite:base"];
+        const geminiGrounded =
+          c.policies["llm:gemini:gemini-3.5-flash-lite:grounded"];
+        expect(geminiBase?.status).toBe("unavailable");
+        expect(geminiGrounded?.status).toBe("unavailable");
       }
       expect(fetchSpy).not.toHaveBeenCalled();
     } finally {
@@ -148,9 +150,9 @@ describe("lab-pack replay safety", () => {
     }
   });
 
-  it("regen is byte-identical to committed decision-lab.v1.json", async () => {
+  it("regen is byte-identical to committed decision-lab.v2.json", async () => {
     const committed = await readFile(
-      join(process.cwd(), "src/ui/lab/pack/decision-lab.v1.json"),
+      join(process.cwd(), "src/ui/lab/pack/decision-lab.v2.json"),
       "utf8"
     );
     const { json } = await buildDecisionLabPack({ dryRun: true });
