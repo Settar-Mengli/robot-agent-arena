@@ -585,6 +585,17 @@ export type HeldoutExtSuiteMeta = {
 };
 
 /**
+ * Match scenarios for the heldout-ext generator (D-044).
+ * Same Cartesian product as `buildMatchSuite("heldout")`, with an explicit seed band.
+ * Default seeds are the widened band (201–280) so indexes cover any committed ext suite.
+ */
+export function buildHeldoutExtMatchSuite(
+  seeds: readonly number[] = HELDOUT_EXT_SEEDS_WIDENED
+): MatchScenario[] {
+  return buildMatchSuiteWithSeeds("heldout", seeds);
+}
+
+/**
  * D-044 additive heldout-ext suite: seeds 201–240, target 40; widen once to 201–280.
  * Excludes any decisionStateKey that appears in the standard heldout/dev snapshot suites
  * (leakage guard).
@@ -606,7 +617,7 @@ export function generateAdversarialHeldoutExtSnapshots(
     seeds: readonly number[],
     band: HeldoutExtSuiteMeta["seedBand"]
   ): AdversarialSnapshotSuite & HeldoutExtSuiteMeta => {
-    const suite = buildMatchSuiteWithSeeds("heldout", seeds);
+    const suite = buildHeldoutExtMatchSuite(seeds);
     const candidates: AdversarialDecisionSnapshot[] = [];
     let scenariosScanned = 0;
     for (let i = 0; i < suite.length; i += 1) {
