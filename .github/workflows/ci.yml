@@ -29,8 +29,10 @@ jobs:
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base,grounded --max-matches 0 --models groq:openai/gpt-oss-20b
 
   # Headline regen drift (~5 min wall locally). Kept off verify so PRs stay fast.
-  # --dangerouslyIgnoreUnhandledErrors: vitest birpc times out onTaskUpdate when a
-  # single CPU-bound drift test blocks the worker >60s; assertions still pass.
+  # Per-file steps (issue #28). Forks + maxWorkers=1 tried as root fix for vitest
+  # "Timeout calling onTaskUpdate"; heldout-ext + discriminate still exit 1 with
+  # Errors 1 after assertions pass — keep --dangerouslyIgnoreUnhandledErrors on
+  # those two steps ONLY (issue #28 remains open; see D-049).
   drift:
     runs-on: ubuntu-latest
     steps:
@@ -40,17 +42,31 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Snapshot / discrimination / bench drift guards
+      - name: Drift — eval-snapshots
         env:
           SNAPSHOT_DRIFT: "1"
-        run: >
-          npx vitest run --dangerouslyIgnoreUnhandledErrors
-          --testTimeout=600000
-          -t "drift-guard"
-          src/__tests__/eval-snapshots.test.ts
-          src/__tests__/eval-pivotal-snapshots.test.ts
-          src/__tests__/eval-adversarial-snapshots.test.ts
-          src/__tests__/eval-heldout-ext-snapshots.test.ts
-          src/__tests__/eval-discriminate.test.ts
-          src/__tests__/eval-bench-mode.test.ts
-          src/__tests__/env-differential.test.ts
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/eval-snapshots.test.ts
+      - name: Drift — eval-pivotal-snapshots
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/eval-pivotal-snapshots.test.ts
+      - name: Drift — eval-adversarial-snapshots
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/eval-adversarial-snapshots.test.ts
+      - name: Drift — eval-heldout-ext-snapshots
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 --dangerouslyIgnoreUnhandledErrors -t "drift-guard" src/__tests__/eval-heldout-ext-snapshots.test.ts
+      - name: Drift — eval-discriminate
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 --dangerouslyIgnoreUnhandledErrors -t "drift-guard" src/__tests__/eval-discriminate.test.ts
+      - name: Drift — eval-bench-mode
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/eval-bench-mode.test.ts
+      - name: Drift — env-differential
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/env-differential.test.ts

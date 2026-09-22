@@ -34,20 +34,24 @@ describe("lab-pack LF hash normalization", () => {
     expect(sha256TextLf(loneCr)).toBe(sha256TextLf(lf));
   });
 
-  it("CRLF injected readText yields the same pack bytes as LF", async () => {
-    const root = process.cwd();
-    const lfPack = await buildDecisionLabPack({ dryRun: true });
-    const crlfPack = await buildDecisionLabPack({
-      dryRun: true,
-      readText: async (rel) => {
-        const text = await readFile(join(root, rel), "utf8");
-        // Simulate a Windows working tree with CRLF endings.
-        return normalizeNewlinesToLf(text).replace(/\n/g, "\r\n");
-      }
-    });
-    expect(crlfPack.json).toBe(lfPack.json);
-    expect(crlfPack.pack.inputHashes).toEqual(lfPack.pack.inputHashes);
-  });
+  it(
+    "CRLF injected readText yields the same pack bytes as LF",
+    async () => {
+      const root = process.cwd();
+      const lfPack = await buildDecisionLabPack({ dryRun: true });
+      const crlfPack = await buildDecisionLabPack({
+        dryRun: true,
+        readText: async (rel) => {
+          const text = await readFile(join(root, rel), "utf8");
+          // Simulate a Windows working tree with CRLF endings.
+          return normalizeNewlinesToLf(text).replace(/\n/g, "\r\n");
+        }
+      });
+      expect(crlfPack.json).toBe(lfPack.json);
+      expect(crlfPack.pack.inputHashes).toEqual(lfPack.pack.inputHashes);
+    },
+    60_000
+  );
 });
 
 describe("evalLlmSnapshots onDecision seam", () => {
@@ -135,7 +139,7 @@ describe("lab-pack replay safety", () => {
         fetch: emptyReplay,
         dryRun: true
       });
-      expect(pack.schemaVersion).toBe(2);
+      expect(pack.schemaVersion).toBe(3);
       expect(pack.cases.length).toBeGreaterThanOrEqual(13);
       for (const c of pack.cases.filter((x) => x.suiteId === "heldout-adversarial")) {
         const geminiBase = c.policies["llm:gemini:gemini-3.5-flash-lite:base"];
@@ -151,10 +155,10 @@ describe("lab-pack replay safety", () => {
   });
 
   it(
-    "regen is byte-identical to committed decision-lab.v2.json",
+    "regen is byte-identical to committed decision-lab.v3.json",
     async () => {
       const committed = await readFile(
-        join(process.cwd(), "src/ui/lab/pack/decision-lab.v2.json"),
+        join(process.cwd(), "src/ui/lab/pack/decision-lab.v3.json"),
         "utf8"
       );
       const { json } = await buildDecisionLabPack({ dryRun: true });

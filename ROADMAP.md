@@ -19,7 +19,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - 8 canonical skills; max 2 equipped (`MVP_SKILL_SLOT_LIMIT`); max 20 turns (`MAX_TURNS`).
 - Player agent naming.
 - 2 CPU opponents: FRACTURE and SENTINEL-X (catalog DONE).
-- 1 localStorage save slot (PLANNED with UI).
+- 1 localStorage save slot (Batch 3 / B.4 — D-049).
 - Seeded RNG (DONE; restore-from-state DONE).
 - **DONE:** Eval harness (M-EVAL) with measured held-out LLM results; grounding/memory tools (M-TOOLS) with adversarial ablation published in EVAL.md (D-024 falsified; D-030).
 - **DONE:** M-BENCH headless (PR #23 / D-032).
@@ -30,7 +30,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
 - **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (PR #33); execution **B.2** Arena + results (D-042).
 - **DONE (code):** Execution **B.2d** Decision Lab (partial diagnostic slice — not locked batch 8 / C).
-- **NEXT:** Execution **B.3** fixture-replayed LLM UI → **B.4** MVP save slot (ES / D-048 complete on branch).
+- **NEXT:** Locked batch **9** — three new measurements (pre-register). Batch 3 (D-049) complete on branch.
 - **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -80,19 +80,19 @@ Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.ru
 **DONE (partial diagnostic slice).** Offline evidence pack exported via `npm run lab:pack` from heldout adversarial suite + fixture replay only; Lab Browse / Inspector / Compare / downloadable report. **Does not complete** locked batch 8 / execution C diagnostics.
 
 #### 7a-es. Evidence + Ship — execution **ES** (after B.2d, before B.3) — D-048
-**DONE (pending merge).** Confidence intervals; additive heldout-ext suite (D-044, n=35); multi-model pin incl. groq (D-046); Decision Lab pack v2; free GitHub Pages (D-045); free-text variant recorded n=13 (D-047; ext freetext deferred). Two-phase handoff honored. **B.3** and **B.4** remain named and not started. Does not complete locked batch 8 / C.
+**DONE.** Confidence intervals; additive heldout-ext suite (D-044, n=35); multi-model pin incl. groq (D-046); Decision Lab pack v2; free GitHub Pages (D-045); free-text variant recorded n=13 (D-047; ext freetext deferred). Two-phase handoff honored. Does not complete locked batch 8 / C.
 
-#### 7b. Fixture-replayed LLM UI — execution **B.3** (after ES)
-Browser-safe fixture playback for LLM turns (D-033 default: deterministic CPU + fixture-replayed LLM). No Node eval harness in the browser. **Not started.**
+#### 7b. Fixture-replayed LLM UI — execution **B.3** (after ES) — D-049
+**Implemented on branch (pending PR merge).** Watch recorded AI battles from `arena-replay.v1.json` (gemini heldout base+grounded, 6 matches). Free play remains greedy. No Node eval harness in the browser.
 
-#### 7c. MVP localStorage save slot — execution **B.4** (after B.3)
-One save slot (D-006 / AGENT_RULES). **Not started.**
+#### 7c. MVP localStorage save slot — execution **B.4** (after B.3) — D-049
+**Implemented on branch (pending PR merge).** One save slot (D-006 / AGENT_RULES).
 
-#### 7d. You vs the model (Batch 3 / post-ES Lab challenge)
-Human vs recorded/oracle comparison challenge in Decision Lab. **Planned after ES**; not in ES scope.
+#### 7d. You vs the model (Batch 3 Lab challenge) — D-049
+**Implemented on branch (pending PR merge).** Human vs recorded/oracle comparison in Decision Lab (pack-only scoring).
 
-#### 8. Diagnostic layer — execution batch C
-Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). **Not started** — B.2d / ES are partial slices only; batch 8 remains open.
+#### 8. Diagnostic layer — execution batch C / Batch 3 — D-049
+**Implemented on branch (pending PR merge).** Headless diagnostics + pack v3 + Lab Diagnostics UI (incl. vs published summary). Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). Three new measurements remain batch 9. D-049 consequences (ROADMAP DONE) apply after merge.
 
 #### 9. Three new measurements — execution batch C
 Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 / D-034 pattern). Same metrics/reporting surface as batch 8.

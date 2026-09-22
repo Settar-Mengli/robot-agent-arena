@@ -152,6 +152,8 @@ export type LlmModeDeps = {
   store?: FixtureStore;
   env?: EnvMap;
   outDir?: string;
+  /** Override committed output dir (tests must not write evals/out-committed). */
+  committedDir?: string;
   fixturesDir?: string;
   log?: (line: string) => void;
   error?: (line: string) => void;
@@ -1982,7 +1984,7 @@ export async function runBenchMode(
       `${JSON.stringify({ summary, rows }, null, 2)}\n`,
       "utf8"
     );
-    const committedDir = join(ROOT, "evals/out-committed");
+    const committedDir = deps.committedDir ?? join(ROOT, "evals/out-committed");
     await mkdir(committedDir, { recursive: true });
     const summaryPath = join(committedDir, "bench.summary.json");
     await writeFile(
@@ -2025,7 +2027,7 @@ export async function runBenchMode(
   const outPath = join(outDir, "bench.json");
   await writeFile(outPath, `${JSON.stringify({ summary, rows }, null, 2)}\n`, "utf8");
 
-  const committedDir = join(ROOT, "evals/out-committed");
+  const committedDir = deps.committedDir ?? join(ROOT, "evals/out-committed");
   await mkdir(committedDir, { recursive: true });
   const summaryPath = join(committedDir, "bench.summary.json");
   await writeFile(

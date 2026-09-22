@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { summarizeBench, type BenchRow, type BenchSummary } from "../eval/bench";
 import { resolveCliArgs, runBenchMode } from "../eval/cli";
 
@@ -12,6 +13,19 @@ const COMMITTED = join(
 function readCommitted(): BenchSummary {
   return JSON.parse(readFileSync(COMMITTED, "utf8")) as BenchSummary;
 }
+
+const tempDirs: string[] = [];
+
+afterEach(() => {
+  while (tempDirs.length > 0) {
+    const dir = tempDirs.pop()!;
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
+  }
+});
 
 describe("bench mode / committed summary", () => {
   it("cli defaults for --mode bench", () => {
@@ -121,7 +135,13 @@ describe("bench mode / committed summary", () => {
   it.skipIf(process.env.SNAPSHOT_DRIFT !== "1")(
     "drift-guard: keyless multi-model bench regen ≡ committed (SNAPSHOT_DRIFT=1)",
     async () => {
-      const before = readCommitted();
+      const beforeRaw = readFileSync(COMMITTED, "utf8");
+      const before = JSON.parse(beforeRaw) as BenchSummary;
+      const tempCommitted = mkdtempSync(join(tmpdir(), "bench-drift-"));
+      tempDirs.push(tempCommitted);
+      const tempOut = mkdtempSync(join(tmpdir(), "bench-out-"));
+      tempDirs.push(tempOut);
+
       const code = await runBenchMode(
         resolveCliArgs([
           "--mode",
@@ -137,6 +157,8 @@ describe("bench mode / committed summary", () => {
         ]),
         {
           skipGuards: true,
+          outDir: tempOut,
+          committedDir: tempCommitted,
           env: {
             GEMINI_API_KEY: "replay-placeholder-key-not-real",
             GROQ_API_KEY: "replay-placeholder-key-not-real",
@@ -150,8 +172,12 @@ describe("bench mode / committed summary", () => {
         }
       );
       expect(code).toBe(0);
-      const after = readCommitted();
+      const after = JSON.parse(
+        readFileSync(join(tempCommitted, "bench.summary.json"), "utf8")
+      ) as BenchSummary;
       expect(after.singleModelPending).toBe(false);
+      expect(typeof after.note).toBe("string");
+      expect(after.note.length).toBeGreaterThan(0);
       expect(
         after.rows.map((r) => ({
           model: r.model,
@@ -171,6 +197,8 @@ describe("bench mode / committed summary", () => {
           meanRegret: r.meanRegret
         }))
       );
+      // Committed artifact must remain untouched by this test.
+      expect(readFileSync(COMMITTED, "utf8")).toBe(beforeRaw);
     }
   );
 });

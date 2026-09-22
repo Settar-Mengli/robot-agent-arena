@@ -29,6 +29,15 @@ node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-
 - Free-text variant: `--variants freetext` (code shipped phase 1; fixtures quota-gated / D-047).
 - Live profile: written under `evals/out/bench.live-profile.json` from **live recording calls only** (cache hits excluded).
 
+### Batch 3 (D-049) — Arena + diagnostics
+
+```bash
+npm run arena:pack    # gemini heldout Watch catalog → src/ui/arena/pack/arena-replay.v1.json
+npm run lab:pack      # Decision Lab pack v3 + diagnostics.summary.json (committed)
+```
+
+Watch mode replays recorded gemini matches only (not live AI). Free play remains greedy. Diagnostics failure tags are descriptive labels on suboptimal decisions — not causal. Lab Challenge scores from pack oracle values only.
+
 `eval:replay` defaults to `--suite dev` and needs **no API keys** (placeholder provider env is derived from committed fixtures). **CI runs `npm run eval:replay -- --suite all`** (not the dev default) — held-out fixtures are committed, so `--suite heldout` / `all` work keyless. `eval:record` / live also default to `--suite dev` (pass `--suite all` or `heldout` to widen). Record/live use archetype-first stratified match sampling for `--max-matches` (see Findings). **Replay follows the fixture manifest when present** (per-variant `scenarioIds`; legacy split-level list for old readers). Fixtures are reused on cache hit (incremental). Runs print a completion summary (including live/non-cached HTTP latency and cache hit counts). Exit code `2` if every decision fell back. Snapshot suites are evaluated by default (`--no-snapshots` to skip). Use `--all-seeds` on record/live to opt into first-N-by-id. Optional `--replay-provider <name>` overrides fixture-derived provider choice. Optional `--models provider:model` pins a single provider with `maxProviders: 1` (no failover). LLM adversarial snapshot figures in this file are from a local record; reproduce keylessly with:
 
 ```bash

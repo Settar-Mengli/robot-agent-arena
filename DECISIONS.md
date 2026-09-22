@@ -1057,3 +1057,27 @@ Multi-model evidence and Pages ship without waiting for B.3 Arena fixture-replay
 
 Consequences:
 ROADMAP / PROGRESS show ES between B.2d and B.3.
+
+## D-049 Execution Batch 3 — Arena + Diagnostics
+Date: 2026-09-22
+Status: Accepted
+
+Decision:
+One cohesive PR after ES (D-048) ships **B.3**, **B.4**, locked **batch 8** diagnostics, and the Lab **You vs the model** challenge, in this order:
+
+1. **B.3 — Watch recorded AI battle** — browser-safe replay of precomputed gemini heldout full matches (fixture-derived arena pack). Free play stays **greedy**, clearly labeled. **No** free-play LLM with fixture_miss fallback. **Zero new operator recording** unless arena-pack fails on existing match pins (contingency only). Catalog: gemini **base + grounded** (6 matches) if `arena-replay.v1.json` &lt; ~300KB; else base-only and record grounded as a slip here / in PROGRESS.
+2. **B.4 — one-slot localStorage save** (D-005 / D-006) — schema-versioned; refuse save while in-flight; load uses `resetBattle` / `clearBattle` (D-041 epoch bump).
+3. **Locked batch 8 — diagnostic layer** — pure `src/decision-lab` diagnostics + Decision Lab **pack v3** + committed `evals/out-committed/diagnostics.summary.json`; Lab shows current diagnostics and a read-only **“vs published”** strip. Failure tags (export-time, facts-v2): `missed_lethal`, `ignored_incoming_threat`, `wasted_energy` (chosen energyCost strictly greater than at least one affordable `oracle.best` skill, regret &gt; 0), `over_defending`; else `other_suboptimal`. Honesty: fixed-player-policy oracle; model-stated reasons; replay ≠ live; small n → insufficient evidence; no universal rankings; tags are descriptive, not causal.
+4. **You vs the model** — Lab challenge using pack oracle values only (no eval / no network in the browser).
+
+Does **not** start locked batch 9 (three new measurements), BYOK, or a second reference environment.
+
+CI: split drift job per file; drop `--dangerouslyIgnoreUnhandledErrors` if green (issue #28); do not weaken drift assertions.
+
+**Issue #28 fallback (Batch 3):** Root fix attempted — per-file drift steps with `--pool=forks --maxWorkers=1 --testTimeout=600000`. Shorter suites exit 0 with Errors 0. Long suites `eval-heldout-ext-snapshots` and `eval-discriminate` still finish assertions green then exit 1 with `vitest-worker: Timeout calling onTaskUpdate` (Errors 1). Restored `--dangerouslyIgnoreUnhandledErrors` on **those two steps only**; issue #28 stays open for a real vitest RPC/teardown fix. Drift assertions remain strict (no skip / no weakened equality).
+
+Rationale:
+ES already published multi-model snapshot evidence; Batch 3 closes the Arena fixture-replay default (D-033), MVP save slot, and the diagnostic layer that B.2d / pack v2 only sliced.
+
+Consequences:
+ROADMAP marks B.3 / B.4 / batch 8 / challenge done after merge; NEXT = batch 9 measurements.

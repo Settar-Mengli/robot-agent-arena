@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "lab:diagnostics",
+  "nCases": 13,
+  "clusterCounts": {
+    "missed_lethal": 0,
+    "ignored_incoming_threat": 0,
+    "wasted_energy": 68,
+    "over_defending": 0,
+    "other_suboptimal": 0
+  },
+  "stakes": [
+    {
+      "id": "zero",
+      "label": "{0}",
+      "count": 10
+    },
+    {
+      "id": "low",
+      "label": "(0,10]",
+      "count": 68
+    },
+    {
+      "id": "mid",
+      "label": "(10,100)",
+      "count": 0
+    },
+    {
+      "id": "high",
+      "label": "[100,∞)",
+      "count": 0
+    }
+  ],
+  "helpRanking": [
+    {
+      "policyKey": "llm:gemini:gemini-3.5-flash-lite:grounded",
+      "baselineKey": "llm:gemini:gemini-3.5-flash-lite:base",
+      "n": 13,
+      "meanDeltaRegret": 0.15384615384615385,
+      "improvedRate": 0,
+      "wilson": {
+        "low": 0,
+        "high": 0.22810184305529166
+      },
+      "insufficientEvidence": true
+    },
+    {
+      "policyKey": "llm:groq:openai/gpt-oss-20b:grounded",
+      "baselineKey": "llm:groq:openai/gpt-oss-20b:base",
+      "n": 13,
+      "meanDeltaRegret": -0.15384615384615385,
+      "improvedRate": 0.07692307692307693,
+      "wilson": {
+        "low": 0.013710066379696304,
+        "high": 0.3331453392824736
+      },
+      "insufficientEvidence": true
+    }
+  ],
+  "counterexample": {
+    "snapshotId": "aegis__greedy__sentinel-x__s101__t1",
+    "policyKey": "llm:gemini:gemini-3.5-flash-lite:base",
+    "regret": 5
+  },
+  "optimalRateByPolicy": {
+    "llm:gemini:gemini-3.5-flash-lite:base": {
+      "n": 13,
+      "optimal": 2,
+      "rate": 0.15384615384615385,
+      "wilson": {
+        "low": 0.04325726318273798,
+        "high": 0.4223517050863101
+      },
+      "insufficientEvidence": true
+    },
+    "llm:gemini:gemini-3.5-flash-lite:freetext": {
+      "n": 13,
+      "optimal": 2,
+      "rate": 0.15384615384615385,
+      "wilson": {
+        "low": 0.04325726318273798,
+        "high": 0.4223517050863101
+      },
+      "insufficientEvidence": true
+    },
+    "llm:gemini:gemini-3.5-flash-lite:grounded": {
+      "n": 13,
+      "optimal": 1,
+      "rate": 0.07692307692307693,
+      "wilson": {
+        "low": 0.013710066379696304,
+        "high": 0.3331453392824736
+      },
+      "insufficientEvidence": true
+    },
+    "llm:groq:openai/gpt-oss-20b:base": {
+      "n": 13,
+      "optimal": 1,
+      "rate": 0.07692307692307693,
+      "wilson": {
+        "low": 0.013710066379696304,
+        "high": 0.3331453392824736
+      },
+      "insufficientEvidence": true
+    },
+    "llm:groq:openai/gpt-oss-20b:freetext": {
+      "n": 13,
+      "optimal": 2,
+      "rate": 0.15384615384615385,
+      "wilson": {
+        "low": 0.04325726318273798,
+        "high": 0.4223517050863101
+      },
+      "insufficientEvidence": true
+    },
+    "llm:groq:openai/gpt-oss-20b:grounded": {
+      "n": 13,
+      "optimal": 2,
+      "rate": 0.15384615384615385,
+      "wilson": {
+        "low": 0.04325726318273798,
+        "high": 0.4223517050863101
+      },
+      "insufficientEvidence": true
+    }
+  }
+}

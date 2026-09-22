@@ -25,6 +25,14 @@ export {
   type DecisionLabSuiteRef
 } from "./pack-v2";
 export {
+  DECISION_LAB_SCHEMA_VERSION_V3,
+  assertDecisionLabPackV3,
+  type DecisionLabCaseV3,
+  type DecisionLabPackV3,
+  type DecisionLabPolicyEvidenceV3,
+  type DecisionLabRecordedPolicyV3
+} from "./pack-v3";
+export {
   classifyFromTrace,
   classifyRecordedTaxonomy,
   traceHasFixtureMissLocal
@@ -39,3 +47,18 @@ export {
   type InsufficientEvidenceInput,
   type WilsonInterval
 } from "./stats";
+export {
+  FAILURE_TAGS,
+  buildDiagnosticsReport,
+  classifyFailureTags,
+  summarizeDiagnostics,
+  type ClassifyFailureTagsInput,
+  type Counterexample,
+  type DiagnosticsCaseView,
+  type DiagnosticsReport,
+  type DiagnosticsSummaryV1,
+  type FailureCluster,
+  type FailureTag,
+  type HelpRankingRow,
+  type RegretBucket
+} from "./diagnostics";
