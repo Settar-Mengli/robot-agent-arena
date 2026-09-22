@@ -16,6 +16,7 @@
     "eval:replay": "node scripts/run-ts.mjs src/eval/cli.ts --mode replay",
     "eval:record": "node scripts/run-ts.mjs src/eval/cli.ts --mode record",
     "lab:pack": "node scripts/run-ts.mjs src/eval/lab-pack.ts",
+    "arena:pack": "node scripts/run-ts.mjs src/eval/arena-pack.ts",
     "preview:pages": "vite build && vite preview"
   },
   "devDependencies": {

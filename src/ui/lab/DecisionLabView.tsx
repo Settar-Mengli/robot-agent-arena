@@ -1,18 +1,22 @@
 import { useMemo, useState } from "react";
 import {
-  assertDecisionLabPackV2,
+  assertDecisionLabPackV3,
   bootstrapMeanCi,
   insufficientEvidence,
   llmPolicyKey,
   wilsonInterval,
-  type DecisionLabCaseV2,
-  type DecisionLabPackV2,
+  type DecisionLabCaseV3,
+  type DecisionLabPackV3,
   type DecisionLabPolicyEvidence,
-  type DecisionLabTaxonomy
+  type DecisionLabTaxonomy,
+  type DiagnosticsSummaryV1
 } from "../../decision-lab";
-import rawPack from "./pack/decision-lab.v2.json";
+import { ChallengeView } from "./ChallengeView";
+import { DiagnosticsPanel } from "./DiagnosticsPanel";
+import rawPack from "./pack/decision-lab.v3.json";
+import rawPublished from "./pack/diagnostics.summary.json";
 
-type LabSubview = "browse" | "inspect" | "compare";
+type LabSubview = "browse" | "inspect" | "compare" | "diagnostics" | "challenge";
 
 export type LabBrowseFilters = {
   text: string;
@@ -37,10 +41,10 @@ export const DEFAULT_LAB_FILTERS: LabBrowseFilters = {
 };
 
 function loadPack(raw: unknown):
-  | { ok: true; pack: DecisionLabPackV2 }
+  | { ok: true; pack: DecisionLabPackV3 }
   | { ok: false; error: string } {
   try {
-    return { ok: true, pack: assertDecisionLabPackV2(raw) };
+    return { ok: true, pack: assertDecisionLabPackV3(raw) };
   } catch (err) {
     return {
       ok: false,
@@ -49,7 +53,18 @@ function loadPack(raw: unknown):
   }
 }
 
-function policyArmKeys(pack: DecisionLabPackV2): string[] {
+function loadPublished(raw: unknown): DiagnosticsSummaryV1 | null {
+  if (
+    raw !== null &&
+    typeof raw === "object" &&
+    (raw as { schemaVersion?: unknown }).schemaVersion === 1
+  ) {
+    return raw as DiagnosticsSummaryV1;
+  }
+  return null;
+}
+
+function policyArmKeys(pack: DecisionLabPackV3): string[] {
   const keys = new Set<string>(["greedy"]);
   for (const pin of pack.modelPins) {
     for (const variant of pack.variants) {
@@ -61,6 +76,7 @@ function policyArmKeys(pack: DecisionLabPackV2): string[] {
 
 export function DecisionLabView(): React.JSX.Element {
   const loaded = useMemo(() => loadPack(rawPack), []);
+  const published = useMemo(() => loadPublished(rawPublished), []);
   const [subview, setSubview] = useState<LabSubview>("browse");
   const [filters, setFilters] = useState<LabBrowseFilters>(DEFAULT_LAB_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -87,15 +103,17 @@ export function DecisionLabView(): React.JSX.Element {
       </p>
       <h2 className="mt-2 text-2xl font-semibold text-stone-50">Decision Lab</h2>
       <p className="mt-2 text-stone-400">
-        Offline evidence pack (schema v2). Inspect oracle ties and compare
-        recorded arms within a suite. No universal rankings.
+        Offline evidence pack (schema v3). Inspect oracle ties, diagnostics, and
+        challenge recorded arms. No universal rankings.
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {(
           [
             ["browse", "Browse"],
             ["inspect", "Inspector"],
-            ["compare", "Compare"]
+            ["compare", "Compare"],
+            ["diagnostics", "Diagnostics"],
+            ["challenge", "Challenge"]
           ] as const
         ).map(([id, label]) => (
           <button
@@ -112,6 +130,7 @@ export function DecisionLabView(): React.JSX.Element {
           </button>
         ))}
       </div>
+      {subview !== "diagnostics" && subview !== "challenge" ? (
       <label className="mt-4 block text-sm text-stone-400">
         Suite{" "}
         <select
@@ -128,6 +147,12 @@ export function DecisionLabView(): React.JSX.Element {
           ))}
         </select>
       </label>
+      ) : null}
+
+      {subview === "diagnostics" ? (
+        <DiagnosticsPanel pack={pack} published={published} />
+      ) : null}
+      {subview === "challenge" ? <ChallengeView pack={pack} /> : null}
       {subview === "browse" ? (
         <BrowsePanel
           cases={filtered}
@@ -150,7 +175,7 @@ export function DecisionLabView(): React.JSX.Element {
   );
 }
 
-function caseMatches(c: DecisionLabCaseV2, filters: LabBrowseFilters): boolean {
+function caseMatches(c: DecisionLabCaseV3, filters: LabBrowseFilters): boolean {
   if (filters.suiteId !== c.suiteId) {
     return false;
   }
@@ -184,7 +209,7 @@ function caseMatches(c: DecisionLabCaseV2, filters: LabBrowseFilters): boolean {
 }
 
 function BrowsePanel(props: {
-  cases: DecisionLabCaseV2[];
+  cases: DecisionLabCaseV3[];
   arms: string[];
   filters: LabBrowseFilters;
   setFilters: React.Dispatch<React.SetStateAction<LabBrowseFilters>>;
@@ -230,7 +255,7 @@ function BrowsePanel(props: {
 }
 
 function InspectPanel(props: {
-  caseRow: DecisionLabCaseV2 | null;
+  caseRow: DecisionLabCaseV3 | null;
   arms: string[];
 }): React.JSX.Element {
   if (props.caseRow === null) {
@@ -270,7 +295,7 @@ function InspectPanel(props: {
 }
 
 function ComparePanel(props: {
-  pack: DecisionLabPackV2;
+  pack: DecisionLabPackV3;
   suiteId: string;
 }): React.JSX.Element {
   const pin = props.pack.modelPins[0]!;

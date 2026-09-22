@@ -9,14 +9,21 @@ import {
 import { CPU_OPPONENTS } from "../data/opponents";
 import { ArenaView } from "./arena/ArenaView";
 import { ResultsView } from "./arena/ResultsView";
+import { WatchBattleView } from "./arena/WatchBattleView";
 import { BuilderForm } from "./builder/BuilderForm";
 import { DecisionLabView } from "./lab/DecisionLabView";
+import {
+  clearSlot,
+  loadSlot,
+  saveSlot
+} from "./persist/save-slot";
 import {
   createBattleViewStore,
   type PlayTurnFn
 } from "./store/battle-view";
 
-type Screen = "builder" | "setup" | "battle" | "lab";
+type Screen = "builder" | "setup" | "battle" | "lab" | "watch";
+type ArenaMode = "free" | "watch";
 
 const DEFAULT_SEED = "arena-1";
 
@@ -34,9 +41,14 @@ export function App({ playTurn }: AppProps = {}) {
   );
 
   const [screen, setScreen] = useState<Screen>("builder");
+  const [arenaMode, setArenaMode] = useState<ArenaMode>("free");
   const [playerConfig, setPlayerConfig] = useState<AgentConfig | null>(null);
   const [opponent, setOpponent] = useState<AgentConfig>(CPU_OPPONENTS[0]!);
   const [seed, setSeed] = useState<string>(DEFAULT_SEED);
+  const [watchMatchId, setWatchMatchId] = useState<string | undefined>(
+    undefined
+  );
+  const [persistMessage, setPersistMessage] = useState<string | null>(null);
 
   function beginBattle(
     player: AgentConfig,
@@ -87,6 +99,94 @@ export function App({ playTurn }: AppProps = {}) {
         ))
       : undefined;
 
+  function onSave() {
+    if (playerConfig === null && arenaMode === "free") {
+      setPersistMessage("Build an agent before saving.");
+      return;
+    }
+    const draftPlayer =
+      playerConfig ??
+      ({
+        agentId: "unsaved",
+        displayName: "Unsaved",
+        modules: {
+          coreIdentity: "-",
+          memory: "-",
+          sigilSecurity: "-",
+          rules: "-",
+          strategy: "-"
+        },
+        skillIds: ["skill-logic-storm", "skill-override-pulse"]
+      } satisfies AgentConfig);
+    const result = saveSlot(
+      {
+        draft: {
+          playerConfig: draftPlayer,
+          opponentId: opponent.agentId,
+          seed
+        },
+        mode: arenaMode,
+        ...(arenaMode === "watch" && watchMatchId !== undefined
+          ? { watch: { matchId: watchMatchId } }
+          : {}),
+        runtime: arenaMode === "free" ? battle.runtime : null,
+        battleOver: Boolean(terminal),
+        ...(outcome !== undefined ? { lastOutcome: outcome } : {})
+      },
+      { inFlight: battle.status === "inFlight" }
+    );
+    if (!result.ok) {
+      setPersistMessage(
+        result.reason === "in_flight"
+          ? "Cannot save while a turn is resolving."
+          : `Save failed (${result.reason}).`
+      );
+      return;
+    }
+    setPersistMessage("Saved to local slot.");
+  }
+
+  function onLoad() {
+    const loaded = loadSlot();
+    if (!loaded.ok) {
+      setPersistMessage(
+        loaded.reason === "empty" ? "No save slot." : loaded.message
+      );
+      return;
+    }
+    const slot = loaded.slot;
+    const cpu =
+      CPU_OPPONENTS.find((o) => o.agentId === slot.draft.opponentId) ??
+      CPU_OPPONENTS[0]!;
+    setPlayerConfig(slot.draft.playerConfig);
+    setOpponent(cpu);
+    setSeed(slot.draft.seed);
+    setArenaMode(slot.mode);
+    if (slot.mode === "watch") {
+      setWatchMatchId(slot.watch?.matchId);
+      store.getState().clearBattle();
+      setScreen("watch");
+    } else if (slot.runtime !== null) {
+      store.getState().resetBattle(slot.runtime);
+      setScreen("battle");
+    } else {
+      store.getState().clearBattle();
+      setScreen("setup");
+    }
+    setPersistMessage(`Loaded save from ${slot.savedAt}.`);
+  }
+
+  function onClearSave() {
+    clearSlot();
+    setPersistMessage("Save slot cleared.");
+  }
+
+  const inArenaNav =
+    screen === "builder" ||
+    screen === "setup" ||
+    screen === "battle" ||
+    screen === "watch";
+
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100">
       <header className="border-b border-stone-800 px-6 py-8">
@@ -100,13 +200,13 @@ export function App({ playTurn }: AppProps = {}) {
           <button
             type="button"
             className={
-              screen === "builder" || screen === "setup" || screen === "battle"
+              inArenaNav
                 ? "text-sm font-medium text-amber-400"
                 : "text-sm text-stone-400 hover:text-stone-200"
             }
             onClick={() => {
               if (screen === "lab") {
-                setScreen("builder");
+                setScreen(arenaMode === "watch" ? "watch" : "builder");
               }
             }}
           >
@@ -124,9 +224,91 @@ export function App({ playTurn }: AppProps = {}) {
             Decision Lab
           </button>
         </nav>
+        {inArenaNav ? (
+          <div
+            className="mt-4 flex flex-wrap gap-2"
+            role="group"
+            aria-label="Arena mode"
+          >
+            <button
+              type="button"
+              className={
+                arenaMode === "free"
+                  ? "rounded border border-amber-700 px-3 py-1 text-sm text-amber-200"
+                  : "rounded border border-stone-700 px-3 py-1 text-sm text-stone-400"
+              }
+              onClick={() => {
+                setArenaMode("free");
+                if (screen === "watch") {
+                  setScreen("builder");
+                }
+              }}
+              data-testid="mode-free"
+            >
+              Free play (greedy)
+            </button>
+            <button
+              type="button"
+              className={
+                arenaMode === "watch"
+                  ? "rounded border border-amber-700 px-3 py-1 text-sm text-amber-200"
+                  : "rounded border border-stone-700 px-3 py-1 text-sm text-stone-400"
+              }
+              onClick={() => {
+                setArenaMode("watch");
+                store.getState().clearBattle();
+                setScreen("watch");
+              }}
+              data-testid="mode-watch"
+            >
+              Watch recorded
+            </button>
+          </div>
+        ) : null}
+        {inArenaNav ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="rounded border border-stone-700 px-3 py-1 text-sm text-stone-300"
+              onClick={onSave}
+              data-testid="save-slot"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              className="rounded border border-stone-700 px-3 py-1 text-sm text-stone-300"
+              onClick={onLoad}
+              data-testid="load-slot"
+            >
+              Load
+            </button>
+            <button
+              type="button"
+              className="rounded border border-stone-700 px-3 py-1 text-sm text-stone-400"
+              onClick={onClearSave}
+              data-testid="clear-slot"
+            >
+              Clear save
+            </button>
+            {persistMessage ? (
+              <p className="text-sm text-stone-400" role="status">
+                {persistMessage}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </header>
       <main className="mx-auto max-w-3xl px-6 py-10">
         {screen === "lab" ? <DecisionLabView /> : null}
+
+        {screen === "watch" ? (
+          <WatchBattleView
+            onLeave={onReturnToBuilder}
+            initialMatchId={watchMatchId}
+            onMatchIdChange={setWatchMatchId}
+          />
+        ) : null}
 
         {screen === "builder" ? (
           <BuilderForm

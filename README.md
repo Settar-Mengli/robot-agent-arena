@@ -6,7 +6,7 @@ Configure agent design choices. Run them in a deterministic battle environment. 
 
 **Published negative result (held-out adversarial):** grounding changed **0** decisions on the historical pre-dedupe suite (D-024 falsified; D-030). Current held-out adversarial suite is **n=13** distinct states (D-035); greedy **0%** optimal / mean regret **156.15**. Pinned gemini ablation and bench rows: see [EVAL.md](EVAL.md).
 
-**Status:** Engine, multi-provider inference client, agent layer, eval harness, grounding ablation, environment interface, and **UI** (Builder, Arena greedy CPU, results, Decision Lab) ship on main. **Next:** execution **Evidence+Ship (ES)** — multi-model evidence, CIs, extended suite, GitHub Pages (`https://settar-mengli.github.io/robot-agent-arena/`) — then **B.3** fixture-replayed LLM Arena → **B.4** save slot. Full diagnostic batch (locked 8 / C), BYOK, and a second reference environment remain **planned**. The Pages/app demo is a **static** site with **recorded** evidence — **no live AI** in the browser. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships).
+**Status:** Engine through Evidence+Ship (ES) on main. **Batch 3** (D-049) — Watch-recorded Arena, one-slot localStorage save, Decision Lab pack **v3** + batch-8 diagnostics, and You-vs-Model challenge — is **implemented on branch, pending PR merge**. Pages demo: `https://settar-mengli.github.io/robot-agent-arena/` — **static** recorded evidence, **no live AI** in the browser. **Next (after Batch 3 merge):** locked batch **9** (three new measurements). BYOK and a second reference environment remain planned. Live multi-provider BYOK play is **not** promised (OpenRouter-only if live play ships).
 
 ## What it is
 
@@ -26,7 +26,7 @@ Temporary product title: **AGENT ARENA**. Repository name: `robot-agent-arena`. 
 
 **Planned**
 
-- localStorage persistence (one save slot) — execution **B.4**, not shipped
+- ~~localStorage persistence (one save slot)~~ — **done** (Batch 3 / B.4)
 
 ## Getting started
 
@@ -51,7 +51,8 @@ npm run eval        # baseline eval (no keys)
 npm run eval:report # baseline + refresh EVAL.md block
 npm run eval:replay # LLM via recorded fixtures
 npm run eval:record # local only — writes fixtures (needs keys)
-npm run lab:pack    # regenerate Decision Lab evidence pack
+npm run lab:pack    # regenerate Decision Lab evidence pack (v3)
+npm run arena:pack  # regenerate Watch arena-replay.v1.json
 ```
 
 ## Evals
@@ -86,7 +87,7 @@ PROGRESS.md        # Current status
 AGENT_RULES.md     # Contributor / agent operating rules
 ```
 
-**PLANNED:** `src/ui` save slot (B.4); fixture-replayed LLM Arena (B.3). Measurement core uses `src/env`; Decision Lab shared types live in `src/decision-lab/`.
+**DONE:** `src/ui` save slot (B.4); Watch-recorded LLM Arena (B.3). Measurement core uses `src/env`; Decision Lab shared types live in `src/decision-lab/`.
 
 ## Testing
 
@@ -107,14 +108,13 @@ For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 4. **Done:** Correctness hardening (A1/A2)
 5. **Done:** Environment interface + port (A3)
 6. **Done:** UI part 1 — scaffolding + Builder (B.1)
-7. **Done:** UI part 2 — Arena + results (B.2); **B.2d** Decision Lab (partial diagnostics — not batch 8)
-7a. Evidence + Ship (ES) — CIs, ext suite, multi-model, Pages — **in progress**
-8. Diagnostic layer (headless first, then UI) — **not started** (B.2d/ES are partial slices only)
+7. **Done:** UI part 2 — Arena + results (B.2); **B.2d** Decision Lab; **ES**; **Batch 3** (B.3 Watch / B.4 save / batch-8 diagnostics / Lab challenge) — D-049
+8. Diagnostic layer — **done** in Batch 3 (pack v3 + Lab Diagnostics); three new measurements remain batch **9**
 9. Three new measurements (pre-register before implement)
 10. BYOK + committed static leaderboard + methodology writeup
 11. Second reference environment + publish
 
-Execution follow-ups: **ES** → **B.3** fixture-replayed LLM Arena → **B.4** save slot. Coach is **cut**. Order locked in [D-033](DECISIONS.md) with B.2d [D-043](DECISIONS.md) and ES [D-048](DECISIONS.md).
+Order locked in [D-033](DECISIONS.md); Batch 3 [D-049](DECISIONS.md); ES [D-048](DECISIONS.md).
 
 Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.md).
 

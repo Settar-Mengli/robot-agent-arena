@@ -12,6 +12,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { DecisionTrace, PlayAgentTurnResult } from "../agent";
+import { computeGroundedFactsV2 } from "../agent/grounding";
 import {
   findSkillDefinition,
   MVP_SKILL_CATALOG,
@@ -19,16 +20,22 @@ import {
 } from "../engine";
 import {
   assertDecisionLabPackV1,
-  assertDecisionLabPackV2,
+  assertDecisionLabPackV3,
+  buildDiagnosticsReport,
+  classifyFailureTags,
   classifyRecordedTaxonomy,
   llmPolicyKey,
   PROMPT_TEMPLATE_FILES,
+  summarizeDiagnostics,
   type DecisionLabCase,
   type DecisionLabCaseV2,
+  type DecisionLabCaseV3,
   type DecisionLabPackV1,
-  type DecisionLabPackV2,
+  type DecisionLabPackV3,
   type DecisionLabPolicyEvidence,
-  type DecisionLabSanitizedTrace
+  type DecisionLabPolicyEvidenceV3,
+  type DecisionLabSanitizedTrace,
+  type DiagnosticsCaseView
 } from "../decision-lab";
 import { createDirStore } from "./dir-store";
 import { traceHasFixtureMiss } from "./metrics";
@@ -47,7 +54,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SUITE_REL = "evals/suites/snapshots.adversarial.heldout.json";
 const SUITE_EXT_REL = "evals/suites/snapshots.adversarial.heldout-ext.json";
 const MANIFEST_REL = "evals/fixtures/manifest.json";
-const PACK_REL = "src/ui/lab/pack/decision-lab.v2.json";
+const PACK_REL = "src/ui/lab/pack/decision-lab.v3.json";
+const DIAG_SUMMARY_REL = "evals/out-committed/diagnostics.summary.json";
+const DIAG_SUMMARY_UI_REL = "src/ui/lab/pack/diagnostics.summary.json";
 const SKILLS_REL = "src/engine/skills.ts";
 const ORACLE_REL = "src/eval/oracle.ts";
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -63,7 +72,8 @@ const LIMITATIONS = [
   "Fixture misses are shown as unavailable; no invented model choices.",
   "Latency from live inference is not claimed in this pack; token/cost evidence is separate (live-profile).",
   "Sample sizes are small — insufficient evidence for broad model rankings when n<30 or Wilson width≥0.40.",
-  "Evidence+Ship Decision Lab pack v2; B.3/B.4 and full batch-8 diagnostics remain open.",
+  "Decision Lab pack v3 includes batch-8 diagnostics and descriptive failure tags (D-049).",
+  "Failure tags are descriptive labels on measured suboptimal decisions — not causal claims.",
   "Input hashes are SHA-256 of UTF-8 text after normalizing newlines to LF (CRLF and lone CR)."
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
@@ -284,6 +294,50 @@ function llmFromPrimary(
   return record;
 }
 
+function withFailureTags(
+  snap: DecisionSnapshot,
+  evidence: DecisionLabPolicyEvidence
+): DecisionLabPolicyEvidenceV3 {
+  if (
+    evidence.status !== "recorded" ||
+    evidence.source !== "llm" ||
+    evidence.taxonomy !== "suboptimal"
+  ) {
+    return evidence;
+  }
+  const facts = computeGroundedFactsV2(
+    { cpu: snap.runtime.cpu, player: snap.runtime.player },
+    snap.runtime.session.cpu,
+    snap.runtime.session.player.skillIds,
+    snap.runtime.session.turn,
+    snap.runtime.session.maxTurns
+  );
+  const lethalBySkill: Record<string, boolean> = {};
+  for (const s of facts.cpuSkills) {
+    lethalBySkill[s.skillId] = s.lethal;
+  }
+  const chosenFact = facts.cpuSkills.find(
+    (s) => s.skillId === evidence.executedSkillId
+  );
+  const skill = findSkillDefinition(
+    MVP_SKILL_CATALOG,
+    evidence.executedSkillId as SkillId
+  );
+  const failureTags = classifyFailureTags({
+    taxonomy: evidence.taxonomy,
+    regret: evidence.regret,
+    executedSkillId: evidence.executedSkillId,
+    oracleBest: snap.best,
+    affordability: affordabilityFor(snap),
+    observation: observationFromSnap(snap),
+    lethalBySkill,
+    diesNextTurnPreAction: facts.threat.diesNextTurnPreAction,
+    diesNextTurnAfterChosen: chosenFact?.diesNextTurnAfterMove ?? false,
+    chosenCategory: skill?.effect.category ?? "unknown"
+  });
+  return { ...evidence, failureTags };
+}
+
 export type BuildLabPackOptions = {
   root?: string;
   fetch?: RepeatAwareFetch;
@@ -298,7 +352,7 @@ export type BuildLabPackOptions = {
 
 export async function buildDecisionLabPack(
   options: BuildLabPackOptions = {}
-): Promise<{ pack: DecisionLabPackV2; json: string }> {
+): Promise<{ pack: DecisionLabPackV3; json: string }> {
   const root = options.root ?? ROOT;
   const readText =
     options.readText ?? ((rel: string) => defaultReadText(root, rel));
@@ -501,17 +555,24 @@ export async function buildDecisionLabPack(
   }
 
   const v2Cases: DecisionLabCaseV2[] = [];
+  const snapById = new Map(snapshots.map((s) => [s.id, s] as const));
+  const extSnapById = new Map(extSnaps.map((s) => [s.id, s] as const));
 
   for (const c of cases) {
-    const policies: Record<string, DecisionLabPolicyEvidence> = {
+    const snap = snapById.get(c.snapshotId);
+    if (snap === undefined) {
+      throw new Error(`missing snap for ${c.snapshotId}`);
+    }
+    const policies: Record<string, DecisionLabPolicyEvidenceV3> = {
       greedy: c.policies.greedy
     };
     for (const pin of pins) {
       for (const variant of variantsAll) {
         const key = llmPolicyKey(pin.provider, pin.model, variant);
-        policies[key] =
+        const raw =
           advArms[key]?.get(c.snapshotId) ??
           unavailable(`missing ${key} on adversarial`);
+        policies[key] = withFailureTags(snap, raw);
       }
     }
     v2Cases.push({
@@ -532,15 +593,16 @@ export async function buildDecisionLabPack(
     if (greedySkill === undefined) {
       throw new Error(`missing greedy decision for ext ${snap.id}`);
     }
-    const policies: Record<string, DecisionLabPolicyEvidence> = {
+    const policies: Record<string, DecisionLabPolicyEvidenceV3> = {
       greedy: greedyPolicy(snap, greedySkill)
     };
     for (const pin of pins) {
       for (const variant of variantsCore) {
         const key = llmPolicyKey(pin.provider, pin.model, variant);
-        policies[key] =
+        const raw =
           extArms[key]?.get(snap.id) ??
           unavailable(`missing ${key} on heldout-ext`);
+        policies[key] = withFailureTags(snap, raw);
       }
       // freetext not recorded on ext
       policies[llmPolicyKey(pin.provider, pin.model, "freetext")] = unavailable(
@@ -560,8 +622,52 @@ export async function buildDecisionLabPack(
     });
   }
 
-  const pack: DecisionLabPackV2 = {
-    schemaVersion: 2,
+  void extSnapById;
+
+  const helpPairs = [
+    {
+      policyKey: llmPolicyKey(gemini.provider, gemini.model, "grounded"),
+      baselineKey: llmPolicyKey(gemini.provider, gemini.model, "base")
+    },
+    {
+      policyKey: llmPolicyKey(groq.provider, groq.model, "grounded"),
+      baselineKey: llmPolicyKey(groq.provider, groq.model, "base")
+    }
+  ];
+
+  function toDiagCases(
+    list: DecisionLabCaseV2[]
+  ): DiagnosticsCaseView[] {
+    return list.map((c) => ({
+      snapshotId: c.snapshotId,
+      observation: c.observation,
+      oracleBest: c.oracle.best,
+      policies: c.policies
+    }));
+  }
+
+  let workingCases = v2Cases;
+  let workingSuites = [
+    {
+      id: "heldout-adversarial",
+      split: "heldout",
+      kind: "adversarial",
+      path: SUITE_REL,
+      snapshotCount: snapshots.length
+    },
+    {
+      id: "heldout-adversarial-ext",
+      split: "heldout",
+      kind: "adversarial-heldout-ext",
+      path: SUITE_EXT_REL,
+      snapshotCount: extSnaps.length
+    }
+  ];
+  let workingLimitations = [...LIMITATIONS];
+
+  let diag = buildDiagnosticsReport(toDiagCases(workingCases), { helpPairs });
+  let pack: DecisionLabPackV3 = {
+    schemaVersion: 3,
     inputHashes: {
       suite: sha256TextLf(suiteText + "\n" + extText),
       fixtureManifest: sha256TextLf(manifestText),
@@ -572,47 +678,51 @@ export async function buildDecisionLabPack(
       skillCatalog: sha256TextLf(skillCatalogText),
       oracleSource: sha256TextLf(oracleText)
     },
-    suites: [
-      {
-        id: "heldout-adversarial",
-        split: "heldout",
-        kind: "adversarial",
-        path: SUITE_REL,
-        snapshotCount: snapshots.length
-      },
-      {
-        id: "heldout-adversarial-ext",
-        split: "heldout",
-        kind: "adversarial-heldout-ext",
-        path: SUITE_EXT_REL,
-        snapshotCount: extSnaps.length
-      }
-    ],
+    suites: workingSuites,
     modelPins: [gemini, groq],
     variants: [...variantsAll],
-    cases: v2Cases,
-    limitations: LIMITATIONS,
+    cases: workingCases as DecisionLabCaseV3[],
+    diagnostics: diag,
+    limitations: workingLimitations,
     reproduce: REPRODUCE
   };
 
   // Thin ext cases to summary if pack would exceed ~300KB
   let json = `${JSON.stringify(pack, null, 2)}\n`;
   if (json.length > 300_000) {
-    pack.cases = pack.cases.filter((c) => c.suiteId === "heldout-adversarial");
-    pack.suites = pack.suites.filter((s) => s.id === "heldout-adversarial");
-    pack.limitations = [
+    workingCases = workingCases.filter(
+      (c) => c.suiteId === "heldout-adversarial"
+    );
+    workingSuites = workingSuites.filter((s) => s.id === "heldout-adversarial");
+    workingLimitations = [
       ...LIMITATIONS,
       "Extended suite thinned from pack (>~300KB); full ext evidence remains in suites/fixtures/bench."
     ].sort((a, b) => (a < b ? -1 : 1));
+    diag = buildDiagnosticsReport(toDiagCases(workingCases), { helpPairs });
+    pack = {
+      ...pack,
+      cases: workingCases as DecisionLabCaseV3[],
+      suites: workingSuites,
+      limitations: workingLimitations,
+      diagnostics: diag
+    };
     json = `${JSON.stringify(pack, null, 2)}\n`;
   }
 
-  assertDecisionLabPackV2(pack);
+  assertDecisionLabPackV3(pack);
 
   if (options.dryRun !== true) {
     const outPath = join(root, PACK_REL);
     await mkdir(dirname(outPath), { recursive: true });
     await writeFile(outPath, json, "utf8");
+    const summary = summarizeDiagnostics(diag, toDiagCases(workingCases));
+    const summaryJson = `${JSON.stringify(summary, null, 2)}\n`;
+    const summaryPath = join(root, DIAG_SUMMARY_REL);
+    await mkdir(dirname(summaryPath), { recursive: true });
+    await writeFile(summaryPath, summaryJson, "utf8");
+    const summaryUiPath = join(root, DIAG_SUMMARY_UI_REL);
+    await mkdir(dirname(summaryUiPath), { recursive: true });
+    await writeFile(summaryUiPath, summaryJson, "utf8");
   }
 
   return { pack, json };
