@@ -18,17 +18,17 @@ Agent designs are often judged by vibe. AGENT ARENA instead measures decision qu
 - Fixed player policy from the scenario (greedy or seeded-random).
 - Exact memoized best response with node caps; ties reported as multiple `best` ids.
 
-## Results (phase 1 / pending operator record)
+## Results (phase 2 — recorded + keyless)
 
 | Surface | Status |
 | --- | --- |
-| Pinned gemini base/grounded on n=13 | Published in EVAL.md / bench.summary.json |
-| Groq second pin | **Pending operator record** (`singleModelPending: true`) |
-| Heldout-ext LLM rows | **Pending operator record** |
-| Free-text (`agent-v5-freetext`) | Code shipped; fixtures pending / may cut (D-047) |
-| Confidence intervals | Wired in metrics, bench rows, Lab Compare |
+| Pinned gemini + groq × base/grounded on n=13 | Published — see EVAL.md / bench.summary.json |
+| Heldout-ext (n=35) base/grounded both pins | Published (`singleModelPending: false`) |
+| Free-text (`agent-v5-freetext`) | Recorded n=13 both pins; ext deferred (D-047) |
+| Confidence intervals | Wilson + bootstrap on bench rows; Lab Compare insufficient-evidence labels |
+| Gemini base≡grounded on ext (34.3%/1.23) | **Genuine identical choices** (35/35 same skillId; distinct `agent-v1` vs `agent-v2-grounded`) |
 
-Do not invent multi-model numbers before fixtures exist.
+Do not over-claim: n=13 rows remain **insufficient evidence**; ext n=35 clears the n/width gate but is still one suite/product cohort.
 
 ## Limitations
 

@@ -30,7 +30,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
 - **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (PR #33); execution **B.2** Arena + results (D-042).
 - **DONE (code):** Execution **B.2d** Decision Lab (partial diagnostic slice — not locked batch 8 / C).
-- **NEXT:** Execution **Evidence+Ship (ES)** (D-048) → **B.3** fixture-replayed LLM UI → **B.4** MVP save slot.
+- **NEXT:** Execution **B.3** fixture-replayed LLM UI → **B.4** MVP save slot (ES / D-048 complete on branch).
 - **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -46,7 +46,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
 - M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE**.
 - M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
-- M-BENCH headless model bench — **DONE** (PR #23 / D-032); multi-model pending operator record.
+- M-BENCH headless model bench — **DONE** (PR #23 / D-032); multi-model proof committed in ES.
 
 ### AI milestone spine (D-033 — 11 locked batches, 5 execution groups)
 
@@ -59,7 +59,7 @@ Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-pro
 Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: regret distribution with rate (D-031). Memory variants still unmeasured.
 
 #### 3. M-BENCH headless — DONE (PR #23 / D-032)
-Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json`. Single-model gemini proof committed; multi-model awaits operator record.
+Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json`. Multi-model proof committed (`singleModelPending: false`) after ES operator record.
 
 #### 4. Correctness hardening — DONE — execution batch **A1** (prompt-byte frozen)
 CI re-proves pivotal / adversarial / bench / discriminate regen (`drift` job, `SNAPSHOT_DRIFT=1`); Oracle MemoScope identity (numeric `maxTurns` + catalog); pricing for Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; weak tests pin published values; greedy→grounding landed after differential proof (0 choice diffs). **Gate held:** committed numbers byte-identical. Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
@@ -80,7 +80,7 @@ Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.ru
 **DONE (partial diagnostic slice).** Offline evidence pack exported via `npm run lab:pack` from heldout adversarial suite + fixture replay only; Lab Browse / Inspector / Compare / downloadable report. **Does not complete** locked batch 8 / execution C diagnostics.
 
 #### 7a-es. Evidence + Ship — execution **ES** (after B.2d, before B.3) — D-048
-Confidence intervals; additive heldout-ext suite (D-044); multi-model pin incl. groq (D-046); Decision Lab pack v2; free GitHub Pages (D-045); free-text variant code (D-047) with operator-recorded fixtures. Two-phase: agent scaffolding → operator record → agent finalize. **B.3** and **B.4** remain named and not started. Does not complete locked batch 8 / C.
+**DONE (pending merge).** Confidence intervals; additive heldout-ext suite (D-044, n=35); multi-model pin incl. groq (D-046); Decision Lab pack v2; free GitHub Pages (D-045); free-text variant recorded n=13 (D-047; ext freetext deferred). Two-phase handoff honored. **B.3** and **B.4** remain named and not started. Does not complete locked batch 8 / C.
 
 #### 7b. Fixture-replayed LLM UI — execution **B.3** (after ES)
 Browser-safe fixture playback for LLM turns (D-033 default: deterministic CPU + fixture-replayed LLM). No Node eval harness in the browser. **Not started.**

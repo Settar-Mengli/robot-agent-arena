@@ -45,7 +45,9 @@ import {
 import { RateLimitStopError } from "../inference/rate-limit";
 import {
   buildLiveProfile,
-  liveSamplesFromRecordingCalls
+  liveSamplesFromRecordingCalls,
+  mergeLiveProfiles,
+  readLiveProfile
 } from "./live-profile";
 import {
   buildEvalMarkdownShell,
@@ -103,13 +105,8 @@ type CliArgs = {
   replayProvider?: string;
   variantsRaw?: string;
   forceQuota: boolean;
-  snapshotSuite:
-    | "standard"
-    | "pivotal"
-    | "adversarial"
-    | "adversarial-heldout-ext"
-    | "both"
-    | "all";
+  /** May be a single kind, both|all, or comma-separated kinds. */
+  snapshotSuite: string;
   snapshotSuiteExplicit: boolean;
   modelsRaw?: string;
   models?: ModelPin[];
@@ -226,17 +223,23 @@ function parseArgs(argv: string[]): CliArgs {
     } else if (flag === "--force-quota") {
       args.forceQuota = true;
     } else if (flag === "--snapshot-suite" && next) {
-      if (
-        next !== "standard" &&
-        next !== "pivotal" &&
-        next !== "adversarial" &&
-        next !== "adversarial-heldout-ext" &&
-        next !== "both" &&
-        next !== "all"
-      ) {
-        throw new Error(
-          `--snapshot-suite must be standard|pivotal|adversarial|adversarial-heldout-ext|both|all, got ${next}`
-        );
+      const parts = next.split(",").map((p) => p.trim()).filter((p) => p.length > 0);
+      if (parts.length === 0) {
+        throw new Error("--snapshot-suite requires a value");
+      }
+      for (const part of parts) {
+        if (
+          part !== "standard" &&
+          part !== "pivotal" &&
+          part !== "adversarial" &&
+          part !== "adversarial-heldout-ext" &&
+          part !== "both" &&
+          part !== "all"
+        ) {
+          throw new Error(
+            `--snapshot-suite must be standard|pivotal|adversarial|adversarial-heldout-ext|both|all (comma-ok), got ${part}`
+          );
+        }
       }
       args.snapshotSuite = next;
       args.snapshotSuiteExplicit = true;
@@ -577,13 +580,41 @@ function resolveSnapshotKinds(
       return [fromManifest];
     }
   }
+  if (args.snapshotSuite.includes(",")) {
+    const out: SnapshotSuiteKind[] = [];
+    for (const part of args.snapshotSuite.split(",").map((p) => p.trim())) {
+      if (part === "both") {
+        out.push("standard", "pivotal");
+      } else if (part === "all") {
+        out.push("standard", "pivotal", "adversarial", "adversarial-heldout-ext");
+      } else if (
+        part === "standard" ||
+        part === "pivotal" ||
+        part === "adversarial" ||
+        part === "adversarial-heldout-ext"
+      ) {
+        out.push(part);
+      }
+    }
+    return [...new Set(out)];
+  }
   if (args.snapshotSuite === "both") {
     return ["standard", "pivotal"];
   }
   if (args.snapshotSuite === "all") {
     return ["standard", "pivotal", "adversarial"];
   }
-  return [args.snapshotSuite];
+  if (
+    args.snapshotSuite === "standard" ||
+    args.snapshotSuite === "pivotal" ||
+    args.snapshotSuite === "adversarial" ||
+    args.snapshotSuite === "adversarial-heldout-ext"
+  ) {
+    return [args.snapshotSuite];
+  }
+  throw new Error(
+    `--snapshot-suite must be standard|pivotal|adversarial|adversarial-heldout-ext|both|all (comma-ok), got ${args.snapshotSuite}`
+  );
 }
 
 function snapshotResultKey(split: EvalSplit, kind: SnapshotSuiteKind): string {
@@ -1584,15 +1615,20 @@ async function runLlmMode(
     recordingStats.liveCalls.length > 0
   ) {
     const today = new Date().toISOString().slice(0, 10);
-    const profile = buildLiveProfile(
+    const next = buildLiveProfile(
       liveSamplesFromRecordingCalls(recordingStats.liveCalls, {
         suite: args.snapshotSuite
       }),
       { recordedFrom: today, recordedTo: today }
     );
     const livePath = join(outDir, "bench.live-profile.json");
+    const existing = readLiveProfile(livePath);
+    const profile =
+      existing !== undefined ? mergeLiveProfiles(existing, next) : next;
     await writeFile(livePath, `${JSON.stringify(profile, null, 2)}\n`, "utf8");
-    log(`live-profile (live calls only): ${relative(ROOT, livePath).replace(/\\/g, "/")}`);
+    log(
+      `live-profile (accumulated live calls): ${relative(ROOT, livePath).replace(/\\/g, "/")}`
+    );
   }
   const fixtureFileCount = record
     ? await countFixtureFiles(fixturesDir)
@@ -1960,7 +1996,11 @@ export async function runBenchMode(
     return 0;
   }
 
-  const expectedRows = args.models.length * variants.length * splits.length;
+  let kindSlots = 0;
+  for (const split of splits) {
+    kindSlots += resolveSnapshotKinds(args, split, undefined).length;
+  }
+  const expectedRows = args.models.length * variants.length * kindSlots;
   const singleModelPending =
     args.models.length < 2 || rows.length < expectedRows;
   const note = singleModelPending

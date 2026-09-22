@@ -306,30 +306,48 @@ Pinned single-model comparison on the **adversarial** measurement set (D-032). C
 
 **Protocol:** `--models provider:model` sets `INFERENCE_PROVIDER_ORDER` + `INFERENCE_MAX_PROVIDERS=1` (no failover). Defaults: `--suite heldout`, `--snapshot-suite adversarial`, `--max-matches 0` (snapshots only), `--variants base,grounded`, T=0, consistency 1. Adversarial greedy/random baselines: `evals/out-committed/adversarial.baselines.json` (post-D-035: heldout greedy **0% / 156.15**, n=13).
 
-### Single-model table (committed summary)
+### Multi-model table (committed summary)
 
-From `evals/out-committed/bench.summary.json` (pinned `gemini:gemini-3.5-flash-lite`, heldout adversarial, n=13):
+From `evals/out-committed/bench.summary.json` (`singleModelPending: false`; **base/grounded only** — 8 rows). Freetext n=13 is published in the table below and in the Lab pack (D-047), not in the committed summary file. Keyless replay of recorded fixtures; latency null under replay. Live token totals: `evals/out-committed/bench.live-profile.json` (label `live`, 2026-09-21…2026-09-22; latency unavailable — per-run live latencies were overwritten and are not reconstructed).
 
-| model | variant | optimal | mean regret |
-| --- | --- | ---: | ---: |
-| gemini:gemini-3.5-flash-lite | base | **15.4%** | 2.00 |
-| gemini:gemini-3.5-flash-lite | grounded | **7.7%** | 2.15 |
+**Heldout adversarial (n=13)** — all rows **insufficient evidence** (n&lt;30):
 
-`singleModelPending: true` remains — multi-model proof still pending. Reproduce keylessly:
+| model | variant | optimal | Wilson 95% | mean regret |
+| --- | --- | ---: | --- | ---: |
+| gemini:gemini-3.5-flash-lite | base | **15.4%** | [4.3%, 42.2%] | 2.00 |
+| gemini:gemini-3.5-flash-lite | grounded | **7.7%** | [1.4%, 33.3%] | 2.15 |
+| gemini:gemini-3.5-flash-lite | freetext | **15.4%** | [4.3%, 42.2%] | 2.00 |
+| groq:openai/gpt-oss-20b | base | **7.7%** | [1.4%, 33.3%] | 2.15 |
+| groq:openai/gpt-oss-20b | grounded | **15.4%** | [4.3%, 42.2%] | 2.00 |
+| groq:openai/gpt-oss-20b | freetext | **15.4%** | [4.3%, 42.2%] | 2.00 |
+
+**Heldout-ext (n=35, D-044)** — Wilson width &lt;0.40 and n≥30 (not labeled insufficient):
+
+| model | variant | optimal | Wilson 95% | mean regret |
+| --- | --- | ---: | --- | ---: |
+| gemini:gemini-3.5-flash-lite | base | **34.3%** | [20.8%, 50.8%] | 1.23 |
+| gemini:gemini-3.5-flash-lite | grounded | **34.3%** | [20.8%, 50.8%] | 1.23 |
+| groq:openai/gpt-oss-20b | base | **37.1%** | [23.2%, 53.7%] | 1.20 |
+| groq:openai/gpt-oss-20b | grounded | **37.1%** | [23.2%, 53.7%] | 1.06 |
+
+Note: gemini base and grounded on heldout-ext are **genuinely identical choices** (35/35 same `skillId`) with distinct prompt versions (`agent-v1` vs `agent-v2-grounded`) — not a fixture-key collision. Free-text not recorded on ext (D-047).
+
+Reproduce keylessly:
 
 ```bash
-node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite --variants base,grounded
+node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite,groq:openai/gpt-oss-20b --variants base,grounded --snapshot-suite adversarial,adversarial-heldout-ext --max-matches 0
+node scripts/run-ts.mjs src/eval/cli.ts --mode replay --suite heldout --variants freetext --snapshot-suite adversarial --max-matches 0 --models gemini:gemini-3.5-flash-lite
 ```
 
 ### Operator multi-model command
 
 ```bash
-# Local record (keys required), then keyless bench:
-npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial --max-matches 0 --models groq:MODEL,gemini:gemini-3.5-flash-lite,mistral:MODEL
-node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models groq:MODEL,gemini:gemini-3.5-flash-lite,mistral:MODEL --variants base,grounded
+# Local record (keys required), then keyless bench — see docs/OPERATOR_RECORDING_RUNBOOK.md
+npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial --max-matches 0 --models groq:openai/gpt-oss-20b
+node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite,groq:openai/gpt-oss-20b --variants base,grounded --snapshot-suite adversarial,adversarial-heldout-ext --max-matches 0
 ```
 
-Replace `MODEL` with the free-tier ids you record. Quota: `models × variants × (snapshots + matches×17) × consistency` — refuse >300 without `--force-quota` (e.g. 3×2×13 = 78 at consistency 1).
+Quota: `models × variants × (snapshots + matches×17) × consistency` — refuse >300 without `--force-quota`.
 
 ## Findings
 

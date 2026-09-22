@@ -84,7 +84,67 @@
           "snapshots": true,
           "snapshotSuite": "adversarial",
           "provider": "gemini",
-          "model": "gemini-3.5-flash-lite"
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [
+                "aegis__greedy__fracture__s101",
+                "mnemonic__greedy__fracture__s101",
+                "tempest__greedy__fracture__s101",
+                "tempest__seeded-random__fracture__s101"
+              ],
+              "snapshots": true,
+              "snapshotSuite": "adversarial"
+            },
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            }
+          ]
+        },
+        {
+          "id": "freetext",
+          "promptVersion": "agent-v5-freetext",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial"
+            }
+          ]
         },
         {
           "id": "grounded",
@@ -96,7 +156,40 @@
           "snapshots": true,
           "snapshotSuite": "adversarial",
           "provider": "gemini",
-          "model": "gemini-3.5-flash-lite"
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [
+                "aegis__greedy__fracture__s101",
+                "mnemonic__greedy__fracture__s101"
+              ],
+              "snapshots": true,
+              "snapshotSuite": "adversarial"
+            },
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            }
+          ]
         },
         {
           "id": "grounded-v2",

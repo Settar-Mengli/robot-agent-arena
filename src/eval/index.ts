@@ -120,8 +120,11 @@ export type {
 
 export {
   buildLiveProfile,
+  buildTokenProfileFromFixtures,
   liveSamplesFromRecordingCalls,
+  mergeLiveProfiles,
   providerFromHost,
+  readLiveProfile,
   writeLiveProfile
 } from "./live-profile";
 export type {

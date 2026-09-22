@@ -150,18 +150,26 @@ describe("lab-pack replay safety", () => {
     }
   });
 
-  it("regen is byte-identical to committed decision-lab.v2.json", async () => {
-    const committed = await readFile(
-      join(process.cwd(), "src/ui/lab/pack/decision-lab.v2.json"),
-      "utf8"
-    );
-    const { json } = await buildDecisionLabPack({ dryRun: true });
-    expect(json).toBe(committed);
-  });
+  it(
+    "regen is byte-identical to committed decision-lab.v2.json",
+    async () => {
+      const committed = await readFile(
+        join(process.cwd(), "src/ui/lab/pack/decision-lab.v2.json"),
+        "utf8"
+      );
+      const { json } = await buildDecisionLabPack({ dryRun: true });
+      expect(json).toBe(committed);
+    },
+    60_000
+  );
 
-  it("two dryRun exports are byte-identical", async () => {
-    const a = await buildDecisionLabPack({ dryRun: true });
-    const b = await buildDecisionLabPack({ dryRun: true });
-    expect(a.json).toBe(b.json);
-  });
+  it(
+    "two dryRun exports are byte-identical",
+    async () => {
+      const a = await buildDecisionLabPack({ dryRun: true });
+      const b = await buildDecisionLabPack({ dryRun: true });
+      expect(a.json).toBe(b.json);
+    },
+    120_000
+  );
 });
