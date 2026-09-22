@@ -18,3 +18,10 @@ export type {
   TokenUsage
 } from "./types";
 export { AllProvidersFailedError } from "./types";
+export {
+  computeBackoffMs,
+  parseRetryAfterMs,
+  RateLimitStopError,
+  sanitizeErrorBody,
+  sleepMs
+} from "./rate-limit";

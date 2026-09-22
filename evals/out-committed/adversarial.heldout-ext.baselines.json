@@ -1,0 +1,20 @@
+{
+  "heldout-ext": {
+    "greedy": {
+      "n": 35,
+      "optimalRate": 0,
+      "meanRegret": 59.05714285714286,
+      "medianRegret": 2,
+      "maxRegret": 1002,
+      "highRegretCount": 2
+    },
+    "random": {
+      "n": 35,
+      "optimalRate": 0.5,
+      "meanRegret": 29.52857142857143,
+      "medianRegret": 1,
+      "maxRegret": 1002,
+      "highRegretCount": 2
+    }
+  }
+}

@@ -11,10 +11,29 @@ import {
   projectBenchQuotaCalls
 } from "../eval/bench";
 import type { SnapshotPolicyMetrics } from "../eval/metrics";
+import { wilsonInterval } from "../decision-lab";
+
+function metricsStub(
+  partial: Partial<SnapshotPolicyMetrics> &
+    Pick<SnapshotPolicyMetrics, "n" | "optimalRate" | "meanRegret">
+): SnapshotPolicyMetrics {
+  const { n, optimalRate, meanRegret } = partial;
+  return {
+    medianRegret: meanRegret,
+    maxRegret: meanRegret,
+    highRegretCount: 0,
+    optimalRateWilson: wilsonInterval(Math.round(optimalRate * n), n),
+    meanRegretCi: { low: meanRegret, high: meanRegret, mean: meanRegret },
+    ...partial,
+    n,
+    optimalRate,
+    meanRegret
+  };
+}
 
 describe("bench metrics / taxonomy / consistency / cost / quota", () => {
   it("aggregates a bench row from snapshot metrics + baselines", () => {
-    const metrics: SnapshotPolicyMetrics = {
+    const metrics = metricsStub({
       n: 10,
       optimalRate: 0.6,
       meanRegret: 40,
@@ -22,15 +41,15 @@ describe("bench metrics / taxonomy / consistency / cost / quota", () => {
       maxRegret: 120,
       highRegretCount: 2,
       invalidDecisionRate: 0.1
-    };
-    const greedy: SnapshotPolicyMetrics = {
+    });
+    const greedy = metricsStub({
       n: 10,
       optimalRate: 0.8,
       meanRegret: 10,
       medianRegret: 5,
       maxRegret: 50,
       highRegretCount: 0
-    };
+    });
     const row = buildBenchRow(
       {
         model: "gemini:gemini-3.5-flash-lite",

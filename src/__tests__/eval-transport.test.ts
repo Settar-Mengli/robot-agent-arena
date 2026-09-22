@@ -211,6 +211,8 @@ describe("recorded LLM transport", () => {
     expect(stats.hits).toBe(1);
     expect(stats.recorded).toBe(1);
     expect(stats.liveLatenciesMs).toHaveLength(1);
+    expect(stats.liveCalls).toHaveLength(1);
+    expect(stats.liveCalls[0]!.host).toBe("api.groq.com");
   });
 
   it("force: true bypasses the cache and overwrites", async () => {

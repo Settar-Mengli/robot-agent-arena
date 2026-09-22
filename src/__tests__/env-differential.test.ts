@@ -16,7 +16,11 @@ import {
   buildMatchSuite,
   type MatchScenario
 } from "../eval/scenarios";
-import type { DecisionSnapshot, SnapshotSuite } from "../eval/snapshots";
+import {
+  buildHeldoutExtMatchSuite,
+  type DecisionSnapshot,
+  type SnapshotSuite
+} from "../eval/snapshots";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const suitesDir = join(root, "evals/suites");
@@ -26,14 +30,21 @@ type DiffStats = {
   differences: number;
 };
 
-function loadAllSnapshots(): DecisionSnapshot[] {
+type SnapshotWithSuite = {
+  suiteFile: string;
+  snap: DecisionSnapshot;
+};
+
+function loadAllSnapshots(): SnapshotWithSuite[] {
   const names = readdirSync(suitesDir).filter((n) => n.endsWith(".json"));
-  const out: DecisionSnapshot[] = [];
+  const out: SnapshotWithSuite[] = [];
   for (const name of names) {
     const suite = JSON.parse(
       readFileSync(join(suitesDir, name), "utf8")
     ) as SnapshotSuite;
-    out.push(...suite.snapshots);
+    for (const snap of suite.snapshots) {
+      out.push({ suiteFile: name, snap });
+    }
   }
   return out;
 }
@@ -44,6 +55,10 @@ function scenarioIndex(): Map<string, MatchScenario> {
     for (const scenario of buildMatchSuite(split)) {
       map.set(scenario.id, scenario);
     }
+  }
+  // D-044: heldout-ext snapshots use seeds 201–280 (widened band).
+  for (const scenario of buildHeldoutExtMatchSuite()) {
+    map.set(scenario.id, scenario);
   }
   return map;
 }
@@ -129,11 +144,16 @@ describe("env adapter differential", () => {
       const byId = scenarioIndex();
       expect(snaps.length).toBeGreaterThan(0);
 
-      for (const snap of snaps) {
+      for (const { suiteFile, snap } of snaps) {
         const { runtime, playerSkillId, values, best } = snap;
         const scenario = byId.get(snap.scenarioId);
-        expect(scenario).toBeDefined();
-        const playerPolicy: PlayerPolicy = resolvePlayerPolicy(scenario!);
+        if (scenario === undefined) {
+          throw new Error(
+            `env-differential: unresolved scenarioId=${snap.scenarioId} in suite file=${suiteFile} ` +
+              `(scenarioIndex must cover every committed suite, including heldout-ext seeds 201–280)`
+          );
+        }
+        const playerPolicy: PlayerPolicy = resolvePlayerPolicy(scenario);
 
         for (const cpuSkillId of robotEnvironment.equippedActions(
           runtime,

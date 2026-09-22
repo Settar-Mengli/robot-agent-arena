@@ -11,18 +11,27 @@ import {
   QUOTA_CALL_CAP,
   type SnapshotPolicyMetrics
 } from "../eval";
+import { wilsonInterval } from "../decision-lab";
 import { mergeManifest, manifestVariantsFor } from "../eval/manifest";
 
 function metricsStub(
   partial: Partial<SnapshotPolicyMetrics> &
     Pick<SnapshotPolicyMetrics, "optimalRate" | "meanRegret">
 ): SnapshotPolicyMetrics {
+  const n = partial.n ?? 20;
+  const optimalRate = partial.optimalRate;
+  const meanRegret = partial.meanRegret;
+  const successes = Math.round(optimalRate * n);
   return {
-    n: 20,
-    medianRegret: partial.meanRegret,
-    maxRegret: partial.meanRegret,
+    medianRegret: meanRegret,
+    maxRegret: meanRegret,
     highRegretCount: 0,
-    ...partial
+    optimalRateWilson: wilsonInterval(successes, n),
+    meanRegretCi: { low: meanRegret, high: meanRegret, mean: meanRegret },
+    ...partial,
+    n,
+    optimalRate,
+    meanRegret
   };
 }
 
@@ -69,7 +78,8 @@ describe("prompt-variant ablation helpers", () => {
       "grounded",
       "grounded-v2",
       "memory",
-      "grounded+memory"
+      "grounded+memory",
+      "freetext"
     ]);
     expect(parseVariantsList("grounded-v2,base,grounded-v2", "live")).toEqual([
       "grounded-v2",

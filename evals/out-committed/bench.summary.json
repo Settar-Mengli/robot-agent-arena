@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "singleModelPending": true,
-  "note": "single-model proof pending operator multi-model record",
+  "singleModelPending": false,
+  "note": "multi-model bench summary (base/grounded on adversarial n=13 + heldout-ext n=35; freetext n=13 in EVAL/pack only, D-047)",
   "models": [
-    "gemini:gemini-3.5-flash-lite"
+    "gemini:gemini-3.5-flash-lite",
+    "groq:openai/gpt-oss-20b"
   ],
   "variants": [
     "base",
@@ -38,6 +39,15 @@
         "fallbackReasons": {},
         "attemptFailByStatus": {}
       },
+      "optimalRateWilson": {
+        "low": 0.04325726318273798,
+        "high": 0.4223517050863101
+      },
+      "meanRegretCi": {
+        "low": 1.3076923076923077,
+        "high": 2.769230769230769,
+        "mean": 2
+      },
       "deltaVsGreedy": {
         "variant": "base",
         "suiteLabel": "heldout/adversarial",
@@ -49,6 +59,15 @@
           "medianRegret": 2,
           "maxRegret": 5,
           "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.04325726318273798,
+            "high": 0.4223517050863101
+          },
+          "meanRegretCi": {
+            "low": 1.3076923076923077,
+            "high": 2.769230769230769,
+            "mean": 2
+          },
           "invalidDecisionRate": 0
         },
         "baseline": {
@@ -57,7 +76,16 @@
           "meanRegret": 156.15384615384616,
           "medianRegret": 2,
           "maxRegret": 2002,
-          "highRegretCount": 1
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.22810184305529166
+          },
+          "meanRegretCi": {
+            "low": 1.8461538461538463,
+            "high": 464,
+            "mean": 156.15384615384616
+          }
         },
         "deltaOptimalRate": 0.15384615384615385,
         "deltaMeanRegret": -154.15384615384616
@@ -73,6 +101,15 @@
           "medianRegret": 2,
           "maxRegret": 5,
           "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.04325726318273798,
+            "high": 0.4223517050863101
+          },
+          "meanRegretCi": {
+            "low": 1.3076923076923077,
+            "high": 2.769230769230769,
+            "mean": 2
+          },
           "invalidDecisionRate": 0
         },
         "baseline": {
@@ -81,10 +118,138 @@
           "meanRegret": 78.07692307692308,
           "medianRegret": 1,
           "maxRegret": 2002,
-          "highRegretCount": 1
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0.2611999565246629,
+            "high": 0.7388000434753371
+          },
+          "meanRegretCi": {
+            "low": 0.9230769230769231,
+            "high": 232,
+            "mean": 78.07692307692308
+          }
         },
         "deltaOptimalRate": -0.34615384615384615,
         "deltaMeanRegret": -76.07692307692308
+      }
+    },
+    {
+      "model": "gemini:gemini-3.5-flash-lite",
+      "variant": "base",
+      "split": "heldout",
+      "snapshotSuite": "adversarial-heldout-ext",
+      "n": 35,
+      "optimalRate": 0.34285714285714286,
+      "meanRegret": 1.2285714285714286,
+      "medianRegret": 1,
+      "maxRegret": 6,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "optimalRateWilson": {
+        "low": 0.20831495282688925,
+        "high": 0.5084835312726328
+      },
+      "meanRegretCi": {
+        "low": 0.8571428571428571,
+        "high": 1.6857142857142857,
+        "mean": 1.2285714285714286
+      },
+      "deltaVsGreedy": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.34285714285714286,
+          "meanRegret": 1.2285714285714286,
+          "medianRegret": 1,
+          "maxRegret": 6,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "meanRegretCi": {
+            "low": 0.8571428571428571,
+            "high": 1.6857142857142857,
+            "mean": 1.2285714285714286
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0,
+          "meanRegret": 59.05714285714286,
+          "medianRegret": 2,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.09890426758938868
+          },
+          "meanRegretCi": {
+            "low": 1.7428571428571429,
+            "high": 144.74285714285713,
+            "mean": 59.05714285714286
+          }
+        },
+        "deltaOptimalRate": 0.34285714285714286,
+        "deltaMeanRegret": -57.82857142857143
+      },
+      "deltaVsRandom": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "random",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.34285714285714286,
+          "meanRegret": 1.2285714285714286,
+          "medianRegret": 1,
+          "maxRegret": 6,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "meanRegretCi": {
+            "low": 0.8571428571428571,
+            "high": 1.6857142857142857,
+            "mean": 1.2285714285714286
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0.5,
+          "meanRegret": 29.52857142857143,
+          "medianRegret": 1,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0.3427547555652408,
+            "high": 0.6572452444347592
+          },
+          "meanRegretCi": {
+            "low": 0.8714285714285714,
+            "high": 72.37142857142857,
+            "mean": 29.52857142857143
+          }
+        },
+        "deltaOptimalRate": -0.15714285714285714,
+        "deltaMeanRegret": -28.3
       }
     },
     {
@@ -112,6 +277,15 @@
         "fallbackReasons": {},
         "attemptFailByStatus": {}
       },
+      "optimalRateWilson": {
+        "low": 0.013710066379696304,
+        "high": 0.3331453392824736
+      },
+      "meanRegretCi": {
+        "low": 1.4615384615384615,
+        "high": 2.8461538461538463,
+        "mean": 2.1538461538461537
+      },
       "deltaVsGreedy": {
         "variant": "grounded",
         "suiteLabel": "heldout/adversarial",
@@ -123,6 +297,15 @@
           "medianRegret": 2,
           "maxRegret": 5,
           "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.013710066379696304,
+            "high": 0.3331453392824736
+          },
+          "meanRegretCi": {
+            "low": 1.4615384615384615,
+            "high": 2.8461538461538463,
+            "mean": 2.1538461538461537
+          },
           "invalidDecisionRate": 0
         },
         "baseline": {
@@ -131,7 +314,16 @@
           "meanRegret": 156.15384615384616,
           "medianRegret": 2,
           "maxRegret": 2002,
-          "highRegretCount": 1
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.22810184305529166
+          },
+          "meanRegretCi": {
+            "low": 1.8461538461538463,
+            "high": 464,
+            "mean": 156.15384615384616
+          }
         },
         "deltaOptimalRate": 0.07692307692307693,
         "deltaMeanRegret": -154
@@ -147,6 +339,15 @@
           "medianRegret": 2,
           "maxRegret": 5,
           "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.013710066379696304,
+            "high": 0.3331453392824736
+          },
+          "meanRegretCi": {
+            "low": 1.4615384615384615,
+            "high": 2.8461538461538463,
+            "mean": 2.1538461538461537
+          },
           "invalidDecisionRate": 0
         },
         "baseline": {
@@ -155,10 +356,614 @@
           "meanRegret": 78.07692307692308,
           "medianRegret": 1,
           "maxRegret": 2002,
-          "highRegretCount": 1
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0.2611999565246629,
+            "high": 0.7388000434753371
+          },
+          "meanRegretCi": {
+            "low": 0.9230769230769231,
+            "high": 232,
+            "mean": 78.07692307692308
+          }
         },
         "deltaOptimalRate": -0.4230769230769231,
         "deltaMeanRegret": -75.92307692307692
+      }
+    },
+    {
+      "model": "gemini:gemini-3.5-flash-lite",
+      "variant": "grounded",
+      "split": "heldout",
+      "snapshotSuite": "adversarial-heldout-ext",
+      "n": 35,
+      "optimalRate": 0.34285714285714286,
+      "meanRegret": 1.2285714285714286,
+      "medianRegret": 1,
+      "maxRegret": 6,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "optimalRateWilson": {
+        "low": 0.20831495282688925,
+        "high": 0.5084835312726328
+      },
+      "meanRegretCi": {
+        "low": 0.8571428571428571,
+        "high": 1.6857142857142857,
+        "mean": 1.2285714285714286
+      },
+      "deltaVsGreedy": {
+        "variant": "grounded",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.34285714285714286,
+          "meanRegret": 1.2285714285714286,
+          "medianRegret": 1,
+          "maxRegret": 6,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "meanRegretCi": {
+            "low": 0.8571428571428571,
+            "high": 1.6857142857142857,
+            "mean": 1.2285714285714286
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0,
+          "meanRegret": 59.05714285714286,
+          "medianRegret": 2,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.09890426758938868
+          },
+          "meanRegretCi": {
+            "low": 1.7428571428571429,
+            "high": 144.74285714285713,
+            "mean": 59.05714285714286
+          }
+        },
+        "deltaOptimalRate": 0.34285714285714286,
+        "deltaMeanRegret": -57.82857142857143
+      },
+      "deltaVsRandom": {
+        "variant": "grounded",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "random",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.34285714285714286,
+          "meanRegret": 1.2285714285714286,
+          "medianRegret": 1,
+          "maxRegret": 6,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "meanRegretCi": {
+            "low": 0.8571428571428571,
+            "high": 1.6857142857142857,
+            "mean": 1.2285714285714286
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0.5,
+          "meanRegret": 29.52857142857143,
+          "medianRegret": 1,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0.3427547555652408,
+            "high": 0.6572452444347592
+          },
+          "meanRegretCi": {
+            "low": 0.8714285714285714,
+            "high": 72.37142857142857,
+            "mean": 29.52857142857143
+          }
+        },
+        "deltaOptimalRate": -0.15714285714285714,
+        "deltaMeanRegret": -28.3
+      }
+    },
+    {
+      "model": "groq:openai/gpt-oss-20b",
+      "variant": "base",
+      "split": "heldout",
+      "snapshotSuite": "adversarial",
+      "n": 13,
+      "optimalRate": 0.07692307692307693,
+      "meanRegret": 2.1538461538461537,
+      "medianRegret": 2,
+      "maxRegret": 5,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "optimalRateWilson": {
+        "low": 0.013710066379696304,
+        "high": 0.3331453392824736
+      },
+      "meanRegretCi": {
+        "low": 1.4615384615384615,
+        "high": 2.8461538461538463,
+        "mean": 2.1538461538461537
+      },
+      "deltaVsGreedy": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 13,
+          "optimalRate": 0.07692307692307693,
+          "meanRegret": 2.1538461538461537,
+          "medianRegret": 2,
+          "maxRegret": 5,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.013710066379696304,
+            "high": 0.3331453392824736
+          },
+          "meanRegretCi": {
+            "low": 1.4615384615384615,
+            "high": 2.8461538461538463,
+            "mean": 2.1538461538461537
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 13,
+          "optimalRate": 0,
+          "meanRegret": 156.15384615384616,
+          "medianRegret": 2,
+          "maxRegret": 2002,
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.22810184305529166
+          },
+          "meanRegretCi": {
+            "low": 1.8461538461538463,
+            "high": 464,
+            "mean": 156.15384615384616
+          }
+        },
+        "deltaOptimalRate": 0.07692307692307693,
+        "deltaMeanRegret": -154
+      },
+      "deltaVsRandom": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial",
+        "baselineId": "random",
+        "policy": {
+          "n": 13,
+          "optimalRate": 0.07692307692307693,
+          "meanRegret": 2.1538461538461537,
+          "medianRegret": 2,
+          "maxRegret": 5,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.013710066379696304,
+            "high": 0.3331453392824736
+          },
+          "meanRegretCi": {
+            "low": 1.4615384615384615,
+            "high": 2.8461538461538463,
+            "mean": 2.1538461538461537
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 13,
+          "optimalRate": 0.5,
+          "meanRegret": 78.07692307692308,
+          "medianRegret": 1,
+          "maxRegret": 2002,
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0.2611999565246629,
+            "high": 0.7388000434753371
+          },
+          "meanRegretCi": {
+            "low": 0.9230769230769231,
+            "high": 232,
+            "mean": 78.07692307692308
+          }
+        },
+        "deltaOptimalRate": -0.4230769230769231,
+        "deltaMeanRegret": -75.92307692307692
+      }
+    },
+    {
+      "model": "groq:openai/gpt-oss-20b",
+      "variant": "base",
+      "split": "heldout",
+      "snapshotSuite": "adversarial-heldout-ext",
+      "n": 35,
+      "optimalRate": 0.37142857142857144,
+      "meanRegret": 1.2,
+      "medianRegret": 1,
+      "maxRegret": 6,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "optimalRateWilson": {
+        "low": 0.2316560736889106,
+        "high": 0.5366335951197893
+      },
+      "meanRegretCi": {
+        "low": 0.8,
+        "high": 1.6571428571428573,
+        "mean": 1.2
+      },
+      "deltaVsGreedy": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.37142857142857144,
+          "meanRegret": 1.2,
+          "medianRegret": 1,
+          "maxRegret": 6,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.2316560736889106,
+            "high": 0.5366335951197893
+          },
+          "meanRegretCi": {
+            "low": 0.8,
+            "high": 1.6571428571428573,
+            "mean": 1.2
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0,
+          "meanRegret": 59.05714285714286,
+          "medianRegret": 2,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.09890426758938868
+          },
+          "meanRegretCi": {
+            "low": 1.7428571428571429,
+            "high": 144.74285714285713,
+            "mean": 59.05714285714286
+          }
+        },
+        "deltaOptimalRate": 0.37142857142857144,
+        "deltaMeanRegret": -57.857142857142854
+      },
+      "deltaVsRandom": {
+        "variant": "base",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "random",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.37142857142857144,
+          "meanRegret": 1.2,
+          "medianRegret": 1,
+          "maxRegret": 6,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.2316560736889106,
+            "high": 0.5366335951197893
+          },
+          "meanRegretCi": {
+            "low": 0.8,
+            "high": 1.6571428571428573,
+            "mean": 1.2
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0.5,
+          "meanRegret": 29.52857142857143,
+          "medianRegret": 1,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0.3427547555652408,
+            "high": 0.6572452444347592
+          },
+          "meanRegretCi": {
+            "low": 0.8714285714285714,
+            "high": 72.37142857142857,
+            "mean": 29.52857142857143
+          }
+        },
+        "deltaOptimalRate": -0.12857142857142856,
+        "deltaMeanRegret": -28.32857142857143
+      }
+    },
+    {
+      "model": "groq:openai/gpt-oss-20b",
+      "variant": "grounded",
+      "split": "heldout",
+      "snapshotSuite": "adversarial",
+      "n": 13,
+      "optimalRate": 0.15384615384615385,
+      "meanRegret": 2,
+      "medianRegret": 2,
+      "maxRegret": 5,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "optimalRateWilson": {
+        "low": 0.04325726318273798,
+        "high": 0.4223517050863101
+      },
+      "meanRegretCi": {
+        "low": 1.3076923076923077,
+        "high": 2.769230769230769,
+        "mean": 2
+      },
+      "deltaVsGreedy": {
+        "variant": "grounded",
+        "suiteLabel": "heldout/adversarial",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 13,
+          "optimalRate": 0.15384615384615385,
+          "meanRegret": 2,
+          "medianRegret": 2,
+          "maxRegret": 5,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.04325726318273798,
+            "high": 0.4223517050863101
+          },
+          "meanRegretCi": {
+            "low": 1.3076923076923077,
+            "high": 2.769230769230769,
+            "mean": 2
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 13,
+          "optimalRate": 0,
+          "meanRegret": 156.15384615384616,
+          "medianRegret": 2,
+          "maxRegret": 2002,
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.22810184305529166
+          },
+          "meanRegretCi": {
+            "low": 1.8461538461538463,
+            "high": 464,
+            "mean": 156.15384615384616
+          }
+        },
+        "deltaOptimalRate": 0.15384615384615385,
+        "deltaMeanRegret": -154.15384615384616
+      },
+      "deltaVsRandom": {
+        "variant": "grounded",
+        "suiteLabel": "heldout/adversarial",
+        "baselineId": "random",
+        "policy": {
+          "n": 13,
+          "optimalRate": 0.15384615384615385,
+          "meanRegret": 2,
+          "medianRegret": 2,
+          "maxRegret": 5,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.04325726318273798,
+            "high": 0.4223517050863101
+          },
+          "meanRegretCi": {
+            "low": 1.3076923076923077,
+            "high": 2.769230769230769,
+            "mean": 2
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 13,
+          "optimalRate": 0.5,
+          "meanRegret": 78.07692307692308,
+          "medianRegret": 1,
+          "maxRegret": 2002,
+          "highRegretCount": 1,
+          "optimalRateWilson": {
+            "low": 0.2611999565246629,
+            "high": 0.7388000434753371
+          },
+          "meanRegretCi": {
+            "low": 0.9230769230769231,
+            "high": 232,
+            "mean": 78.07692307692308
+          }
+        },
+        "deltaOptimalRate": -0.34615384615384615,
+        "deltaMeanRegret": -76.07692307692308
+      }
+    },
+    {
+      "model": "groq:openai/gpt-oss-20b",
+      "variant": "grounded",
+      "split": "heldout",
+      "snapshotSuite": "adversarial-heldout-ext",
+      "n": 35,
+      "optimalRate": 0.37142857142857144,
+      "meanRegret": 1.0571428571428572,
+      "medianRegret": 1,
+      "maxRegret": 4,
+      "highRegret": 0,
+      "validityRate": 1,
+      "fallbackCount": 0,
+      "latency": {
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "cacheHits": 0
+      },
+      "costUsd": 0,
+      "taxonomy": {
+        "validationCodes": {},
+        "fallbackReasons": {},
+        "attemptFailByStatus": {}
+      },
+      "optimalRateWilson": {
+        "low": 0.2316560736889106,
+        "high": 0.5366335951197893
+      },
+      "meanRegretCi": {
+        "low": 0.7142857142857143,
+        "high": 1.4,
+        "mean": 1.0571428571428572
+      },
+      "deltaVsGreedy": {
+        "variant": "grounded",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "greedy",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.37142857142857144,
+          "meanRegret": 1.0571428571428572,
+          "medianRegret": 1,
+          "maxRegret": 4,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.2316560736889106,
+            "high": 0.5366335951197893
+          },
+          "meanRegretCi": {
+            "low": 0.7142857142857143,
+            "high": 1.4,
+            "mean": 1.0571428571428572
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0,
+          "meanRegret": 59.05714285714286,
+          "medianRegret": 2,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0,
+            "high": 0.09890426758938868
+          },
+          "meanRegretCi": {
+            "low": 1.7428571428571429,
+            "high": 144.74285714285713,
+            "mean": 59.05714285714286
+          }
+        },
+        "deltaOptimalRate": 0.37142857142857144,
+        "deltaMeanRegret": -58
+      },
+      "deltaVsRandom": {
+        "variant": "grounded",
+        "suiteLabel": "heldout/adversarial-heldout-ext",
+        "baselineId": "random",
+        "policy": {
+          "n": 35,
+          "optimalRate": 0.37142857142857144,
+          "meanRegret": 1.0571428571428572,
+          "medianRegret": 1,
+          "maxRegret": 4,
+          "highRegretCount": 0,
+          "optimalRateWilson": {
+            "low": 0.2316560736889106,
+            "high": 0.5366335951197893
+          },
+          "meanRegretCi": {
+            "low": 0.7142857142857143,
+            "high": 1.4,
+            "mean": 1.0571428571428572
+          },
+          "invalidDecisionRate": 0
+        },
+        "baseline": {
+          "n": 35,
+          "optimalRate": 0.5,
+          "meanRegret": 29.52857142857143,
+          "medianRegret": 1,
+          "maxRegret": 1002,
+          "highRegretCount": 2,
+          "optimalRateWilson": {
+            "low": 0.3427547555652408,
+            "high": 0.6572452444347592
+          },
+          "meanRegretCi": {
+            "low": 0.8714285714285714,
+            "high": 72.37142857142857,
+            "mean": 29.52857142857143
+          }
+        },
+        "deltaOptimalRate": -0.12857142857142856,
+        "deltaMeanRegret": -28.47142857142857
       }
     }
   ]

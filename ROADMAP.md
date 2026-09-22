@@ -30,7 +30,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
 - **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (PR #33); execution **B.2** Arena + results (D-042).
 - **DONE (code):** Execution **B.2d** Decision Lab (partial diagnostic slice — not locked batch 8 / C).
-- **NEXT:** **B.3** fixture-replayed LLM UI → **B.4** MVP save slot.
+- **NEXT:** Execution **B.3** fixture-replayed LLM UI → **B.4** MVP save slot (ES / D-048 complete on branch).
 - **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -46,7 +46,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - M-AGENT LLM opponent turn + greedy baseline (`src/agent/`) — DONE (PR #9).
 - M-EVAL eval harness (`src/eval/`, `evals/`, `EVAL.md`) — **DONE**.
 - M-TOOLS grounding + memory + adversarial ablation — **DONE** (D-024 falsified; D-030).
-- M-BENCH headless model bench — **DONE** (PR #23 / D-032); multi-model pending operator record.
+- M-BENCH headless model bench — **DONE** (PR #23 / D-032); multi-model proof committed in ES.
 
 ### AI milestone spine (D-033 — 11 locked batches, 5 execution groups)
 
@@ -59,7 +59,7 @@ Environment **DISCRIMINATES** (optimal ≫ greedy). Fixture manifest + multi-pro
 Grounding + memory + variant ablation (D-027). Standard inconclusive; pivotal greedy-saturated (D-028); adversarial suites (D-029). Held-out adversarial: grounding changed **0/20** decisions — D-024 **falsified** (D-030). Metric choice: regret distribution with rate (D-031). Memory variants still unmeasured.
 
 #### 3. M-BENCH headless — DONE (PR #23 / D-032)
-Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json`. Single-model gemini proof committed; multi-model awaits operator record.
+Pinned single-model runs (`--models`, `maxProviders: 1`), repeat-aware fixture keys, failure taxonomy, cost/latency, prompt-version axis, `--mode bench` + committed `evals/out-committed/bench.summary.json`. Multi-model proof committed (`singleModelPending: false`) after ES operator record.
 
 #### 4. Correctness hardening — DONE — execution batch **A1** (prompt-byte frozen)
 CI re-proves pivotal / adversarial / bench / discriminate regen (`drift` job, `SNAPSHOT_DRIFT=1`); Oracle MemoScope identity (numeric `maxTurns` + catalog); pricing for Groq pin `openai/gpt-oss-20b`; sanitize **new** fixture records only; `.env.example` `INFERENCE_*`; weak tests pin published values; greedy→grounding landed after differential proof (0 choice diffs). **Gate held:** committed numbers byte-identical. Grounding *fact* fixes are **not** in A1 — see A2 / D-034.
@@ -77,16 +77,22 @@ Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.ru
 **DONE.** Arena + results on the epoch-guarded battle-view store (D-041 / D-042): `UiTurnResult = { step; trace? }`, reserve-before-`playTurn`, greedy CPU from `runtime.session.cpu`, Builder Continue-when-validated, restart/clear with preserved draft. Leave-while-pending proven via injected deferred `playTurn`. Operator production-preview smoke passed (opponent selection, fallback progression, results, restart, preserved Builder draft, clean console).
 
 #### 7a. Decision Lab — execution **B.2d** (after B.2, before B.3)
-**DONE (partial diagnostic slice).** Offline evidence pack (`src/ui/lab/pack/decision-lab.v1.json`) exported via `npm run lab:pack` from heldout adversarial suite + fixture replay only; shared `assertDecisionLabPackV1`; Lab Browse / Inspector / Compare / downloadable report. Base vs grounded comparison on recorded∩recorded only. **Does not complete** locked batch 8 / execution C diagnostics. **B.3** and **B.4** remain named and not started.
+**DONE (partial diagnostic slice).** Offline evidence pack exported via `npm run lab:pack` from heldout adversarial suite + fixture replay only; Lab Browse / Inspector / Compare / downloadable report. **Does not complete** locked batch 8 / execution C diagnostics.
 
-#### 7b. Fixture-replayed LLM UI — execution **B.3** (after B.2d)
+#### 7a-es. Evidence + Ship — execution **ES** (after B.2d, before B.3) — D-048
+**DONE (pending merge).** Confidence intervals; additive heldout-ext suite (D-044, n=35); multi-model pin incl. groq (D-046); Decision Lab pack v2; free GitHub Pages (D-045); free-text variant recorded n=13 (D-047; ext freetext deferred). Two-phase handoff honored. **B.3** and **B.4** remain named and not started. Does not complete locked batch 8 / C.
+
+#### 7b. Fixture-replayed LLM UI — execution **B.3** (after ES)
 Browser-safe fixture playback for LLM turns (D-033 default: deterministic CPU + fixture-replayed LLM). No Node eval harness in the browser. **Not started.**
 
 #### 7c. MVP localStorage save slot — execution **B.4** (after B.3)
 One save slot (D-006 / AGENT_RULES). **Not started.**
 
+#### 7d. You vs the model (Batch 3 / post-ES Lab challenge)
+Human vs recorded/oracle comparison challenge in Decision Lab. **Planned after ES**; not in ES scope.
+
 #### 8. Diagnostic layer — execution batch C
-Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). **Not started** — B.2d is a partial slice only; batch 8 remains open.
+Headless first, then surfaced in the UI. Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). **Not started** — B.2d / ES are partial slices only; batch 8 remains open.
 
 #### 9. Three new measurements — execution batch C
 Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 / D-034 pattern). Same metrics/reporting surface as batch 8.

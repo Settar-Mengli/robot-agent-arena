@@ -153,12 +153,20 @@ function archetypesForSplit(split: EvalSplit): readonly AgentConfig[] {
 }
 
 export function buildMatchSuite(split: EvalSplit): MatchScenario[] {
+  return buildMatchSuiteWithSeeds(split, seedsForSplit(split));
+}
+
+/** Same Cartesian product as `buildMatchSuite`, with an explicit seed list. */
+export function buildMatchSuiteWithSeeds(
+  split: EvalSplit,
+  seeds: readonly number[]
+): MatchScenario[] {
   const scenarios: MatchScenario[] = [];
 
   for (const archetype of archetypesForSplit(split)) {
     for (const playerPolicy of POLICY_IDS) {
       for (const cpuConfig of OPPONENTS) {
-        for (const seed of seedsForSplit(split)) {
+        for (const seed of seeds) {
           const id = `${archetypeSlug(archetype)}__${playerPolicy}__${opponentSlug(cpuConfig)}__s${seed}`;
           scenarios.push({
             id,

@@ -48,6 +48,13 @@ export interface PlayAgentTurnOptions {
   grounding?: "off" | "facts" | "facts-v2";
   /** Default "off" — per-match tendencies from runtime.turns. */
   memory?: "off" | "match";
+  /**
+   * Default true (JSON response_format). Set false for free-text variant
+   * (agent-v5-freetext) — changes fixture keys via response_format absence.
+   */
+  json?: boolean;
+  /** When "freetext", uses agent-v5-freetext prompt bytes (not agent-v1). */
+  responseFormat?: "json" | "freetext";
 }
 
 export interface DecisionTrace {

@@ -19,6 +19,7 @@ import {
   type SnapshotPolicyMetrics
 } from "../eval";
 import type { SkillId } from "../engine";
+import { wilsonInterval } from "../decision-lab";
 
 const suitesDir = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -191,7 +192,12 @@ describe("adversarial snapshot selection", () => {
       meanRegret: 4.25,
       medianRegret: 5,
       maxRegret: 5,
-      highRegretCount: 0
+      highRegretCount: 0,
+      optimalRateWilson: wilsonInterval(
+        Math.round(0.05 * suite.count),
+        suite.count
+      ),
+      meanRegretCi: { low: 4.25, high: 4.25, mean: 4.25 }
     };
     const delta = deltaVsSuiteBaseline(
       "grounded",

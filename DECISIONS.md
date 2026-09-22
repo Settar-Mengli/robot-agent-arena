@@ -69,6 +69,17 @@ This stack supports fast iteration, clear state flow, and strong testability.
 Consequences:
 Alternative frameworks are out of scope unless explicitly re-decided.
 
+### Amend — 2026-09-21 — GitHub Pages hosting (D-045)
+
+Decision:
+MVP public hosting is **free GitHub Pages** (project site), not Vercel/Netlify for Evidence+Ship. Vite `base` is `/robot-agent-arena/`. Public URL: `https://settar-mengli.github.io/robot-agent-arena/`. Deploy on **push to `main`** and **`workflow_dispatch` only** — never from pull requests. The `pages` job is **non-required** under branch protection. Product copy must state: static demo, recorded evidence, no live AI in the browser.
+
+Rationale:
+Zero-cost hosting matches D-017 free-tier constraints; project Pages fits the repo name.
+
+Consequences:
+ROADMAP / README reflect Pages; verify keeps a normal build plus a base-path build check without making `pages` required.
+
 ## D-006 MVP Scope Lock
 Date: 2026-06-04  
 Status: Accepted
@@ -853,6 +864,10 @@ This **generalises D-032** from `--mode bench` to every comparative measurement 
 
 **Recordings from unpinned multi-variant runs are not committed.** Local leftovers from those runs stay out of git. **Only recordings from a pinned multi-variant run become the published record.** After the operator’s pinned run, matching keys regenerate or reuse by content hash — no manual salvage of the unpinned mixture.
 
+### Amend — 2026-09-21 — Multiple recorded pins (D-046)
+
+A run still uses **exactly one** active `--models` pin (D-036). The fixture **manifest** may retain **multiple** recorded pins under `variants[].models[]` (legacy `provider`/`model` kept for the first pin). On **record/live**, a CLI pin that is not yet in the manifest is accepted and merged (second pin). On **replay**, a CLI pin must match one of the recorded pins; an unknown pin still hard-fails with `PIN MISMATCH`. When multiple pins exist and CLI omits `--models`, the CLI asks you to select one.
+
 Rationale:
 Without a pin, “variant A beat variant B” confounds routing with prompt quality — the same root cause that forced D-032 for bench.
 
@@ -979,3 +994,66 @@ Operators need inspectable per-decision evidence without waiting for full diagno
 
 Consequences:
 ROADMAP / PROGRESS list **B.2d** then **B.3** then **B.4**. Do not mark locked batch 8 complete. README status may be corrected to reflect shipped UI + Decision Lab.
+
+## D-044 Additive heldout-ext adversarial suite (scopes D-026)
+Date: 2026-09-21
+Status: Accepted
+
+Decision:
+Allow a **new** versioned heldout adversarial snapshot suite `adversarial-heldout-ext` (`evals/suites/snapshots.adversarial.heldout-ext.json`). Generator uses heldout archetypes/policies/opponents with seed band **201–240**, `minRegret ≥ 1`, `targetCount = 40`, distinct-state dedupe (D-035). If dry-run yields fewer than 40 distinct states, widen seeds **once** to **201–280**. If still short, ship the honest `count` with a `warning` — do not pad. Leakage check: empty `decisionStateKey` intersection vs all six existing suite files. **Existing** suites, fixtures, and committed results remain **byte-unchanged**.
+
+This entry is the “new decision” called for by D-026’s won't-fix on regenerating existing artifacts; D-026 continues to apply to those existing artifacts.
+
+Rationale:
+Heldout seeds 101–110 already exhaust at n=13 distinct adversarial states; enlarging n requires a new candidate pool without mutating published suites.
+
+Consequences:
+CLI `--snapshot-suite adversarial-heldout-ext`; drift guard for the new file only; EVAL documents actual n after generation.
+
+## D-045 GitHub Pages hosting
+Date: 2026-09-21
+Status: Accepted
+
+Decision:
+See D-005 amend (2026-09-21). Pages URL `https://settar-mengli.github.io/robot-agent-arena/`; base `/robot-agent-arena/`; main + workflow_dispatch deploy only; pages job non-required.
+
+## D-046 Second published bench pin
+Date: 2026-09-21
+Status: Accepted
+
+Decision:
+Published multi-model bench includes pinned `groq:openai/gpt-oss-20b` alongside `gemini:gemini-3.5-flash-lite`, under D-036 pinning rules. `singleModelPending` becomes false only after complete fixture-backed rows for both pins.
+
+Rationale:
+Harness and pricing already support the Groq pin; attribution requires a second recorded pin (D-032 / D-036).
+
+Consequences:
+Operator record required; agent never live-calls APIs.
+
+## D-047 Free-text prompt variant + defer cut
+Date: 2026-09-21
+Status: Accepted
+
+Decision:
+Add versioned free-text arm `agent-v5-freetext` / CLI variant `freetext` (no `response_format` json). **Code ships in Evidence+Ship phase 1** before the operator recording window (constructed-fixture tests only). Fixtures are operator-recorded in the same recording window. When quota is tight, record free-text on heldout adversarial **n=13 only**. Full defer to Batch 3 only if even n=13 fails. On defer: phase-1 code may remain but stays **unexposed** (no Lab/pack measured arm, no committed free-text fixtures); docs record the defer. No dead UI. Existing prompt version bytes stay unchanged.
+
+Rationale:
+Free-text must be recordable in one operator window; publishing without fixtures would over-claim.
+
+Consequences:
+Pack/docs include free-text only after fixtures exist; EVAL notes unmeasured if cut.
+
+## D-048 Execution Evidence+Ship (ES)
+Date: 2026-09-21
+Status: Accepted
+
+Decision:
+Insert execution **Evidence+Ship (ES)** after **B.2d** and before **B.3**. Retain **B.3** and **B.4** as named, not started. Do not redefine or drop locked batches **8–11**. ES does not complete locked batch 8 / execution C.
+
+Two-phase handoff: **phase 1** (agent) = governance, CIs, ext suite, M5 code, M4/M6 scaffolding → push → STOP with operator runbook. **Recording window** (operator) = local-key `eval:record` only. **phase 2** (agent) = commit sanitized fixtures, keyless bench, finalize pack/Pages/docs. M5 code lands in phase 1 before recording.
+
+Rationale:
+Multi-model evidence and Pages ship without waiting for B.3 Arena fixture-replay UI; operator keys stay off the agent.
+
+Consequences:
+ROADMAP / PROGRESS show ES between B.2d and B.3.

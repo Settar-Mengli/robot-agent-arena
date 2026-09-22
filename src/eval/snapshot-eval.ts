@@ -18,6 +18,7 @@ import {
   traceHasFixtureMiss,
   type SnapshotPolicyMetrics
 } from "./metrics";
+import { bootstrapMeanCi, wilsonInterval } from "../decision-lab";
 import { regret } from "./oracle";
 import type { LlmVariant } from "./policies";
 import { variantPromptVersion } from "./policies";
@@ -174,7 +175,9 @@ export function evalRandomSnapshots(
       meanRegret: n === 0 ? 0 : regretSum / n,
       medianRegret,
       maxRegret,
-      highRegretCount
+      highRegretCount,
+      optimalRateWilson: wilsonInterval(optimalSum, n),
+      meanRegretCi: bootstrapMeanCi(perSnapMeanRegrets)
     },
     decisions,
     fixtureMissCount: 0

@@ -114,8 +114,24 @@ export type {
   FixtureStore,
   RecordingFetch,
   RecordingFetchOptions,
-  RecordingFetchStats
+  RecordingFetchStats,
+  RecordingLiveCall
 } from "./transport";
+
+export {
+  buildLiveProfile,
+  buildTokenProfileFromFixtures,
+  liveSamplesFromRecordingCalls,
+  mergeLiveProfiles,
+  providerFromHost,
+  readLiveProfile,
+  writeLiveProfile
+} from "./live-profile";
+export type {
+  LiveCallSample,
+  LiveProfile,
+  LiveProfileModelRow
+} from "./live-profile";
 
 export {
   aggregateLlm,

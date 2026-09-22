@@ -19,10 +19,14 @@ import {
 } from "../engine";
 import {
   assertDecisionLabPackV1,
+  assertDecisionLabPackV2,
   classifyRecordedTaxonomy,
+  llmPolicyKey,
   PROMPT_TEMPLATE_FILES,
   type DecisionLabCase,
+  type DecisionLabCaseV2,
   type DecisionLabPackV1,
+  type DecisionLabPackV2,
   type DecisionLabPolicyEvidence,
   type DecisionLabSanitizedTrace
 } from "../decision-lab";
@@ -41,8 +45,9 @@ import { createReplayFetch, type RepeatAwareFetch } from "./transport";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SUITE_REL = "evals/suites/snapshots.adversarial.heldout.json";
+const SUITE_EXT_REL = "evals/suites/snapshots.adversarial.heldout-ext.json";
 const MANIFEST_REL = "evals/fixtures/manifest.json";
-const PACK_REL = "src/ui/lab/pack/decision-lab.v1.json";
+const PACK_REL = "src/ui/lab/pack/decision-lab.v2.json";
 const SKILLS_REL = "src/engine/skills.ts";
 const ORACLE_REL = "src/eval/oracle.ts";
 const REPLAY_PLACEHOLDER_KEY = "replay-placeholder-key-not-real";
@@ -51,19 +56,22 @@ const FIXED_PLAYER_POLICY =
   "scenario playerPolicy (fixed; best response vs known policy — not an equilibrium)";
 
 const LIMITATIONS = [
-  "Cohort is heldout adversarial snapshots only (n=13).",
-  "LLM arms are pinned gemini:gemini-3.5-flash-lite base (agent-v1) and grounded (agent-v2-grounded).",
+  "Primary cohort is heldout adversarial snapshots (n=13) plus additive heldout-ext (n=35, D-044).",
+  "LLM arms: gemini:gemini-3.5-flash-lite and groq:openai/gpt-oss-20b × base/grounded (and freetext on n=13 only).",
+  "Free-text (agent-v5-freetext) recorded on adversarial n=13 only; heldout-ext freetext deferred (D-047).",
   "Oracle is exact best response vs a fixed player policy, not a game-theoretic equilibrium.",
   "Fixture misses are shown as unavailable; no invented model choices.",
-  "Latency/cost from live inference are not claimed; this pack is offline replay evidence.",
-  "Sample size is small — insufficient evidence for broad model rankings.",
-  "B.2d Decision Lab is a partial diagnostic slice; B.3/B.4 and full batch-8 diagnostics remain open.",
+  "Latency from live inference is not claimed in this pack; token/cost evidence is separate (live-profile).",
+  "Sample sizes are small — insufficient evidence for broad model rankings when n<30 or Wilson width≥0.40.",
+  "Evidence+Ship Decision Lab pack v2; B.3/B.4 and full batch-8 diagnostics remain open.",
   "Input hashes are SHA-256 of UTF-8 text after normalizing newlines to LF (CRLF and lone CR)."
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
 const REPRODUCE = [
   "npm run lab:pack",
-  "npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite adversarial --models gemini:gemini-3.5-flash-lite"
+  "npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite adversarial --models gemini:gemini-3.5-flash-lite",
+  "npm run eval:replay -- --suite heldout --variants base,grounded --snapshot-suite adversarial-heldout-ext --models groq:openai/gpt-oss-20b",
+  "npm run eval:replay -- --suite heldout --variants freetext --snapshot-suite adversarial --models gemini:gemini-3.5-flash-lite"
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
 /**
@@ -290,7 +298,7 @@ export type BuildLabPackOptions = {
 
 export async function buildDecisionLabPack(
   options: BuildLabPackOptions = {}
-): Promise<{ pack: DecisionLabPackV1; json: string }> {
+): Promise<{ pack: DecisionLabPackV2; json: string }> {
   const root = options.root ?? ROOT;
   const readText =
     options.readText ?? ((rel: string) => defaultReadText(root, rel));
@@ -338,69 +346,81 @@ export async function buildDecisionLabPack(
       ? (n: number) => fetchImpl.setRepeat(n)
       : undefined;
 
-  const inferenceBase = {
-    env: {
-      GEMINI_API_KEY: REPLAY_PLACEHOLDER_KEY,
-      INFERENCE_PROVIDER_ORDER: "gemini",
+  const gemini = { provider: "gemini", model: "gemini-3.5-flash-lite" };
+  const groq = { provider: "groq", model: "openai/gpt-oss-20b" };
+  const pins = [gemini, groq] as const;
+  const variantsCore = ["base", "grounded"] as const;
+  const variantsAll = ["base", "grounded", "freetext"] as const;
+
+  function pinnedEnv(pin: { provider: string; model: string }): Record<string, string> {
+    const keyEnv =
+      pin.provider === "gemini"
+        ? "GEMINI_API_KEY"
+        : pin.provider === "groq"
+          ? "GROQ_API_KEY"
+          : `${pin.provider.toUpperCase()}_API_KEY`;
+    return {
+      [keyEnv]: REPLAY_PLACEHOLDER_KEY,
+      INFERENCE_PROVIDER_ORDER: pin.provider,
       INFERENCE_MAX_PROVIDERS: "1",
       INFERENCE_MAX_RETRIES: "0",
-      INFERENCE_GEMINI_MODEL: "gemini-3.5-flash-lite"
-    },
-    fetch: fetchImpl
-  };
+      [`${pin.provider.toUpperCase()}_MODEL`]: pin.model
+    };
+  }
 
-  const llmBase = new Map<string, DecisionLabPolicyEvidence>();
-  const llmGrounded = new Map<string, DecisionLabPolicyEvidence>();
-
-  await evalLlmSnapshots(
-    snapshots,
-    {
-      ...variantToPlayOptions("base"),
-      inference: inferenceBase,
-      now: () => 0,
-      budgetMs: 60_000
-    },
-    "llm:base",
-    {
-      setRepeat,
-      onDecision: (snap, primary) => {
-        llmBase.set(
-          snap.id,
-          llmFromPrimary(snap, primary, variantPromptVersion("base"))
-        );
+  async function evalArm(
+    snaps: DecisionSnapshot[],
+    pin: { provider: string; model: string },
+    variant: "base" | "grounded" | "freetext"
+  ): Promise<Map<string, DecisionLabPolicyEvidence>> {
+    const out = new Map<string, DecisionLabPolicyEvidence>();
+    await evalLlmSnapshots(
+      snaps,
+      {
+        ...variantToPlayOptions(variant),
+        inference: {
+          env: pinnedEnv(pin),
+          fetch: fetchImpl
+        },
+        now: () => 0,
+        budgetMs: 60_000
+      },
+      `llm:${pin.provider}:${variant}`,
+      {
+        setRepeat,
+        onDecision: (snap, primary) => {
+          out.set(
+            snap.id,
+            llmFromPrimary(snap, primary, variantPromptVersion(variant))
+          );
+        }
       }
-    }
-  );
+    );
+    return out;
+  }
 
-  await evalLlmSnapshots(
-    snapshots,
-    {
-      ...variantToPlayOptions("grounded"),
-      inference: inferenceBase,
-      now: () => 0,
-      budgetMs: 60_000
-    },
-    "llm:grounded",
-    {
-      setRepeat,
-      onDecision: (snap, primary) => {
-        llmGrounded.set(
-          snap.id,
-          llmFromPrimary(snap, primary, variantPromptVersion("grounded"))
-        );
-      }
+  type ArmMaps = Record<string, Map<string, DecisionLabPolicyEvidence>>;
+  const advArms: ArmMaps = {};
+  for (const pin of pins) {
+    for (const variant of variantsAll) {
+      const key = llmPolicyKey(pin.provider, pin.model, variant);
+      advArms[key] = await evalArm(snapshots, pin, variant);
     }
-  );
+  }
 
   const cases: DecisionLabCase[] = snapshots.map((snap) => {
     const greedySkill = greedyById.get(snap.id);
     if (greedySkill === undefined) {
       throw new Error(`missing greedy decision for ${snap.id}`);
     }
-    const basePol = llmBase.get(snap.id);
-    const groundedPol = llmGrounded.get(snap.id);
+    const basePol = advArms[llmPolicyKey(gemini.provider, gemini.model, "base")]!.get(
+      snap.id
+    );
+    const groundedPol = advArms[
+      llmPolicyKey(gemini.provider, gemini.model, "grounded")
+    ]!.get(snap.id);
     if (basePol === undefined || groundedPol === undefined) {
-      throw new Error(`missing llm decisions for ${snap.id}`);
+      throw new Error(`missing gemini llm decisions for ${snap.id}`);
     }
     return {
       snapshotId: snap.id,
@@ -418,7 +438,7 @@ export async function buildDecisionLabPack(
     };
   });
 
-  const pack: DecisionLabPackV1 = {
+  const packV1: DecisionLabPackV1 = {
     schemaVersion: 1,
     inputHashes: {
       suite: sha256TextLf(suiteText),
@@ -434,7 +454,7 @@ export async function buildDecisionLabPack(
       split: "heldout",
       kind: "adversarial",
       path: SUITE_REL,
-      snapshotCount: 13
+      snapshotCount: snapshots.length
     },
     oracleDefaults: {
       perspective: "cpu",
@@ -450,8 +470,144 @@ export async function buildDecisionLabPack(
     reproduce: REPRODUCE
   };
 
-  assertDecisionLabPackV1(pack);
-  const json = `${JSON.stringify(pack, null, 2)}\n`;
+  assertDecisionLabPackV1(packV1);
+
+  const unavailable = (detail: string): DecisionLabPolicyEvidence => ({
+    status: "unavailable",
+    reason: "fixture_miss",
+    taxonomy: "unavailable",
+    detail
+  });
+
+  const extText = await readText(SUITE_EXT_REL);
+  const extJson = JSON.parse(extText) as {
+    count: number;
+    snapshots: DecisionSnapshot[];
+  };
+  const extSnaps = [...extJson.snapshots].sort((a, b) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+  );
+  const extGreedy = evalGreedySnapshots(extSnaps);
+  const extGreedyById = new Map(
+    extGreedy.decisions.map((d) => [d.snapshotId, d.executedSkillId as SkillId])
+  );
+
+  const extArms: ArmMaps = {};
+  for (const pin of pins) {
+    for (const variant of variantsCore) {
+      const key = llmPolicyKey(pin.provider, pin.model, variant);
+      extArms[key] = await evalArm(extSnaps, pin, variant);
+    }
+  }
+
+  const v2Cases: DecisionLabCaseV2[] = [];
+
+  for (const c of cases) {
+    const policies: Record<string, DecisionLabPolicyEvidence> = {
+      greedy: c.policies.greedy
+    };
+    for (const pin of pins) {
+      for (const variant of variantsAll) {
+        const key = llmPolicyKey(pin.provider, pin.model, variant);
+        policies[key] =
+          advArms[key]?.get(c.snapshotId) ??
+          unavailable(`missing ${key} on adversarial`);
+      }
+    }
+    v2Cases.push({
+      suiteId: "heldout-adversarial",
+      snapshotId: c.snapshotId,
+      scenarioId: c.scenarioId,
+      turn: c.turn,
+      observation: c.observation,
+      equippedSkillIds: c.equippedSkillIds,
+      affordability: c.affordability,
+      oracle: c.oracle,
+      policies
+    });
+  }
+
+  for (const snap of extSnaps) {
+    const greedySkill = extGreedyById.get(snap.id);
+    if (greedySkill === undefined) {
+      throw new Error(`missing greedy decision for ext ${snap.id}`);
+    }
+    const policies: Record<string, DecisionLabPolicyEvidence> = {
+      greedy: greedyPolicy(snap, greedySkill)
+    };
+    for (const pin of pins) {
+      for (const variant of variantsCore) {
+        const key = llmPolicyKey(pin.provider, pin.model, variant);
+        policies[key] =
+          extArms[key]?.get(snap.id) ??
+          unavailable(`missing ${key} on heldout-ext`);
+      }
+      // freetext not recorded on ext
+      policies[llmPolicyKey(pin.provider, pin.model, "freetext")] = unavailable(
+        "freetext not recorded on adversarial-heldout-ext (D-047 n=13-only)"
+      );
+    }
+    v2Cases.push({
+      suiteId: "heldout-adversarial-ext",
+      snapshotId: snap.id,
+      scenarioId: snap.scenarioId,
+      turn: snap.runtime.session.turn,
+      observation: observationFromSnap(snap),
+      equippedSkillIds: [...snap.runtime.session.cpu.skillIds],
+      affordability: affordabilityFor(snap),
+      oracle: oracleFor(snap),
+      policies
+    });
+  }
+
+  const pack: DecisionLabPackV2 = {
+    schemaVersion: 2,
+    inputHashes: {
+      suite: sha256TextLf(suiteText + "\n" + extText),
+      fixtureManifest: sha256TextLf(manifestText),
+      promptTemplates: {
+        files: [...PROMPT_TEMPLATE_FILES],
+        sha256: sha256TextLf(promptConcat)
+      },
+      skillCatalog: sha256TextLf(skillCatalogText),
+      oracleSource: sha256TextLf(oracleText)
+    },
+    suites: [
+      {
+        id: "heldout-adversarial",
+        split: "heldout",
+        kind: "adversarial",
+        path: SUITE_REL,
+        snapshotCount: snapshots.length
+      },
+      {
+        id: "heldout-adversarial-ext",
+        split: "heldout",
+        kind: "adversarial-heldout-ext",
+        path: SUITE_EXT_REL,
+        snapshotCount: extSnaps.length
+      }
+    ],
+    modelPins: [gemini, groq],
+    variants: [...variantsAll],
+    cases: v2Cases,
+    limitations: LIMITATIONS,
+    reproduce: REPRODUCE
+  };
+
+  // Thin ext cases to summary if pack would exceed ~300KB
+  let json = `${JSON.stringify(pack, null, 2)}\n`;
+  if (json.length > 300_000) {
+    pack.cases = pack.cases.filter((c) => c.suiteId === "heldout-adversarial");
+    pack.suites = pack.suites.filter((s) => s.id === "heldout-adversarial");
+    pack.limitations = [
+      ...LIMITATIONS,
+      "Extended suite thinned from pack (>~300KB); full ext evidence remains in suites/fixtures/bench."
+    ].sort((a, b) => (a < b ? -1 : 1));
+    json = `${JSON.stringify(pack, null, 2)}\n`;
+  }
+
+  assertDecisionLabPackV2(pack);
 
   if (options.dryRun !== true) {
     const outPath = join(root, PACK_REL);
@@ -469,18 +625,6 @@ export async function main(_argv: string[] = []): Promise<number> {
   console.log(
     `wrote ${PACK_REL} (${pack.cases.length} cases, ${json.length} bytes)`
   );
-  let recorded = 0;
-  let unavailable = 0;
-  for (const c of pack.cases) {
-    for (const key of ["llm:base", "llm:grounded"] as const) {
-      if (c.policies[key].status === "recorded") {
-        recorded += 1;
-      } else {
-        unavailable += 1;
-      }
-    }
-  }
-  console.log(`llm cells: recorded=${recorded} unavailable=${unavailable}`);
   console.log(`path=${outPath}`);
   return 0;
 }

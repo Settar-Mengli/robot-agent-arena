@@ -9,6 +9,7 @@ import {
   promptVersionMismatchMessage
 } from "../eval";
 import type { DecisionSnapshot } from "../eval/snapshots";
+import { wilsonInterval } from "../decision-lab";
 
 const root = join(import.meta.dirname, "../..");
 
@@ -100,7 +101,9 @@ describe("auditable snapshot decisions", () => {
         meanRegret: 0,
         medianRegret: 0,
         maxRegret: 0,
-        highRegretCount: 0
+        highRegretCount: 0,
+        optimalRateWilson: wilsonInterval(1, 1),
+        meanRegretCi: { low: 0, high: 0, mean: 0 }
       },
       decisions: [
         decisionRecordFromChoice(snap, skillId, {

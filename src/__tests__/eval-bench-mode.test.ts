@@ -119,7 +119,7 @@ describe("bench mode / committed summary", () => {
   });
 
   it.skipIf(process.env.SNAPSHOT_DRIFT !== "1")(
-    "drift-guard: keyless gemini bench regen ≡ committed (SNAPSHOT_DRIFT=1)",
+    "drift-guard: keyless multi-model bench regen ≡ committed (SNAPSHOT_DRIFT=1)",
     async () => {
       const before = readCommitted();
       const code = await runBenchMode(
@@ -127,17 +127,23 @@ describe("bench mode / committed summary", () => {
           "--mode",
           "bench",
           "--models",
-          "gemini:gemini-3.5-flash-lite",
+          "gemini:gemini-3.5-flash-lite,groq:openai/gpt-oss-20b",
           "--variants",
-          "base,grounded"
+          "base,grounded",
+          "--snapshot-suite",
+          "adversarial,adversarial-heldout-ext",
+          "--max-matches",
+          "0"
         ]),
         {
           skipGuards: true,
           env: {
             GEMINI_API_KEY: "replay-placeholder-key-not-real",
+            GROQ_API_KEY: "replay-placeholder-key-not-real",
             INFERENCE_PROVIDER_ORDER: "gemini",
             INFERENCE_MAX_PROVIDERS: "1",
-            GEMINI_MODEL: "gemini-3.5-flash-lite"
+            GEMINI_MODEL: "gemini-3.5-flash-lite",
+            GROQ_MODEL: "openai/gpt-oss-20b"
           },
           log: () => {},
           error: () => {}
@@ -145,16 +151,21 @@ describe("bench mode / committed summary", () => {
       );
       expect(code).toBe(0);
       const after = readCommitted();
-      expect(after.rows.map((r) => ({
-        model: r.model,
-        variant: r.variant,
-        n: r.n,
-        optimalRate: r.optimalRate,
-        meanRegret: r.meanRegret
-      }))).toEqual(
+      expect(after.singleModelPending).toBe(false);
+      expect(
+        after.rows.map((r) => ({
+          model: r.model,
+          variant: r.variant,
+          snapshotSuite: r.snapshotSuite,
+          n: r.n,
+          optimalRate: r.optimalRate,
+          meanRegret: r.meanRegret
+        }))
+      ).toEqual(
         before.rows.map((r) => ({
           model: r.model,
           variant: r.variant,
+          snapshotSuite: r.snapshotSuite,
           n: r.n,
           optimalRate: r.optimalRate,
           meanRegret: r.meanRegret

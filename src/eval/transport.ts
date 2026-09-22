@@ -1,4 +1,9 @@
 import { createHash } from "node:crypto";
+import {
+  RateLimitStopError,
+  sanitizeErrorBody,
+  sleepMs
+} from "../inference/rate-limit";
 
 export type FixtureRequestMeta = {
   host: string;
@@ -25,6 +30,19 @@ export type FixtureStore = {
 
 export type RecordingFetchOptions = {
   force?: boolean;
+  /** Minimum delay between live network calls (cache hits exempt). Default 0. */
+  liveDelayMs?: number;
+  /** Stop after this many consecutive HTTP 429 live responses. Default: no stop. */
+  maxConsecutive429s?: number;
+  sleep?: (ms: number) => Promise<void>;
+};
+
+/** One real network attempt during record (never a fixture cache hit). */
+export type RecordingLiveCall = {
+  host: string;
+  model: string;
+  durationMs: number;
+  status?: number;
 };
 
 export type RecordingFetchStats = {
@@ -33,6 +51,12 @@ export type RecordingFetchStats = {
   skippedNon2xx: number;
   /** Wall durations (ms) of realFetch calls only — excludes cache hits. */
   liveLatenciesMs: number[];
+  /** Per-call live samples (excludes cache hits). */
+  liveCalls: RecordingLiveCall[];
+  /** Counts of non-2xx HTTP statuses from live calls. */
+  failByStatus: Record<string, number>;
+  /** Truncated, redacted error body snippets keyed by status (non-secret). */
+  failBodyByStatus: Record<string, string>;
 };
 
 export type RepeatAwareFetch = typeof fetch & {
@@ -142,13 +166,21 @@ export function createRecordingFetch(
   options: RecordingFetchOptions = {}
 ): RecordingFetch {
   const force = options.force === true;
+  const liveDelayMs = Math.max(0, options.liveDelayMs ?? 0);
+  const maxConsecutive429s = options.maxConsecutive429s;
+  const sleep = options.sleep;
   const counters: RecordingFetchStats = {
     hits: 0,
     recorded: 0,
     skippedNon2xx: 0,
-    liveLatenciesMs: []
+    liveLatenciesMs: [],
+    liveCalls: [],
+    failByStatus: {},
+    failBodyByStatus: {}
   };
   let repeatSlot = 0;
+  let lastLiveEndedAt = 0;
+  let consecutive429s = 0;
 
   const fetchImpl: typeof fetch = async (input, init) => {
     const url = String(input);
@@ -166,11 +198,31 @@ export function createRecordingFetch(
       }
     }
 
+    if (liveDelayMs > 0 && lastLiveEndedAt > 0) {
+      const wait = liveDelayMs - (performance.now() - lastLiveEndedAt);
+      if (wait > 0) {
+        await sleepMs(wait, sleep);
+      }
+    }
+
     const started = performance.now();
     const response = await realFetch(input, init);
-    counters.liveLatenciesMs.push(performance.now() - started);
+    const durationMs = performance.now() - started;
+    lastLiveEndedAt = performance.now();
+    const status = response.status;
+    counters.liveLatenciesMs.push(durationMs);
+    counters.liveCalls.push({
+      host: new URL(url).host,
+      model:
+        typeof rawBody.model === "string"
+          ? rawBody.model
+          : String(rawBody.model ?? ""),
+      durationMs,
+      status
+    });
 
     if (response.ok) {
+      consecutive429s = 0;
       const parsed = (await response.clone().json()) as unknown;
       await store.write(key, {
         key,
@@ -184,6 +236,30 @@ export function createRecordingFetch(
       counters.recorded += 1;
     } else {
       counters.skippedNon2xx += 1;
+      const statusKey = String(status);
+      counters.failByStatus[statusKey] =
+        (counters.failByStatus[statusKey] ?? 0) + 1;
+      try {
+        const bodyText = await response.clone().text();
+        const snippet = sanitizeErrorBody(bodyText);
+        if (snippet.length > 0) {
+          counters.failBodyByStatus[statusKey] = snippet;
+        }
+      } catch {
+        // ignore body read failures
+      }
+      if (status === 429) {
+        consecutive429s += 1;
+        if (
+          maxConsecutive429s !== undefined &&
+          maxConsecutive429s > 0 &&
+          consecutive429s >= maxConsecutive429s
+        ) {
+          throw new RateLimitStopError(consecutive429s);
+        }
+      } else {
+        consecutive429s = 0;
+      }
     }
 
     return response;
@@ -194,7 +270,10 @@ export function createRecordingFetch(
       hits: counters.hits,
       recorded: counters.recorded,
       skippedNon2xx: counters.skippedNon2xx,
-      liveLatenciesMs: [...counters.liveLatenciesMs]
+      liveLatenciesMs: [...counters.liveLatenciesMs],
+      liveCalls: counters.liveCalls.map((c) => ({ ...c })),
+      failByStatus: { ...counters.failByStatus },
+      failBodyByStatus: { ...counters.failBodyByStatus }
     }),
     setRepeat: (n: number): void => {
       repeatSlot = n;

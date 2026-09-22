@@ -19,8 +19,14 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run build
+      - name: Build with Pages base path
+        env:
+          VITE_BASE: /robot-agent-arena/
+        run: npm run build
       - run: npm run coverage
-      - run: npm run eval:replay -- --suite all
+      - run: npm run eval:replay -- --suite all --models gemini:gemini-3.5-flash-lite
+      - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial --variants base,grounded,freetext --max-matches 0 --models groq:openai/gpt-oss-20b
+      - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base,grounded --max-matches 0 --models groq:openai/gpt-oss-20b
 
   # Headline regen drift (~5 min wall locally). Kept off verify so PRs stay fast.
   # --dangerouslyIgnoreUnhandledErrors: vitest birpc times out onTaskUpdate when a
@@ -44,6 +50,7 @@ jobs:
           src/__tests__/eval-snapshots.test.ts
           src/__tests__/eval-pivotal-snapshots.test.ts
           src/__tests__/eval-adversarial-snapshots.test.ts
+          src/__tests__/eval-heldout-ext-snapshots.test.ts
           src/__tests__/eval-discriminate.test.ts
           src/__tests__/eval-bench-mode.test.ts
           src/__tests__/env-differential.test.ts

@@ -1,35 +1,17 @@
 import type { SkillId } from "../engine";
 import { robotEnvironment } from "../env";
 import type { DecisionTrace } from "../agent";
+import {
+  bootstrapMeanCi,
+  wilsonInterval,
+  type WilsonInterval
+} from "../decision-lab";
 import type { MatchResult } from "./match";
 import type { DecisionSnapshot } from "./snapshots";
 import { regret } from "./oracle";
 
-export type WilsonInterval = {
-  low: number;
-  high: number;
-};
-
-/** Wilson score interval for a binomial proportion (z ≈ 1.96 → ~95%). */
-export function wilsonInterval(
-  successes: number,
-  n: number,
-  z = 1.96
-): WilsonInterval {
-  if (n <= 0) {
-    return { low: 0, high: 0 };
-  }
-  const p = successes / n;
-  const z2 = z * z;
-  const denom = 1 + z2 / n;
-  const center = p + z2 / (2 * n);
-  const margin =
-    z * Math.sqrt((p * (1 - p) + z2 / (4 * n)) / n);
-  return {
-    low: (center - margin) / denom,
-    high: (center + margin) / denom
-  };
-}
+export type { WilsonInterval };
+export { wilsonInterval, bootstrapMeanCi };
 
 export function percentile(sorted: number[], p: number): number | null {
   if (sorted.length === 0) {
@@ -455,6 +437,10 @@ export type SnapshotPolicyMetrics = {
   /** Decisions (or per-snapshot for random) with regret ≥ 100. */
   highRegretCount: number;
   invalidDecisionRate?: number;
+  /** Wilson 95% CI on optimal rate (successes = optimal hits). */
+  optimalRateWilson: WilsonInterval;
+  /** Seeded bootstrap 95% CI on mean regret. */
+  meanRegretCi: { low: number; high: number; mean: number };
 };
 
 function medianOf(values: readonly number[]): number {
@@ -498,13 +484,17 @@ export function metricsForChosenMoves(
   }
 
   const n = snapshots.length;
+  const optimalRate = n === 0 ? 0 : optimal / n;
+  const meanRegret = n === 0 ? 0 : regretSum / n;
   return {
     n,
-    optimalRate: n === 0 ? 0 : optimal / n,
-    meanRegret: n === 0 ? 0 : regretSum / n,
+    optimalRate,
+    meanRegret,
     medianRegret: medianOf(regrets),
     maxRegret,
     highRegretCount,
+    optimalRateWilson: wilsonInterval(optimal, n),
+    meanRegretCi: bootstrapMeanCi(regrets),
     ...(options.invalidFlags !== undefined
       ? { invalidDecisionRate: n === 0 ? 0 : invalid / n }
       : {})

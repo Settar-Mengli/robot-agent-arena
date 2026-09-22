@@ -15,7 +15,8 @@
     "eval:report": "node scripts/run-ts.mjs src/eval/cli.ts --mode baseline --write-report",
     "eval:replay": "node scripts/run-ts.mjs src/eval/cli.ts --mode replay",
     "eval:record": "node scripts/run-ts.mjs src/eval/cli.ts --mode record",
-    "lab:pack": "node scripts/run-ts.mjs src/eval/lab-pack.ts"
+    "lab:pack": "node scripts/run-ts.mjs src/eval/lab-pack.ts",
+    "preview:pages": "vite build && vite preview"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
