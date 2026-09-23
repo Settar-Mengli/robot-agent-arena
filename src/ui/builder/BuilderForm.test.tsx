@@ -35,9 +35,7 @@ function fillValidForm() {
 }
 
 function submitForm() {
-  fireEvent.click(
-    screen.getByRole("button", { name: /Validate configuration/i })
-  );
+  fireEvent.click(screen.getByRole("button", { name: /Check robot/i }));
 }
 
 describe("BuilderForm", () => {
@@ -47,7 +45,7 @@ describe("BuilderForm", () => {
     submitForm();
 
     const summary = screen.getByTestId("validated-config");
-    expect(summary).toHaveTextContent("Valid configuration");
+    expect(summary).toHaveTextContent("Ready");
     expect(summary).toHaveTextContent("UNIT-ALPHA");
     expect(summary).toHaveAttribute("role", "status");
     expect(
@@ -97,24 +95,39 @@ describe("BuilderForm", () => {
       },
       skillIds: ["skill-override-pulse", "skill-logic-storm"] as const
     };
-    render(<BuilderForm initialConfig={{ ...initial, skillIds: [...initial.skillIds] }} />);
+    let continuedId = "";
+    render(
+      <BuilderForm
+        initialConfig={{ ...initial, skillIds: [...initial.skillIds] }}
+        onContinue={(c) => {
+          continuedId = c.agentId;
+        }}
+      />
+    );
     expect(screen.getByLabelText("Display name")).toHaveValue("SEEDED");
     submitForm();
-    expect(screen.getByTestId("validated-config")).toHaveTextContent(
-      "fixed-agent-id"
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue to battle setup/i })
     );
+    expect(continuedId).toBe("fixed-agent-id");
   });
 
   it("keeps agentId stable when the display name changes after re-validate", () => {
-    render(<BuilderForm />);
+    let firstId = "";
+    let secondId = "";
+    render(
+      <BuilderForm
+        onContinue={(c) => {
+          if (firstId === "") firstId = c.agentId;
+          else secondId = c.agentId;
+        }}
+      />
+    );
     fillValidForm();
     submitForm();
-
-    const firstSummary = screen.getByTestId("validated-config").textContent ?? "";
-    const idMatch = firstSummary.match(
-      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue to battle setup/i })
     );
-    expect(idMatch).not.toBeNull();
 
     fireEvent.change(screen.getByLabelText("Display name"), {
       target: { value: "SECOND" }
@@ -122,9 +135,13 @@ describe("BuilderForm", () => {
     expect(screen.queryByTestId("validated-config")).toBeNull();
 
     submitForm();
-    const second = screen.getByTestId("validated-config");
-    expect(second).toHaveTextContent("SECOND");
-    expect(second).toHaveTextContent(idMatch![0]!);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue to battle setup/i })
+    );
+    expect(secondId).toBe(firstId);
+    expect(firstId).toMatch(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+    );
   });
 
   it("clears validated results when the display name changes", () => {

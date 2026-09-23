@@ -98,7 +98,7 @@ Date: 2026-06-04
 Status: Accepted
 
 Decision:
-Exclude online multiplayer, real-time battle, node graph builder, visual robot customization, sound, campaign, leaderboards, tools module, mobile layout, and public final branding from MVP.
+Exclude online multiplayer, real-time battle, node graph builder, visual robot customization, sound, campaign, leaderboards, tools module, and public final branding from MVP. **Amend (D-050):** a responsive layout usable at ~380px is in scope (supersedes the prior blanket “mobile layout” exclusion for that narrow usability goal only).
 
 Rationale:
 Exclusions reduce delivery risk and protect timeline focus.
@@ -1081,3 +1081,26 @@ ES already published multi-model snapshot evidence; Batch 3 closes the Arena fix
 
 Consequences:
 ROADMAP marks B.3 / B.4 / batch 8 / challenge done after merge; NEXT = batch 9 measurements.
+
+## D-050 UX + bugs batch (plain-language Arena)
+Date: 2026-09-22
+Status: Accepted
+
+Decision:
+One cohesive UI batch after Batch 3 (D-049) on main. Locked operator choices:
+
+1. **Mobile:** Amends D-007 and AGENT_RULES — a responsive layout fully usable at ~380px width is in scope for this batch.
+2. **No regeneration of committed artifacts.** Do not change committed packs (`decision-lab.v3.json`, `arena-replay.v1.json`), `diagnostics.summary.json`, bench files, prompts, suites, fixtures, or eval results. Do not change `src/engine`. Do not change generator output in `src/eval` or `src/decision-lab` in any way that would alter committed artifact bytes. “What would help” text is composed in the UI from structured fields (`improvedCases`, `n`, `meanDeltaRegret`, policy/baseline keys), with Δ = variant − baseline and “negative = better” spelled out. The default UI does not display the pack’s `wording` string. Fixing the generator wording is deferred to the next versioned pack.
+3. **Failure tags unchanged** (multi-label, as D-049). Diagnostics explains plainly that all 68 recorded mistakes match “spent more energy than a cheaper best move” and that the other labels had 0 matches. Labels are descriptions, not causes.
+4. **Compare** covers n=13 only from pack v3: model selector (gemini, groq), variant selector (base, grounded, freetext), and cross-model comparison. Compare on n=35 is deferred; no bench snippet or new data file.
+5. **Navigation:** Home = plain-language landing; primary CTA “Can you beat the AI?” starts the guided Challenge path; secondary CTAs = quick-start battle and Watch; Builder remains “Build your own robot”; Lab defaults to Challenge; Browse+Inspect merged; Compare, Diagnostics, and researcher detail behind one Advanced toggle.
+6. **Per-turn explanations and end-of-game lesson** are templates filled from engine data only (`TurnRecord`, `ResolvedAction`, skill catalog). No combat math in the UI, no LLM-generated text, and no claims that a free-play move was “best.”
+7. **Docs sync** in the same change set: README status, PROGRESS, ROADMAP, ARCHITECTURE (B.3/B.4 shipped), case-study (pack v3), and this entry.
+8. **Lazy-load** Lab and Watch (and their packs) with `React.lazy` / dynamic import. No new packages.
+9. **Player-facing text** uses fictional in-game vocabulary only. Honesty labels stay in plain words: static demo; recorded, not live AI; small samples can’t rank models; “best move” is measured against a fixed player plan; AI reasons are what the model wrote.
+
+Rationale:
+Batch 3 shipped researcher-facing Lab/Arena surfaces; live testing showed save/mode desync and poor first-run comprehension. This batch fixes bugs and rewires the default path for operators without touching measurement artifacts.
+
+Consequences:
+AGENT_RULES / D-007 mobile exclusion amended for ~380px usable layout. ROADMAP / PROGRESS show D-050 UX batch; NEXT remains locked batch 9 after this ships.

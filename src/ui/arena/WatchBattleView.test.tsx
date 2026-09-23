@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 import { WatchBattleView } from "./WatchBattleView";
 import pack from "./pack/arena-replay.v1.json";
 import { SENTINEL_X } from "../../data/opponents";
@@ -42,15 +43,16 @@ const player = {
 };
 
 describe("WatchBattleView", () => {
-  it("shows honesty banner and advances frames", () => {
+  it("shows honesty line and advances frames with story narration", () => {
     render(<WatchBattleView onLeave={() => undefined} />);
 
     expect(screen.getByTestId("watch-battle-view")).toBeTruthy();
-    expect(screen.getByText(/Recorded replay/i)).toBeTruthy();
-    expect(screen.getByText(/not live AI/i)).toBeTruthy();
+    expect(screen.getByTestId("watch-honesty-line")).toHaveTextContent(
+      /Recorded examples, not live AI/
+    );
 
     fireEvent.click(screen.getByTestId("watch-next"));
-    expect(screen.getByText(/Turn \d+:/i)).toBeTruthy();
+    expect(screen.getAllByText(/used /i).length).toBeGreaterThanOrEqual(1);
   });
 
   it("notifies onMatchIdChange and restores initialMatchId", () => {

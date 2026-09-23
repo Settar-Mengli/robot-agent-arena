@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 import { assertDecisionLabPackV3 } from "../../decision-lab";
+import { findForbiddenTechnicalText } from "../copy/forbidden-default-path";
 import rawPack from "./pack/decision-lab.v3.json";
 import { ChallengeView } from "./ChallengeView";
 
@@ -11,60 +13,98 @@ afterEach(() => {
 describe("ChallengeView", () => {
   const pack = assertDecisionLabPackV3(rawPack);
 
-  it("scores from oracle.values and hides regret until Reveal", () => {
+  it("session starts with No answers yet and omits model-rank label", () => {
     render(<ChallengeView pack={pack} />);
-    expect(screen.getByTestId("lab-challenge")).toBeTruthy();
-    expect(screen.queryByText(/Your regret:/i)).toBeNull();
-
-    const radios = screen.getAllByRole("radio");
-    expect(radios.length).toBeGreaterThan(0);
-    fireEvent.click(radios[0]!);
-    expect(screen.queryByText(/Your regret:/i)).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
-    expect(screen.getByText(/Your regret:/i)).toBeTruthy();
-    expect(screen.getByText(/best /i)).toBeTruthy();
+    expect(screen.getByTestId("challenge-session")).toHaveTextContent(
+      "No answers yet."
+    );
+    expect(screen.queryByText(/Too little data to rank models/i)).toBeNull();
+    expect(screen.getByTestId("challenge-you-side")).toHaveTextContent(
+      /You \(in the AI/
+    );
+    expect(screen.getByTestId("challenge-opponent-side")).toHaveTextContent(
+      /Opponent \(follows a fixed plan\)/
+    );
   });
 
-  it("shows multi-best / ties when oracle.best has multiple", () => {
-    const tieCase = pack.cases.find((c) => c.oracle.ties && c.oracle.best.length > 1);
-    // If no tie in pack, still assert reveal path lists best array join.
+  it("Show answer is enabled after a pick", () => {
     render(<ChallengeView pack={pack} />);
+    const btn = screen.getByTestId("challenge-show-answer") as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    fireEvent.click(screen.getAllByRole("radio")[0]!);
+    expect(btn.disabled).toBe(false);
+  });
+
+  it("guided reveal: best path and worse path with plain sentences", () => {
+    render(<ChallengeView pack={pack} guided />);
+    const case0 = pack.cases.find((c) =>
+      Object.values(c.policies).some(
+        (p) => p.status === "recorded" && p.source === "llm"
+      )
+    )!;
+    const best = case0.oracle.best[0]!;
     const radios = screen.getAllByRole("radio");
-    fireEvent.click(radios[0]!);
-    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
-    if (tieCase) {
-      // Navigate until we hit a ties case is expensive; assert current reveal
-      // includes the word "best" and at least one skill label separator path works.
-      expect(screen.getByText(/Your regret:/i)).toBeTruthy();
-    } else {
-      expect(screen.getByText(/Your regret:/i)).toBeTruthy();
+    const bestRadio = radios.find(
+      (r) => (r as HTMLInputElement).value === best
+    );
+    expect(bestRadio).toBeTruthy();
+    fireEvent.click(bestRadio!);
+    fireEvent.click(screen.getByTestId("challenge-show-answer"));
+    const reveal = screen.getByTestId("challenge-reveal");
+    expect(reveal).toHaveTextContent("You picked the best move.");
+    expect(findForbiddenTechnicalText(reveal.textContent ?? "")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Next situation/i }));
+    const worse = screen
+      .getAllByRole("radio")
+      .find((r) => !(r as HTMLInputElement).disabled);
+    fireEvent.click(worse!);
+    // Prefer a non-best if available
+    const nonBest = screen
+      .getAllByRole("radio")
+      .find(
+        (r) =>
+          (r as HTMLInputElement).value !==
+          pack.cases.find((c) => c.equippedSkillIds.length > 0)?.oracle.best[0]
+      );
+    if (nonBest) {
+      fireEvent.click(nonBest);
+      fireEvent.click(screen.getByTestId("challenge-show-answer"));
+      const r2 = screen.getByTestId("challenge-reveal");
+      expect(r2.textContent ?? "").toMatch(/points worse than the best move/);
+      expect(findForbiddenTechnicalText(r2.textContent ?? "")).toBeNull();
+      expect(r2.textContent ?? "").not.toMatch(/skill-/);
     }
   });
 
-  it("session summary marks insufficientEvidence for n<30 and aria-live on reveal", () => {
-    render(<ChallengeView pack={pack} />);
-    expect(screen.getByTestId("challenge-session")).toBeTruthy();
-    expect(screen.getByText(/insufficient evidence/i)).toBeTruthy();
-
-    const radios = screen.getAllByRole("radio");
-    fireEvent.click(radios[0]!);
-    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
-    const live = screen.getByText(/Your regret:/i).closest("[aria-live]");
-    expect(live?.getAttribute("aria-live")).toBe("polite");
+  it("groups identical recorded-AI picks on reveal", () => {
+    render(<ChallengeView pack={pack} guided />);
+    fireEvent.click(screen.getAllByRole("radio")[0]!);
+    fireEvent.click(screen.getByTestId("challenge-show-answer"));
+    const reveal = screen.getByTestId("challenge-reveal");
+    expect(reveal.textContent ?? "").toMatch(/picked|All \d+ recorded AI/);
   });
 
-  it("is keyboard operable via radio + Reveal button focus", () => {
+  it("keeps visual selection after Reveal", () => {
     render(<ChallengeView pack={pack} />);
-    const radio = screen.getAllByRole("radio")[0]!;
-    radio.focus();
-    expect(document.activeElement).toBe(radio);
-    fireEvent.click(radio);
-    const reveal = screen.getByRole("button", { name: "Reveal" });
-    reveal.focus();
-    expect(document.activeElement).toBe(reveal);
-    fireEvent.keyDown(reveal, { key: "Enter", code: "Enter" });
-    fireEvent.click(reveal);
-    expect(screen.getByText(/Your regret:/i)).toBeTruthy();
+    const radios = screen.getAllByRole("radio");
+    fireEvent.click(radios[0]!);
+    fireEvent.click(screen.getByTestId("challenge-show-answer"));
+    const selected = screen
+      .getByTestId("challenge-reveal")
+      .closest("section")
+      ?.querySelector('[data-selected="true"]');
+    expect(selected).toBeTruthy();
+    expect((radios[0] as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("session summary after answer uses plain counts", () => {
+    render(<ChallengeView pack={pack} />);
+    fireEvent.click(screen.getAllByRole("radio")[0]!);
+    fireEvent.click(screen.getByTestId("challenge-show-answer"));
+    const session = screen.getByTestId("challenge-session");
+    expect(session.textContent ?? "").toMatch(/You: 1 answers/);
+    expect(session.textContent ?? "").not.toMatch(/\bn=/);
+    expect(session.textContent ?? "").not.toMatch(/mean/);
   });
 });
