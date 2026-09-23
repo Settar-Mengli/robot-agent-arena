@@ -1,1 +1,96 @@
 @import "tailwindcss";
+
+:root {
+  --aa-bg: #0c0a09;
+  --aa-fg: #f5f5f4;
+  --aa-accent: #d97706;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.info-tip-hit {
+  position: relative;
+  min-width: 1rem;
+  min-height: 1rem;
+}
+
+.info-tip-hit::before {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot-motion-hit,
+  .robot-motion-defend {
+    animation: none !important;
+  }
+
+  .motion-reduce\:transition-none {
+    transition: none !important;
+  }
+}
+
+@keyframes robot-hit {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-4px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes robot-defend {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+.robot-motion-hit {
+  animation: robot-hit 0.35s ease-in-out;
+}
+
+.robot-motion-defend {
+  animation: robot-defend 0.35s ease-in-out;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.focus-visible\:not-sr-only:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}

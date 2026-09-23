@@ -7,6 +7,7 @@ import {
   type AgentModule,
   type SkillId
 } from "../../engine";
+import { skillLabel } from "../copy/skill-label";
 import { buildAgentConfig } from "./buildAgentConfig";
 
 const MODULE_LABELS: Record<AgentModule, string> = {
@@ -112,13 +113,16 @@ export function BuilderForm({
 
   return (
     <section aria-labelledby="builder-heading">
-      <h2 id="builder-heading" className="text-2xl font-semibold text-stone-100">
-        Builder
-      </h2>
+      <h1
+        id="builder-heading"
+        tabIndex={-1}
+        className="text-2xl font-semibold text-stone-100"
+      >
+        Build your own robot
+      </h1>
       <p className="mt-2 text-stone-400">
-        Configure an agent. Skills affect Arena combat. Module text does not
-        change the greedy CPU opponent; modules apply to LLM prompts when LLM
-        play exists (B.3+). Validation uses the engine catalog and limits.
+        Name your robot, fill its modules, and pick two moves. Module text is
+        stored for recorded AI prompts; free play uses a simple computer foe.
       </p>
 
       <form className="mt-8 space-y-8" onSubmit={onSubmit} noValidate>
@@ -140,8 +144,8 @@ export function BuilderForm({
         <fieldset>
           <legend className="text-sm text-stone-300">Modules</legend>
           <p className="mt-1 text-xs text-stone-500">
-            Stored on the agent config for future LLM Arena. Not used by the
-            current greedy CPU opponent.
+            Stored on the robot for recorded AI prompts. Not used by the
+            simple computer foe in free play.
           </p>
           <div className="mt-3 space-y-4">
             {AGENT_MODULES.map((key) => (
@@ -204,7 +208,7 @@ export function BuilderForm({
           type="submit"
           className="rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
         >
-          Validate configuration
+          Check robot
         </button>
       </form>
 
@@ -213,7 +217,7 @@ export function BuilderForm({
           role="alert"
           className="mt-6 rounded border border-red-800 bg-red-950/40 px-4 py-3 text-red-200"
         >
-          <p className="font-medium">Configuration is invalid</p>
+          <p className="font-medium">Robot is invalid</p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
             {errors.map((error) => (
               <li key={error}>{error}</li>
@@ -228,25 +232,21 @@ export function BuilderForm({
           className="mt-6 rounded border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-emerald-100"
           data-testid="validated-config"
         >
-          <p className="font-medium">Valid configuration</p>
+          <p className="font-medium">Ready</p>
           <dl className="mt-3 space-y-2 text-sm">
-            <div>
-              <dt className="text-emerald-400">Agent ID</dt>
-              <dd>{validated.agentId}</dd>
-            </div>
             <div>
               <dt className="text-emerald-400">Display name</dt>
               <dd>{validated.displayName}</dd>
             </div>
             <div>
-              <dt className="text-emerald-400">Skills</dt>
-              <dd>{validated.skillIds.join(", ")}</dd>
+              <dt className="text-emerald-400">Moves</dt>
+              <dd>{validated.skillIds.map(skillLabel).join(", ")}</dd>
             </div>
           </dl>
           {onContinue ? (
             <button
               type="button"
-              className="mt-4 rounded bg-emerald-600 px-4 py-2 font-medium text-stone-950 hover:bg-emerald-500"
+              className="mt-4 min-h-11 rounded bg-emerald-600 px-4 py-2 font-medium text-stone-950 hover:bg-emerald-500"
               onClick={() => onContinue(validated)}
             >
               Continue to battle setup

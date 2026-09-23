@@ -10,7 +10,7 @@ Agent designs are often judged by vibe. AGENT ARENA instead measures decision qu
 - Held-out adversarial suite (**n=13** distinct states, D-035) plus additive **heldout-ext** suite (D-044; honest n after widen-once seed band 201–280).
 - Pinned models only for comparative claims (D-036): `gemini:gemini-3.5-flash-lite` and `groq:openai/gpt-oss-20b` (D-046).
 - Wilson 95% CI on optimal rate; seeded bootstrap CI on mean regret; **insufficient evidence** when n&lt;30 or Wilson width ≥0.40.
-- Decision Lab pack **v2** (offline JSON) for Browse / Inspector / Compare — static demo, **no live AI**.
+- Decision Lab pack **v3** (offline JSON) for Challenge / Situations / Compare / Diagnostics — static demo, **no live AI**.
 
 ## Oracle assumptions
 

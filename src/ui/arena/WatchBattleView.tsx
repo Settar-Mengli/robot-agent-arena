@@ -1,28 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
-import { MVP_SKILL_CATALOG } from "../../engine";
+import { HONESTY_ONE_LINE } from "../HonestyStrip";
 import rawPack from "./pack/arena-replay.v1.json";
 import {
   assertArenaReplayPackV1,
   type ArenaReplayMatch,
   type ArenaReplayPackV1
 } from "./pack/schema";
+import { CombatantBars } from "./CombatantBars";
+import { RobotFigure } from "./RobotFigure";
+import { narrateSkillExchange } from "./turn-narration";
 
 function loadPack(raw: unknown): ArenaReplayPackV1 {
   return assertArenaReplayPackV1(raw);
 }
 
-function skillLabel(skillId: string): string {
-  const skill = MVP_SKILL_CATALOG.skills.find((s) => s.skillId === skillId);
-  return skill?.displayName ?? skillId;
-}
-
 export type WatchBattleViewProps = {
   onLeave: () => void;
-  /** Restore a saved match id when present in the pack. */
   initialMatchId?: string;
-  /** Notify App when the selected recorded match changes (save slot). */
   onMatchIdChange?: (matchId: string) => void;
 };
+
+function providerLabel(provider: string): string {
+  if (provider === "gemini") return "Gemini";
+  if (provider === "groq") return "Groq";
+  return provider;
+}
+
+function variantPromptLabel(variant: "base" | "grounded"): string {
+  return variant === "grounded" ? "facts prompt" : "basic prompt";
+}
+
+export function matchSelectLabel(
+  match: ArenaReplayMatch,
+  index: number,
+  packProvider: string
+): string {
+  const provider = providerLabel(match.provider || packProvider);
+  return `${match.playerConfig.displayName} vs ${match.cpuConfig.displayName} — ${provider}, ${variantPromptLabel(match.variant)} (match ${index + 1})`;
+}
 
 export function WatchBattleView({
   onLeave,
@@ -43,7 +58,6 @@ export function WatchBattleView({
   const match: ArenaReplayMatch | undefined = pack.matches.find(
     (m) => m.matchId === matchId
   );
-  /** frameIndex 0 = start; 1..n = after turn n */
   const [frameIndex, setFrameIndex] = useState(0);
 
   useEffect(() => {
@@ -66,16 +80,16 @@ export function WatchBattleView({
   if (match === undefined) {
     return (
       <section aria-labelledby="watch-heading">
-        <h2 id="watch-heading" className="text-2xl font-semibold">
-          Watch recorded
-        </h2>
-        <p className="mt-2 text-stone-400">No recorded matches in pack.</p>
+        <h1 id="watch-heading" tabIndex={-1} className="text-2xl font-semibold">
+          Watch a recorded AI battle
+        </h1>
+        <p className="mt-2 text-stone-400">No recorded matches available.</p>
         <button
           type="button"
-          className="mt-4 rounded border border-stone-600 px-4 py-2"
+          className="mt-4 min-h-11 rounded border border-stone-600 px-4 py-2"
           onClick={onLeave}
         >
-          Back
+          Home
         </button>
       </section>
     );
@@ -101,30 +115,44 @@ export function WatchBattleView({
       ? (lastTurn.trace.validation as { reason: string }).reason
       : lastTurn?.trace?.rawText;
 
+  const narration =
+    lastTurn !== undefined
+      ? narrateSkillExchange(
+          player.displayName,
+          cpu.displayName,
+          lastTurn.playerSkillId,
+          lastTurn.cpuSkillId
+        )
+      : [];
+
   return (
     <section aria-labelledby="watch-heading" data-testid="watch-battle-view">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 id="watch-heading" className="text-2xl font-semibold text-stone-100">
-          Watch recorded
-        </h2>
+        <h1
+          id="watch-heading"
+          tabIndex={-1}
+          className="text-2xl font-semibold text-stone-100"
+        >
+          Watch a recorded AI battle
+        </h1>
         <p className="text-sm text-stone-400">
-          Frame {clamped} / {maxFrame}
+          Turn {clamped} / {maxFrame}
           {finished ? " · complete" : null}
         </p>
       </div>
 
       <p
-        className="mt-2 rounded border border-amber-900/60 bg-amber-950/30 px-3 py-2 text-sm text-amber-100"
+        className="mt-2 text-sm text-stone-400"
         role="status"
+        data-testid="watch-honesty-line"
       >
-        Recorded replay · {pack.provider}/{pack.model} · {match.variant} · fixed
-        player policy ({match.playerPolicy}) · not live AI
+        {HONESTY_ONE_LINE}
       </p>
 
       <label className="mt-6 block text-sm text-stone-400">
         Match
         <select
-          className="mt-1 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+          className="mt-1 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
           value={matchId}
           onChange={(e) => {
             setMatchId(e.target.value);
@@ -132,46 +160,49 @@ export function WatchBattleView({
           }}
           data-testid="watch-match-select"
         >
-          {pack.matches.map((m) => (
+          {pack.matches.map((m, i) => (
             <option key={m.matchId} value={m.matchId}>
-              [{m.variant}] {m.scenarioId}
+              {matchSelectLabel(m, i, pack.provider)}
             </option>
           ))}
         </select>
       </label>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
-        <CombatantPanel
-          title="Player (recorded policy)"
-          name={player.displayName}
-          health={player.health}
-          maxHealth={player.maxHealth}
-          energy={player.energy}
-          maxEnergy={player.maxEnergy}
-          defense={player.defense}
-        />
-        <CombatantPanel
-          title="CPU (recorded LLM)"
-          name={cpu.displayName}
-          health={cpu.health}
-          maxHealth={cpu.maxHealth}
-          energy={cpu.energy}
-          maxEnergy={cpu.maxEnergy}
-          defense={cpu.defense}
-        />
+        <div>
+          <RobotFigure side="player" />
+          <CombatantBars
+            title="Player (recorded plan)"
+            name={player.displayName}
+            health={player.health}
+            maxHealth={player.maxHealth}
+            energy={player.energy}
+            maxEnergy={player.maxEnergy}
+            defense={player.defense}
+          />
+        </div>
+        <div>
+          <RobotFigure side="cpu" />
+          <CombatantBars
+            title="Recorded AI"
+            name={cpu.displayName}
+            health={cpu.health}
+            maxHealth={cpu.maxHealth}
+            energy={cpu.energy}
+            maxEnergy={cpu.maxEnergy}
+            defense={cpu.defense}
+          />
+        </div>
       </div>
 
       {lastTurn ? (
         <div className="mt-6 space-y-2 text-sm text-stone-300" aria-live="polite">
-          <p>
-            Turn {lastTurn.turn}: player{" "}
-            <strong>{skillLabel(lastTurn.playerSkillId)}</strong> → CPU{" "}
-            <strong>{skillLabel(lastTurn.cpuSkillId)}</strong>
-            {lastTurn.trace?.source ? ` · source ${lastTurn.trace.source}` : null}
-          </p>
+          {narration.map((line, i) => (
+            <p key={`n-${i}`}>{line}</p>
+          ))}
           {reasonText ? (
             <p className="text-stone-400">
-              Model-stated reason:{" "}
+              What the AI wrote:{" "}
               <span className="text-stone-200">{reasonText.slice(0, 280)}</span>
             </p>
           ) : null}
@@ -182,22 +213,22 @@ export function WatchBattleView({
 
       {finished ? (
         <p className="mt-4 text-sm text-stone-300" data-testid="watch-outcome">
-          Outcome: {match.outcome.result} ({match.outcome.reason})
+          Outcome: {formatOutcome(match.outcome.result)}
         </p>
       ) : null}
 
       <div className="mt-8 flex flex-wrap gap-3">
         <button
           type="button"
-          className="rounded border border-stone-600 px-4 py-2 disabled:opacity-40"
+          className="min-h-11 rounded border border-stone-600 px-4 py-2 disabled:opacity-40"
           disabled={clamped === 0}
           onClick={() => setFrameIndex((i) => Math.max(0, i - 1))}
         >
-          Prev
+          Previous
         </button>
         <button
           type="button"
-          className="rounded border border-amber-700 bg-amber-950/40 px-4 py-2 text-amber-100 disabled:opacity-40"
+          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500 disabled:opacity-40"
           disabled={clamped >= maxFrame}
           onClick={() => setFrameIndex((i) => Math.min(maxFrame, i + 1))}
           data-testid="watch-next"
@@ -206,14 +237,14 @@ export function WatchBattleView({
         </button>
         <button
           type="button"
-          className="rounded border border-stone-600 px-4 py-2"
+          className="min-h-11 rounded border border-stone-600 px-4 py-2"
           onClick={() => setFrameIndex(0)}
         >
           Reset
         </button>
         <button
           type="button"
-          className="rounded border border-stone-600 px-4 py-2"
+          className="min-h-11 rounded border border-stone-600 px-4 py-2"
           onClick={onLeave}
         >
           Leave
@@ -223,37 +254,9 @@ export function WatchBattleView({
   );
 }
 
-function CombatantPanel(props: {
-  title: string;
-  name: string;
-  health: number;
-  maxHealth: number;
-  energy: number;
-  maxEnergy: number;
-  defense: number;
-}) {
-  return (
-    <div className="rounded border border-stone-800 bg-stone-900/50 p-4">
-      <p className="text-xs tracking-wide text-stone-500 uppercase">{props.title}</p>
-      <p className="mt-1 text-lg font-medium text-stone-100">{props.name}</p>
-      <dl className="mt-3 grid grid-cols-2 gap-2 text-sm text-stone-300">
-        <div>
-          <dt className="text-stone-500">HP</dt>
-          <dd>
-            {props.health} / {props.maxHealth}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-stone-500">Energy</dt>
-          <dd>
-            {props.energy} / {props.maxEnergy}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-stone-500">Defense</dt>
-          <dd>{props.defense}</dd>
-        </div>
-      </dl>
-    </div>
-  );
+function formatOutcome(result: string): string {
+  if (result === "player-victory") return "Player won";
+  if (result === "cpu-victory") return "AI side won";
+  if (result === "draw") return "Draw";
+  return result;
 }

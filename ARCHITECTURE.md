@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3), and UI through execution **B.2** (Builder + Arena + results) are in the repository. Headless-first per D-014 / D-033: A1–A3 done; UI foundation + B.1 + B.2 shipped. Next execution slices: **B.3** fixture-replayed LLM UI, then **B.4** save slot; then diagnostic / BYOK batches.
+**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3 / ES), and UI through Batch 3 (B.3 Watch, B.4 save, pack v3 diagnostics, Challenge) plus **D-050** (plain-language UX + bugs, [PR #38](https://github.com/Settar-Mengli/robot-agent-arena/pull/38)) are the product surface. Next measurement work: locked batch **9**.
 
 ## Layered architecture and dependency rule
 
@@ -44,7 +44,7 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 
 **Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023). Dynamics go through the environment adapter (`robotEnvironment`); terminal scoring and memo/decision state keys live on the interface.
 
-**UI (execution B.1 + B.2):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder (`src/ui/builder/`) validates configs through `src/engine`. Arena + results (`src/ui/arena/`) play turns through the vanilla Zustand battle-view store (`src/ui/store/`, D-041 / D-042) with a greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Fixture-replayed LLM UI (**B.3**) and save slot (**B.4**) are not built yet.
+**UI (through Batch 3 / D-049 + D-050):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, and one-slot save live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs are static JSON; no Node eval harness in the browser.
 
 ## Environment interface (A3 / D-033 batch 5)
 

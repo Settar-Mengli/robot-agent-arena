@@ -30,7 +30,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** **A3** — environment interface, adapter-only (PR #31).
 - **DONE (code):** UI foundation D-038–D-041 (PR #32); execution **B.1** shell + Builder (PR #33); execution **B.2** Arena + results (D-042).
 - **DONE (code):** Execution **B.2d** Decision Lab (partial diagnostic slice — not locked batch 8 / C).
-- **NEXT:** Locked batch **9** — three new measurements (pre-register). Batch 3 (D-049) complete on branch.
+- **NEXT:** Locked batch **9** — three new measurements (pre-register). Batch 3 (D-049) **DONE** on main. **D-050** UX + bugs **implemented on branch** (gates green; awaiting audit/PR).
 - **PLANNED:** Diagnostics → three new measurements → BYOK + committed leaderboard + methodology writeup → second reference environment + publish.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -83,16 +83,19 @@ Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.ru
 **DONE.** Confidence intervals; additive heldout-ext suite (D-044, n=35); multi-model pin incl. groq (D-046); Decision Lab pack v2; free GitHub Pages (D-045); free-text variant recorded n=13 (D-047; ext freetext deferred). Two-phase handoff honored. Does not complete locked batch 8 / C.
 
 #### 7b. Fixture-replayed LLM UI — execution **B.3** (after ES) — D-049
-**Implemented on branch (pending PR merge).** Watch recorded AI battles from `arena-replay.v1.json` (gemini heldout base+grounded, 6 matches). Free play remains greedy. No Node eval harness in the browser.
+**DONE on main (PR #37).** Watch recorded AI battles from `arena-replay.v1.json` (gemini heldout base+grounded, 6 matches). Free play remains greedy. No Node eval harness in the browser.
 
 #### 7c. MVP localStorage save slot — execution **B.4** (after B.3) — D-049
-**Implemented on branch (pending PR merge).** One save slot (D-006 / AGENT_RULES).
+**DONE on main (PR #37).** One save slot (D-006 / AGENT_RULES). Save rules refined under D-050 (battle-only runtime).
 
 #### 7d. You vs the model (Batch 3 Lab challenge) — D-049
-**Implemented on branch (pending PR merge).** Human vs recorded/oracle comparison in Decision Lab (pack-only scoring).
+**DONE on main (PR #37).** Human vs recorded/oracle comparison in Decision Lab (pack-only scoring). Guided path + plain copy under D-050.
 
 #### 8. Diagnostic layer — execution batch C / Batch 3 — D-049
-**Implemented on branch (pending PR merge).** Headless diagnostics + pack v3 + Lab Diagnostics UI (incl. vs published summary). Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). Three new measurements remain batch 9. D-049 consequences (ROADMAP DONE) apply after merge.
+**DONE on main (PR #37).** Headless diagnostics + pack v3 + Lab Diagnostics UI (incl. vs published summary). Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). Three new measurements remain batch 9. D-050 composes help text in UI (no pack regen).
+
+#### 8a. UX + bugs — **D-050**
+**Shipped in [PR #38](https://github.com/Settar-Mengli/robot-agent-arena/pull/38).** Plain landing, guided Challenge, AppView, Advanced Lab Compare (n=13), battle juice, tour, lazy Lab/Watch, ~380px layout. No artifact / engine changes.
 
 #### 9. Three new measurements — execution batch C
 Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 / D-034 pattern). Same metrics/reporting surface as batch 8.
@@ -122,7 +125,7 @@ Small provably solvable task proving the interface is real; then publish.
 - Live / public PvP leaderboards (a **committed static** BYOK comparison page is in-scope under D-033).
 - Post-match LLM coach (cut by D-033).
 - Tools module (gameplay “Tools” module — distinct from M-TOOLS grounding).
-- Mobile layout.
+- Full mobile product polish (D-050 amends D-007: ~380px usable layout is in scope; this non-goal remains for broader mobile polish beyond that).
 - Public final branding.
 - Real-world attack, jailbreak, or prompt-injection content.
 - Full service/DB/auth backend for MVP (minimal serverless inference proxy only if multi-provider live play is wanted — D-016 deferred).

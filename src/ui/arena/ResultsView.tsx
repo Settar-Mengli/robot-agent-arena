@@ -1,43 +1,79 @@
-import type { BattleOutcome, TurnRecord } from "../../engine";
+import type {
+  BattleOutcome,
+  CombatantState,
+  TurnRecord
+} from "../../engine";
+import { HonestyStrip } from "../HonestyStrip";
+import { endLesson } from "./end-lesson";
+import { narrateTurn } from "./turn-narration";
 
 export type ResultsViewProps = {
   outcome: BattleOutcome;
   turns: TurnRecord[];
+  playerName: string;
+  cpuName: string;
+  finalPlayer: CombatantState;
+  finalCpu: CombatantState;
   onRestart: () => void;
-  onReturnToBuilder: () => void;
+  onReturnHome: () => void;
 };
 
 export function ResultsView({
   outcome,
   turns,
+  playerName,
+  cpuName,
+  finalPlayer,
+  finalCpu,
   onRestart,
-  onReturnToBuilder
+  onReturnHome
 }: ResultsViewProps) {
+  const winnerName =
+    outcome.winnerSide === "player"
+      ? playerName
+      : outcome.winnerSide === "cpu"
+        ? cpuName
+        : undefined;
+  const lesson = endLesson({ outcome, turns, finalPlayer });
+
   return (
     <section aria-labelledby="results-heading" data-testid="results-view">
-      <h2 id="results-heading" className="text-2xl font-semibold text-stone-100">
+      <h1
+        id="results-heading"
+        tabIndex={-1}
+        className="text-2xl font-semibold text-stone-100"
+      >
         Results
-      </h2>
+      </h1>
+
+      <div className="mt-3">
+        <HonestyStrip variant="compact" />
+      </div>
 
       <div
         role="status"
+        aria-live="polite"
         className="mt-6 rounded border border-stone-700 bg-stone-900/60 px-4 py-4"
         data-testid="battle-outcome"
       >
         <p className="text-lg font-medium text-stone-100">
           {formatResult(outcome.result)}
         </p>
-        <p className="mt-1 text-sm text-stone-400">
-          Reason: {outcome.reason}
-          {outcome.winnerAgentId
-            ? ` · Winner: ${outcome.winnerAgentId}`
-            : null}
+        {winnerName !== undefined ? (
+          <p className="mt-1 text-sm text-stone-400">Winner: {winnerName}</p>
+        ) : null}
+        <p className="mt-2 text-sm text-stone-300" data-testid="final-hp">
+          Final HP: you {finalPlayer.health}/{finalPlayer.maxHealth} · foe{" "}
+          {finalCpu.health}/{finalCpu.maxHealth}
         </p>
         <p className="mt-1 text-sm text-stone-500">{turns.length} turns</p>
+        <p className="mt-3 text-sm text-amber-100/90" data-testid="end-lesson">
+          {lesson}
+        </p>
       </div>
 
       <div className="mt-8" data-testid="results-history">
-        <h3 className="text-sm font-medium text-stone-300">Turn history</h3>
+        <h3 className="text-sm font-medium text-stone-300">Battle log</h3>
         {turns.length === 0 ? (
           <p className="mt-2 text-sm text-stone-500">No turns recorded.</p>
         ) : (
@@ -49,13 +85,8 @@ export function ResultsView({
               >
                 <p className="font-medium text-stone-200">Turn {turn.turn}</p>
                 <ul className="mt-1 space-y-1 text-stone-400">
-                  {turn.actions.map((action, index) => (
-                    <li key={`${turn.turn}-${action.actor}-${index}`}>
-                      {action.actor}: {action.selectedSkillId}
-                      {action.fallback
-                        ? ` → ${action.resolvedSkillId} (fallback)`
-                        : ` → ${action.resolvedSkillId}`}
-                    </li>
+                  {narrateTurn(turn, playerName, cpuName).map((line, index) => (
+                    <li key={`${turn.turn}-${index}`}>{line}</li>
                   ))}
                 </ul>
               </li>
@@ -67,17 +98,17 @@ export function ResultsView({
       <div className="mt-8 flex flex-wrap gap-3">
         <button
           type="button"
-          className="rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
+          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
           onClick={onRestart}
         >
-          Restart battle
+          Fight again
         </button>
         <button
           type="button"
-          className="rounded border border-stone-600 px-4 py-2 text-stone-200 hover:bg-stone-900"
-          onClick={onReturnToBuilder}
+          className="min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200 hover:bg-stone-900"
+          onClick={onReturnHome}
         >
-          Return to Builder
+          Home
         </button>
       </div>
     </section>
@@ -87,9 +118,9 @@ export function ResultsView({
 function formatResult(result: BattleOutcome["result"]): string {
   switch (result) {
     case "player-victory":
-      return "Player victory";
+      return "You won";
     case "cpu-victory":
-      return "CPU victory";
+      return "Foe won";
     case "draw":
       return "Draw";
     default: {

@@ -1,13 +1,18 @@
 import { useMemo, useState } from "react";
 import {
-  insufficientEvidence,
   type DecisionLabCaseV3,
   type DecisionLabPackV3
 } from "../../decision-lab";
-import { MVP_SKILL_CATALOG } from "../../engine";
+import { InfoTip } from "../components/InfoTip";
+import { skillLabel } from "../copy/skill-label";
+import { plainPolicyLabel } from "./help-ranking-copy";
 
 export type ChallengeViewProps = {
   pack: DecisionLabPackV3;
+  guided?: boolean;
+  advanced?: boolean;
+  onWatch?: () => void;
+  onHome?: () => void;
 };
 
 type ChallengeRound = {
@@ -15,12 +20,6 @@ type ChallengeRound = {
   pick: string | null;
   revealed: boolean;
 };
-
-function skillLabel(id: string): string {
-  return (
-    MVP_SKILL_CATALOG.skills.find((s) => s.skillId === id)?.displayName ?? id
-  );
-}
 
 function eligibleCases(pack: DecisionLabPackV3): DecisionLabCaseV3[] {
   return pack.cases.filter((c) => {
@@ -31,7 +30,27 @@ function eligibleCases(pack: DecisionLabPackV3): DecisionLabCaseV3[] {
   });
 }
 
-export function ChallengeView({ pack }: ChallengeViewProps): React.JSX.Element {
+function tagSentence(tags: readonly string[] | undefined): string | null {
+  if (tags === undefined || tags.length === 0) return null;
+  if (tags.includes("wasted_energy")) {
+    return "They spent more energy than a cheaper best move.";
+  }
+  return null;
+}
+
+/** Whole numbers when integer; otherwise one decimal. */
+export function formatPlainScore(n: number): string {
+  const rounded = Math.round(n * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+export function ChallengeView({
+  pack,
+  guided = false,
+  advanced = false,
+  onWatch,
+  onHome
+}: ChallengeViewProps): React.JSX.Element {
   const pool = useMemo(() => eligibleCases(pack), [pack]);
   const [index, setIndex] = useState(0);
   const [pick, setPick] = useState<string | null>(null);
@@ -43,10 +62,7 @@ export function ChallengeView({ pack }: ChallengeViewProps): React.JSX.Element {
   function reveal() {
     if (current === null || pick === null) return;
     setRevealed(true);
-    setHistory((h) => [
-      ...h,
-      { case: current, pick, revealed: true }
-    ]);
+    setHistory((h) => [...h, { case: current, pick, revealed: true }]);
   }
 
   function next() {
@@ -70,84 +86,114 @@ export function ChallengeView({ pack }: ChallengeViewProps): React.JSX.Element {
       (p) => p.status === "recorded" && p.source === "llm"
     );
     if (llm.length === 0) return 0;
-    return Math.min(...llm.map((p) => (p.status === "recorded" ? p.regret : 0)));
+    return Math.min(
+      ...llm.map((p) => (p.status === "recorded" ? p.regret : 0))
+    );
   });
   const meanModel =
     modelRegrets.length === 0
       ? 0
       : modelRegrets.reduce((a, b) => a + b, 0) / modelRegrets.length;
 
-  const greedyWins = history.filter((h) => {
-    const g = h.case.policies.greedy;
-    if (g === undefined || g.status !== "recorded" || h.pick === null) {
-      return false;
-    }
-    const userVal = h.case.oracle.values[h.pick] ?? 0;
-    return userVal >= g.chosenValue;
-  }).length;
-  const vsGreedyRate =
-    history.length === 0 ? 0 : greedyWins / history.length;
-  const sessionInsuff = insufficientEvidence({ n: history.length });
-
   if (current === null) {
     return (
       <p className="mt-6 text-stone-400" data-testid="lab-challenge">
-        No eligible challenge cases in this pack.
+        No eligible challenge cases in this set.
       </p>
     );
   }
 
   const bestVal = Math.max(...Object.values(current.oracle.values));
   const userRegret =
-    pick === null
-      ? null
-      : bestVal - (current.oracle.values[pick] ?? bestVal);
+    pick === null ? null : bestVal - (current.oracle.values[pick] ?? bestVal);
+
+  const llmPolicies = Object.entries(current.policies).filter(
+    ([, pol]) => pol.status === "recorded" && pol.source === "llm"
+  );
+
+  const groups = new Map<
+    string,
+    { keys: string[]; regret: number; tags?: string[] }
+  >();
+  for (const [key, pol] of llmPolicies) {
+    if (pol.status !== "recorded") continue;
+    const sid = pol.executedSkillId;
+    const existing = groups.get(sid);
+    const tags =
+      "failureTags" in pol
+        ? (pol.failureTags as string[] | undefined)
+        : undefined;
+    if (existing) {
+      existing.keys.push(key);
+    } else {
+      groups.set(sid, { keys: [key], regret: pol.regret, tags });
+    }
+  }
+
+  const showAnswerEnabled = pick !== null && !revealed;
 
   return (
     <section data-testid="lab-challenge" className="mt-6 space-y-4">
       <p className="text-sm text-stone-400">
-        You vs the model — pick a skill from the observation, then reveal
-        oracle regret vs recorded arms. Pack scoring only; no network.
+        Can you beat the AI? Pick a move, then show the answer. Scored from
+        saved measurements — no live AI call.
+        <InfoTip termId="missScore" />
       </p>
-
       <div className="rounded border border-stone-800 p-4">
-        <p className="text-sm text-stone-500">{current.snapshotId}</p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2 text-sm">
-          <div>
-            <p className="text-stone-500">CPU</p>
-            <p>
-              HP {current.observation.cpu.health}/{current.observation.cpu.maxHealth} ·
-              E {current.observation.cpu.energy} · Def {current.observation.cpu.defense}
+        <div className="mt-1 grid gap-4 text-sm sm:grid-cols-2">
+          <div data-testid="challenge-you-side">
+            <p className="font-medium text-stone-200">
+              You (in the AI&apos;s place)
+            </p>
+            <p className="mt-1 text-stone-400">
+              HP {current.observation.cpu.health}/
+              {current.observation.cpu.maxHealth} · Energy{" "}
+              {current.observation.cpu.energy} · Defense{" "}
+              {current.observation.cpu.defense}
             </p>
           </div>
-          <div>
-            <p className="text-stone-500">Player</p>
-            <p>
-              HP {current.observation.player.health}/{current.observation.player.maxHealth} ·
-              E {current.observation.player.energy} · Def{" "}
+          <div data-testid="challenge-opponent-side">
+            <p className="font-medium text-stone-200">
+              Opponent (follows a fixed plan)
+            </p>
+            <p className="mt-1 text-stone-400">
+              HP {current.observation.player.health}/
+              {current.observation.player.maxHealth} · Energy{" "}
+              {current.observation.player.energy} · Defense{" "}
               {current.observation.player.defense}
             </p>
           </div>
         </div>
 
-        <fieldset className="mt-4" disabled={revealed}>
+        <fieldset className="mt-4">
           <legend className="text-sm text-stone-300">Your pick</legend>
           <ul className="mt-2 space-y-2">
             {current.equippedSkillIds.map((id) => {
               const aff = current.affordability.find((a) => a.skillId === id);
+              const selected = pick === id;
               return (
                 <li key={id}>
-                  <label className="flex items-center gap-2 text-stone-200">
+                  <label
+                    className={
+                      selected
+                        ? "flex min-h-11 items-center gap-2 rounded border border-amber-600 bg-amber-950/40 px-3 py-2 text-amber-50"
+                        : "flex min-h-11 items-center gap-2 rounded border border-transparent px-3 py-2 text-stone-200"
+                    }
+                    data-selected={selected ? "true" : "false"}
+                  >
                     <input
                       type="radio"
                       name="challenge-pick"
                       value={id}
-                      checked={pick === id}
-                      onChange={() => setPick(id)}
+                      checked={selected}
+                      disabled={revealed}
+                      onChange={() => {
+                        if (!revealed) setPick(id);
+                      }}
                     />
                     <span>
                       {skillLabel(id)}
-                      {aff && !aff.affordable ? " (unaffordable)" : ""}
+                      {aff && !aff.affordable ? " (not enough energy)" : ""}
                     </span>
                   </label>
                 </li>
@@ -159,58 +205,136 @@ export function ChallengeView({ pack }: ChallengeViewProps): React.JSX.Element {
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded border border-amber-700 px-3 py-1 text-sm text-amber-100 disabled:opacity-40"
-            disabled={pick === null || revealed}
+            className={
+              showAnswerEnabled
+                ? "min-h-11 rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950 hover:bg-amber-500"
+                : "min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-500 opacity-50"
+            }
+            disabled={!showAnswerEnabled}
             onClick={reveal}
+            data-testid="challenge-show-answer"
           >
-            Reveal
+            Show answer
           </button>
           <button
             type="button"
-            className="rounded border border-stone-600 px-3 py-1 text-sm"
+            className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
             onClick={next}
           >
-            Next case
+            Next situation
           </button>
         </div>
 
         {revealed && pick !== null ? (
-          <div className="mt-4 space-y-2 text-sm text-stone-300" aria-live="polite">
-            <p>
-              Your regret: {userRegret?.toFixed(2)} (best{" "}
-              {current.oracle.best.map(skillLabel).join(", ")})
-            </p>
-            {Object.entries(current.policies).map(([key, pol]) => {
-              if (pol.status !== "recorded") {
+          <div
+            className="mt-4 space-y-2 text-sm text-stone-300"
+            aria-live="polite"
+            data-testid="challenge-reveal"
+          >
+            {userRegret === 0 ? (
+              <p>You picked the best move.</p>
+            ) : (
+              <p>
+                Your move was {formatPlainScore(userRegret ?? 0)} points worse
+                than the best move (
+                {current.oracle.best.map(skillLabel).join(", ")}).
+              </p>
+            )}
+
+            {[...groups.entries()].map(([skillId, g]) => {
+              const count = g.keys.length;
+              const names = g.keys.map(plainPolicyLabel);
+              const tag = tagSentence(g.tags);
+              const worse =
+                g.regret === 0
+                  ? "matched the best move"
+                  : `${formatPlainScore(g.regret)} points worse than best`;
+              if (count > 1 && groups.size === 1) {
                 return (
-                  <p key={key}>
-                    {key}: unavailable
+                  <p key={skillId} data-testid="challenge-ai-group">
+                    All {count} recorded AI versions picked {skillLabel(skillId)}{" "}
+                    — {worse}.{tag ? ` ${tag}` : ""}
+                  </p>
+                );
+              }
+              if (count > 1) {
+                return (
+                  <p key={skillId} data-testid="challenge-ai-group">
+                    {names.join(", ")} all picked {skillLabel(skillId)} —{" "}
+                    {worse}.{tag ? ` ${tag}` : ""}
                   </p>
                 );
               }
               return (
-                <p key={key}>
-                  {key}: chose {skillLabel(pol.executedSkillId)} · regret{" "}
-                  {pol.regret.toFixed(2)}
-                  {pol.optimal ? " · optimal" : ""}
+                <p key={skillId}>
+                  {names[0]} picked {skillLabel(skillId)} — {worse}.
+                  {tag ? ` ${tag}` : ""}
                 </p>
               );
             })}
+
+            {advanced ? (
+              <details className="pt-2">
+                <summary className="cursor-pointer text-stone-400">
+                  Advanced
+                </summary>
+                <ul className="mt-2 space-y-1 text-stone-500">
+                  {llmPolicies.map(([key, pol]) => {
+                    if (pol.status !== "recorded") return null;
+                    return (
+                      <li key={key}>
+                        {plainPolicyLabel(key)}: {skillLabel(pol.executedSkillId)}{" "}
+                        ({formatPlainScore(pol.regret)} points)
+                      </li>
+                    );
+                  })}
+                </ul>
+              </details>
+            ) : null}
+
+            {guided ? (
+              <div className="flex flex-wrap gap-2 pt-2">
+                <button
+                  type="button"
+                  className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+                  onClick={next}
+                >
+                  Try another
+                </button>
+                {onWatch ? (
+                  <button
+                    type="button"
+                    className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+                    onClick={onWatch}
+                  >
+                    Watch a recorded fight
+                  </button>
+                ) : null}
+                {onHome ? (
+                  <button
+                    type="button"
+                    className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+                    onClick={onHome}
+                  >
+                    Home
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
 
       <div data-testid="challenge-session" className="text-sm text-stone-400">
-        <p>
-          Session n={history.length} · mean user regret {meanUser.toFixed(2)} ·
-          mean best-model regret {meanModel.toFixed(2)} · win-rate vs greedy{" "}
-          {(vsGreedyRate * 100).toFixed(0)}%
-        </p>
-        {sessionInsuff ? (
-          <p className="text-amber-300/90">
-            insufficient evidence (session n&lt;30)
+        {history.length === 0 ? (
+          <p>No answers yet.</p>
+        ) : (
+          <p>
+            You: {history.length} answers, {formatPlainScore(meanUser)} points
+            worse than best on average. Best recorded AI:{" "}
+            {formatPlainScore(meanModel)}.
           </p>
-        ) : null}
+        )}
       </div>
     </section>
   );
