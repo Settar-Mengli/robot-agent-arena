@@ -1,4 +1,4 @@
-﻿# Architecture
+# Architecture
 
 ## Overview
 
@@ -11,12 +11,12 @@ AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based r
 **Layering** (engine-first, UI later):
 
 ```
-data  â†’  engine
-         â†‘
-         env (robotEnvironment)  â†  eval (measurement core)
-         â†‘
-inference (standalone)  â†’  agent  â†’  (lib bridge)  â†’  store  â†’  components / screens
-         â†‘__________________|
+data  →  engine
+         ↑
+         env (robotEnvironment)  ←  eval (measurement core)
+         ↑
+inference (standalone)  →  agent  →  (lib bridge)  →  store  →  components / screens
+         ↑__________________|
 ```
 
 Dependencies should point inward toward the engine. Game logic must not live in React components. Browser APIs, persistence, and UI state stay outside `src/engine`.
@@ -38,17 +38,17 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 | UI (Builder, Arena, results, battle-view store) | `src/ui/` |
 | Tests | `src/__tests__/`, `src/ui/**/*.test.*` |
 
-`src/data/` exists (opponents). There are **no** top-level `src/types/`, `src/store/`, `src/components/`, or `src/lib/` directories â€” UI store/components live under `src/ui/`.
+`src/data/` exists (opponents). There are **no** top-level `src/types/`, `src/store/`, `src/components/`, or `src/lib/` directories — UI store/components live under `src/ui/`.
 
 **Layer rules (ESLint-enforced):** `src/inference/` is standalone (must not import engine, agent, or eval). `src/agent/` may import engine and inference but not eval. `src/engine/` must import neither agent, inference, nor eval. `src/env/` may import engine only (not agent, eval, or inference). `src/eval/` may import env, engine, agent, and inference; nothing imports eval.
 
 **Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023). Dynamics go through the environment adapter (`robotEnvironment`); terminal scoring and memo/decision state keys live on the interface.
 
-**UI (through Batch 3 / D-049 + D-050):** React, Tailwind, and Zustand are installed. App entry is `index.html` â†’ `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, and one-slot save live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs are static JSON; no Node eval harness in the browser.
+**UI (through Batch 3 / D-049 + D-050):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, and one-slot save live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs are static JSON; no Node eval harness in the browser.
 
 ## Environment interface (A3 / D-033 batch 5)
 
-The measurement core depends on the **environment interface** in `src/env/` (`start`, `apply`, `isTerminal`, `equippedActions`, `legalActions`, `terminalValue`, `memoStateKey`, `decisionStateKey`). The robot game implements it as `robotEnvironment` by delegating to the engine. **Scoring and state keys are on the interface** (a second environment must supply them). Policies, prompt construction, grounding facts, and scenario content stay deliberately game-specific outside `src/env`. `DecisionSnapshot.runtime` remains todayâ€™s `BattleRuntime` JSON. Second reference environment is locked batch 11.
+The measurement core depends on the **environment interface** in `src/env/` (`start`, `apply`, `isTerminal`, `equippedActions`, `legalActions`, `terminalValue`, `memoStateKey`, `decisionStateKey`). The robot game implements it as `robotEnvironment` by delegating to the engine. **Scoring and state keys are on the interface** (a second environment must supply them). Policies, prompt construction, grounding facts, and scenario content stay deliberately game-specific outside `src/env`. `DecisionSnapshot.runtime` remains today’s `BattleRuntime` JSON. Second reference environment is locked batch 11.
 
 ## Determinism and the engine contract
 
@@ -102,13 +102,13 @@ Defined in `src/engine/types.ts`:
 | `BattleOutcome` | `result` (`player-victory` \| `cpu-victory` \| `draw`), `reason`, optional winner fields |
 | `BattleResult` | Full match: `finalSession`, final combatants, `turns`, `outcome`, `seed`, `totalTurns` |
 
-MVP numbers from `src/engine/constants.ts` (source of truth): **5** modules, **8** catalog skills, **1â€“2** skills per agent (`MVP_SKILL_SLOT_LIMIT` = 2, minimum 1 via validation), **max 20** turns, combatant **30** max health / **10** max energy / **6** starting energy.
+MVP numbers from `src/engine/constants.ts` (source of truth): **5** modules, **8** catalog skills, **1–2** skills per agent (`MVP_SKILL_SLOT_LIMIT` = 2, minimum 1 via validation), **max 20** turns, combatant **30** max health / **10** max energy / **6** starting energy.
 
 ## Battle flow
 
 **Session API (interactive path):**
 
-1. `startBattle(configA, configB, seed, maxTurns?)` â†’ `BattleRuntime`
+1. `startBattle(configA, configB, seed, maxTurns?)` → `BattleRuntime`
 2. While the battle is open: choose a player skill, call `stepBattle(runtime, playerSkillId, selectCpuSkillId?)` (optional sync CPU selector; default is the seeded simulation picker)
 3. `BattleRuntime` is JSON-serializable for save/resume; when `stepBattle` produces an outcome, the session is finalized (`status: "completed"`)
 

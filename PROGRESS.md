@@ -1,14 +1,14 @@
-﻿# PROGRESS
+# PROGRESS
 
 ## Status Snapshot
 - Date: 2026-09-23
-- Branch: `feat/ux-bugs-d050` â†’ PR (D-050)
+- Branch: `feat/ux-bugs-d050` → PR (D-050)
 - Current state: Batch 3 (D-049) on main. **D-050** plain-language UX + AppView/save fixes + lazy Lab/Watch shipped in this PR (PR #38). Next: locked batch **9**.
-- Verification: typecheck / lint / vitest / coverage / build (incl. base path) / eval:replay / seven drifts / protected-path empty â€” run in this PR gate pass.
+- Verification: typecheck / lint / vitest / coverage / build (incl. base path) / eval:replay / seven drifts / protected-path empty — run in this PR gate pass.
 
 ## Completed
 - Repository baseline through Batch 3 (PR #37 / D-049) on main.
-- B.2d (PR #35 / D-043) and Evidence+Ship ES (PR #36 / D-044â€“D-048).
+- B.2d (PR #35 / D-043) and Evidence+Ship ES (PR #36 / D-044–D-048).
 - **D-050** UX + bugs (this PR): plain landing, guided Challenge, honesty/tour/a11y, AppView saves, Advanced Lab Compare (n=13), battle juice, lazy Lab/Watch, ~380px layout. No artifact / engine changes.
 
 ## Open
