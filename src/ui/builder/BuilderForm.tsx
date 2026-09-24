@@ -144,7 +144,7 @@ export function BuilderForm({
 
         <fieldset>
           <legend className="text-sm text-stone-300">Modules</legend>
-          <p className="mt-1 text-xs text-stone-500">
+          <p className="mt-1 text-xs text-stone-400">
             Stored on the robot for recorded AI prompts. Not used by the
             simple computer opponent in free play.
           </p>

@@ -21,7 +21,7 @@ export function CombatantBars(props: CombatantBarsProps): React.JSX.Element {
 
   return (
     <div className="rounded border border-stone-800 bg-stone-900/50 px-4 py-4">
-      <p className="text-xs tracking-wide text-stone-500 uppercase">
+      <p className="text-xs tracking-wide text-stone-400 uppercase">
         {props.title}
       </p>
       <p className="mt-1 text-lg font-medium text-stone-100">{props.name}</p>

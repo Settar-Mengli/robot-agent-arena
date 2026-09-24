@@ -48,7 +48,7 @@ export function LeaderboardView({
         Recorded measurements in this robot battle only. Compared only within the
         same suite. Live AI play is never ranked here.
       </p>
-      <p className="mt-2 text-stone-500 text-sm">
+      <p className="mt-2 text-stone-400 text-sm">
         These numbers are for this test set and these models — not a general claim
         about every robot battle or every AI.
       </p>
@@ -103,7 +103,7 @@ export function LeaderboardView({
                                 <span className="text-stone-100">
                                   {row.label ?? row.id}
                                 </span>
-                                <span className="text-stone-500">
+                                <span className="text-stone-400">
                                   {" "}
                                   · best-move rate {pct}
                                   {row.insufficientEvidence

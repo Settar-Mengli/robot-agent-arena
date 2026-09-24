@@ -120,6 +120,7 @@ export function DecisionLabView({
     <div className="text-stone-200" data-testid="decision-lab">
       <HonestyStrip />
       <h1
+        id="lab-heading"
         tabIndex={-1}
         className="mt-4 text-2xl font-semibold text-stone-50"
       >
@@ -291,11 +292,11 @@ function SituationsPanel(props: {
             </li>
           ))}
         </ul>
-        <p className="mt-4 text-sm text-stone-500">{cases.length} situations</p>
+        <p className="mt-4 text-sm text-stone-400">{cases.length} situations</p>
       </div>
       <div className="text-sm">
         {selected === null ? (
-          <p className="text-stone-500">No situation selected.</p>
+          <p className="text-stone-400">No situation selected.</p>
         ) : (
           <>
             <h3 className="text-lg text-stone-100">

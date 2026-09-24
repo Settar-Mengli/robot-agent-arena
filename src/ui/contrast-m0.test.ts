@@ -22,6 +22,7 @@ function contrastRatio(fg: string, bg: string): number {
 describe("M0 contrast pairs (default path)", () => {
   const bg = "#0c0a09"; // stone-950
   const bgElevated = "#1c1917"; // stone-900
+  const stone400 = "#a8a29e";
 
   it("lists changed pairs at WCAG thresholds", () => {
     const pairs: Array<{
@@ -33,7 +34,7 @@ describe("M0 contrast pairs (default path)", () => {
     }> = [
       {
         name: "unaffordable hint stone-400 on stone-950",
-        fg: "#a8a29e",
+        fg: stone400,
         bg,
         min: 4.5,
         ratio: 0
@@ -47,14 +48,105 @@ describe("M0 contrast pairs (default path)", () => {
       },
       {
         name: "opponent line stone-400 on stone-950",
-        fg: "#a8a29e",
+        fg: stone400,
         bg,
         min: 4.5,
         ratio: 0
       },
       {
         name: "builder skill desc stone-400 on stone-950",
-        fg: "#a8a29e",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "challenge disabled show-answer stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "challenge advanced list stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "combatant bars label stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "watch battle start stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "decision lab situations count stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "decision lab empty selection stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "diagnostics empty compare stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "diagnostics none stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "diagnostics list stone-400 on stone-900",
+        fg: stone400,
+        bg: bgElevated,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "leaderboard subtitle stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "leaderboard meta stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "methodology subtitle stone-400 on stone-950",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "compare empty pairs stone-400 on stone-950",
+        fg: stone400,
         bg,
         min: 4.5,
         ratio: 0

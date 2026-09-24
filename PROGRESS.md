@@ -2,9 +2,8 @@
 
 ## Status Snapshot
 - Date: 2026-09-24
-- Branch: `feat/batch5-second-env` (Batch 5 / D-052)
-- Current state: Batch 5 / D-052 complete — `EnvironmentOf` + robot adapter + shared `evaluateChoices`; Resonance Seal suite n=40 + baselines (keyless).
-- NEXT: final polish (screenshots, demo video, issue #28).
+- Current state: main includes Batch 5 (PR #40, D-052).
+- NEXT: bug-hunt PR then final polish.
 
 ## Completed
 - Repository baseline through Batch 3 (PR #37 / D-049) + D-050 (PR #38) on main.
