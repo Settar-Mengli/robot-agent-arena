@@ -1,7 +1,7 @@
 # Pre-registration — Batch 4 robustness (D-051)
 
 Status: pre-registered before any Batch 4 recording.
-Commit: (filled at Phase 1 push)
+Commit: 2a130a757543433fbec9d56a1ead9fd59d07d114 (Phase 1 push; this file first landed in that commit)
 No outcome-dependent changes after recording; deviations logged as deviations.
 
 ## Shared protocol
