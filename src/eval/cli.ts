@@ -1357,6 +1357,7 @@ async function runLlmMode(
     if (args.snapshots) {
       if (
         args.mode === "replay" &&
+        existingManifest !== undefined &&
         !manifestRecordsVariant(
           existingManifest,
           variant,
