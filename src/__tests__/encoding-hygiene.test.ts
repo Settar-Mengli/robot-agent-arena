@@ -7,13 +7,13 @@ import { describe, expect, it } from "vitest";
  * Patterns are built from escapes so this file does not contain the sequences.
  */
 function hasMojibake(line: string): boolean {
-  // â€ (U+00E2 U+20AC) — start of many CP1252 mis-decodes
+  // U+00E2 U+20AC -- start of many CP1252 mis-decodes
   if (line.includes("\u00E2\u20AC")) return true;
-  // Ã + continuation-ish (U+00C3 + U+0080–U+00BF)
+  // U+00C3 + U+0080-U+00BF
   if (/\u00C3[\u0080-\u00BF]/.test(line)) return true;
-  // Â + continuation (U+00C2 + U+0080–U+00BF)
+  // U+00C2 + U+0080-U+00BF
   if (/\u00C2[\u0080-\u00BF]/.test(line)) return true;
-  // ï»¿ as three Latin-1 chars
+  // U+00EF U+00BB U+00BF (BOM as three Latin-1 chars)
   if (line.includes("\u00EF\u00BB\u00BF")) return true;
   return false;
 }
