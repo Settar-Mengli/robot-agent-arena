@@ -139,6 +139,139 @@ describe("save-slot", () => {
     expect(slot.mode).toBe("watch");
   });
 
+  it("rejects empty skillIds", () => {
+    expect(() =>
+      assertSaveSlotV1({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: {
+          ...sampleSlot().draft,
+          playerConfig: { ...player, skillIds: [] }
+        },
+        mode: "free",
+        runtime: null,
+        battleOver: false
+      })
+    ).toThrow(/skillIds/);
+  });
+
+  it("rejects unknown skill id", () => {
+    expect(() =>
+      assertSaveSlotV1({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: {
+          ...sampleSlot().draft,
+          playerConfig: {
+            ...player,
+            skillIds: ["skill-not-real"]
+          }
+        },
+        mode: "free",
+        runtime: null,
+        battleOver: false
+      })
+    ).toThrow(/known skill/);
+  });
+
+  it("strips own __proto__ key from playerConfig", () => {
+    const playerConfig = JSON.parse(
+      JSON.stringify({
+        agentId: "p1",
+        displayName: "P1",
+        modules: { ...player.modules },
+        skillIds: [...player.skillIds]
+      })
+    ) as Record<string, unknown>;
+    Object.defineProperty(playerConfig, "__proto__", {
+      value: { polluted: true },
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    expect(Object.prototype.hasOwnProperty.call(playerConfig, "__proto__")).toBe(
+      true
+    );
+    const slot = assertSaveSlotV1({
+      schemaVersion: 1,
+      savedAt: "2026-01-01T00:00:00.000Z",
+      draft: {
+        playerConfig,
+        opponentId: CPU_OPPONENTS[0]!.agentId,
+        seed: "arena-1"
+      },
+      mode: "free",
+      runtime: null,
+      battleOver: false
+    });
+    expect(Object.keys(slot.draft.playerConfig).sort()).toEqual(
+      ["agentId", "displayName", "modules", "skillIds"].sort()
+    );
+  });
+
+  it("rejects garbage lastOutcome", () => {
+    expect(() =>
+      assertSaveSlotV1({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: sampleSlot().draft,
+        mode: "free",
+        runtime: null,
+        battleOver: true,
+        lastOutcome: { winner: "hacked" }
+      })
+    ).toThrow(/lastOutcome/);
+  });
+
+  it("valid slot round-trips unchanged (allowlisted fields)", () => {
+    const storage = memoryStorage();
+    const draft = sampleSlot();
+    const withOutcome = {
+      ...draft,
+      battleOver: true,
+      lastOutcome: {
+        result: "player-victory" as const,
+        reason: "cpu-health-zero" as const,
+        winnerSide: "player" as const,
+        winnerAgentId: "p1"
+      }
+    };
+    expect(saveSlot(withOutcome, { inFlight: false, storage }).ok).toBe(true);
+    const loaded = loadSlot(storage);
+    expect(loaded.ok).toBe(true);
+    if (loaded.ok) {
+      expect(loaded.slot.draft.playerConfig).toEqual(withOutcome.draft.playerConfig);
+      expect(loaded.slot.lastOutcome).toEqual(withOutcome.lastOutcome);
+      expect(Object.keys(loaded.slot.draft.playerConfig).sort()).toEqual(
+        ["agentId", "displayName", "modules", "skillIds"].sort()
+      );
+    }
+  });
+
+  it("load with invalid draft returns schema/corrupt-style failure", () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      SAVE_SLOT_KEY,
+      JSON.stringify({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: {
+          playerConfig: { ...player, skillIds: [] },
+          opponentId: "x",
+          seed: "s"
+        },
+        mode: "free",
+        runtime: null,
+        battleOver: false
+      })
+    );
+    const loaded = loadSlot(storage);
+    expect(loaded.ok).toBe(false);
+    if (!loaded.ok) {
+      expect(loaded.reason).toBe("schema");
+    }
+  });
+
   it("clearSlot removes key", () => {
     const storage = memoryStorage();
     saveSlot(sampleSlot(), { inFlight: false, storage });

@@ -64,7 +64,7 @@ export function DiagnosticsPanel({
           Variant comparison
         </h3>
         {d.helpRanking.length === 0 ? (
-          <p className="mt-2 text-sm text-stone-500">No paired comparison.</p>
+          <p className="mt-2 text-sm text-stone-400">No paired comparison.</p>
         ) : (
           <ul className="mt-2 space-y-3 text-sm text-stone-300">
             {d.helpRanking.map((h) => {
@@ -94,7 +94,7 @@ export function DiagnosticsPanel({
           Clearest mistake example
         </h3>
         {d.counterexample === null ? (
-          <p className="mt-2 text-sm text-stone-500">None.</p>
+          <p className="mt-2 text-sm text-stone-400">None.</p>
         ) : (
           <div
             className="mt-2 text-sm text-stone-300"
@@ -152,7 +152,7 @@ export function DiagnosticsPanel({
         </div>
       ) : null}
 
-      <ul className="text-xs text-stone-500">
+      <ul className="text-xs text-stone-400">
         <li>
           Best move is measured against a fixed player plan — not a full-game
           equilibrium.

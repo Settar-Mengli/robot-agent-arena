@@ -51,7 +51,7 @@ export function MethodologyView({
             small wobble (1 of 35), from repeat runs or provider changes over
             time.
           </p>
-          <p className="mt-2 text-stone-500 text-sm">
+          <p className="mt-2 text-stone-400 text-sm">
             Scoped to this robot battle, this test set, and these two models —
             not a claim about AI systems in general.
           </p>

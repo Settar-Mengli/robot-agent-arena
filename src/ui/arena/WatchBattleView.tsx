@@ -228,7 +228,7 @@ export function WatchBattleView({
           ) : null}
         </div>
       ) : (
-        <p className="mt-6 text-sm text-stone-500">Start of match.</p>
+        <p className="mt-6 text-sm text-stone-400">Start of match.</p>
       )}
 
       {storyLog.length > 0 ? (

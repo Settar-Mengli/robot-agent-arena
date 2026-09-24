@@ -1146,3 +1146,16 @@ D-033 locked batch 11 — prove the interface is real (robot + second env throug
 
 Consequences:
 NEXT → final polish (screenshots, demo video, issue #28).
+
+## D-053 Live session lifecycle
+Date: 2026-09-24
+Status: Accepted
+
+Decision:
+The Arena opt-in live AI session ({ apiKey, modelId, enabled }) is owned by App state, memory only — never localStorage, sessionStorage, URL, logs, or error messages. LiveOpponentPanel only edits App state; unmount must not wipe the session. The session persists across battle → results → Fight again within one browser visit. It is cleared on Home, Leave-to-Home, Load, and page reload. Loaded fights always start with the simple computer unless the user re-enables live in Setup. createLivePlayTurn clears the fallback notice on a successful LLM turn. Arena/Results show honest opponentMode labels: cpu / live / live-fallback.
+
+Rationale:
+Bug hunt F1–F4: Fight again silently dropped live AI (panel unmount wipe); Leave/Load left a stale live PlayTurnFn; Arena always claimed "simple computer"; notices never cleared on recovery.
+
+Consequences:
+UI tests cover Fight-again continuity, Load→cpu, notice recovery, and key-absence fences. CI protected-path fences expanded.

@@ -1,15 +1,47 @@
 /**
- * One-slot localStorage persistence (D-005 / D-006 / D-049 B.4).
- * Browser-only; no engine/eval imports beyond types used for shape checks.
+ * One-slot localStorage persistence (D-005 / D-006 / D-049 B.4 / D-053).
+ * Rebuilds AgentConfig from allowlisted fields; validates via engine rules.
  */
-import type {
-  AgentConfig,
-  BattleOutcome,
-  BattleRuntime
+import {
+  MVP_SKILL_CATALOG,
+  validateAgentConfigInput,
+  type AgentConfig,
+  type BattleOutcome,
+  type BattleRuntime
 } from "../../engine";
 
 export const SAVE_SLOT_KEY = "agent-arena.save.v1";
 export const SAVE_SLOT_SCHEMA_VERSION = 1 as const;
+
+const AGENT_CONFIG_KEYS = [
+  "agentId",
+  "displayName",
+  "modules",
+  "skillIds"
+] as const;
+
+const MODULE_KEYS = [
+  "coreIdentity",
+  "memory",
+  "sigilSecurity",
+  "rules",
+  "strategy"
+] as const;
+
+const OUTCOME_RESULTS: ReadonlySet<string> = new Set([
+  "player-victory",
+  "cpu-victory",
+  "draw"
+]);
+
+const OUTCOME_REASONS: ReadonlySet<string> = new Set([
+  "player-health-zero",
+  "cpu-health-zero",
+  "mutual-health-zero",
+  "turn-limit"
+]);
+
+const OUTCOME_SIDES: ReadonlySet<string> = new Set(["player", "cpu"]);
 
 export type SaveDraftV1 = {
   playerConfig: AgentConfig;
@@ -44,17 +76,89 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+/** Rebuild AgentConfig from allowlisted fields only; validate with engine rules. */
 function assertAgentConfig(value: unknown, path: string): AgentConfig {
   if (!isPlainObject(value)) {
     throw new TypeError(`${path}: expected object`);
   }
+  const modulesRaw = value.modules;
+  if (!isPlainObject(modulesRaw)) {
+    throw new TypeError(`${path}: modules`);
+  }
+  for (const key of MODULE_KEYS) {
+    if (typeof modulesRaw[key] !== "string") {
+      throw new TypeError(`${path}.modules.${key}`);
+    }
+  }
+  const modules = {
+    coreIdentity: modulesRaw.coreIdentity as string,
+    memory: modulesRaw.memory as string,
+    sigilSecurity: modulesRaw.sigilSecurity as string,
+    rules: modulesRaw.rules as string,
+    strategy: modulesRaw.strategy as string
+  };
+  if (!Array.isArray(value.skillIds)) {
+    throw new TypeError(`${path}: skillIds`);
+  }
+  const skillIds = value.skillIds.map((id, i) => {
+    if (typeof id !== "string") {
+      throw new TypeError(`${path}.skillIds[${i}]`);
+    }
+    return id;
+  });
   if (typeof value.agentId !== "string" || typeof value.displayName !== "string") {
     throw new TypeError(`${path}: agentId/displayName`);
   }
-  if (!isPlainObject(value.modules) || !Array.isArray(value.skillIds)) {
-    throw new TypeError(`${path}: modules/skillIds`);
+  const rebuilt: AgentConfig = {
+    agentId: value.agentId,
+    displayName: value.displayName,
+    modules,
+    skillIds
+  };
+  validateAgentConfigInput(rebuilt, MVP_SKILL_CATALOG, path);
+  // Guarantee Object.keys is exactly the allowlist (no __proto__ etc.)
+  const keys = Object.keys(rebuilt);
+  if (
+    keys.length !== AGENT_CONFIG_KEYS.length ||
+    !AGENT_CONFIG_KEYS.every((k) => keys.includes(k))
+  ) {
+    throw new TypeError(`${path}: unexpected keys`);
   }
-  return value as unknown as AgentConfig;
+  return rebuilt;
+}
+
+function assertBattleOutcome(value: unknown, path: string): BattleOutcome {
+  if (!isPlainObject(value)) {
+    throw new TypeError(`${path}: expected object`);
+  }
+  const result = value.result;
+  const reason = value.reason;
+  if (typeof result !== "string" || !OUTCOME_RESULTS.has(result)) {
+    throw new TypeError(`${path}: result`);
+  }
+  if (typeof reason !== "string" || !OUTCOME_REASONS.has(reason)) {
+    throw new TypeError(`${path}: reason`);
+  }
+  const out: BattleOutcome = {
+    result: result as BattleOutcome["result"],
+    reason: reason as BattleOutcome["reason"]
+  };
+  if (value.winnerSide !== undefined) {
+    if (
+      typeof value.winnerSide !== "string" ||
+      !OUTCOME_SIDES.has(value.winnerSide)
+    ) {
+      throw new TypeError(`${path}: winnerSide`);
+    }
+    out.winnerSide = value.winnerSide as BattleOutcome["winnerSide"];
+  }
+  if (value.winnerAgentId !== undefined) {
+    if (typeof value.winnerAgentId !== "string") {
+      throw new TypeError(`${path}: winnerAgentId`);
+    }
+    out.winnerAgentId = value.winnerAgentId;
+  }
+  return out;
 }
 
 function assertCombatant(value: unknown, path: string): void {
@@ -115,7 +219,10 @@ export function assertSaveSlotV1(raw: unknown): SaveSlotV1 {
   if (!isPlainObject(raw.draft)) {
     throw new TypeError("SaveSlotV1: draft");
   }
-  assertAgentConfig(raw.draft.playerConfig, "draft.playerConfig");
+  const playerConfig = assertAgentConfig(
+    raw.draft.playerConfig,
+    "draft.playerConfig"
+  );
   if (typeof raw.draft.opponentId !== "string" || typeof raw.draft.seed !== "string") {
     throw new TypeError("SaveSlotV1: draft.opponentId/seed");
   }
@@ -129,13 +236,17 @@ export function assertSaveSlotV1(raw: unknown): SaveSlotV1 {
   if (raw.runtime !== null) {
     runtime = assertBattleRuntime(raw.runtime);
   }
+  let lastOutcome: BattleOutcome | undefined;
+  if (raw.lastOutcome !== undefined) {
+    lastOutcome = assertBattleOutcome(raw.lastOutcome, "lastOutcome");
+  }
   return {
     schemaVersion: SAVE_SLOT_SCHEMA_VERSION,
     savedAt: raw.savedAt,
     draft: {
-      playerConfig: assertAgentConfig(raw.draft.playerConfig, "draft.playerConfig"),
-      opponentId: raw.draft.opponentId as string,
-      seed: raw.draft.seed as string
+      playerConfig,
+      opponentId: raw.draft.opponentId,
+      seed: raw.draft.seed
     },
     mode: raw.mode,
     ...(isPlainObject(raw.watch) && typeof raw.watch.matchId === "string"
@@ -143,9 +254,7 @@ export function assertSaveSlotV1(raw: unknown): SaveSlotV1 {
       : {}),
     runtime,
     battleOver: raw.battleOver,
-    ...(raw.lastOutcome !== undefined
-      ? { lastOutcome: raw.lastOutcome as BattleOutcome }
-      : {})
+    ...(lastOutcome !== undefined ? { lastOutcome } : {})
   };
 }
 

@@ -5,6 +5,10 @@ import type {
 } from "../../engine";
 import { HonestyStrip } from "../HonestyStrip";
 import { endLesson } from "./end-lesson";
+import {
+  opponentModeLine,
+  type OpponentMode
+} from "./opponent-mode";
 import { narrateTurn } from "./turn-narration";
 
 export type ResultsViewProps = {
@@ -16,6 +20,9 @@ export type ResultsViewProps = {
   finalCpu: CombatantState;
   onRestart: () => void;
   onReturnHome: () => void;
+  /** Honesty label matching the battle opponent mode. */
+  opponentMode?: OpponentMode;
+  liveModelId?: string;
 };
 
 export function ResultsView({
@@ -26,7 +33,9 @@ export function ResultsView({
   finalPlayer,
   finalCpu,
   onRestart,
-  onReturnHome
+  onReturnHome,
+  opponentMode = "cpu",
+  liveModelId = ""
 }: ResultsViewProps) {
   const winnerName =
     outcome.winnerSide === "player"
@@ -35,6 +44,7 @@ export function ResultsView({
         ? cpuName
         : undefined;
   const lesson = endLesson({ outcome, turns, finalPlayer });
+  const modeLine = opponentModeLine(opponentMode, liveModelId);
 
   return (
     <section aria-labelledby="results-heading" data-testid="results-view">
@@ -46,8 +56,15 @@ export function ResultsView({
         Results
       </h1>
 
+      <p
+        className="mt-2 text-sm text-stone-400"
+        data-testid="results-opponent-line"
+      >
+        {modeLine}
+      </p>
+
       <div className="mt-3">
-        <HonestyStrip variant="compact" />
+        <HonestyStrip variant="compact" opponentMode={opponentMode} />
       </div>
 
       <div
@@ -66,7 +83,7 @@ export function ResultsView({
           Final HP: you {finalPlayer.health}/{finalPlayer.maxHealth} · opponent{" "}
           {finalCpu.health}/{finalCpu.maxHealth}
         </p>
-        <p className="mt-1 text-sm text-stone-500">{turns.length} turns</p>
+        <p className="mt-1 text-sm text-stone-400">{turns.length} turns</p>
         <p className="mt-3 text-sm text-amber-100/90" data-testid="end-lesson">
           {lesson}
         </p>
@@ -85,7 +102,7 @@ export function ResultsView({
           small wobble (1 of 35), from repeat runs or provider changes over
           time.
         </p>
-        <p className="mt-2 text-stone-500">
+        <p className="mt-2 text-stone-400">
           Scoped to this robot battle, this test set, and these two models —
           not a claim about AI systems in general. Details: Methodology.
         </p>
@@ -94,7 +111,7 @@ export function ResultsView({
       <div className="mt-8" data-testid="results-history">
         <h3 className="text-sm font-medium text-stone-300">Battle log</h3>
         {turns.length === 0 ? (
-          <p className="mt-2 text-sm text-stone-500">No turns recorded.</p>
+          <p className="mt-2 text-sm text-stone-400">No turns recorded.</p>
         ) : (
           <ol className="mt-3 space-y-3 text-sm text-stone-300">
             {[...turns].reverse().map((turn) => (

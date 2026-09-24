@@ -208,7 +208,7 @@ export function ChallengeView({
             className={
               showAnswerEnabled
                 ? "min-h-11 rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950 hover:bg-amber-500"
-                : "min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-500 opacity-50"
+                : "min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-400 opacity-50"
             }
             disabled={!showAnswerEnabled}
             onClick={reveal}
@@ -278,7 +278,7 @@ export function ChallengeView({
                 <summary className="cursor-pointer text-stone-400">
                   Advanced
                 </summary>
-                <ul className="mt-2 space-y-1 text-stone-500">
+                <ul className="mt-2 space-y-1 text-stone-400">
                   {llmPolicies.map(([key, pol]) => {
                     if (pol.status !== "recorded") return null;
                     return (

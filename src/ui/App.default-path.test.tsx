@@ -326,4 +326,29 @@ describe("ViewErrorBoundary", () => {
     });
     spy.mockRestore();
   });
+
+  it("live panel Suspense reject keeps Setup Start battle usable", async () => {
+    const RejectLazy = lazy(() =>
+      Promise.reject(new Error("live chunk failed"))
+    );
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <section data-testid="battle-setup">
+        <ViewErrorBoundary onHome={() => {}}>
+          <Suspense fallback={<p>Loading…</p>}>
+            <RejectLazy />
+          </Suspense>
+        </ViewErrorBoundary>
+        <button type="button">Start battle</button>
+      </section>
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("view-error-boundary")).toHaveTextContent(
+        "Couldn't load this screen."
+      );
+    });
+    expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Start battle/i })).toBeEnabled();
+    spy.mockRestore();
+  });
 });
