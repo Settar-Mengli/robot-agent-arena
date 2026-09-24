@@ -11,8 +11,8 @@ export type CreateLivePlayTurnOptions = {
   fetch?: typeof fetch;
   /** Optional origin override for OPENROUTER_HTTP_REFERER. */
   origin?: string;
-  /** Called when live fails and greedy fallback is used. */
-  onNotice?: (message: string) => void;
+  /** Called when live fails (message) or recovers (null). */
+  onNotice?: (message: string | null) => void;
 };
 
 /**
@@ -45,6 +45,7 @@ export function createLivePlayTurn(
       });
 
       if (result.trace.source === "llm") {
+        opts.onNotice?.(null);
         return { step: result.step, trace: result.trace };
       }
 

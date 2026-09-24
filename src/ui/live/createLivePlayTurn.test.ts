@@ -74,7 +74,7 @@ describe("createLivePlayTurn", () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(
       openaiOk('{"skillId":"skill-null-pulse","reason":"guard"}')
     );
-    const notices: string[] = [];
+    const notices: Array<string | null> = [];
 
     const playTurn = createLivePlayTurn({
       apiKey: "sk-live",
@@ -103,7 +103,7 @@ describe("createLivePlayTurn", () => {
     expect(step.turnRecord.actions.find((a) => a.actor === "cpu")?.selectedSkillId).toBe(
       "skill-null-pulse"
     );
-    expect(notices).toEqual([]);
+    expect(notices).toEqual([null]);
   });
 
   it("falls back to greedy on 429 and surfaces rate-limit copy", async () => {
@@ -112,7 +112,7 @@ describe("createLivePlayTurn", () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ error: "rate" }), { status: 429 })
     );
-    const notices: string[] = [];
+    const notices: Array<string | null> = [];
 
     const playTurn = createLivePlayTurn({
       apiKey: "sk-live",
@@ -132,7 +132,7 @@ describe("createLivePlayTurn", () => {
     const runtime = runtimeFor("live-net");
     const expected = greedyStep(runtime, "skill-logic-storm");
     const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
-    const notices: string[] = [];
+    const notices: Array<string | null> = [];
 
     const playTurn = createLivePlayTurn({
       apiKey: "sk-live",
@@ -150,5 +150,30 @@ describe("createLivePlayTurn", () => {
       notices[0] === LIVE_ERROR.networkBlocked ||
         notices[0] === LIVE_ERROR.unreachable
     ).toBe(true);
+  });
+
+  it("clears notice on later LLM success", async () => {
+    const runtime = runtimeFor("live-recover");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
+      .mockResolvedValueOnce(
+        openaiOk('{"skillId":"skill-null-pulse","reason":"ok"}')
+      );
+    const notices: Array<string | null> = [];
+
+    const playTurn = createLivePlayTurn({
+      apiKey: "sk-live",
+      modelId: "openrouter/free",
+      fetch: fetchMock,
+      onNotice: (m) => notices.push(m)
+    });
+
+    await playTurn(runtime, "skill-logic-storm");
+    expect(notices[notices.length - 1]).toBe(LIVE_ERROR.rateLimit);
+
+    const next = startBattle(playerConfig, SENTINEL_X, "live-recover-2", 5);
+    await playTurn(next, "skill-logic-storm");
+    expect(notices[notices.length - 1]).toBeNull();
   });
 });

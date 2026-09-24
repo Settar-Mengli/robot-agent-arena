@@ -13,6 +13,11 @@ import { HonestyStrip } from "../HonestyStrip";
 import { createGreedyPlayTurn } from "../play/cpu-turn";
 import type { BattleViewStore, PlayTurnFn } from "../store/battle-view";
 import { CombatantBars } from "./CombatantBars";
+import {
+  opponentBarTitle,
+  opponentModeLine,
+  type OpponentMode
+} from "./opponent-mode";
 import { RobotFigure } from "./RobotFigure";
 import { narrateTurn } from "./turn-narration";
 
@@ -23,16 +28,29 @@ export type ArenaViewProps = {
   playTurn?: PlayTurnFn;
   /** Opt-in live opponent failure notice (fallback to simple computer). */
   liveNotice?: string | null;
+  /** Honesty label: cpu / live LLM / live fallen back this turn. */
+  opponentMode?: OpponentMode;
+  /** Live model id when opponentMode is live (for the label). */
+  liveModelId?: string;
 };
 
 function energyCost(skillId: SkillId): number | undefined {
   return MVP_SKILL_CATALOG.skills.find((s) => s.skillId === skillId)?.energyCost;
 }
 
-export function ArenaView({ store, onLeave, playTurn, liveNotice }: ArenaViewProps) {
+export function ArenaView({
+  store,
+  onLeave,
+  playTurn,
+  liveNotice,
+  opponentMode = "cpu",
+  liveModelId = ""
+}: ArenaViewProps) {
   const state = useSyncExternalStore(store.subscribe, store.getState, store.getState);
   const runtime = state.runtime;
   const greedy = playTurn ?? createGreedyPlayTurn();
+  const modeLine = opponentModeLine(opponentMode, liveModelId);
+  const barTitle = opponentBarTitle(opponentMode, liveModelId);
 
   if (runtime === null) {
     return (
@@ -100,18 +118,19 @@ export function ArenaView({ store, onLeave, playTurn, liveNotice }: ArenaViewPro
         </p>
       </div>
       <p className="mt-2 text-sm text-stone-400" data-testid="arena-opponent-line">
-        Opponent: simple computer (not an AI)
+        {modeLine}
       </p>
       <div className="mt-3">
         <HonestyStrip variant="compact" />
       </div>
-      {liveNotice ? (
+      {opponentMode === "live-fallback" && liveNotice ? (
         <p
           className="mt-3 text-sm text-amber-300"
           role="status"
           data-testid="arena-live-notice"
         >
-          {liveNotice} Falling back to simple computer.
+          {liveNotice} Falling back to simple computer. This turn: simple
+          computer.
         </p>
       ) : null}
 
@@ -131,7 +150,7 @@ export function ArenaView({ store, onLeave, playTurn, liveNotice }: ArenaViewPro
         <div>
           <RobotFigure side="cpu" motion={cpuMotion} />
           <CombatantBars
-            title="Opponent (simple computer)"
+            title={barTitle}
             name={runtime.cpu.displayName}
             health={runtime.cpu.health}
             maxHealth={runtime.cpu.maxHealth}
@@ -239,7 +258,7 @@ function TurnHistory(props: {
   cpuName: string;
 }) {
   if (props.turns.length === 0) {
-    return <p className="mt-8 text-sm text-stone-500">No turns yet.</p>;
+    return <p className="mt-8 text-sm text-stone-400">No turns yet.</p>;
   }
 
   const newestFirst = [...props.turns].reverse();

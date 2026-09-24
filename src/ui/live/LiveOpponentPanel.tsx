@@ -1,18 +1,15 @@
-import { useEffect, useRef, useState } from "react";
 import {
-  DEFAULT_LIVE_MODEL_ID,
   LIVE_MODEL_IDS,
   type LiveModelId
 } from "./live-models";
+import type { LiveOpponentConfig } from "./live-config";
 
-export type LiveOpponentConfig = {
-  enabled: boolean;
-  apiKey: string;
-  modelId: LiveModelId;
-};
+export type { LiveOpponentConfig } from "./live-config";
+export { EMPTY_LIVE_CONFIG } from "./live-config";
 
 export type LiveOpponentPanelProps = {
-  /** Fired on every config change (toggle / key / model). */
+  /** App-owned session; panel only edits via onConfigChange (never wipes on unmount). */
+  config: LiveOpponentConfig;
   onConfigChange: (config: LiveOpponentConfig) => void;
   /** Latest live failure notice from createLivePlayTurn. */
   notice?: string | null;
@@ -23,31 +20,15 @@ const HONESTY =
   "Live AI — not recorded evidence; not on the leaderboard; answers can change.";
 
 /**
- * Opt-in OpenRouter BYOK panel. API key is useState only — cleared on unmount/reload.
+ * Opt-in OpenRouter BYOK panel. Session is owned by App (memory only).
+ * Unmount does not clear the session — App clears on Home / Leave / Load.
  */
 export function LiveOpponentPanel({
+  config,
   onConfigChange,
   notice
 }: LiveOpponentPanelProps): React.JSX.Element {
-  const [enabled, setEnabled] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [modelId, setModelId] = useState<LiveModelId>(DEFAULT_LIVE_MODEL_ID);
-  const onConfigChangeRef = useRef(onConfigChange);
-  onConfigChangeRef.current = onConfigChange;
-
-  useEffect(() => {
-    onConfigChangeRef.current({ enabled, apiKey, modelId });
-  }, [enabled, apiKey, modelId]);
-
-  useEffect(() => {
-    return () => {
-      onConfigChangeRef.current({
-        enabled: false,
-        apiKey: "",
-        modelId: DEFAULT_LIVE_MODEL_ID
-      });
-    };
-  }, []);
+  const { enabled, apiKey, modelId } = config;
 
   return (
     <fieldset
@@ -60,7 +41,9 @@ export function LiveOpponentPanel({
         <input
           type="checkbox"
           checked={enabled}
-          onChange={(e) => setEnabled(e.target.checked)}
+          onChange={(e) =>
+            onConfigChange({ ...config, enabled: e.target.checked })
+          }
           data-testid="live-opponent-toggle"
         />
         <span>Enable live AI opponent (default off)</span>
@@ -88,7 +71,9 @@ export function LiveOpponentPanel({
               type="password"
               autoComplete="off"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={(e) =>
+                onConfigChange({ ...config, apiKey: e.target.value })
+              }
               className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
               data-testid="live-api-key"
             />
@@ -104,7 +89,12 @@ export function LiveOpponentPanel({
             <select
               id="live-model"
               value={modelId}
-              onChange={(e) => setModelId(e.target.value as LiveModelId)}
+              onChange={(e) =>
+                onConfigChange({
+                  ...config,
+                  modelId: e.target.value as LiveModelId
+                })
+              }
               className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
               data-testid="live-model-select"
             >

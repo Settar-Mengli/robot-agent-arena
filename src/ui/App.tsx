@@ -42,7 +42,9 @@ import {
   type PlayTurnFn
 } from "./store/battle-view";
 import { TOUR_KEY } from "./tour/FirstVisitTour";
-import type { LiveOpponentConfig } from "./live/LiveOpponentPanel";
+import { EMPTY_LIVE_CONFIG } from "./live/live-config";
+import type { LiveOpponentConfig } from "./live/live-config";
+import type { OpponentMode } from "./arena/opponent-mode";
 
 const WatchBattleView = lazy(() =>
   import("./arena/WatchBattleView").then((m) => ({
@@ -119,34 +121,31 @@ export function App({ playTurn }: AppProps = {}) {
   const [savePresent, setSavePresent] = useState(() => hasSaveSlot());
   const [tourCloseSignal, setTourCloseSignal] = useState(0);
   const mainHeadingRef = useRef<HTMLElement | null>(null);
-  const prevKind = useRef(view.kind);
-  const [liveConfig, setLiveConfig] = useState<LiveOpponentConfig>({
-    enabled: false,
-    apiKey: "",
-    modelId: "openrouter/free"
-  });
+  const [liveConfig, setLiveConfig] =
+    useState<LiveOpponentConfig>(EMPTY_LIVE_CONFIG);
   const [livePlayTurn, setLivePlayTurn] = useState<PlayTurnFn | undefined>(
     undefined
   );
   const [liveNotice, setLiveNotice] = useState<string | null>(null);
   const [showLivePanel, setShowLivePanel] = useState(false);
 
-  useEffect(() => {
-    if (prevKind.current !== view.kind) {
-      prevKind.current = view.kind;
-      const el =
-        document.getElementById("landing-heading") ??
-        document.getElementById("builder-heading") ??
-        document.getElementById("setup-heading") ??
-        document.getElementById("arena-heading") ??
-        document.getElementById("results-heading") ??
-        document.getElementById("watch-heading") ??
-        document.querySelector("main h1");
-      if (el instanceof HTMLElement) {
-        el.focus();
-      }
-    }
-  }, [view.kind]);
+  function clearLiveSession() {
+    setLiveConfig(EMPTY_LIVE_CONFIG);
+    setLivePlayTurn(undefined);
+    setLiveNotice(null);
+  }
+
+  function deriveOpponentMode(): OpponentMode {
+    const liveActive =
+      liveConfig.enabled &&
+      liveConfig.apiKey.trim() !== "" &&
+      livePlayTurn !== undefined;
+    if (!liveActive) return "cpu";
+    if (liveNotice !== null) return "live-fallback";
+    const source = battle.lastResult?.trace?.source;
+    if (source !== undefined && source !== "llm") return "live-fallback";
+    return "live";
+  }
 
   function refreshSavePresent() {
     setSavePresent(hasSaveSlot());
@@ -203,6 +202,7 @@ export function App({ playTurn }: AppProps = {}) {
   }
 
   function goHome() {
+    clearLiveSession();
     setView({ kind: "home" });
     setGuidedPath(false);
     setNavOpen(false);
@@ -261,6 +261,48 @@ export function App({ playTurn }: AppProps = {}) {
         ))
       : undefined;
 
+  const focusKey =
+    view.kind === "battle" && terminal && outcome !== undefined
+      ? "results"
+      : view.kind === "battle"
+        ? "arena"
+        : view.kind;
+
+  useEffect(() => {
+    const idByKey: Record<string, string> = {
+      home: "landing-heading",
+      builder: "builder-heading",
+      setup: "setup-heading",
+      arena: "arena-heading",
+      results: "results-heading",
+      watch: "watch-heading",
+      lab: "lab-heading",
+      leaderboard: "leaderboard-heading",
+      methodology: "methodology-heading"
+    };
+    const wantedId = idByKey[focusKey];
+    let attempts = 0;
+    let raf = 0;
+    const tryFocus = () => {
+      const el =
+        (wantedId !== undefined
+          ? document.getElementById(wantedId)
+          : null) ?? document.querySelector("main h1");
+      if (el instanceof HTMLElement) {
+        el.focus();
+        return;
+      }
+      if (attempts < 60) {
+        attempts += 1;
+        raf = requestAnimationFrame(tryFocus);
+      }
+    };
+    tryFocus();
+    return () => {
+      cancelAnimationFrame(raf);
+    };
+  }, [focusKey]);
+
   const saveAllowed = saveAllowedForView(view.kind);
 
   function onSave() {
@@ -317,6 +359,7 @@ export function App({ playTurn }: AppProps = {}) {
       setPersistMessage(plainLoadMessage(loaded));
       return;
     }
+    clearLiveSession();
     const slot = loaded.slot;
     const cpu =
       CPU_OPPONENTS.find((o) => o.agentId === slot.draft.opponentId) ??
@@ -494,7 +537,7 @@ export function App({ playTurn }: AppProps = {}) {
               ) : (
                 <button
                   type="button"
-                  className="min-h-11 cursor-not-allowed rounded border border-stone-800 px-3 py-2 text-sm text-stone-500"
+                  className="min-h-11 cursor-not-allowed rounded border border-stone-800 px-3 py-2 text-sm text-stone-400 opacity-60"
                   disabled
                   title={SAVE_DISABLED_TITLE}
                   data-testid="save-slot"
@@ -632,7 +675,9 @@ export function App({ playTurn }: AppProps = {}) {
               showLivePanel={showLivePanel}
               onRevealLivePanel={() => setShowLivePanel(true)}
               liveNotice={liveNotice}
+              liveConfig={liveConfig}
               onLiveConfigChange={setLiveConfig}
+              onHome={goHome}
             />
           ) : null}
 
@@ -642,6 +687,8 @@ export function App({ playTurn }: AppProps = {}) {
               onLeave={onLeaveToHome}
               playTurn={livePlayTurn ?? playTurn}
               liveNotice={liveNotice}
+              opponentMode={deriveOpponentMode()}
+              liveModelId={liveConfig.modelId}
             />
           ) : null}
 
@@ -655,6 +702,8 @@ export function App({ playTurn }: AppProps = {}) {
               finalCpu={runtime!.cpu}
               onRestart={onRestart}
               onReturnHome={onLeaveToHome}
+              opponentMode={deriveOpponentMode()}
+              liveModelId={liveConfig.modelId}
             />
           ) : null}
         </main>
@@ -688,7 +737,9 @@ function BattleSetup(props: {
   showLivePanel: boolean;
   onRevealLivePanel: () => void;
   liveNotice: string | null;
+  liveConfig: LiveOpponentConfig;
   onLiveConfigChange: (config: LiveOpponentConfig) => void;
+  onHome: () => void;
 }) {
   return (
     <section aria-labelledby="setup-heading" data-testid="battle-setup">
@@ -725,7 +776,7 @@ function BattleSetup(props: {
                 />
                 <span>
                   <span className="font-medium">{cpu.displayName}</span>
-                  <span className="block text-sm text-stone-500">
+                  <span className="block text-sm text-stone-400">
                     {cpu.skillIds.map(skillLabel).join(", ")}
                   </span>
                 </span>
@@ -751,16 +802,21 @@ function BattleSetup(props: {
       </div>
 
       {props.showLivePanel ? (
-        <Suspense fallback={<p className="mt-6 text-stone-500">Loading…</p>}>
-          <LiveOpponentPanel
-            onConfigChange={props.onLiveConfigChange}
-            notice={props.liveNotice}
-          />
-        </Suspense>
+        <ViewErrorBoundary onHome={props.onHome}>
+          <Suspense
+            fallback={<p className="mt-6 text-stone-400">Loading…</p>}
+          >
+            <LiveOpponentPanel
+              config={props.liveConfig}
+              onConfigChange={props.onLiveConfigChange}
+              notice={props.liveNotice}
+            />
+          </Suspense>
+        </ViewErrorBoundary>
       ) : (
         <button
           type="button"
-          className="mt-8 min-h-11 text-left text-sm text-stone-500 underline-offset-2 hover:text-stone-300 hover:underline"
+          className="mt-8 min-h-11 text-left text-sm text-stone-400 underline-offset-2 hover:text-stone-300 hover:underline"
           onClick={props.onRevealLivePanel}
           data-testid="reveal-live-opponent"
         >
