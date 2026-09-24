@@ -1,6 +1,7 @@
 /**
  * Fail-closed allowlist for https?:// URLs embedded in dist/assets/*.js.
  * Any URL not matching an explicit allow entry fails the check.
+ * Also verifies connect targets are covered by index.html CSP connect-src.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -15,6 +16,13 @@ export const ALLOWED_URL_PREFIXES = [
   "https://react.dev/errors/",
   "https://localhost",
   "https://openrouter.ai/"
+];
+
+/** Origins that appear in JS but are never fetch/XHR targets (docs, SVG NS). */
+const NON_CONNECT_URL_PREFIXES = [
+  "http://www.w3.org/",
+  "https://react.dev/errors/",
+  "https://localhost"
 ];
 
 /**
@@ -45,8 +53,86 @@ export function findDisallowedDistUrls(dir) {
   return bad;
 }
 
+/**
+ * Parse connect-src hosts from index.html CSP meta (source of truth).
+ * @param {string} html
+ * @returns {string[] | null} hosts including 'self', or null if meta missing
+ */
+export function parseConnectSrcHosts(html) {
+  const m =
+    html.match(
+      /http-equiv=["']Content-Security-Policy["'][\s\S]*?content="([^"]+)"/i
+    ) ??
+    html.match(
+      /http-equiv=["']Content-Security-Policy["'][\s\S]*?content='([^']+)'/i
+    ) ??
+    html.match(
+      /content="([^"]+)"[\s\S]*?http-equiv=["']Content-Security-Policy["']/i
+    );
+  if (!m) return null;
+  const connect = m[1].match(/connect-src\s+([^;]+)/i);
+  if (!connect) return null;
+  return connect[1].trim().split(/\s+/).filter(Boolean);
+}
+
+/**
+ * @param {string} url
+ * @param {string[]} connectHosts from parseConnectSrcHosts
+ * @returns {boolean}
+ */
+export function isCoveredByConnectSrc(url, connectHosts) {
+  if (NON_CONNECT_URL_PREFIXES.some((p) => url === p || url.startsWith(p))) {
+    return true;
+  }
+  const originMatch = url.match(/^(https?:\/\/[^/?#]+)/);
+  if (!originMatch) return false;
+  const origin = originMatch[1];
+  return connectHosts.some((h) => {
+    if (h === "'self'") return false;
+    return origin === h || url.startsWith(h + "/") || url === h;
+  });
+}
+
+/**
+ * Every https? connect candidate in dist/assets must be covered by CSP connect-src.
+ * @param {string} assetsDir
+ * @param {string} indexHtmlPath
+ * @returns {string[]}
+ */
+export function findConnectSrcGaps(assetsDir, indexHtmlPath = "index.html") {
+  if (!fs.existsSync(indexHtmlPath)) {
+    return [`missing ${indexHtmlPath}`];
+  }
+  const html = fs.readFileSync(indexHtmlPath, "utf8");
+  const hosts = parseConnectSrcHosts(html);
+  if (!hosts) {
+    return ["index.html missing CSP connect-src"];
+  }
+  if (!fs.existsSync(assetsDir)) {
+    return [`missing directory ${assetsDir}`];
+  }
+  /** @type {string[]} */
+  const bad = [];
+  for (const f of fs.readdirSync(assetsDir)) {
+    if (!f.endsWith(".js")) continue;
+    const t = fs.readFileSync(path.join(assetsDir, f), "utf8");
+    const re = /https?:\/\/[^"'\\\s)`]+/g;
+    let m;
+    while ((m = re.exec(t))) {
+      const url = m[0];
+      if (!isCoveredByConnectSrc(url, hosts)) {
+        bad.push(`${f} connect-src gap ${url}`);
+      }
+    }
+  }
+  return bad;
+}
+
 export function checkDistUrls(dir = "dist/assets") {
-  const bad = findDisallowedDistUrls(dir);
+  const bad = [
+    ...findDisallowedDistUrls(dir),
+    ...findConnectSrcGaps(dir, "index.html")
+  ];
   if (bad.length) {
     console.error(bad.join("\n"));
     return 1;

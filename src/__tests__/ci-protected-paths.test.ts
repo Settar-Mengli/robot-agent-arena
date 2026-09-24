@@ -33,12 +33,41 @@ const PROTECTED_PATHS = [
   "package-lock.json"
 ] as const;
 
+const WORKFLOWS = [
+  ".github/workflows/ci.yml",
+  ".github/workflows/pages.yml"
+] as const;
+
+const SHA40 = /^[a-f0-9]{40}$/;
+
 describe("CI protected-path list", () => {
   it("ci.yml lists every protected path and each exists on disk", () => {
     const yml = readFileSync(".github/workflows/ci.yml", "utf8");
     for (const p of PROTECTED_PATHS) {
       expect(yml, `ci.yml missing ${p}`).toContain(p);
       expect(existsSync(p), `missing on disk: ${p}`).toBe(true);
+    }
+  });
+});
+
+describe("GitHub Actions SHA pins", () => {
+  it("every uses: line is pinned to a 40-char commit SHA", () => {
+    for (const file of WORKFLOWS) {
+      const yml = readFileSync(file, "utf8");
+      const usesLines = yml
+        .split(/\r?\n/)
+        .map((line, i) => ({ line, n: i + 1 }))
+        .filter(({ line }) => /^\s*-\s*uses:\s*\S+/.test(line));
+      expect(usesLines.length, `${file} has no uses:`).toBeGreaterThan(0);
+      for (const { line, n } of usesLines) {
+        const m = line.match(/uses:\s*([^@\s]+)@([^\s#]+)/);
+        expect(m, `${file}:${n} unparseable uses: ${line}`).not.toBeNull();
+        const sha = m![2];
+        expect(
+          SHA40.test(sha),
+          `${file}:${n} not 40-char SHA: ${sha}`
+        ).toBe(true);
+      }
     }
   });
 });

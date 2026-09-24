@@ -9,6 +9,36 @@ export type CombatantBarsProps = {
   motion?: "idle" | "hit" | "defend";
 };
 
+/** SVG bar fill — presentation attributes, not CSS style= (CSP style-src 'self'). */
+function BarFill(props: {
+  pct: number;
+  fill: string;
+  label: string;
+  now: number;
+  max: number;
+}): React.JSX.Element {
+  const width = Math.max(0, Math.min(100, props.pct));
+  return (
+    <div
+      className="h-3 overflow-hidden rounded bg-stone-800"
+      role="progressbar"
+      aria-valuenow={props.now}
+      aria-valuemin={0}
+      aria-valuemax={props.max}
+      aria-label={props.label}
+    >
+      <svg
+        className="block h-full w-full"
+        viewBox="0 0 100 12"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <rect x="0" y="0" width={width} height="12" fill={props.fill} />
+      </svg>
+    </div>
+  );
+}
+
 export function CombatantBars(props: CombatantBarsProps): React.JSX.Element {
   const hpPct =
     props.maxHealth <= 0
@@ -33,19 +63,13 @@ export function CombatantBars(props: CombatantBarsProps): React.JSX.Element {
               {props.health} / {props.maxHealth}
             </span>
           </div>
-          <div
-            className="h-3 overflow-hidden rounded bg-stone-800"
-            role="progressbar"
-            aria-valuenow={props.health}
-            aria-valuemin={0}
-            aria-valuemax={props.maxHealth}
-            aria-label={`${props.name} health`}
-          >
-            <div
-              className="h-full bg-emerald-600 transition-[width] duration-300 motion-reduce:transition-none"
-              style={{ width: `${hpPct}%` }}
-            />
-          </div>
+          <BarFill
+            pct={hpPct}
+            fill="#059669"
+            label={`${props.name} health`}
+            now={props.health}
+            max={props.maxHealth}
+          />
         </div>
         <div>
           <div className="mb-1 flex justify-between text-xs text-stone-400">
@@ -54,19 +78,13 @@ export function CombatantBars(props: CombatantBarsProps): React.JSX.Element {
               {props.energy} / {props.maxEnergy}
             </span>
           </div>
-          <div
-            className="h-3 overflow-hidden rounded bg-stone-800"
-            role="progressbar"
-            aria-valuenow={props.energy}
-            aria-valuemin={0}
-            aria-valuemax={props.maxEnergy}
-            aria-label={`${props.name} energy`}
-          >
-            <div
-              className="h-full bg-sky-600 transition-[width] duration-300 motion-reduce:transition-none"
-              style={{ width: `${enPct}%` }}
-            />
-          </div>
+          <BarFill
+            pct={enPct}
+            fill="#0284c7"
+            label={`${props.name} energy`}
+            now={props.energy}
+            max={props.maxEnergy}
+          />
         </div>
         <p className="text-sm text-stone-300">Defense {props.defense}</p>
       </div>

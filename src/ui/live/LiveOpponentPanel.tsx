@@ -77,6 +77,10 @@ export function LiveOpponentPanel({
               className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
               data-testid="live-api-key"
             />
+            <p className="mt-2 text-sm text-stone-400" role="note">
+              Tip: use a separate OpenRouter key with a low credit limit. The
+              key stays in this tab&apos;s memory and is never saved.
+            </p>
           </div>
 
           <div>
