@@ -64,7 +64,7 @@ export function ResultsView({
       </p>
 
       <div className="mt-3">
-        <HonestyStrip variant="compact" />
+        <HonestyStrip variant="compact" opponentMode={opponentMode} />
       </div>
 
       <div
