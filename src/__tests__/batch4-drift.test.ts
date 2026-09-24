@@ -110,7 +110,9 @@ function rebuildLeaderboard(snapshots: readonly DecisionSnapshot[]): unknown {
 }
 
 describe("batch4 drift", () => {
-  it("Phase 2 hard mode: summary + leaderboard byte-equality; groq flip not separable", () => {
+  it(
+    "Phase 2 hard mode: summary + leaderboard byte-equality; groq flip not separable",
+    () => {
     expect(existsSync(MARKER), "phase2 marker required").toBe(true);
     expect(existsSync(SUMMARY), "batch4 summary required").toBe(true);
     expect(existsSync(UI_SUMMARY), "UI batch4 summary required").toBe(true);
@@ -163,5 +165,7 @@ describe("batch4 drift", () => {
     expect(groqFlip?.separableFromNoise).toBe(false);
     expect(groqNoise?.flipRateVariantVsBase).toBeCloseTo(1 / 35);
     expect(groqNoise?.separable).toBe(false);
-  });
+  },
+  60_000
+  );
 });

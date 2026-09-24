@@ -1,26 +1,74 @@
-# Demo video script (optional recording)
+# Demo video script (operator voice-over)
 
-**Must-ship:** this script. **Optional:** the video file itself.
-
-**Tooling:** OBS Studio (free) or Windows Game Bar.
+**Must-ship:** this script. **Optional:** the recorded file.
 
 **URL:** https://settar-mengli.github.io/robot-agent-arena/  
-**Local:** `npm run preview:pages`
+**Local:** `npm run preview:pages` after `VITE_BASE=/robot-agent-arena/ npm run build`
 
-## Shot list (≤5 minutes)
+**Honesty (say these out loud at least once):**
+- This is a **static demo** of **recorded** measurements — not a live model ranking.
+- Batch 4’s scoped result: on **this** robot battle, **this** test set, **these** two models, rewording / rumor / extra facts did **not** separate choices; one model’s same-question wobble was **1/35**.
+- Arena **live AI** is **opt-in** with **your** OpenRouter key (memory only). Watch, Lab, and leaderboard stay **recorded**.
 
-1. **Title (5s)** — AGENT ARENA; subtitle: recorded evidence; Arena optional opt-in live AI.
-2. **Builder (30s)** — Open Builder; show modules/skills; Validate; Continue to battle.
-3. **Arena (45s)** — Start greedy CPU battle (or mention optional BYOK live AI); show turns resolving; reach results.
-4. **Decision Lab Browse (40s)** — Open Lab; select suite; filter/browse cases (recorded-only).
-5. **Inspector (40s)** — Open a case; show oracle `best` ids / ties; show greedy vs LLM arms.
-6. **Compare (50s)** — Show cohort n, exclusions, Wilson/bootstrap CIs, insufficient-evidence banner; stress no universal ranking.
-7. **Honesty close (20s)** — Lab / Challenge / Watch / leaderboard are recorded-only; Arena live AI is optional opt-in (user OpenRouter key, memory-only).
-8. **Reproduce (20s)** — Flash terminal commands from case-study.md (replay + lab:pack).
+---
 
-## Narration bullets
+## Full cut (3–4 minutes)
 
-- Exact oracle, not vibes.
-- Negative/honest results are first-class (D-024 falsified).
-- Small n → say insufficient evidence.
-- Arena BYOK live AI is optional and memory-only; Lab surfaces stay recorded-only.
+| # | Time | On-screen actions | Narration (one sentence) |
+|---|------|-------------------|---------------------------|
+| 1 | 0:00–0:20 | Landing: brand + honesty strip visible; do not open Live yet | “AGENT ARENA measures robot-agent decisions against an exact best answer — recorded evidence first.” |
+| 2 | 0:20–0:50 | Click **Can you beat the AI?** → Challenge; pick a skill; Show answer; Next once | “In Challenge you guess the best move against a fixed plan — the lab already measured it.” |
+| 3 | 0:50–1:20 | Nav **Watch a recorded AI battle**; step Next 2–3 turns; show honesty line | “Watch replays a recorded fight — not live AI.” |
+| 4 | 1:20–1:55 | Nav **Decision Lab** → Advanced on → **Compare** briefly, then **Diagnostics** one case | “Advanced Lab Compare and Diagnostics show Wilson intervals and when evidence is too thin to rank.” |
+| 5 | 1:55–2:25 | Nav **Methodology**; scroll to Batch 4 / null-result lines | “Batch 4: on this suite, those prompt twists did not separate the models — a scoped null result, not a universal claim.” |
+| 6 | 2:25–2:50 | Nav **Leaderboard**; point at overlap / “can’t be separated” grouping copy | “The leaderboard groups rates whose intervals still overlap — we refuse a fake ranking.” |
+| 7 | 2:50–3:25 | **Build** → quick validate → Setup → reveal **Live AI** → enable (blur/cover the key field) → show live honesty line → Start → one turn → Leave | “Optional live AI uses your key in memory only; labels say it is not recorded evidence.” |
+| 8 | 3:25–3:40 | One line on Methodology or README: second environment (Resonance Seal) is headless / keyless | “A second environment proves the same measurement contract without the robot battle UI.” |
+| 9 | 3:40–4:00 | Back to landing; show repo URL in browser or end card | “Code and committed fixtures: github.com/Settar-Mengli/robot-agent-arena — measure, don’t overclaim.” |
+
+---
+
+## LinkedIn cut (60–90 seconds)
+
+1. Landing honesty (5s)  
+2. Challenge pick + reveal (20s)  
+3. Watch one turn (15s)  
+4. Methodology null-result sentence on screen (15s)  
+5. Leaderboard overlap groups (15s)  
+6. End card: repo + “recorded ≠ live” (10s)  
+
+Skip Live AI and Lab Advanced in the short cut unless you have time.
+
+---
+
+## Recording checklist
+
+**OBS**
+- Canvas **1920×1080**, **30 fps**, MP4 (x264) or MKV  
+- Display capture of one browser window only  
+- Mic: separate track if possible  
+
+**Browser**
+- Zoom **100%**; hide bookmarks bar; use a clean profile or Incognito  
+- `localStorage.clear()` then reload once so the first-visit tour can run **or** set tour seen if you want a quiet take  
+- Pages URL or local preview with the `/robot-agent-arena/` base  
+- For Live AI: use a throwaway key; **blur** the password field in post or cover with a sticky note  
+
+**Voice (Audacity)**
+- Record VO in a quiet room after the picture lock  
+- Soft pop filter; normalize; leave 0.3s gaps between beats  
+
+---
+
+## Screenshot shot-list (README, 6–8)
+
+1. **Landing** — honesty strip expanded (More open)  
+2. **Challenge** — answer revealed on one situation  
+3. **Watch** — mid-match turn with recorded honesty line  
+4. **Lab Compare** — Advanced on, two variants, insufficient-evidence or overlap visible  
+5. **Methodology** — Batch 4 scoped null-result paragraph in frame  
+6. **Leaderboard** — heldout-ext suite with overlap grouping visible  
+7. **Battle setup + Live panel** — live enabled; key field blurred; live honesty strip  
+8. **Arena mid-fight** — opponent line shows live AI (or this-turn computer if fallback)  
+
+Do not crop away honesty labels.

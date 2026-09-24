@@ -12,6 +12,22 @@ describe("decision-lab stats", () => {
     expect(w.high).toBeCloseTo(0.5962, 3);
   });
 
+  it("Wilson bounds stay in [0, 1] on edge counts", () => {
+    for (const [s, n] of [
+      [5, 5],
+      [0, 30],
+      [30, 30],
+      [0, 0]
+    ] as const) {
+      const w = wilsonInterval(s, n);
+      expect(Number.isFinite(w.low)).toBe(true);
+      expect(Number.isFinite(w.high)).toBe(true);
+      expect(w.low).toBeGreaterThanOrEqual(0);
+      expect(w.high).toBeLessThanOrEqual(1);
+      expect(w.low).toBeLessThanOrEqual(w.high);
+    }
+  });
+
   it("insufficientEvidence when n < 30", () => {
     expect(
       insufficientEvidence({ n: 13, wilson: wilsonInterval(2, 13) })

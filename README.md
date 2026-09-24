@@ -98,6 +98,14 @@ npm run coverage
 
 The engine is covered by a comprehensive Vitest suite, including seam-parity tests that prove the interactive turn path matches full-match simulation. Agent/inference tests inject mocks (no live network). GitHub Actions CI runs `typecheck`, `lint`, `coverage`, and `eval:replay -- --suite all` on every pull request and on pushes to `main`.
 
+**Issue #28 / `SNAPSHOT_DRIFT`:** drift-guard tests run only when `SNAPSHOT_DRIFT=1` (CI drift job). If that variable is left set in your shell, plain `npm test` will execute the long regenerators and can hit vitest `Timeout calling "onTaskUpdate"` worker errors even when assertions pass. Clear it first:
+
+```powershell
+Remove-Item Env:SNAPSHOT_DRIFT -ErrorAction SilentlyContinue
+```
+
+Vitest prints a startup warning when `SNAPSHOT_DRIFT=1` outside CI.
+
 For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Status / roadmap (D-033 — 11 batches)

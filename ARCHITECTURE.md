@@ -46,6 +46,8 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 
 **UI (through Batch 4 / D-051):** React, Tailwind, and Zustand. App entry is `index.html` → `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, one-slot save, **leaderboard**, **methodology**, and **OpenRouter BYOK** (`src/ui/live/**`, Arena opt-in) live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs and Batch 4 summaries are static JSON; no Node eval harness in the browser. Live keys stay in memory only and never appear on the leaderboard.
 
+**Browser inference providers:** the Vite client build aliases `src/inference/providers.ts` → `providers.browser.ts` (OpenRouter only) so `dist` does not embed Groq/Mistral/Gemini/Cloudflare base URLs. The Node recorder and Vitest keep the full provider table. Only OpenRouter is ever called from the Arena live path.
+
 ## Environment interface (A3 / D-033 batch 5 → Batch 5 / D-052)
 
 The measurement core depends on the **environment interface** in `src/env/`.

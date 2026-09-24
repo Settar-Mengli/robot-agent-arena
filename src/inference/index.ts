@@ -5,7 +5,7 @@ export {
   DEFAULT_MAX_RETRIES,
   DEFAULT_TIMEOUT_MS,
   resolveActiveProviders
-} from "./providers";
+} from "./providers-active";
 export type {
   AttemptInfo,
   ChatMessage,

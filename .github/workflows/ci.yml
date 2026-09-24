@@ -49,6 +49,14 @@ jobs:
               src/ui/data/leaderboard.v1.json \
               evals/env-suites/resonance-seal/snapshots.resonance-seal.v1.json \
               evals/out-committed/resonance-seal.baselines.v1.json \
+              evals/out-committed/adversarial.baselines.json \
+              evals/out-committed/adversarial.heldout-ext.baselines.json \
+              evals/out-committed/batch4.phase2.marker.json \
+              evals/out-committed/bench.live-profile.json \
+              evals/out-committed/diagnostics.summary.json \
+              evals/out-committed/discriminate.summary.json \
+              src/ui/arena/pack/schema.ts \
+              src/ui/data/quickstart-robot.ts \
               src/__tests__/env-robot.test.ts \
               src/__tests__/eval-snapshots.test.ts \
               src/__tests__/env-differential.test.ts \
@@ -59,6 +67,52 @@ jobs:
           else
             echo "push event: skipping protected-path PR-base check (no pull_request.base.sha)"
           fi
+      - name: Dist URL allowlist (OpenRouter API only)
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const ALLOW_NON_API = [
+            "http://www.w3.org/2000/svg",
+            "http://www.w3.org/1999/xlink",
+            "http://www.w3.org/1998/Math/MathML",
+            "http://www.w3.org/XML/1998/namespace",
+            "https://react.dev/errors/",
+            "https://localhost"
+          ];
+          const ALLOW_API_PREFIXES = ["https://openrouter.ai/"];
+          const BLOCK_SUBSTRINGS = [
+            "api.groq.com",
+            "api.mistral.ai",
+            "generativelanguage.googleapis.com",
+            "api.cloudflare.com"
+          ];
+          const dir = "dist/assets";
+          let bad = [];
+          for (const f of fs.readdirSync(dir)) {
+            if (!f.endsWith(".js")) continue;
+            const t = fs.readFileSync(path.join(dir, f), "utf8");
+            for (const b of BLOCK_SUBSTRINGS) {
+              if (t.includes(b)) bad.push(`${f} contains ${b}`);
+            }
+            const re = /https?:\/\/[^"'\\\s)`]+/g;
+            let m;
+            while ((m = re.exec(t))) {
+              const url = m[0];
+              if (ALLOW_NON_API.some((a) => url === a || url.startsWith(a))) continue;
+              if (ALLOW_API_PREFIXES.some((a) => url.startsWith(a))) continue;
+              // templated cloudflare account URLs must not appear
+              if (/^https?:\/\//.test(url) && /api\./.test(url)) {
+                bad.push(`${f} unexpected API URL ${url}`);
+              }
+            }
+          }
+          if (bad.length) {
+            console.error(bad.join("\n"));
+            process.exit(1);
+          }
+          console.log("dist URL allowlist OK");
+          NODE
       - run: npm run coverage
       - run: npm run eval:replay -- --suite all --models gemini:gemini-3.5-flash-lite
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial --variants base,grounded,freetext --max-matches 0 --models groq:openai/gpt-oss-20b
