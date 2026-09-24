@@ -55,6 +55,18 @@ export interface PlayAgentTurnOptions {
   json?: boolean;
   /** When "freetext", uses agent-v5-freetext prompt bytes (not agent-v1). */
   responseFormat?: "json" | "freetext";
+  /**
+   * Batch 4 robustness arms. Absent/"default" keeps agent-v1 path bytes.
+   * "base-repeat" is message-identical to base (distinct fixture via setRepeat).
+   */
+  promptVariant?:
+    | "default"
+    | "base-repeat"
+    | "perturb"
+    | "advctx"
+    | "info-partial";
+  /** Snapshot id for deterministic perturb option shuffle. */
+  snapshotId?: string;
 }
 
 export interface DecisionTrace {

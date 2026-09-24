@@ -95,7 +95,7 @@ export function DecisionLabView({
   if (!loaded.ok) {
     return (
       <div className="p-6 text-red-300" role="alert">
-        Decision Lab failed to load: {loaded.error}
+        Couldn't load the Lab.
       </div>
     );
   }

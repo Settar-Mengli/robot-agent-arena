@@ -1,7 +1,15 @@
 import type { AgentConfig, BattleOutcome, BattleRuntime } from "../../engine";
 import type { SaveSlotV1 } from "./save-slot";
 
-export type SaveViewKind = "home" | "builder" | "setup" | "battle" | "watch" | "lab";
+export type SaveViewKind =
+  | "home"
+  | "builder"
+  | "setup"
+  | "battle"
+  | "watch"
+  | "lab"
+  | "leaderboard"
+  | "methodology";
 
 export type BuildSavePayloadInput = {
   viewKind: SaveViewKind;

@@ -21,13 +21,15 @@ export type ArenaViewProps = {
   onLeave: () => void;
   /** Optional test seam; defaults to greedy CPU play. */
   playTurn?: PlayTurnFn;
+  /** Opt-in live opponent failure notice (fallback to simple computer). */
+  liveNotice?: string | null;
 };
 
 function energyCost(skillId: SkillId): number | undefined {
   return MVP_SKILL_CATALOG.skills.find((s) => s.skillId === skillId)?.energyCost;
 }
 
-export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
+export function ArenaView({ store, onLeave, playTurn, liveNotice }: ArenaViewProps) {
   const state = useSyncExternalStore(store.subscribe, store.getState, store.getState);
   const runtime = state.runtime;
   const greedy = playTurn ?? createGreedyPlayTurn();
@@ -97,12 +99,21 @@ export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
           {inFlight ? " · resolving…" : null}
         </p>
       </div>
-      <p className="mt-2 text-sm text-stone-500" data-testid="arena-opponent-line">
+      <p className="mt-2 text-sm text-stone-400" data-testid="arena-opponent-line">
         Opponent: simple computer (not an AI)
       </p>
       <div className="mt-3">
         <HonestyStrip variant="compact" />
       </div>
+      {liveNotice ? (
+        <p
+          className="mt-3 text-sm text-amber-300"
+          role="status"
+          data-testid="arena-live-notice"
+        >
+          {liveNotice} Falling back to simple computer.
+        </p>
+      ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div>
@@ -120,7 +131,7 @@ export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
         <div>
           <RobotFigure side="cpu" motion={cpuMotion} />
           <CombatantBars
-            title="Foe (simple computer)"
+            title="Opponent (simple computer)"
             name={runtime.cpu.displayName}
             health={runtime.cpu.health}
             maxHealth={runtime.cpu.maxHealth}
@@ -159,7 +170,7 @@ export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
                   type="button"
                   className={
                     unaffordable
-                      ? "min-h-11 rounded border border-amber-900/60 bg-stone-900/40 px-4 py-2 text-left font-medium text-stone-500 hover:bg-stone-900 disabled:cursor-not-allowed"
+                      ? "min-h-11 rounded border border-amber-900/60 bg-stone-900/40 px-4 py-2 text-left font-medium text-stone-400 hover:bg-stone-900 disabled:cursor-not-allowed"
                       : "min-h-11 rounded border border-stone-600 bg-stone-900 px-4 py-2 text-left font-medium text-stone-100 hover:border-stone-500 hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
                   }
                   disabled={actionsDisabled}
@@ -173,14 +184,14 @@ export function ArenaView({ store, onLeave, playTurn }: ArenaViewProps) {
                   <span
                     className={
                       unaffordable
-                        ? "mt-1 block text-xs font-normal text-stone-600"
+                        ? "mt-1 block text-xs font-normal text-stone-400"
                         : "mt-1 block text-xs font-normal text-stone-400"
                     }
                   >
                     {hint}
                   </span>
                   {unaffordable ? (
-                    <span className="mt-1 block text-xs font-normal text-amber-700/90">
+                    <span className="mt-1 block text-xs font-normal text-amber-200">
                       Not enough energy — may switch to a safe stabilize
                     </span>
                   ) : null}
@@ -238,8 +249,7 @@ function TurnHistory(props: {
       <h2 className="text-sm font-medium text-stone-300">Battle log</h2>
       <ol
         className="mt-3 space-y-3 text-sm text-stone-300"
-        aria-live="polite"
-        data-testid="arena-log-live"
+        data-testid="arena-log"
       >
         {newestFirst.map((turn) => (
           <li

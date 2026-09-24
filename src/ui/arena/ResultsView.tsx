@@ -63,7 +63,7 @@ export function ResultsView({
           <p className="mt-1 text-sm text-stone-400">Winner: {winnerName}</p>
         ) : null}
         <p className="mt-2 text-sm text-stone-300" data-testid="final-hp">
-          Final HP: you {finalPlayer.health}/{finalPlayer.maxHealth} · foe{" "}
+          Final HP: you {finalPlayer.health}/{finalPlayer.maxHealth} · opponent{" "}
           {finalCpu.health}/{finalCpu.maxHealth}
         </p>
         <p className="mt-1 text-sm text-stone-500">{turns.length} turns</p>
@@ -78,7 +78,7 @@ export function ResultsView({
           <p className="mt-2 text-sm text-stone-500">No turns recorded.</p>
         ) : (
           <ol className="mt-3 space-y-3 text-sm text-stone-300">
-            {turns.map((turn) => (
+            {[...turns].reverse().map((turn) => (
               <li
                 key={turn.turn}
                 className="rounded border border-stone-800 px-3 py-2"
@@ -120,7 +120,7 @@ function formatResult(result: BattleOutcome["result"]): string {
     case "player-victory":
       return "You won";
     case "cpu-victory":
-      return "Foe won";
+      return "Opponent won";
     case "draw":
       return "Draw";
     default: {

@@ -7,6 +7,8 @@ export const FORBIDDEN_DEFAULT_PATH: readonly RegExp[] = [
   /\bregret\b/i,
   /\boracle\b/i,
   /\bschema\b/i,
+  /\bquota\b/i,
+  /\bserialize\b/i,
   /\bpack\b/i,
   /\barms\b/i,
   /\bpolicy\b/i,
@@ -19,7 +21,11 @@ export const FORBIDDEN_DEFAULT_PATH: readonly RegExp[] = [
   /\bn\s*=/i,
   /\bdeterministic\b/i,
   /\bfictional\b/i,
-  /\d+\.\d*00\b/
+  /\d+\.\d*00\b/,
+  /\bfoe\b/i,
+  /\bSeed\b/,
+  /agent around its declared/i,
+  /declared purpose/i
 ] as const;
 
 export function findForbiddenTechnicalText(text: string): string | null {

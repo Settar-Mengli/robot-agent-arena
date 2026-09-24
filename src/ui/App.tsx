@@ -30,6 +30,10 @@ import {
   SAVE_SLOT_KEY
 } from "./persist/save-slot";
 import {
+  plainLoadMessage,
+  plainSaveMessage
+} from "./persist/persist-messages";
+import {
   buildSavePayload,
   saveAllowedForView
 } from "./persist/build-save-payload";
@@ -38,6 +42,7 @@ import {
   type PlayTurnFn
 } from "./store/battle-view";
 import { TOUR_KEY } from "./tour/FirstVisitTour";
+import type { LiveOpponentConfig } from "./live/LiveOpponentPanel";
 
 const WatchBattleView = lazy(() =>
   import("./arena/WatchBattleView").then((m) => ({
@@ -49,6 +54,21 @@ const DecisionLabView = lazy(() =>
     default: m.DecisionLabView
   }))
 );
+const LiveOpponentPanel = lazy(() =>
+  import("./live/LiveOpponentPanel").then((m) => ({
+    default: m.LiveOpponentPanel
+  }))
+);
+const LeaderboardView = lazy(() =>
+  import("./leaderboard/LeaderboardView").then((m) => ({
+    default: m.LeaderboardView
+  }))
+);
+const MethodologyView = lazy(() =>
+  import("./methodology/MethodologyView").then((m) => ({
+    default: m.MethodologyView
+  }))
+);
 
 export type AppView =
   | { kind: "home" }
@@ -56,7 +76,9 @@ export type AppView =
   | { kind: "setup" }
   | { kind: "battle" }
   | { kind: "watch"; matchId?: string }
-  | { kind: "lab" };
+  | { kind: "lab" }
+  | { kind: "leaderboard" }
+  | { kind: "methodology" };
 
 const DEFAULT_SEED = "arena-1";
 const SAVE_DISABLED_TITLE =
@@ -98,6 +120,16 @@ export function App({ playTurn }: AppProps = {}) {
   const [tourCloseSignal, setTourCloseSignal] = useState(0);
   const mainHeadingRef = useRef<HTMLElement | null>(null);
   const prevKind = useRef(view.kind);
+  const [liveConfig, setLiveConfig] = useState<LiveOpponentConfig>({
+    enabled: false,
+    apiKey: "",
+    modelId: "openrouter/free"
+  });
+  const [livePlayTurn, setLivePlayTurn] = useState<PlayTurnFn | undefined>(
+    undefined
+  );
+  const [liveNotice, setLiveNotice] = useState<string | null>(null);
+  const [showLivePanel, setShowLivePanel] = useState(false);
 
   useEffect(() => {
     if (prevKind.current !== view.kind) {
@@ -123,8 +155,15 @@ export function App({ playTurn }: AppProps = {}) {
   function beginBattle(
     player: AgentConfig,
     cpu: AgentConfig,
-    battleSeed: Seed
+    battleSeed: Seed,
+    turnFn?: PlayTurnFn
   ) {
+    if (turnFn !== undefined) {
+      setLivePlayTurn(() => turnFn);
+    } else {
+      setLivePlayTurn(undefined);
+    }
+    setLiveNotice(null);
     const runtime = startBattle(player, cpu, battleSeed);
     store.getState().resetBattle(runtime);
     setView({ kind: "battle" });
@@ -135,14 +174,32 @@ export function App({ playTurn }: AppProps = {}) {
     setView({ kind: "setup" });
   }
 
-  function onStartFromSetup() {
+  async function onStartFromSetup() {
     if (playerConfig === null) return;
-    beginBattle(playerConfig, opponent, parseSeed(seed));
+    let turnFn: PlayTurnFn | undefined = playTurn;
+    if (liveConfig.enabled && liveConfig.apiKey.trim() !== "") {
+      const { createLivePlayTurn } = await import("./live/createLivePlayTurn");
+      turnFn = createLivePlayTurn({
+        apiKey: liveConfig.apiKey.trim(),
+        modelId: liveConfig.modelId,
+        onNotice: (message) => setLiveNotice(message)
+      });
+    }
+    beginBattle(playerConfig, opponent, parseSeed(seed), turnFn);
   }
 
-  function onRestart() {
+  async function onRestart() {
     if (playerConfig === null) return;
-    beginBattle(playerConfig, opponent, parseSeed(seed));
+    let turnFn: PlayTurnFn | undefined = playTurn;
+    if (liveConfig.enabled && liveConfig.apiKey.trim() !== "") {
+      const { createLivePlayTurn } = await import("./live/createLivePlayTurn");
+      turnFn = createLivePlayTurn({
+        apiKey: liveConfig.apiKey.trim(),
+        modelId: liveConfig.modelId,
+        onNotice: (message) => setLiveNotice(message)
+      });
+    }
+    beginBattle(playerConfig, opponent, parseSeed(seed), turnFn);
   }
 
   function goHome() {
@@ -247,11 +304,7 @@ export function App({ playTurn }: AppProps = {}) {
       inFlight: battle.status === "inFlight"
     });
     if (!result.ok) {
-      setPersistMessage(
-        result.reason === "in_flight"
-          ? "Cannot save while a turn is resolving."
-          : `Save failed (${result.reason}).`
-      );
+      setPersistMessage(plainSaveMessage(result));
       return;
     }
     setPersistMessage("Saved to this device.");
@@ -261,9 +314,7 @@ export function App({ playTurn }: AppProps = {}) {
   function onLoad() {
     const loaded = loadSlot();
     if (!loaded.ok) {
-      setPersistMessage(
-        loaded.reason === "empty" ? "No save slot." : loaded.message
-      );
+      setPersistMessage(plainLoadMessage(loaded));
       return;
     }
     const slot = loaded.slot;
@@ -400,6 +451,28 @@ export function App({ playTurn }: AppProps = {}) {
             >
               Lab
             </button>
+            <button
+              type="button"
+              className={navBtn(view.kind === "leaderboard")}
+              onClick={() => {
+                setView({ kind: "leaderboard" });
+                setNavOpen(false);
+              }}
+              data-testid="nav-leaderboard"
+            >
+              Leaderboard
+            </button>
+            <button
+              type="button"
+              className={navBtn(view.kind === "methodology")}
+              onClick={() => {
+                setView({ kind: "methodology" });
+                setNavOpen(false);
+              }}
+              data-testid="nav-methodology"
+            >
+              Methodology
+            </button>
 
             <div
               className={
@@ -421,7 +494,7 @@ export function App({ playTurn }: AppProps = {}) {
               ) : (
                 <button
                   type="button"
-                  className="min-h-11 cursor-not-allowed rounded border border-stone-800 px-3 py-2 text-sm text-stone-600"
+                  className="min-h-11 cursor-not-allowed rounded border border-stone-800 px-3 py-2 text-sm text-stone-500"
                   disabled
                   title={SAVE_DISABLED_TITLE}
                   data-testid="save-slot"
@@ -510,6 +583,22 @@ export function App({ playTurn }: AppProps = {}) {
             </ViewErrorBoundary>
           ) : null}
 
+          {view.kind === "leaderboard" ? (
+            <ViewErrorBoundary onHome={goHome}>
+              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
+                <LeaderboardView onHome={goHome} />
+              </Suspense>
+            </ViewErrorBoundary>
+          ) : null}
+
+          {view.kind === "methodology" ? (
+            <ViewErrorBoundary onHome={goHome}>
+              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
+                <MethodologyView onHome={goHome} />
+              </Suspense>
+            </ViewErrorBoundary>
+          ) : null}
+
           {view.kind === "watch" ? (
             <ViewErrorBoundary onHome={goHome}>
               <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
@@ -536,8 +625,14 @@ export function App({ playTurn }: AppProps = {}) {
               seed={seed}
               onOpponentChange={setOpponent}
               onSeedChange={setSeed}
-              onStart={onStartFromSetup}
+              onStart={() => {
+                void onStartFromSetup();
+              }}
               onBack={() => setView({ kind: "builder" })}
+              showLivePanel={showLivePanel}
+              onRevealLivePanel={() => setShowLivePanel(true)}
+              liveNotice={liveNotice}
+              onLiveConfigChange={setLiveConfig}
             />
           ) : null}
 
@@ -545,7 +640,8 @@ export function App({ playTurn }: AppProps = {}) {
             <ArenaView
               store={store}
               onLeave={onLeaveToHome}
-              playTurn={playTurn}
+              playTurn={livePlayTurn ?? playTurn}
+              liveNotice={liveNotice}
             />
           ) : null}
 
@@ -589,6 +685,10 @@ function BattleSetup(props: {
   onSeedChange: (seed: string) => void;
   onStart: () => void;
   onBack: () => void;
+  showLivePanel: boolean;
+  onRevealLivePanel: () => void;
+  liveNotice: string | null;
+  onLiveConfigChange: (config: LiveOpponentConfig) => void;
 }) {
   return (
     <section aria-labelledby="setup-heading" data-testid="battle-setup">
@@ -637,7 +737,8 @@ function BattleSetup(props: {
 
       <div className="mt-6">
         <label htmlFor="battle-seed" className="block text-sm text-stone-300">
-          Seed
+          Replay code
+          <InfoTip termId="seed" />
         </label>
         <input
           id="battle-seed"
@@ -648,6 +749,24 @@ function BattleSetup(props: {
           autoComplete="off"
         />
       </div>
+
+      {props.showLivePanel ? (
+        <Suspense fallback={<p className="mt-6 text-stone-500">Loading…</p>}>
+          <LiveOpponentPanel
+            onConfigChange={props.onLiveConfigChange}
+            notice={props.liveNotice}
+          />
+        </Suspense>
+      ) : (
+        <button
+          type="button"
+          className="mt-8 min-h-11 text-left text-sm text-stone-500 underline-offset-2 hover:text-stone-300 hover:underline"
+          onClick={props.onRevealLivePanel}
+          data-testid="reveal-live-opponent"
+        >
+          Live AI opponent (OpenRouter) — optional
+        </button>
+      )}
 
       <div className="mt-8 flex flex-wrap gap-3">
         <button

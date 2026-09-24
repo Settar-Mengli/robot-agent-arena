@@ -121,6 +121,56 @@ export default tseslint.config(
     }
   },
   {
+    files: ["src/ui/live/**/*.{ts,tsx}"],
+    ignores: ["src/ui/live/**/*.test.ts", "src/ui/live/**/*.test.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "process",
+              message: "live BYOK must not import process — use in-memory EnvMap only"
+            },
+            {
+              name: "buffer",
+              message: "live UI must not import Buffer/buffer"
+            },
+            {
+              name: "node:buffer",
+              message: "live UI must not import Buffer/buffer"
+            }
+          ],
+          patterns: [
+            "node:*",
+            "fs",
+            "fs/**",
+            "**/eval",
+            "**/eval/**"
+          ]
+        }
+      ],
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "Buffer",
+          message: "live UI must not use Buffer"
+        },
+        {
+          name: "process",
+          message: "live BYOK must not read process — inject EnvMap only"
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/ui/live/**/*.test.ts", "src/ui/live/**/*.test.tsx"],
+    rules: {
+      "no-restricted-imports": "off",
+      "no-restricted-globals": "off"
+    }
+  },
+  {
     files: ["src/decision-lab/**/*.ts"],
     rules: {
       "no-restricted-imports": [

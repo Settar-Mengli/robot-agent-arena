@@ -100,7 +100,7 @@ describe("App battle flow", () => {
       expect(screen.getByTestId("battle-outcome")).toBeInTheDocument();
       expect(screen.getByTestId("final-hp")).toBeInTheDocument();
       expect(screen.getByTestId("final-hp").textContent ?? "").toMatch(
-        /Final HP: you \d+\/\d+ · foe \d+\/\d+/
+        /Final HP: you \d+\/\d+ · opponent \d+\/\d+/
       );
       expect(screen.getByTestId("battle-outcome").textContent ?? "").toMatch(
         /FLOW-UNIT|Winner/
@@ -219,7 +219,7 @@ describe("App battle flow", () => {
     const buttons = screen.getAllByRole("button", { name: /Logic Storm/i });
     fireEvent.click(buttons[0]!);
     await waitFor(() => {
-      expect(screen.getByTestId("arena-log-live").textContent ?? "").toMatch(
+      expect(screen.getByTestId("arena-log").textContent ?? "").toMatch(
         /AEGIS/
       );
     });

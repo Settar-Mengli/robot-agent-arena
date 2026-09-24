@@ -1388,6 +1388,7 @@ async function runLlmMode(
             llmPolicyIdForVariant(variant),
             {
               consistency: args.consistency,
+              fixtureRepeatOffset: variant === "base-repeat" ? 1 : 0,
               ...(setRepeat !== undefined ? { setRepeat } : {})
             }
           );
@@ -1876,6 +1877,7 @@ export async function runBenchMode(
             llmPolicyIdForVariant(variant),
             {
               consistency: args.consistency,
+              fixtureRepeatOffset: variant === "base-repeat" ? 1 : 0,
               ...(setRepeat !== undefined ? { setRepeat } : {})
             }
           );

@@ -6,6 +6,7 @@ import {
   waitFor
 } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
+import { lazy, Suspense } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { ViewErrorBoundary } from "./components/ViewErrorBoundary";
@@ -48,7 +49,13 @@ describe("forbidden-default-path matcher", () => {
       "deterministic",
       "fictional sigil",
       "miss score 2.00",
-      "Your miss score: 0.00"
+      "Your miss score: 0.00",
+      "computer foe",
+      "Seed",
+      "schema assert failed",
+      "quota",
+      "serialize",
+      "agent around its declared"
     ];
     for (const s of olds) {
       expect(findForbiddenTechnicalText(s), s).not.toBeNull();
@@ -216,5 +223,27 @@ describe("ViewErrorBoundary", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(onHome).toHaveBeenCalled();
+  });
+
+  it("shows plain message when a lazy import rejects under Suspense", async () => {
+    const RejectLazy = lazy(() =>
+      Promise.reject(new Error("chunk load failed"))
+    );
+    const onHome = vi.fn();
+    // Suppress React error boundary console noise for intentional reject.
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <ViewErrorBoundary onHome={onHome}>
+        <Suspense fallback={<p>Loading…</p>}>
+          <RejectLazy />
+        </Suspense>
+      </ViewErrorBoundary>
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("view-error-boundary")).toHaveTextContent(
+        "Couldn't load this screen."
+      );
+    });
+    spy.mockRestore();
   });
 });

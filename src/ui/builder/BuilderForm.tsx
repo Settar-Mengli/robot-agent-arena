@@ -8,6 +8,7 @@ import {
   type SkillId
 } from "../../engine";
 import { skillLabel } from "../copy/skill-label";
+import { skillPlainDescription } from "../copy/skill-plain";
 import { buildAgentConfig } from "./buildAgentConfig";
 
 const MODULE_LABELS: Record<AgentModule, string> = {
@@ -122,7 +123,7 @@ export function BuilderForm({
       </h1>
       <p className="mt-2 text-stone-400">
         Name your robot, fill its modules, and pick two moves. Module text is
-        stored for recorded AI prompts; free play uses a simple computer foe.
+        stored for recorded AI prompts; free play uses a simple computer opponent.
       </p>
 
       <form className="mt-8 space-y-8" onSubmit={onSubmit} noValidate>
@@ -136,7 +137,7 @@ export function BuilderForm({
             type="text"
             value={displayName}
             onChange={(event) => updateDisplayName(event.target.value)}
-            className="mt-2 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+            className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
             autoComplete="off"
           />
         </div>
@@ -145,7 +146,7 @@ export function BuilderForm({
           <legend className="text-sm text-stone-300">Modules</legend>
           <p className="mt-1 text-xs text-stone-500">
             Stored on the robot for recorded AI prompts. Not used by the
-            simple computer foe in free play.
+            simple computer opponent in free play.
           </p>
           <div className="mt-3 space-y-4">
             {AGENT_MODULES.map((key) => (
@@ -162,7 +163,7 @@ export function BuilderForm({
                   type="text"
                   value={modules[key]}
                   onChange={(event) => updateModule(key, event.target.value)}
-                  className="mt-2 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+                  className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
                   autoComplete="off"
                 />
               </div>
@@ -172,7 +173,7 @@ export function BuilderForm({
 
         <fieldset>
           <legend className="text-sm text-stone-300">
-            Equipped skills (max {MVP_SKILL_SLOT_LIMIT})
+            Equipped moves (max {MVP_SKILL_SLOT_LIMIT})
           </legend>
           <ul className="mt-3 space-y-2">
             {MVP_SKILL_CATALOG.skills.map((skill) => {
@@ -193,8 +194,8 @@ export function BuilderForm({
                     />
                     <span>
                       <span className="font-medium">{skill.displayName}</span>
-                      <span className="block text-sm text-stone-500">
-                        {skill.summary}
+                      <span className="block text-sm text-stone-400">
+                        {skillPlainDescription(skill.skillId)}
                       </span>
                     </span>
                   </label>
@@ -206,7 +207,7 @@ export function BuilderForm({
 
         <button
           type="submit"
-          className="rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
+          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
         >
           Check robot
         </button>

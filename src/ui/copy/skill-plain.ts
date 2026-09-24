@@ -5,11 +5,11 @@ export const SKILL_PLAIN_DESCRIPTION: Readonly<Record<SkillId, string>> = {
   "skill-core-identity":
     "Raises your defense a little to soften the next hits.",
   "skill-signal-exposure":
-    "A light disrupt that also drains a bit of the foe's energy.",
+    "A light disrupt that also drains a bit of the opponent's energy.",
   "skill-logic-drift": "Recovers some of your health.",
   "skill-null-pulse": "Raises your defense to soften the next hits.",
   "skill-signal-breach":
-    "A disrupt attack that also drains some of the foe's energy.",
+    "A disrupt attack that also drains some of the opponent's energy.",
   "skill-sigil-rule": "A small defense boost before the next exchange.",
   "skill-override-pulse": "A strong attack.",
   "skill-logic-storm": "A very strong attack."

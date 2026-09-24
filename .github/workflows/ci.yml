@@ -23,6 +23,23 @@ jobs:
         env:
           VITE_BASE: /robot-agent-arena/
         run: npm run build
+      - name: Assert Pages asset prefix in dist
+        run: |
+          grep -q '/robot-agent-arena/' dist/index.html
+      - name: Protected paths and lockfile unchanged vs PR base
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          BASE="origin/${{ github.base_ref }}"
+          git diff --exit-code "$BASE"...HEAD -- \
+            src/engine \
+            src/ui/lab/pack/decision-lab.v3.json \
+            src/ui/arena/pack/arena-replay.v1.json \
+            src/ui/lab/pack/diagnostics.summary.json \
+            src/decision-lab/diagnostics.ts \
+            src/eval/lab-pack.ts \
+            package.json \
+            package-lock.json
       - run: npm run coverage
       - run: npm run eval:replay -- --suite all --models gemini:gemini-3.5-flash-lite
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial --variants base,grounded,freetext --max-matches 0 --models groq:openai/gpt-oss-20b

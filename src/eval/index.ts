@@ -174,6 +174,37 @@ export type {
 } from "./snapshot-eval";
 
 export {
+  BATCH4_BOOTSTRAP_ALPHA,
+  BATCH4_BOOTSTRAP_B,
+  BATCH4_BOOTSTRAP_SEED,
+  emptyBatch4RobustnessSummary,
+  flipRateWilson,
+  pairedDeltaRegretCi,
+  separableByDirection,
+  separableForComparison,
+  wilsonIntervalsDisjoint
+} from "./batch4-summary";
+export type {
+  Batch4ComparisonRow,
+  Batch4RegisteredDirection,
+  Batch4RobustnessSummaryV1
+} from "./batch4-summary";
+
+export {
+  buildLeaderboardV1,
+  exportLeaderboardStub,
+  wilsonIntervalsOverlap,
+  wilsonOverlapGroups
+} from "./leaderboard-pack";
+export type {
+  LeaderboardInputRow,
+  LeaderboardInputSuite,
+  LeaderboardRowV1,
+  LeaderboardSuiteV1,
+  LeaderboardV1
+} from "./leaderboard-pack";
+
+export {
   buildEvalMarkdownShell,
   extractBaselineBlock,
   renderBaselineBlock,
