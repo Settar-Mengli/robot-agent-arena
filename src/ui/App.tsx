@@ -1,4 +1,4 @@
-﻿import {
+import {
   lazy,
   Suspense,
   useEffect,
@@ -613,7 +613,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "lab" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
                 <DecisionLabView
                   guided={guidedPath}
                   onWatch={() => {
@@ -628,7 +628,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "leaderboard" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
                 <LeaderboardView onHome={goHome} />
               </Suspense>
             </ViewErrorBoundary>
@@ -636,7 +636,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "methodology" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
                 <MethodologyView onHome={goHome} />
               </Suspense>
             </ViewErrorBoundary>
@@ -644,7 +644,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "watch" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
                 <WatchBattleView
                   onLeave={onLeaveToHome}
                   initialMatchId={watchMatchId ?? view.matchId}
@@ -821,7 +821,7 @@ function BattleSetup(props: {
       {props.showLivePanel ? (
         <ViewErrorBoundary onHome={props.onHome}>
           <Suspense
-            fallback={<p className="mt-6 text-stone-400">Loadingâ€¦</p>}
+            fallback={<p className="mt-6 text-stone-400">Loading…</p>}
           >
             <LiveOpponentPanel
               config={props.liveConfig}
@@ -837,7 +837,7 @@ function BattleSetup(props: {
           onClick={props.onRevealLivePanel}
           data-testid="reveal-live-opponent"
         >
-          Live AI opponent (OpenRouter) â€” optional
+          Live AI opponent (OpenRouter) — optional
         </button>
       )}
 

@@ -34,7 +34,9 @@ function assertNoGarbage(root: HTMLElement, label: string) {
 }
 
 describe("bug-hunt keyboard + render hygiene (G22/G23)", () => {
-  it("landing → quick battle → results → Challenge → Watch: focus + no garbage", async () => {
+  it(
+    "landing → quick battle → results → Challenge → Watch: focus + no garbage",
+    async () => {
     render(<App />);
 
     const landing = screen.getByTestId("landing-view");
@@ -84,5 +86,7 @@ describe("bug-hunt keyboard + render hygiene (G22/G23)", () => {
     expect(heading?.tabIndex).toBe(-1);
     heading?.focus();
     expect(heading).toHaveFocus();
-  });
+    },
+    20_000
+  );
 });

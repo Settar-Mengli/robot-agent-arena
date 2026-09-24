@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Pure confidence-interval helpers shared by eval (Node) and Lab UI.
  * No Node, eval, React, or DOM imports.
  */
@@ -8,7 +8,7 @@ export type WilsonInterval = {
   high: number;
 };
 
-/** Wilson score interval for a binomial proportion (z â‰ˆ 1.96 â†’ ~95%). */
+/** Wilson score interval for a binomial proportion (z ≈ 1.96 → ~95%). */
 export function wilsonInterval(
   successes: number,
   n: number,
@@ -22,12 +22,17 @@ export function wilsonInterval(
   const denom = 1 + z2 / n;
   const center = p + z2 / (2 * n);
   const margin = z * Math.sqrt((p * (1 - p) + z2 / (4 * n)) / n);
-  // Clamp to [0, 1]: float error can push endpoints slightly outside the unit
-  // interval (e.g. 5/5 → high 1+ε). Batch4/leaderboard regen stays byte-identical
-  // for current committed success counts (verified in polish/final-1).
+  // Order before clamp: float error can push endpoints slightly outside [0, 1]
+  // (e.g. 5/5 → high 1+ε). Negative z can invert raw endpoints; ordering keeps
+  // low ≤ high. Batch4/leaderboard regen stays byte-identical for current
+  // committed success counts (verified in polish/final-1 / final-2).
+  const rawLow = (center - margin) / denom;
+  const rawHigh = (center + margin) / denom;
+  const orderedLow = Math.min(rawLow, rawHigh);
+  const orderedHigh = Math.max(rawLow, rawHigh);
   return {
-    low: Math.min(1, Math.max(0, (center - margin) / denom)),
-    high: Math.min(1, Math.max(0, (center + margin) / denom))
+    low: Math.min(1, Math.max(0, orderedLow)),
+    high: Math.min(1, Math.max(0, orderedHigh))
   };
 }
 
@@ -39,7 +44,7 @@ export type InsufficientEvidenceInput = {
 };
 
 /**
- * Label â€œinsufficient evidenceâ€ when n is small or the Wilson interval is wide.
+ * Label "insufficient evidence" when n is small or the Wilson interval is wide.
  * Defaults: minN=30, maxWidth=0.40 (D-033 / ES).
  */
 export function insufficientEvidence(
@@ -59,7 +64,7 @@ export function insufficientEvidence(
   return false;
 }
 
-/** Deterministic Mulberry32 PRNG â€” same seed â‡’ same stream on every OS. */
+/** Deterministic Mulberry32 PRNG — same seed ⇒ same stream on every OS. */
 export function mulberry32(seed: number): () => number {
   let t = seed >>> 0;
   return (): number => {
@@ -84,7 +89,7 @@ export type BootstrapMeanCi = {
 
 /**
  * Seeded bootstrap percentile CI for the mean of `values`.
- * Default: seed 0xA11CE, B=2000, alpha=0.05 â†’ 2.5% / 97.5% percentiles.
+ * Default: seed 0xA11CE, B=2000, alpha=0.05 → 2.5% / 97.5% percentiles.
  */
 export function bootstrapMeanCi(
   values: readonly number[],
@@ -133,4 +138,3 @@ export function bootstrapMeanCi(
     mean
   };
 }
-

@@ -1,8 +1,13 @@
 import type { EnvMap, ResolvedProvider } from "./types";
+import {
+  DEFAULT_MAX_PROVIDERS,
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_TIMEOUT_MS,
+  OPENROUTER_TEMPLATE,
+  readEnv
+} from "./openrouter-template";
 
-export const DEFAULT_TIMEOUT_MS = 8000;
-export const DEFAULT_MAX_PROVIDERS = 3;
-export const DEFAULT_MAX_RETRIES = 1;
+export { DEFAULT_TIMEOUT_MS, DEFAULT_MAX_PROVIDERS, DEFAULT_MAX_RETRIES };
 
 const DEFAULT_ORDER = ["groq", "cloudflare", "gemini", "mistral", "openrouter"] as const;
 
@@ -15,15 +20,6 @@ interface ProviderTemplate {
   apiKeyEnvVar: string;
   buildBaseUrl: (env: EnvMap) => string | null;
   extraHeaders?: (env: EnvMap) => Record<string, string> | undefined;
-}
-
-function readEnv(env: EnvMap, key: string): string | undefined {
-  const value = env[key];
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
 }
 
 function hasAllEnv(env: EnvMap, keys: readonly string[]): boolean {
@@ -69,25 +65,7 @@ const PROVIDER_TEMPLATES: readonly ProviderTemplate[] = [
     apiKeyEnvVar: "MISTRAL_API_KEY",
     buildBaseUrl: () => "https://api.mistral.ai/v1"
   },
-  {
-    name: "openrouter",
-    defaultModel: "openai/gpt-oss-20b:free",
-    requiredEnvVars: ["OPENROUTER_API_KEY"],
-    apiKeyEnvVar: "OPENROUTER_API_KEY",
-    buildBaseUrl: () => "https://openrouter.ai/api/v1",
-    extraHeaders: (env) => {
-      const headers: Record<string, string> = {};
-      const referer = readEnv(env, "OPENROUTER_HTTP_REFERER");
-      const title = readEnv(env, "OPENROUTER_X_TITLE");
-      if (referer !== undefined) {
-        headers["HTTP-Referer"] = referer;
-      }
-      if (title !== undefined) {
-        headers["X-Title"] = title;
-      }
-      return Object.keys(headers).length > 0 ? headers : undefined;
-    }
-  }
+  OPENROUTER_TEMPLATE
 ];
 
 const templateByName = new Map(PROVIDER_TEMPLATES.map((template) => [template.name, template]));
