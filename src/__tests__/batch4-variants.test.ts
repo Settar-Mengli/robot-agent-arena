@@ -135,14 +135,15 @@ describe("batch4 variants", () => {
     });
     const partial = buildAgentMessages({
       ...baseInput,
-      promptVariant: "info-partial"
+      promptVariant: "info-partial",
+      playerSkillIds: ["skill-override-pulse"]
     });
     expect(perturb).not.toEqual(base);
     expect(perturb[1]!.content).toContain("\n");
     expect(advctx.some((m) => m.content.includes("ARENA_RUMOR"))).toBe(true);
-    expect(partial.some((m) => m.content.startsWith("PARTIAL_STATE"))).toBe(
-      true
-    );
+    expect(
+      partial.some((m) => m.content.startsWith("ENGINE_PARTIAL_FACTS"))
+    ).toBe(true);
     expect(partial.some((m) => m.content.includes("ENGINE_GROUNDED_FACTS"))).toBe(
       false
     );

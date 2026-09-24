@@ -130,7 +130,8 @@ export async function playAgentTurn(
     memory: playerTendencies,
     responseFormat,
     promptVariant: options.promptVariant,
-    snapshotId: options.snapshotId
+    snapshotId: options.snapshotId,
+    playerSkillIds: runtime.session.player.skillIds
   });
 
   const budgetSignal = AbortSignal.timeout(budgetMs);

@@ -224,6 +224,7 @@ export {
   resolveVariantRun,
   selectScenariosByIds,
   variantsFromManifestSplit,
+  manifestRecordsVariant,
   writeManifest
 } from "./manifest";
 export type {

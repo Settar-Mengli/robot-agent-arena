@@ -63,6 +63,7 @@ import {
   resolveVariantRun,
   selectScenariosByIds,
   variantsFromManifestSplit,
+  manifestRecordsVariant,
   writeManifest,
   type FixtureManifest
 } from "./manifest";
@@ -1354,6 +1355,19 @@ async function runLlmMode(
 
     const snapshotResults: Record<string, SnapshotEvalResult> = {};
     if (args.snapshots) {
+      if (
+        args.mode === "replay" &&
+        !manifestRecordsVariant(
+          existingManifest,
+          variant,
+          splitsFor(args.suite)
+        )
+      ) {
+        error(
+          `variant ${variant} has no recorded fixtures in the manifest`
+        );
+        return 1;
+      }
       for (const split of splitsFor(args.suite)) {
         const entry = existingManifest?.splits[split];
         const resolved =
@@ -1361,7 +1375,6 @@ async function runLlmMode(
             ? resolveVariantRun(entry, variant, activePin)
             : { snapshots: true as boolean };
         if (args.mode === "replay" && resolved.snapshots === false) {
-          log(`snapshots: ${split} skipped (variant.snapshots=false)`);
           continue;
         }
         for (const kind of resolveSnapshotKinds(

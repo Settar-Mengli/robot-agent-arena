@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -27,19 +29,22 @@ jobs:
         run: |
           grep -q '/robot-agent-arena/' dist/index.html
       - name: Protected paths and lockfile unchanged vs PR base
-        if: github.event_name == 'pull_request'
         run: |
-          git fetch origin "${{ github.base_ref }}" --depth=1
-          BASE="origin/${{ github.base_ref }}"
-          git diff --exit-code "$BASE"...HEAD -- \
-            src/engine \
-            src/ui/lab/pack/decision-lab.v3.json \
-            src/ui/arena/pack/arena-replay.v1.json \
-            src/ui/lab/pack/diagnostics.summary.json \
-            src/decision-lab/diagnostics.ts \
-            src/eval/lab-pack.ts \
-            package.json \
-            package-lock.json
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            echo "Comparing protected paths two-dot against PR base $BASE"
+            git diff --exit-code "$BASE"..HEAD -- \
+              src/engine \
+              src/ui/lab/pack/decision-lab.v3.json \
+              src/ui/arena/pack/arena-replay.v1.json \
+              src/ui/lab/pack/diagnostics.summary.json \
+              src/decision-lab/diagnostics.ts \
+              src/eval/lab-pack.ts \
+              package.json \
+              package-lock.json
+          else
+            echo "push event: skipping protected-path PR-base check (no pull_request.base.sha)"
+          fi
       - run: npm run coverage
       - run: npm run eval:replay -- --suite all --models gemini:gemini-3.5-flash-lite
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial --variants base,grounded,freetext --max-matches 0 --models groq:openai/gpt-oss-20b

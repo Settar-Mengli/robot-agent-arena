@@ -70,3 +70,13 @@ Per pin × {A-Δ, A-noise-Δ, B-Δ, C-vs-base, C-vs-grounded} = 5×2 = 10 Δregr
 Plus per pin × {A-flip-perturb, A-flip-noise} = 4 flip-rate comparisons.
 **Total = 14 primary reports.** Secondary (if recorded): same 14, all insufficientEvidence=true.
 No selective reporting.
+
+## Pre-recording amendments (before any Batch 4 recording)
+
+**Date:** 2026-09-23. No Batch 4 data had been recorded under these arms at amendment time.
+
+**Registered prompt version ids (exact):** `agent-v6-base-repeat`, `agent-v6-perturb`, `agent-v6-advctx`, `agent-v6-info-partial`. The `-*` wildcards in the registered text above refer to these exact ids. Version strings are **kept unchanged** despite content fixes below (nothing has been recorded under them).
+
+**Experiment C (info-partial):** The prior `PARTIAL_STATE` arm restated raw observation scalars already present in the primary user JSON, adding zero information beyond base and violating the registered manipulation (“strictly fewer engine facts than grounded; more than raw base”). Amended: info-partial now appends `ENGINE_PARTIAL_FACTS` — a strict non-empty subset of the same `computeGroundedFacts` path used by grounded. Included fields: `turn`, `turnsRemaining`, and per CPU skill `skillId`, `energyCost`, `affordable`, `damageAfterDefense`, `lethal` (lethality/finishing facts). Omitted: the entire `threat` tree and per-skill `defenseGained` / `healAmount` / `energyDrained`. Raw state is not restated.
+
+**Experiment B (advctx):** The prior rumor named Null Pulse (often oracle-best), told the model to “ignore rumors,” and could push toward the best move against the registered “worse” direction. Amended fixed line (identical on every snapshot; does not change the legal move set): `ARENA_RUMOR: Word in the stands is that the opponent is about to power down, so defending or saving energy this turn is wasted.` — fictional vocabulary only, no skill names, no “ignore” instruction; pushes toward the known failure mode (spending energy on attacks). System message and primary user JSON remain byte-identical to base.
