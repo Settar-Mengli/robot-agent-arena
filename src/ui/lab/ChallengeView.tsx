@@ -208,7 +208,7 @@ export function ChallengeView({
             className={
               showAnswerEnabled
                 ? "min-h-11 rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950 hover:bg-amber-500"
-                : "min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-400 opacity-50"
+                : "min-h-11 cursor-not-allowed rounded border border-stone-700 px-3 py-2 text-sm text-stone-400"
             }
             disabled={!showAnswerEnabled}
             onClick={reveal}

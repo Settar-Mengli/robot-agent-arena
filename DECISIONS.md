@@ -73,6 +73,7 @@ Alternative frameworks are out of scope unless explicitly re-decided.
 
 Decision:
 MVP public hosting is **free GitHub Pages** (project site), not Vercel/Netlify for Evidence+Ship. Vite `base` is `/robot-agent-arena/`. Public URL: `https://settar-mengli.github.io/robot-agent-arena/`. Deploy on **push to `main`** and **`workflow_dispatch` only** — never from pull requests. The `pages` job is **non-required** under branch protection. Product copy must state: static demo, recorded evidence, no live AI in the browser.
+**Amended by D-051/D-053:** the static demo remains the default; the Arena offers an opt-in BYOK live opponent (OpenRouter, memory-only key).
 
 Rationale:
 Zero-cost hosting matches D-017 free-tier constraints; project Pages fits the repo name.

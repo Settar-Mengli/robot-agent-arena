@@ -221,6 +221,39 @@ describe("live session lifecycle (D-053)", () => {
     assertKeyAbsent(SECRET);
   });
 
+  it("Load without Leave mid-battle clears live; next turn is CPU (0 live calls)", async () => {
+    render(<App />);
+    await enableLiveAndStart(SECRET);
+
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Logic Storm/i })[0]!
+    );
+    await waitFor(() => expect(liveCalls.n).toBeGreaterThan(0));
+    assertKeyAbsent(SECRET);
+
+    const saveBtn = screen
+      .getAllByTestId("save-slot")
+      .find((el) => !(el as HTMLButtonElement).disabled);
+    expect(saveBtn).toBeTruthy();
+    fireEvent.click(saveBtn!);
+    await waitFor(() => {
+      expect(window.localStorage.getItem(SAVE_SLOT_KEY)).toBeTruthy();
+    });
+
+    liveCalls.n = 0;
+    fireEvent.click(screen.getByTestId("load-slot"));
+    await waitFor(() => {
+      expect(screen.getByTestId("arena-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /Logic Storm/i })[0]!
+    );
+    await new Promise((r) => setTimeout(r, 80));
+    expect(liveCalls.n).toBe(0);
+    assertKeyAbsent(SECRET);
+  }, 20_000);
+
   it("failure then success clears the arena live notice", async () => {
     render(<App />);
     await enableLiveAndStart(SECRET);

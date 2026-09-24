@@ -5,7 +5,7 @@ import {
   readNonNegativeIntEnv,
   readPositiveIntEnv,
   resolveActiveProviders
-} from "./providers";
+} from "./providers-active";
 import type {
   AttemptInfo,
   ChatMessage,

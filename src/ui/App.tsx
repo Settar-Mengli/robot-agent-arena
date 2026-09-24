@@ -1,4 +1,4 @@
-import {
+﻿import {
   lazy,
   Suspense,
   useEffect,
@@ -613,7 +613,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "lab" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
                 <DecisionLabView
                   guided={guidedPath}
                   onWatch={() => {
@@ -628,7 +628,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "leaderboard" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
                 <LeaderboardView onHome={goHome} />
               </Suspense>
             </ViewErrorBoundary>
@@ -636,7 +636,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "methodology" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
                 <MethodologyView onHome={goHome} />
               </Suspense>
             </ViewErrorBoundary>
@@ -644,7 +644,7 @@ export function App({ playTurn }: AppProps = {}) {
 
           {view.kind === "watch" ? (
             <ViewErrorBoundary onHome={goHome}>
-              <Suspense fallback={<p className="text-stone-400">Loading…</p>}>
+              <Suspense fallback={<p className="text-stone-400">Loadingâ€¦</p>}>
                 <WatchBattleView
                   onLeave={onLeaveToHome}
                   initialMatchId={watchMatchId ?? view.matchId}
@@ -741,6 +741,10 @@ function BattleSetup(props: {
   onLiveConfigChange: (config: LiveOpponentConfig) => void;
   onHome: () => void;
 }) {
+  const liveIntent =
+    props.liveConfig.enabled && props.liveConfig.apiKey.trim() !== "";
+  const setupOpponentMode: OpponentMode = liveIntent ? "live" : "cpu";
+
   return (
     <section aria-labelledby="setup-heading" data-testid="battle-setup">
       <h1
@@ -750,18 +754,31 @@ function BattleSetup(props: {
       >
         Battle setup
       </h1>
-      <p className="mt-2 text-stone-400">
-        Player: {props.player.displayName}. Opponent: simple computer (not an
-        AI). Choose opponent and seed
-        <InfoTip termId="seed" />.
+      <p className="mt-2 text-stone-400" data-testid="setup-opponent-blurb">
+        {liveIntent ? (
+          <>
+            Player: {props.player.displayName}. Opponent: live AI (
+            {props.liveConfig.modelId}). Answers are not recorded evidence and
+            can vary. Choose a standby computer and seed
+            <InfoTip termId="seed" />.
+          </>
+        ) : (
+          <>
+            Player: {props.player.displayName}. Opponent: simple computer (not an
+            AI). Choose opponent and seed
+            <InfoTip termId="seed" />.
+          </>
+        )}
       </p>
       <div className="mt-3">
-        <HonestyStrip variant="compact" />
+        <HonestyStrip variant="compact" opponentMode={setupOpponentMode} />
       </div>
 
       <fieldset className="mt-8">
         <legend className="text-sm text-stone-300">
-          Opponent (simple computer)
+          {liveIntent
+            ? "Standby computer (if live is off or fails)"
+            : "Opponent (simple computer)"}
         </legend>
         <ul className="mt-3 space-y-2">
           {CPU_OPPONENTS.map((cpu) => (
@@ -804,7 +821,7 @@ function BattleSetup(props: {
       {props.showLivePanel ? (
         <ViewErrorBoundary onHome={props.onHome}>
           <Suspense
-            fallback={<p className="mt-6 text-stone-400">Loading…</p>}
+            fallback={<p className="mt-6 text-stone-400">Loadingâ€¦</p>}
           >
             <LiveOpponentPanel
               config={props.liveConfig}
@@ -820,7 +837,7 @@ function BattleSetup(props: {
           onClick={props.onRevealLivePanel}
           data-testid="reveal-live-opponent"
         >
-          Live AI opponent (OpenRouter) — optional
+          Live AI opponent (OpenRouter) â€” optional
         </button>
       )}
 
@@ -843,3 +860,4 @@ function BattleSetup(props: {
     </section>
   );
 }
+

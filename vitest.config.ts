@@ -20,7 +20,8 @@ export default defineConfig({
         test: {
           name: "node",
           include: ["src/__tests__/**/*.test.ts"],
-          environment: "node"
+          environment: "node",
+          setupFiles: ["./src/test-setup-drift-warn.ts"]
         }
       },
       {
@@ -28,7 +29,8 @@ export default defineConfig({
         test: {
           name: "ui",
           include: ["src/ui/**/*.test.ts", "src/ui/**/*.test.tsx"],
-          environment: "jsdom"
+          environment: "jsdom",
+          setupFiles: ["./src/test-setup-drift-warn.ts"]
         }
       }
     ]
