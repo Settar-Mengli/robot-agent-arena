@@ -71,6 +71,10 @@ export function LiveOpponentPanel({
           <p className="text-sm text-amber-200/90" role="note">
             {HONESTY}
           </p>
+          <p className="text-sm text-stone-400" role="note">
+            Model list not yet verified — if a model isn&apos;t available, the
+            game switches to the simple computer and tells you.
+          </p>
 
           <div>
             <label

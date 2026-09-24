@@ -88,7 +88,9 @@ describe("App default path", () => {
     expect(screen.getByText(/Small samples cannot rank models/i)).toBeTruthy();
   });
 
-  it("forbids technical tokens on landing, Arena 3+ turns, Watch 3+ turns, tour, honesty", async () => {
+  it(
+    "forbids technical tokens on landing, Arena 3+ turns, Watch 3+ turns, tour, honesty",
+    async () => {
     window.localStorage.removeItem(TOUR_KEY);
     render(<App />);
     await waitFor(() => {
@@ -114,9 +116,12 @@ describe("App default path", () => {
 
     fireEvent.click(screen.getByTestId("brand-home"));
     fireEvent.click(screen.getByTestId("cta-watch"));
-    await waitFor(() => {
-      expect(screen.getByTestId("watch-battle-view")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("watch-battle-view")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
     const select = screen.getByTestId("watch-match-select");
     assertClean(select);
     expect(findForbiddenTechnicalText(collectSelectText(select))).toBeNull();
@@ -124,7 +129,82 @@ describe("App default path", () => {
       fireEvent.click(screen.getByTestId("watch-next"));
     }
     assertClean(screen.getByTestId("watch-battle-view"));
-  });
+
+    fireEvent.click(screen.getByTestId("brand-home"));
+    fireEvent.click(screen.getByTestId("nav-lab"));
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("decision-lab")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+
+    fireEvent.click(screen.getByTestId("nav-leaderboard"));
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("leaderboard-view")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+    assertClean(screen.getByTestId("leaderboard-view"));
+
+    fireEvent.click(screen.getByTestId("nav-methodology"));
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("methodology-default")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+    assertClean(screen.getByTestId("methodology-default"));
+
+    fireEvent.click(screen.getByTestId("brand-home"));
+    fireEvent.click(screen.getByTestId("cta-build"));
+    await waitFor(
+      () => {
+        expect(screen.getByLabelText("Display name")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "LAZY-LIVE" }
+    });
+    fireEvent.change(screen.getByLabelText("Core Identity"), {
+      target: { value: "Steady Vanguard" }
+    });
+    fireEvent.change(screen.getByLabelText("Memory"), {
+      target: { value: "Pattern Recall" }
+    });
+    fireEvent.change(screen.getByLabelText("Sigil and Security"), {
+      target: { value: "Aegis Layer" }
+    });
+    fireEvent.change(screen.getByLabelText("Rules"), {
+      target: { value: "Never Skip Verification" }
+    });
+    fireEvent.change(screen.getByLabelText("Strategy"), {
+      target: { value: "Measured Pressure" }
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: /Override Pulse/i }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Logic Storm/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Check robot/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue to battle setup/i })
+    );
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+    fireEvent.click(screen.getByTestId("reveal-live-opponent"));
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("live-opponent-panel")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+  },
+  30000
+  );
 });
 
 describe("FirstVisitTour", () => {
