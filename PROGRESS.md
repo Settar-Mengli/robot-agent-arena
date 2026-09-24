@@ -1,14 +1,15 @@
 # PROGRESS
 
 ## Status Snapshot
-- Date: 2026-09-23
-- Branch: `feat/batch4-robustness-live` (PR #39 / Batch 4, D-051)
-- Current state: Batch 4 / D-051 complete — 280 fixtures, robustness summary, leaderboard, methodology null-result copy.
-- NEXT: Batch 5 (second environment).
+- Date: 2026-09-24
+- Branch: `feat/batch5-second-env` (Batch 5 / D-052)
+- Current state: Batch 5 / D-052 complete — `EnvironmentOf` + robot adapter + shared `evaluateChoices`; Resonance Seal suite n=40 + baselines (keyless).
+- NEXT: final polish (screenshots, demo video, issue #28).
 
 ## Completed
 - Repository baseline through Batch 3 (PR #37 / D-049) + D-050 (PR #38) on main.
 - Batch 4 / D-051 (PR #39): M0 UX cleanup; four robustness variants; OpenRouter BYOK Arena opt-in; leaderboard/methodology; prereg + amendments; primary recording 280/280; `batch4.robustness.summary.json` + `leaderboard.v1.json`.
+- Batch 5 / D-052: `EnvironmentOf` generality proof (robot adapter + golden); Resonance Seal headless env; suite + baselines + CI drift.
 
 ## Open
 - Memory variants unmeasured.

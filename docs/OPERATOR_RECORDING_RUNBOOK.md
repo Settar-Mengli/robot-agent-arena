@@ -121,3 +121,14 @@ Then set `singleModelPending: false`, update EVAL, commit live-profile under `ev
 On HTTP **503** / transient provider gaps: **rerun the same record command** — fixture cache skips completed keys and fills misses only. Do not raise temperature; do not change variants mid-window.
 
 Window 3 (adversarial n=13) was **cut** per pre-registration — do not record it for Batch 4.
+
+## BYOK model verification (Batch 5 / D-052)
+
+Arena Live AI uses `LIVE_MODEL_IDS` in `src/ui/live/live-models.ts`. Candidates pending verification live in `LIVE_MODEL_CANDIDATES_UNVERIFIED` — **do not treat them as valid** until checked.
+
+Operator steps:
+1. Open https://openrouter.ai/collections/free-models (or the current free catalog).
+2. For each id in `LIVE_MODEL_CANDIDATES_UNVERIFIED`, confirm it still exists and is free.
+3. On a deployed or local build: Arena → enable Live AI → paste key → try each candidate for 1–2 turns.
+4. Promote only verified ids into `LIVE_MODEL_IDS`; leave the rest in `UNVERIFIED` or remove them.
+5. If a model fails, keep the existing fallback notice behavior (simple computer).

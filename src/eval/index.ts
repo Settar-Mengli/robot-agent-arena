@@ -143,6 +143,7 @@ export {
   isFixtureMissFailure,
   matchStratumKey,
   metricsForChosenMoves,
+  aggregateChoiceMetrics,
   percentile,
   randomPolicyExpectation,
   traceHasFixtureMiss,
@@ -158,6 +159,16 @@ export type {
   SuiteBaselineDelta,
   WilsonInterval
 } from "./metrics";
+
+export {
+  evaluateChoices
+} from "./evaluate-choices";
+export type {
+  ChoiceOracleResult,
+  EvaluateChoicesCase,
+  EvaluateChoicesPerCase,
+  EvaluateChoicesResult
+} from "./evaluate-choices";
 
 export {
   evalGreedySnapshots,

@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3 / ES / Batch 4), and UI through Batch 3–4 (Watch, save, pack v3 diagnostics, Challenge, D-050 plain UX, Batch 4 BYOK Arena opt-in + leaderboard/methodology) are the product surface. Next measurement work: **Batch 5** (second reference environment).
+**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3 / ES / Batch 5), and UI through Batch 3–4 (Watch, save, pack v3 diagnostics, Challenge, D-050 plain UX, Batch 4 BYOK Arena opt-in + leaderboard/methodology) are the product surface. Next: **final polish** (screenshots, demo video, issue #28).
 
 ## Layered architecture and dependency rule
 
@@ -13,7 +13,7 @@ AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based r
 ```
 data  →  engine
          ↑
-         env (robotEnvironment)  ←  eval (measurement core)
+         env (robotEnvironment + EnvironmentOf)  ←  eval (measurement core)
          ↑
 inference (standalone)  →  agent  →  (lib bridge)  →  store  →  components / screens
          ↑__________________|
@@ -46,9 +46,21 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 
 **UI (through Batch 4 / D-051):** React, Tailwind, and Zustand. App entry is `index.html` → `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, one-slot save, **leaderboard**, **methodology**, and **OpenRouter BYOK** (`src/ui/live/**`, Arena opt-in) live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs and Batch 4 summaries are static JSON; no Node eval harness in the browser. Live keys stay in memory only and never appear on the leaderboard.
 
-## Environment interface (A3 / D-033 batch 5)
+## Environment interface (A3 / D-033 batch 5 → Batch 5 / D-052)
 
-The measurement core depends on the **environment interface** in `src/env/` (`start`, `apply`, `isTerminal`, `equippedActions`, `legalActions`, `terminalValue`, `memoStateKey`, `decisionStateKey`). The robot game implements it as `robotEnvironment` by delegating to the engine. **Scoring and state keys are on the interface** (a second environment must supply them). Policies, prompt construction, grounding facts, and scenario content stay deliberately game-specific outside `src/env`. `DecisionSnapshot.runtime` remains today’s `BattleRuntime` JSON. Second reference environment is locked batch 11.
+The measurement core depends on the **environment interface** in `src/env/`.
+
+**Robot production path (unchanged):** `Environment` + `robotEnvironment` (`start`, `apply`, `isTerminal`, `equippedActions`, `legalActions`, `terminalValue`, `memoStateKey`, `decisionStateKey`) still specialize to `BattleRuntime` / `SkillId`. Scoring and state keys stay on the interface.
+
+**Generic contract (D-052):** `EnvironmentOf<S,A>` is the shared measurement shape. A zero-behavior adapter `asEnvironmentOf(robotEnvironment)` proves the robot satisfies it without changing production call sites. Resonance Seal implements `EnvironmentOf` directly. One shared `evaluateChoices` runs on both (robot golden ≡ existing metrics; Seal → committed baselines).
+
+| Shared | Not shared |
+|--------|------------|
+| `EnvironmentOf` contract | LLM prompt / agent path |
+| `evaluateChoices` + `aggregateChoiceMetrics` | Robot-specific `Environment` / `stepBattle` return shape |
+| `wilsonInterval` / `bootstrapMeanCi` / `insufficientEvidence` | Cross-environment metric comparison (forbidden) |
+
+Policies, prompt construction, grounding facts, and scenario content stay deliberately game-specific outside `src/env`. `DecisionSnapshot.runtime` remains today’s `BattleRuntime` JSON. Seal is headless / keyless only — not on the leaderboard; Seal metrics are never compared to robot battle metrics (different regret scale). Seal suite artifacts live under `evals/env-suites/resonance-seal/` (not `evals/suites/`, which remains robot-only).
 
 ## Determinism and the engine contract
 

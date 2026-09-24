@@ -98,6 +98,50 @@ export default tseslint.config(
     }
   },
   {
+    files: ["src/env/resonance-seal/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "**/agent",
+            "**/agent/**",
+            "**/eval",
+            "**/eval/**",
+            "**/inference",
+            "**/inference/**",
+            "**/engine",
+            "**/engine/**",
+            "node:*",
+            "fs",
+            "fs/**",
+            "path",
+            "path/**",
+            "child_process",
+            "os",
+            "worker_threads",
+            "module",
+            "react",
+            "react-dom",
+            "react/*",
+            "react-dom/*"
+          ]
+        }
+      ],
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "document",
+          message: "resonance-seal must stay pure — no DOM"
+        },
+        {
+          name: "window",
+          message: "resonance-seal must stay pure — no DOM"
+        }
+      ]
+    }
+  },
+  {
     files: ["src/ui/**/*.ts", "src/ui/**/*.tsx"],
     rules: {
       "no-restricted-imports": [
