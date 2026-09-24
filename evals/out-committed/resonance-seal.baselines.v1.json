@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "resonance-seal.baselines.v1",
+  "n": 40,
+  "excludedAllTieCount": 21,
+  "greedy": {
+    "n": 40,
+    "optimalRate": 0.9,
+    "meanRegret": 0.1,
+    "optimalRateWilson": {
+      "low": 0.7694792561952611,
+      "high": 0.9604211124044252
+    },
+    "meanRegretCi": {
+      "low": 0.025,
+      "high": 0.2,
+      "mean": 0.1
+    },
+    "insufficientEvidence": false
+  },
+  "random": {
+    "n": 40,
+    "optimalRate": 0.55,
+    "meanRegret": 16.325,
+    "optimalRateWilson": {
+      "low": 0.3982882988844078,
+      "high": 0.6929492471905531
+    },
+    "meanRegretCi": {
+      "low": 7.05,
+      "high": 27.7,
+      "mean": 16.325
+    },
+    "insufficientEvidence": false
+  },
+  "oracleBestActionDistribution": {
+    "channel": 19,
+    "inscribe": 27,
+    "vent": 16,
+    "brace": 3
+  },
+  "greedyNeqOracleRate": 0.1,
+  "randomNeqOracleRate": 0.45,
+  "meanActionValueSpread": 37.325,
+  "maxActionValueSpread": 93,
+  "notes": [
+    "Resonance Seal regret scale differs from the robot battle - never compare across environments.",
+    "Seal is not on the leaderboard.",
+    "Oracle = exact best response to a fixed vault pressure script (not an equilibrium).",
+    "Shared: EnvironmentOf, evaluateChoices, aggregateChoiceMetrics, wilsonInterval/bootstrapMeanCi/insufficientEvidence.",
+    "Not shared: LLM prompt/agent path.",
+    "Plan greedy (inscribe-preferring) is pre-declared; greedy!=oracle is measured (not a fixed error-rate gate)."
+  ]
+}

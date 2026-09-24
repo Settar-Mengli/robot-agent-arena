@@ -9,7 +9,8 @@ import type {
 
 /**
  * Environment contract for the measurement core (D-033 / A3).
- * State type is BattleRuntime for the robot game; generics wait for batch 11.
+ * Robot specialization of the Batch 5 generic `EnvironmentOf` (see contract.ts).
+ * Production robot signatures stay concrete BattleRuntime / SkillId (D-037 / D-052).
  */
 export type Environment = {
   start: (

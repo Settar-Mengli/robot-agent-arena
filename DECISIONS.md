@@ -1118,4 +1118,31 @@ Rationale:
 D-033 after D-050; honesty + free-tier quota.
 
 Consequences:
-NEXT → Batch 5 (second reference environment). CI replay includes the four new variants on both pins.
+NEXT → Batch 5 (done, D-052); then final polish. CI replay includes the four new variants on both pins.
+
+## D-052 Batch 5 — Second reference environment (Resonance Seal)
+Date: 2026-09-24
+Status: Accepted
+
+Decision:
+Execute locked batch 11 / product Batch 5 as a **keyless**, headless second environment.
+
+**Generality proof:** Introduce `EnvironmentOf<S,A>`. Production robot `Environment` / `robotEnvironment` stay behavior-identical. A zero-behavior adapter makes `robotEnvironment` satisfy `EnvironmentOf<BattleRuntime, SkillId>` (compile-time check). One shared `evaluateChoices` runs on the robot adapter (golden: equals existing metrics on a committed suite) and on Resonance Seal (produces committed baselines). Shared: contract, evaluateChoices, aggregateChoiceMetrics, wilson/bootstrap/insufficientEvidence. **Not** shared: LLM prompt/agent path (out of scope). Metrics are **never compared across environments**; Seal is **not** on the leaderboard (different regret scale).
+
+**Environment:** Resonance Seal — 4 actions with explicit legality; seeded dynamics; exact best-response oracle vs a fixed vault script (not an equilibrium). Final brace/energy rules locked only after non-degeneracy tests. Suite: n=40 distinct informative states (all-tie excluded), stratified by turn/resource; report excluded-all-tie count, oracle-best distribution, greedy≠oracle / random≠oracle rates, mean/max action-value spread.
+
+**Locked rule adjustments (non-degeneracy):** provisional channel +1 and vault else-+1 made seal≥3 unreachable. Locked: channel +2 energy (cap 5); vault pressure +2 only when `turn % 3 === 0`, else +0; brace still costs 1 energy with no consecutive brace; vent/inscribe as provisional.
+
+**Pre-publication gate change:** An early draft gated greedy≠oracle ≥15%. Meeting that rate required retuning the greedy baseline itself, which is not allowed. The plan inscribe-preferring greedy is kept as a pre-declared natural rule. Non-triviality gates are now: ≥3 distinct oracle-best actions; no action oracle-best in >80% of states; random≠oracle ≥0.25; greedy≠oracle >0 (measured, not a fixed error-rate floor); seal win reachable from ≥25% of states. Committed measured rates (n=40): distinctBest=4; max monopoly (inscribe in best)=27/40=0.675; random≠oracle=0.45 (baselines RNG); greedy≠oracle=0.10; win-reachable=0.575.
+
+**Artifacts:** `evals/env-suites/resonance-seal/snapshots.resonance-seal.v1.json` + `evals/out-committed/resonance-seal.baselines.v1.json`; hard LF drift; CI drift steps. Suites for the robot battle remain under `evals/suites/` only.
+
+**M0:** Methodology Window-3 line; CI protected-path includes `prompt.ts` + `prompt-batch4.ts`; `actions/checkout@v7` + `actions/setup-node@v7`; `runs-on: ubuntu-24.04`; BYOK `LIVE_MODEL_CANDIDATES_UNVERIFIED` (not claimed valid; active allowlist ids also unverified until operator runbook).
+
+**Out of scope:** UI game, Lab pack, seal leaderboard rows, plugin registry, new packages, API keys, LLM eval of Seal.
+
+Rationale:
+D-033 locked batch 11 — prove the interface is real (robot + second env through one evaluation function), not asserted by an unused sibling type.
+
+Consequences:
+NEXT → final polish (screenshots, demo video, issue #28).

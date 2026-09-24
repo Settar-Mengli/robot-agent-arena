@@ -153,6 +153,7 @@ export function MethodologyView({
               changes on the provider&apos;s side over time, not only
               same-session wobble.
             </li>
+            <li>Window 3 (13-situation set) was not recorded.</li>
           </ul>
         </section>
       </div>
@@ -170,6 +171,11 @@ export function MethodologyView({
             Bootstrap defaults: seed 0xA11CE, B=2000, alpha=0.05. Recorder
             temperature 0. OpenRouter-only if live play is enabled in the
             browser. Live model allowlist still needs operator verification.
+          </p>
+          <p>
+            A second headless reference task (Resonance Seal) has committed
+            baselines in EVAL.md — not a playable Arena mode. Metrics are not
+            comparable to the robot battle.
           </p>
           <p>
             Leaderboard groups are connected components of inclusive Wilson

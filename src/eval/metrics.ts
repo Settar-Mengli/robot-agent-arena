@@ -455,35 +455,30 @@ function medianOf(values: readonly number[]): number {
   return (sorted[mid - 1]! + sorted[mid]!) / 2;
 }
 
-export function metricsForChosenMoves(
-  snapshots: readonly DecisionSnapshot[],
-  chosen: readonly SkillId[],
-  options: { invalidFlags?: readonly boolean[] } = {}
-): SnapshotPolicyMetrics {
-  if (snapshots.length !== chosen.length) {
-    throw new Error("snapshots and chosen length mismatch");
+/** Pure aggregator shared by robot metrics and Batch 5 evaluateChoices. */
+export function aggregateChoiceMetrics(input: {
+  regrets: readonly number[];
+  optimalFlags: readonly boolean[];
+  invalidFlags?: readonly boolean[];
+}): SnapshotPolicyMetrics {
+  const { regrets, optimalFlags } = input;
+  if (regrets.length !== optimalFlags.length) {
+    throw new Error("regrets and optimalFlags length mismatch");
   }
-
+  const n = regrets.length;
   let optimal = 0;
   let regretSum = 0;
   let maxRegret = 0;
   let highRegretCount = 0;
   let invalid = 0;
-  const regrets: number[] = [];
-
-  for (let i = 0; i < snapshots.length; i += 1) {
-    const snap = snapshots[i]!;
-    const skillId = chosen[i]!;
-    if (snap.best.includes(skillId)) optimal += 1;
-    const r = regret(snap.values, skillId);
-    regrets.push(r);
+  for (let i = 0; i < n; i += 1) {
+    if (optimalFlags[i] === true) optimal += 1;
+    const r = regrets[i]!;
     regretSum += r;
     if (r > maxRegret) maxRegret = r;
     if (r >= 100) highRegretCount += 1;
-    if (options.invalidFlags?.[i] === true) invalid += 1;
+    if (input.invalidFlags?.[i] === true) invalid += 1;
   }
-
-  const n = snapshots.length;
   const optimalRate = n === 0 ? 0 : optimal / n;
   const meanRegret = n === 0 ? 0 : regretSum / n;
   return {
@@ -495,10 +490,35 @@ export function metricsForChosenMoves(
     highRegretCount,
     optimalRateWilson: wilsonInterval(optimal, n),
     meanRegretCi: bootstrapMeanCi(regrets),
-    ...(options.invalidFlags !== undefined
+    ...(input.invalidFlags !== undefined
       ? { invalidDecisionRate: n === 0 ? 0 : invalid / n }
       : {})
   };
+}
+
+export function metricsForChosenMoves(
+  snapshots: readonly DecisionSnapshot[],
+  chosen: readonly SkillId[],
+  options: { invalidFlags?: readonly boolean[] } = {}
+): SnapshotPolicyMetrics {
+  if (snapshots.length !== chosen.length) {
+    throw new Error("snapshots and chosen length mismatch");
+  }
+
+  const regrets: number[] = [];
+  const optimalFlags: boolean[] = [];
+  for (let i = 0; i < snapshots.length; i += 1) {
+    const snap = snapshots[i]!;
+    const skillId = chosen[i]!;
+    optimalFlags.push(snap.best.includes(skillId));
+    regrets.push(regret(snap.values, skillId));
+  }
+
+  return aggregateChoiceMetrics({
+    regrets,
+    optimalFlags,
+    invalidFlags: options.invalidFlags
+  });
 }
 
 export function greedyChoice(snapshot: DecisionSnapshot): SkillId {

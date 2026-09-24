@@ -410,3 +410,15 @@ Pre-registration: `docs/preregistration-batch4.md` (SHA `2a130a7…`; amendments
 | groq/A-flip-noise | — | flip rate 1/35 | no (noise baseline) | |
 
 **Limitations:** two-move loadouts; T=0; single suite; no multiplicity correction; A combined surfaces; gemini C degenerate; Window 3 cut. Groq's base answers were recorded in Batch 2; the new versions were recorded later. The 1 of 35 difference may reflect changes on the provider's side over time, not only same-session wobble.
+
+## Batch 5 / D-052 — Resonance Seal (second reference environment)
+
+Keyless headless baselines only. Suite: `evals/env-suites/resonance-seal/snapshots.resonance-seal.v1.json` (n=40 informative states; all-ties excluded). Summary: `evals/out-committed/resonance-seal.baselines.v1.json`.
+
+**Scale honesty:** Seal regret scale ≠ robot battle. **Never compare metrics across environments.** Seal is **not** on the leaderboard. Oracle = exact best response to a fixed vault pressure script (not an equilibrium).
+
+**Shared (generality proof):** `EnvironmentOf`, `evaluateChoices`, `aggregateChoiceMetrics`, `wilsonInterval` / `bootstrapMeanCi` / `insufficientEvidence`. Robot production `Environment` / `robotEnvironment` unchanged; adapter + golden test prove shared eval.
+
+**Not shared:** LLM prompt/agent path; cross-env comparison.
+
+**Committed greedy / random (n=40):** plan greedy optimalRate **0.90**, meanRegret **0.10** (greedy≠oracle **0.10**, measured); random optimalRate **0.55**, meanRegret **16.325** (random≠oracle **0.45**). See summary JSON for Wilson / bootstrap CIs, oracle-best distribution, spreads, and excluded-all-tie count.

@@ -1,12 +1,22 @@
 /**
- * Placeholder allowlist of free OpenRouter model ids.
- * UNKNOWN until an operator verifies which free ids actually work.
- * Do not treat these as production-validated.
+ * UNVERIFIED catalog candidates (operator may promote after runbook verify).
+ * Catalog churns; do not claim these work.
  */
-export const LIVE_MODEL_IDS = [
-  // Placeholder — replace after operator verification of free OpenRouter ids.
-  "openrouter/free"
+export const LIVE_MODEL_CANDIDATES_UNVERIFIED = [
+  "openrouter/free",
+  "google/gemma-3-4b-it:free",
+  "meta-llama/llama-3.2-3b-instruct:free",
+  "qwen/qwen3-4b:free"
 ] as const;
+
+/**
+ * Active Arena allowlist (UI dropdown).
+ * Every id here is still UNVERIFIED until the operator completes
+ * docs/OPERATOR_RECORDING_RUNBOOK.md § BYOK model verification — including
+ * the default `openrouter/free` placeholder. Do not treat allowlist membership
+ * as proof the model works.
+ */
+export const LIVE_MODEL_IDS = ["openrouter/free"] as const;
 
 export type LiveModelId = (typeof LIVE_MODEL_IDS)[number];
 

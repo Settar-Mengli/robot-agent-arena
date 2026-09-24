@@ -1,0 +1,913 @@
+{
+  "schemaVersion": 1,
+  "id": "resonance-seal-v1",
+  "n": 40,
+  "excludedAllTieCount": 21,
+  "snapshots": [
+    {
+      "id": "seal__2_2_0_0_0_0",
+      "state": {
+        "turn": 2,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 0,
+        "pressure": 0,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 93,
+        "inscribe": 93,
+        "vent": -1000000000000,
+        "brace": 91
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__3_4_0_0_0_0",
+      "state": {
+        "turn": 3,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 0,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 92,
+        "inscribe": 93,
+        "vent": -1000000000000,
+        "brace": 91
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__4_2_1_2_0_0",
+      "state": {
+        "turn": 4,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 93,
+        "inscribe": 93,
+        "vent": 91,
+        "brace": 91
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__4_3_0_1_0_1",
+      "state": {
+        "turn": 4,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 0,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 91,
+        "vent": 1,
+        "brace": -1000000000000
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__4_3_0_2_0_0",
+      "state": {
+        "turn": 4,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 0,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 91,
+        "vent": 0,
+        "brace": -1
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__4_5_0_2_0_0",
+      "state": {
+        "turn": 4,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 0,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 92,
+        "vent": 91,
+        "brace": 91
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_1_1_1_0_0",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 1,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": -1000000000000,
+        "vent": 1,
+        "brace": 0
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_1_1_2_0_0",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": -1000000000000,
+        "vent": 0,
+        "brace": -1
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_1_1_2_0_1",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": -1000000000000,
+        "vent": 0,
+        "brace": -1000000000000
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_2_0_0_0_0",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 0,
+        "pressure": 0,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 1,
+        "inscribe": 1,
+        "vent": -1000000000000,
+        "brace": 0
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_3_1_2_0_0",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 92,
+        "inscribe": 92,
+        "vent": 91,
+        "brace": 91
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_4_0_1_0_0",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 0,
+        "inscribe": 91,
+        "vent": 0,
+        "brace": 0
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_4_0_2_0_1",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": 91,
+        "vent": 0,
+        "brace": -1000000000000
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__5_5_0_2_0_0",
+      "state": {
+        "turn": 5,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 0,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": 91,
+        "vent": 0,
+        "brace": -1
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_1_2_2_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 2,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 92,
+        "inscribe": -1000000000000,
+        "vent": 91,
+        "brace": 91
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_2_1_1_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 91,
+        "vent": 0,
+        "brace": 0
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_2_1_2_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 91,
+        "vent": -1,
+        "brace": -1
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_2_1_2_0_1",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 91,
+        "vent": -1,
+        "brace": -1000000000000
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_3_0_1_0_1",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 0,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": -1,
+        "vent": 0,
+        "brace": -1000000000000
+      },
+      "best": [
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_3_1_2_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 91,
+        "vent": 0,
+        "brace": 0
+      },
+      "best": [
+        "channel",
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_4_0_1_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": 0,
+        "vent": 0,
+        "brace": 0
+      },
+      "best": [
+        "inscribe",
+        "vent",
+        "brace"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_4_0_2_0_1",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -1000000000000
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_5_0_1_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 0,
+        "pressure": 1,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": 0,
+        "vent": 0,
+        "brace": 0
+      },
+      "best": [
+        "inscribe",
+        "vent",
+        "brace"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_5_0_2_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 0,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -1
+      },
+      "best": [
+        "inscribe",
+        "vent",
+        "brace"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__6_5_1_2_0_0",
+      "state": {
+        "turn": 6,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": 92,
+        "vent": 91,
+        "brace": 91
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_1_1_2_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 1,
+        "pressure": 2,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 0,
+        "inscribe": -1000000000000,
+        "vent": 0,
+        "brace": -1
+      },
+      "best": [
+        "channel",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_1_1_3_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 1,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": -1000000000000,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "channel",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_1_2_3_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 2,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": -1000000000000,
+        "vent": 0,
+        "brace": -1
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_1_2_3_0_1",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 2,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": -1000000000000,
+        "vent": 0,
+        "brace": -1000000000000
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_1_2_4_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 1,
+        "seal": 2,
+        "pressure": 4,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": 91,
+        "inscribe": -1000000000000,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "channel"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_2_1_3_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": -1,
+        "vent": 0,
+        "brace": -1
+      },
+      "best": [
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_2_1_3_0_1",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": -1,
+        "inscribe": -1,
+        "vent": 0,
+        "brace": -1000000000000
+      },
+      "best": [
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_2_1_4_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 2,
+        "seal": 1,
+        "pressure": 4,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -2,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_3_0_3_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 0,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_3_1_4_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 3,
+        "seal": 1,
+        "pressure": 4,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_4_0_3_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_4_0_3_0_1",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 4,
+        "seal": 0,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": true
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -1000000000000
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_5_0_3_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 0,
+        "pressure": 3,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": -1,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_5_0_4_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 0,
+        "pressure": 4,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -3,
+        "inscribe": -2,
+        "vent": -2,
+        "brace": -3
+      },
+      "best": [
+        "inscribe",
+        "vent"
+      ],
+      "exact": true
+    },
+    {
+      "id": "seal__7_5_1_4_0_0",
+      "state": {
+        "turn": 7,
+        "maxTurns": 8,
+        "energy": 5,
+        "seal": 1,
+        "pressure": 4,
+        "braced": false,
+        "bracedLastTurn": false
+      },
+      "values": {
+        "channel": -2,
+        "inscribe": 91,
+        "vent": -1,
+        "brace": -2
+      },
+      "best": [
+        "inscribe"
+      ],
+      "exact": true
+    }
+  ]
+}
