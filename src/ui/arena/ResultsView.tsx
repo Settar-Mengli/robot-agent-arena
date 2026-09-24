@@ -72,6 +72,25 @@ export function ResultsView({
         </p>
       </div>
 
+      <div
+        className="mt-6 rounded border border-stone-800 px-4 py-3 text-sm text-stone-400"
+        data-testid="batch4-findings-results"
+      >
+        <p className="text-stone-300">
+          No measurable effect: rewording, a misleading rumor, and extra facts
+          did not change these models&apos; choices on this test set.
+        </p>
+        <p className="mt-2 text-stone-300">
+          The same question asked twice changed 1 of 35 answers for Groq —
+          small wobble (1 of 35), from repeat runs or provider changes over
+          time.
+        </p>
+        <p className="mt-2 text-stone-500">
+          Scoped to this robot battle, this test set, and these two models —
+          not a claim about AI systems in general. Details: Methodology.
+        </p>
+      </div>
+
       <div className="mt-8" data-testid="results-history">
         <h3 className="text-sm font-medium text-stone-300">Battle log</h3>
         {turns.length === 0 ? (

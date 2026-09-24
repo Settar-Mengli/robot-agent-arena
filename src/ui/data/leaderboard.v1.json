@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "suites": [
+    {
+      "suiteId": "adversarial-heldout-ext",
+      "label": "Held-out extended (35 cases)",
+      "rows": [
+        {
+          "id": "gemini:base",
+          "label": "gemini base",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "gemini:grounded",
+          "label": "gemini grounded",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "gemini:base-repeat",
+          "label": "gemini base-repeat",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "gemini:perturb",
+          "label": "gemini perturb",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "gemini:advctx",
+          "label": "gemini advctx",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "gemini:info-partial",
+          "label": "gemini info-partial",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "groq:base",
+          "label": "groq base",
+          "n": 35,
+          "rate": 0.37142857142857144,
+          "wilson": {
+            "low": 0.2316560736889106,
+            "high": 0.5366335951197893
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "groq:grounded",
+          "label": "groq grounded",
+          "n": 35,
+          "rate": 0.37142857142857144,
+          "wilson": {
+            "low": 0.2316560736889106,
+            "high": 0.5366335951197893
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "groq:base-repeat",
+          "label": "groq base-repeat",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "groq:perturb",
+          "label": "groq perturb",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "groq:advctx",
+          "label": "groq advctx",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        },
+        {
+          "id": "groq:info-partial",
+          "label": "groq info-partial",
+          "n": 35,
+          "rate": 0.34285714285714286,
+          "wilson": {
+            "low": 0.20831495282688925,
+            "high": 0.5084835312726328
+          },
+          "insufficientEvidence": false
+        }
+      ],
+      "groups": [
+        [
+          "gemini:base",
+          "gemini:grounded",
+          "gemini:base-repeat",
+          "gemini:perturb",
+          "gemini:advctx",
+          "gemini:info-partial",
+          "groq:base",
+          "groq:grounded",
+          "groq:base-repeat",
+          "groq:perturb",
+          "groq:advctx",
+          "groq:info-partial"
+        ]
+      ]
+    },
+    {
+      "suiteId": "adversarial",
+      "label": "Held-out adversarial (13 cases)",
+      "rows": [
+        {
+          "id": "gemini:base:secondary",
+          "label": "gemini base (smaller set)",
+          "n": 13,
+          "rate": 0.15384615384615385,
+          "wilson": {
+            "low": 0.04325726318273798,
+            "high": 0.4223517050863101
+          },
+          "insufficientEvidence": true
+        },
+        {
+          "id": "gemini:grounded:secondary",
+          "label": "gemini grounded (smaller set)",
+          "n": 13,
+          "rate": 0.07692307692307693,
+          "wilson": {
+            "low": 0.013710066379696304,
+            "high": 0.3331453392824736
+          },
+          "insufficientEvidence": true
+        },
+        {
+          "id": "groq:base:secondary",
+          "label": "groq base (smaller set)",
+          "n": 13,
+          "rate": 0.07692307692307693,
+          "wilson": {
+            "low": 0.013710066379696304,
+            "high": 0.3331453392824736
+          },
+          "insufficientEvidence": true
+        },
+        {
+          "id": "groq:grounded:secondary",
+          "label": "groq grounded (smaller set)",
+          "n": 13,
+          "rate": 0.15384615384615385,
+          "wilson": {
+            "low": 0.04325726318273798,
+            "high": 0.4223517050863101
+          },
+          "insufficientEvidence": true
+        }
+      ],
+      "groups": [
+        [
+          "gemini:base:secondary",
+          "gemini:grounded:secondary",
+          "groq:base:secondary",
+          "groq:grounded:secondary"
+        ]
+      ]
+    }
+  ]
+}

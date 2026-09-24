@@ -1104,3 +1104,18 @@ Batch 3 shipped researcher-facing Lab/Arena surfaces; live testing showed save/m
 
 Consequences:
 AGENT_RULES / D-007 mobile exclusion amended for ~380px usable layout. ROADMAP / PROGRESS show D-050 UX batch; NEXT remains locked batch 9 after this ships.
+
+## D-051 Batch 4 — Robustness experiments + BYOK/leaderboard/methodology
+Date: 2026-09-23
+Status: Accepted
+
+Decision:
+Execute locked batches 9+10 as one PR with M0 cleanup and D-048 two-phase recording. Pre-register in `docs/preregistration-batch4.md` **before** recording (commit `2a130a757543433fbec9d56a1ead9fd59d07d114`); pre-recording amendments `48fa3d2` / `6b08ebb`. Variants: `base-repeat` (noise; byte-identical prompt; `setRepeat(1)` fixture key), `perturb`, `advctx`, `info-partial`. Primary heldout-ext n=35; 2×4×35=280≤300; secondary n=13 cut. Decision rule: paired bootstrap Δregret CI (seed 0xA11CE, B=2000); Wilson display-only; A noise-flip gate; report all 14 primary comparisons; no multiplicity correction. Gemini C expected-degenerate. BYOK OpenRouter Arena-only; injected EnvMap seam; eslint `src/ui/live/**`; mocked CI. UI evidence via `batch4.robustness.summary` + `leaderboard.v1` only — **no new Lab pack**. Leaderboard per-suite; Wilson overlap = connected components.
+
+**Results (primary n=35):** No separable treatment effects. Gemini: 0/35 flips for all new arms vs base (and info-partial vs grounded). Groq: 1/35 flips for each of base-repeat, perturb, advctx, and info-partial vs base (same single snapshot); info-partial vs grounded also 1/35. All Δregret CIs include 0 or fail the registered directional/noise gate; A-flip-perturb is separable from noise only when flip Wilson intervals are disjoint (Groq 1/35 vs 1/35 → not separable). Identical digest aggregates across the eight new arms reflect identical skill choices, not a scoring bug. Window 3 not recorded. Limitation: Groq's base answers were recorded in Batch 2; the new versions were recorded later. The 1 of 35 difference may reflect changes on the provider's side over time, not only same-session wobble.
+
+Rationale:
+D-033 after D-050; honesty + free-tier quota.
+
+Consequences:
+NEXT → Batch 5 (second reference environment). CI replay includes the four new variants on both pins.

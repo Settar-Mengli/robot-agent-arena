@@ -19,6 +19,21 @@ describe("batch4-summary helpers", () => {
     expect(projected).toBeLessThanOrEqual(QUOTA_CALL_CAP);
   });
 
+  it("pairedDeltaRegretCi is [0,0] when all paired deltas are 0", () => {
+    const zeros = [0, 0, 0, 0, 0];
+    const ci = pairedDeltaRegretCi(zeros, zeros, {
+      seed: BATCH4_BOOTSTRAP_SEED,
+      B: BATCH4_BOOTSTRAP_B,
+      alpha: 0.05
+    });
+    expect(ci.mean).toBe(0);
+    expect(ci.low).toBe(0);
+    expect(ci.high).toBe(0);
+    expect(separableByDirection(ci, "two-sided")).toBe(false);
+    expect(separableByDirection(ci, "worse")).toBe(false);
+    expect(separableByDirection(ci, "better")).toBe(false);
+  });
+
   it("pairedDeltaRegretCi uses bootstrap on per-case deltas", () => {
     const variant = [1, 2, 3, 4, 5];
     const baseline = [0, 1, 2, 3, 4];
@@ -47,6 +62,14 @@ describe("batch4-summary helpers", () => {
     expect(
       wilsonIntervalsDisjoint({ low: 0.1, high: 0.4 }, { low: 0.3, high: 0.6 })
     ).toBe(false);
+  });
+
+  it("A-flip-perturb separable iff flip Wilson intervals are disjoint from noise", () => {
+    const same = flipRateWilson(1, 35);
+    expect(wilsonIntervalsDisjoint(same.wilson, same.wilson)).toBe(false);
+    const low = flipRateWilson(0, 35);
+    const high = flipRateWilson(20, 35);
+    expect(wilsonIntervalsDisjoint(low.wilson, high.wilson)).toBe(true);
   });
 
   it("separability decision rules match pre-registration", () => {

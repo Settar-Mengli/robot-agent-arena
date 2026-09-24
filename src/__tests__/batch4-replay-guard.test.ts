@@ -23,7 +23,7 @@ describe("cli replay unknown-variant guard", () => {
     expect(window).toMatch(/return 1/);
   });
 
-  it("batch4 variants are absent from committed manifest (would trip the guard)", () => {
+  it("batch4 variants are recorded in the committed manifest", () => {
     const manifest = readManifestSync(manifestPath);
     expect(manifest).toBeDefined();
     if (manifest === undefined) {
@@ -35,7 +35,7 @@ describe("cli replay unknown-variant guard", () => {
       "advctx",
       "info-partial"
     ] as const) {
-      expect(manifestRecordsVariant(manifest, v, ["heldout"])).toBe(false);
+      expect(manifestRecordsVariant(manifest, v, ["heldout"])).toBe(true);
     }
   });
 });

@@ -1378,11 +1378,14 @@ async function runLlmMode(
         if (args.mode === "replay" && resolved.snapshots === false) {
           continue;
         }
-        for (const kind of resolveSnapshotKinds(
-          args,
-          split,
-          existingManifest
-        )) {
+        const kinds =
+          args.mode === "replay" &&
+          "snapshotSuite" in resolved &&
+          resolved.snapshotSuite !== undefined &&
+          !args.snapshotSuiteExplicit
+            ? ([resolved.snapshotSuite] as SnapshotSuiteKind[])
+            : resolveSnapshotKinds(args, split, existingManifest);
+        for (const kind of kinds) {
           const key = snapshotResultKey(split, kind);
           log(`snapshots: ${key} [${variant}]`);
           const snapshots = await loadCommittedSnapshots(split, kind);

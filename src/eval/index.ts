@@ -191,6 +191,22 @@ export type {
 } from "./batch4-summary";
 
 export {
+  BATCH4_AMENDMENT_SHAS,
+  BATCH4_PREREG_SHA,
+  auditFlipCounts,
+  buildBatch4RobustnessSummary,
+  loadArmSeries,
+  loadFixtureIndex,
+  stableStringify
+} from "./batch4-analyze";
+export type {
+  ArmDecision,
+  ArmSeries,
+  Batch4ArmId,
+  Batch4PinId
+} from "./batch4-analyze";
+
+export {
   buildLeaderboardV1,
   exportLeaderboardStub,
   wilsonIntervalsOverlap,

@@ -49,6 +49,8 @@ jobs:
       - run: npm run eval:replay -- --suite all --models gemini:gemini-3.5-flash-lite
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial --variants base,grounded,freetext --max-matches 0 --models groq:openai/gpt-oss-20b
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base,grounded --max-matches 0 --models groq:openai/gpt-oss-20b
+      - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base-repeat,perturb,advctx,info-partial --max-matches 0 --models gemini:gemini-3.5-flash-lite
+      - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base-repeat,perturb,advctx,info-partial --max-matches 0 --models groq:openai/gpt-oss-20b
 
   # Headline regen drift (~5 min wall locally). Kept off verify so PRs stay fast.
   # Per-file steps (issue #28). Forks + maxWorkers=1 tried as root fix for vitest
@@ -92,3 +94,7 @@ jobs:
         env:
           SNAPSHOT_DRIFT: "1"
         run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/env-differential.test.ts
+      - name: Drift — batch4
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 src/__tests__/batch4-drift.test.ts

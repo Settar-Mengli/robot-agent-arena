@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 1,
+  "preregistrationCommitSha": "2a130a757543433fbec9d56a1ead9fd59d07d114",
+  "bootstrap": {
+    "seed": 659918,
+    "B": 2000,
+    "alpha": 0.05
+  },
+  "suite": {
+    "id": "adversarial-heldout-ext",
+    "n": 35
+  },
+  "comparisons": [
+    {
+      "id": "gemini/A-delta",
+      "experiment": "A",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "perturb",
+      "baselineVariant": "base",
+      "registeredDirection": "two-sided",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "flipRateVariantVsBase": 0,
+      "flipRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "flipRateNoiseVsBase": 0,
+      "flipRateNoiseWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "separableFromNoise": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "gemini/A-noise-delta",
+      "experiment": "noise",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "base-repeat",
+      "baselineVariant": "base",
+      "registeredDirection": "noise-baseline",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "gemini/B-delta",
+      "experiment": "B",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "advctx",
+      "baselineVariant": "base",
+      "registeredDirection": "worse",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "gemini/C-vs-base",
+      "experiment": "C",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "info-partial",
+      "baselineVariant": "base",
+      "registeredDirection": "better",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "expectedDegenerate": true,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "gemini/C-vs-grounded",
+      "experiment": "C",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "info-partial",
+      "baselineVariant": "grounded",
+      "registeredDirection": "worse",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "expectedDegenerate": true,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "gemini/A-flip-perturb",
+      "experiment": "A",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "perturb",
+      "baselineVariant": "base",
+      "registeredDirection": "two-sided",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "flipRateVariantVsBase": 0,
+      "flipRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "separableFromNoise": false,
+      "optimalRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "gemini/A-flip-noise",
+      "experiment": "noise",
+      "pin": "gemini:gemini-3.5-flash-lite",
+      "variant": "base-repeat",
+      "baselineVariant": "base",
+      "registeredDirection": "noise-baseline",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "flipRateVariantVsBase": 0,
+      "flipRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "optimalRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/A-delta",
+      "experiment": "A",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "perturb",
+      "baselineVariant": "base",
+      "registeredDirection": "two-sided",
+      "meanDeltaRegret": 0.0286,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0.0857,
+        "mean": 0.0286
+      },
+      "separable": false,
+      "flipRateVariantVsBase": 0.0286,
+      "flipRateWilson": {
+        "low": 0.0051,
+        "high": 0.1453
+      },
+      "flipRateNoiseVsBase": 0.0286,
+      "flipRateNoiseWilson": {
+        "low": 0.0051,
+        "high": 0.1453
+      },
+      "separableFromNoise": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/A-noise-delta",
+      "experiment": "noise",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "base-repeat",
+      "baselineVariant": "base",
+      "registeredDirection": "noise-baseline",
+      "meanDeltaRegret": 0.0286,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0.0857,
+        "mean": 0.0286
+      },
+      "separable": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/B-delta",
+      "experiment": "B",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "advctx",
+      "baselineVariant": "base",
+      "registeredDirection": "worse",
+      "meanDeltaRegret": 0.0286,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0.0857,
+        "mean": 0.0286
+      },
+      "separable": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/C-vs-base",
+      "experiment": "C",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "info-partial",
+      "baselineVariant": "base",
+      "registeredDirection": "better",
+      "meanDeltaRegret": 0.0286,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0.0857,
+        "mean": 0.0286
+      },
+      "separable": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/C-vs-grounded",
+      "experiment": "C",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "info-partial",
+      "baselineVariant": "grounded",
+      "registeredDirection": "worse",
+      "meanDeltaRegret": 0.1714,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0.5143,
+        "mean": 0.1714
+      },
+      "separable": false,
+      "optimalRateWilson": {
+        "low": 0.2083,
+        "high": 0.5085
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/A-flip-perturb",
+      "experiment": "A",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "perturb",
+      "baselineVariant": "base",
+      "registeredDirection": "two-sided",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "flipRateVariantVsBase": 0.0286,
+      "flipRateWilson": {
+        "low": 0.0051,
+        "high": 0.1453
+      },
+      "separableFromNoise": false,
+      "optimalRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "insufficientEvidence": false
+    },
+    {
+      "id": "groq/A-flip-noise",
+      "experiment": "noise",
+      "pin": "groq:openai/gpt-oss-20b",
+      "variant": "base-repeat",
+      "baselineVariant": "base",
+      "registeredDirection": "noise-baseline",
+      "meanDeltaRegret": 0,
+      "deltaRegretCi": {
+        "low": 0,
+        "high": 0,
+        "mean": 0
+      },
+      "separable": false,
+      "flipRateVariantVsBase": 0.0286,
+      "flipRateWilson": {
+        "low": 0.0051,
+        "high": 0.1453
+      },
+      "optimalRateWilson": {
+        "low": 0,
+        "high": 0.0989
+      },
+      "insufficientEvidence": false
+    }
+  ],
+  "notes": [
+    "Most situations in this suite offer two legal moves, so there is little room for any manipulation to change a choice.",
+    "Recorder temperature was 0 (greedy decoding).",
+    "Evidence is from a single suite (adversarial-heldout-ext, n=35).",
+    "No multiplicity correction across the 14 pre-registered comparisons (family-wise error not controlled).",
+    "Experiment A combines three surface changes (rewording, option order, formatting) and does not attribute which one matters.",
+    "Gemini information-scaling (C) is expected-degenerate: base and grounded already chose identically on all 35 cases.",
+    "Groq shows small wobble (1 of 35), from repeat runs or provider changes over time.",
+    "Groq's base answers were recorded in Batch 2; the new versions were recorded later. The 1 of 35 difference may reflect changes on the provider's side over time, not only same-session wobble.",
+    "Window 3 (adversarial n=13 secondary) was not recorded; cut per pre-registration.",
+    "Pre-registration commit: 2a130a757543433fbec9d56a1ead9fd59d07d114.",
+    "Pre-recording amendment commits: 48fa3d2, 6b08ebb."
+  ]
+}

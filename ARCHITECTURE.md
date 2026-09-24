@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
 
-**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3 / ES), and UI through Batch 3 (B.3 Watch, B.4 save, pack v3 diagnostics, Challenge) plus **D-050** (plain-language UX + bugs, [PR #38](https://github.com/Settar-Mengli/robot-agent-arena/pull/38)) are the product surface. Next measurement work: locked batch **9**.
+**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3 / ES / Batch 4), and UI through Batch 3–4 (Watch, save, pack v3 diagnostics, Challenge, D-050 plain UX, Batch 4 BYOK Arena opt-in + leaderboard/methodology) are the product surface. Next measurement work: **Batch 5** (second reference environment).
 
 ## Layered architecture and dependency rule
 
@@ -44,7 +44,7 @@ Dependencies should point inward toward the engine. Game logic must not live in 
 
 **Oracle note:** `bestResponse` is an exact memoized best response against a *fixed* player policy (node-capped). It is not a game-theoretic equilibrium. Snapshot suites sample discriminative CPU decisions reached under greedy-CPU play (D-023). Dynamics go through the environment adapter (`robotEnvironment`); terminal scoring and memo/decision state keys live on the interface.
 
-**UI (through Batch 3 / D-049 + D-050):** React, Tailwind, and Zustand are installed. App entry is `index.html` → `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, and one-slot save live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs are static JSON; no Node eval harness in the browser.
+**UI (through Batch 4 / D-051):** React, Tailwind, and Zustand. App entry is `index.html` → `src/ui/main.tsx`. Builder, Arena, Results, Watch (lazy), Decision Lab (lazy), landing, honesty strip, first-visit tour, one-slot save, **leaderboard**, **methodology**, and **OpenRouter BYOK** (`src/ui/live/**`, Arena opt-in) live under `src/ui/`. Battle-view store (D-041 / D-042); greedy CPU adapter (`src/ui/play/cpu-turn.ts`). Packs and Batch 4 summaries are static JSON; no Node eval harness in the browser. Live keys stay in memory only and never appear on the leaderboard.
 
 ## Environment interface (A3 / D-033 batch 5)
 

@@ -111,6 +111,17 @@ describe("App battle flow", () => {
       expect(screen.getByTestId("results-history").textContent ?? "").toMatch(
         /FLOW-UNIT/
       );
+      expect(screen.getByTestId("batch4-findings-results")).toHaveTextContent(
+        "No measurable effect"
+      );
+      const { findForbiddenTechnicalText } = await import(
+        "./copy/forbidden-default-path"
+      );
+      expect(
+        findForbiddenTechnicalText(
+          screen.getByTestId("results-view").textContent ?? ""
+        )
+      ).toBeNull();
 
       fireEvent.click(screen.getByRole("button", { name: /Fight again/i }));
       expect(screen.getByTestId("arena-view")).toBeInTheDocument();

@@ -2,15 +2,22 @@ import { describe, expect, it } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 import { MethodologyView } from "./MethodologyView";
+import { findForbiddenTechnicalText } from "../copy/forbidden-default-path";
 
 describe("MethodologyView", () => {
-  it("renders core sections and Advanced prereg path", () => {
+  it("shows plain robustness findings and passes forbidden crawl", () => {
     render(<MethodologyView />);
     expect(screen.getByTestId("methodology-view")).toBeInTheDocument();
-    expect(screen.getByText("What we measure")).toBeInTheDocument();
-    expect(screen.getByText("Recorded vs live")).toBeInTheDocument();
+    expect(screen.getByTestId("batch4-findings")).toHaveTextContent(
+      "No measurable effect"
+    );
+    expect(screen.getByTestId("batch4-findings")).toHaveTextContent(
+      "1 of 35 answers for Groq"
+    );
     expect(
-      screen.getByText("docs/preregistration-batch4.md")
-    ).toBeInTheDocument();
+      findForbiddenTechnicalText(
+        screen.getByTestId("methodology-default").textContent ?? ""
+      )
+    ).toBeNull();
   });
 });

@@ -155,14 +155,26 @@ describe("lab-pack replay safety", () => {
   });
 
   it(
-    "regen is byte-identical to committed decision-lab.v3.json",
+    "regen matches committed decision-lab.v3.json except fixtureManifest hash",
     async () => {
+      // Batch 4 extends evals/fixtures/manifest.json without a new Lab pack
+      // (D-051: packs stay byte-identical on disk). Regen recomputes
+      // inputHashes.fixtureManifest from the current manifest, so that one
+      // field may differ; all other pack bytes must still match.
       const committed = await readFile(
         join(process.cwd(), "src/ui/lab/pack/decision-lab.v3.json"),
         "utf8"
       );
       const { json } = await buildDecisionLabPack({ dryRun: true });
-      expect(json).toBe(committed);
+      const committedHash = (
+        JSON.parse(committed) as { inputHashes: { fixtureManifest: string } }
+      ).inputHashes.fixtureManifest;
+      const normalized = json.replace(
+        /"fixtureManifest":\s*"[a-f0-9]{64}"/,
+        `"fixtureManifest": "${committedHash}"`
+      );
+      expect(normalized).toBe(committed);
+      expect(json).not.toBe(committed);
     },
     60_000
   );

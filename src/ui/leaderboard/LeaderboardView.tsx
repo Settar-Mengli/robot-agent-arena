@@ -1,4 +1,5 @@
 import { useState } from "react";
+import pack from "../data/leaderboard.v1.json";
 
 /** UI-local mirror of LeaderboardV1 (ui must not import eval). */
 export type LeaderboardPackUi = {
@@ -21,12 +22,8 @@ export type LeaderboardPackUi = {
 
 const OVERLAP_LABEL = "Can't be separated with this data";
 
-/**
- * Phase 1: pack file absent → empty state.
- * Phase 2: switch to `import raw from "../data/leaderboard.v1.json"`.
- */
-function loadPackSync(): LeaderboardPackUi | null {
-  return null;
+function loadPackSync(): LeaderboardPackUi {
+  return pack as LeaderboardPackUi;
 }
 
 export type LeaderboardViewProps = {
@@ -36,7 +33,7 @@ export type LeaderboardViewProps = {
 export function LeaderboardView({
   onHome
 }: LeaderboardViewProps): React.JSX.Element {
-  const [pack] = useState<LeaderboardPackUi | null>(() => loadPackSync());
+  const [board] = useState<LeaderboardPackUi>(() => loadPackSync());
 
   return (
     <section aria-labelledby="leaderboard-heading" data-testid="leaderboard-view">
@@ -51,15 +48,19 @@ export function LeaderboardView({
         Recorded measurements in this robot battle only. Compared only within the
         same suite. Live AI play is never ranked here.
       </p>
+      <p className="mt-2 text-stone-500 text-sm">
+        These numbers are for this test set and these models — not a general claim
+        about every robot battle or every AI.
+      </p>
 
-      {pack === null || pack.suites.length === 0 ? (
+      {board.suites.length === 0 ? (
         <p className="mt-6 text-stone-400" data-testid="leaderboard-empty">
           No leaderboard pack is available yet. Recorded results will appear here
           when published.
         </p>
       ) : (
         <div className="mt-8 space-y-10">
-          {pack.suites.map((suite) => {
+          {board.suites.map((suite) => {
             const byId = new Map(suite.rows.map((r) => [r.id, r]));
             return (
               <div
@@ -79,39 +80,36 @@ export function LeaderboardView({
                         data-testid="leaderboard-group"
                       >
                         {multi ? (
-                          <p className="mb-2 text-sm text-amber-200/90">
+                          <p className="text-sm text-amber-200/90">
                             {OVERLAP_LABEL}
                           </p>
                         ) : null}
-                        <ul className="space-y-2">
+                        <ul className="mt-1 space-y-1">
                           {group.map((id) => {
                             const row = byId.get(id);
                             if (row === undefined) {
-                              return (
-                                <li key={id} className="text-sm text-stone-500">
-                                  {id}
-                                </li>
-                              );
+                              return null;
                             }
+                            const pct =
+                              row.rate === undefined
+                                ? "—"
+                                : `${(row.rate * 100).toFixed(1)}%`;
                             return (
-                              <li key={id} className="text-sm text-stone-300">
-                                <span className="font-medium text-stone-100">
+                              <li
+                                key={id}
+                                className="text-stone-300"
+                                data-testid="leaderboard-row"
+                              >
+                                <span className="text-stone-100">
                                   {row.label ?? row.id}
                                 </span>
-                                {row.rate !== undefined ? (
-                                  <span className="ml-2 text-stone-400">
-                                    rate {(row.rate * 100).toFixed(0)}%
-                                  </span>
-                                ) : null}
-                                <span className="ml-2 text-stone-500">
-                                  Wilson [{row.wilson.low.toFixed(2)},{" "}
-                                  {row.wilson.high.toFixed(2)}] · n={row.n}
+                                <span className="text-stone-500">
+                                  {" "}
+                                  · best-move rate {pct}
+                                  {row.insufficientEvidence
+                                    ? " · not enough evidence"
+                                    : ""}
                                 </span>
-                                {row.insufficientEvidence ? (
-                                  <span className="ml-2 text-amber-300/80">
-                                    insufficient evidence
-                                  </span>
-                                ) : null}
                               </li>
                             );
                           })}
@@ -129,7 +127,7 @@ export function LeaderboardView({
       {onHome ? (
         <button
           type="button"
-          className="mt-8 min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200"
+          className="mt-10 min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200"
           onClick={onHome}
         >
           Home

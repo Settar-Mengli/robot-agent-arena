@@ -159,24 +159,20 @@ describe("fixture manifest", () => {
     });
   });
 
-  it("manifestRecordsVariant is false for batch4 arms not yet in the manifest", () => {
+  it("manifestRecordsVariant reflects heldout vs dev listing", () => {
     const manifest = readManifestSync(manifestPath);
     expect(manifest).toBeDefined();
     if (manifest === undefined) {
       throw new Error("manifest missing");
     }
-    for (const absent of [
+    for (const id of [
       "base-repeat",
       "perturb",
       "advctx",
       "info-partial"
     ] as const) {
-      expect(manifestRecordsVariant(manifest, absent, ["heldout"])).toBe(
-        false
-      );
-      expect(manifestRecordsVariant(manifest, absent, ["dev", "heldout"])).toBe(
-        false
-      );
+      expect(manifestRecordsVariant(manifest, id, ["heldout"])).toBe(true);
+      expect(manifestRecordsVariant(manifest, id, ["dev"])).toBe(false);
     }
     expect(manifestRecordsVariant(manifest, "base", ["heldout"])).toBe(true);
     expect(manifestRecordsVariant(manifest, "freetext", ["dev"])).toBe(false);
@@ -185,32 +181,43 @@ describe("fixture manifest", () => {
     );
   });
 
-  it("resolveVariantRun returns snapshots:false for variants absent from the manifest", () => {
+  it("resolveVariantRun returns snapshots:false for variants absent from a split", () => {
+    const resolved = resolveVariantRun(
+      {
+        scenarioIds: ["a"],
+        snapshots: true,
+        providers: [],
+        variants: [
+          {
+            id: "base",
+            promptVersion: "agent-v1",
+            scenarioIds: ["a"],
+            snapshots: true
+          }
+        ]
+      },
+      "info-partial",
+      { provider: "groq", model: "openai/gpt-oss-20b" }
+    );
+    expect(resolved.snapshots).toBe(false);
+    expect(
+      "variant info-partial has no recorded fixtures in the manifest"
+    ).toMatch(/has no recorded fixtures in the manifest/);
+  });
+
+  it("heldout manifest records batch4 variants after Phase 2", () => {
     const manifest = readManifestSync(manifestPath);
     expect(manifest).toBeDefined();
     if (manifest === undefined) {
       throw new Error("manifest missing");
     }
-    const heldout = manifest.splits.heldout;
-    expect(heldout).toBeDefined();
-    if (heldout === undefined) {
-      throw new Error("heldout split missing");
-    }
-    for (const absent of [
+    for (const id of [
       "base-repeat",
       "perturb",
       "advctx",
       "info-partial"
     ] as const) {
-      const resolved = resolveVariantRun(heldout, absent, {
-        provider: "groq",
-        model: "openai/gpt-oss-20b"
-      });
-      expect(resolved.snapshots).toBe(false);
-      // CLI replay must fail (not silently skip) when snapshots===false — see cli.ts.
-      expect(
-        `variant ${absent} has no recorded fixtures in the manifest`
-      ).toMatch(/has no recorded fixtures in the manifest/);
+      expect(manifestRecordsVariant(manifest, id, ["heldout"])).toBe(true);
     }
   });
 
