@@ -59,6 +59,15 @@ async function goToSetup() {
 }
 
 describe("BattleSetup honesty vs live intent", () => {
+  it("reveal Live control accessible name is clean UTF-8", async () => {
+    render(<App />);
+    await goToSetup();
+    const reveal = screen.getByTestId("reveal-live-opponent");
+    expect(reveal).toHaveAccessibleName(/Live AI opponent \(OpenRouter\)/);
+    expect(reveal.textContent ?? "").toMatch(/Live AI opponent \(OpenRouter\)/);
+    expect(reveal.textContent ?? "").not.toContain("â");
+  });
+
   it("live enabled with key: live strip, no CPU/recorded claims", async () => {
     render(<App />);
     await goToSetup();

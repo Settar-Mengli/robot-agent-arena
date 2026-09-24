@@ -28,6 +28,13 @@ describe("decision-lab stats", () => {
     }
   });
 
+  it("Wilson orders before clamp so negative z keeps low ≤ high", () => {
+    const w = wilsonInterval(1, 2, -10);
+    expect(w.low).toBeGreaterThanOrEqual(0);
+    expect(w.high).toBeLessThanOrEqual(1);
+    expect(w.low).toBeLessThanOrEqual(w.high);
+  });
+
   it("insufficientEvidence when n < 30", () => {
     expect(
       insufficientEvidence({ n: 13, wilson: wilsonInterval(2, 13) })
