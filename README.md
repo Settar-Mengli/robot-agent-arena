@@ -130,6 +130,8 @@ Track progress in [PROGRESS.md](PROGRESS.md) and scope in [ROADMAP.md](ROADMAP.m
 
 All robots, skills, and lore are original. Security-related gameplay uses safe fictional mechanics and approved vocabulary only — no real hacking content or copying of other games’ assets, characters, or moves. See [AGENT_RULES.md](AGENT_RULES.md).
 
+**Pages security:** the demo ships a Content-Security-Policy meta (scripts/styles from `'self'`; `connect-src` limited to `'self'` and `https://openrouter.ai`) and `referrer: strict-origin-when-cross-origin`. OpenRouter still receives an explicit `HTTP-Referer` header from the live client (not the browser’s default referrer). GitHub Pages cannot set `frame-ancestors` via HTTP headers or CSP meta — residual clickjacking risk is low for this static demo.
+
 ## License
 
 [MIT](LICENSE)

@@ -72,7 +72,38 @@ describe("check-dist-urls fail-closed", () => {
       ].join("\n")
     );
     const r = runCheck(dir);
-    expect(r.status).toBe(0);
+    expect(r.status, r.stderr).toBe(0);
     expect(r.stdout).toMatch(/dist URL allowlist OK/);
+  });
+
+  it("fails when CSP connect-src omits an allowlisted connect host", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "csp-gap-"));
+    temps.push(root);
+    const assets = path.join(root, "assets");
+    mkdirSync(assets, { recursive: true });
+    writeFileSync(
+      path.join(assets, "plant.js"),
+      '"https://openrouter.ai/api/v1"\n'
+    );
+    const htmlPath = path.join(root, "index.html").replace(/\\/g, "/");
+    writeFileSync(
+      path.join(root, "index.html"),
+      `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; script-src 'self'">`
+    );
+    const assetsPosix = assets.replace(/\\/g, "/");
+    const r2 = spawnSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        `import { findConnectSrcGaps } from './scripts/check-dist-urls.mjs';
+const gaps = findConnectSrcGaps(${JSON.stringify(assetsPosix)}, ${JSON.stringify(htmlPath)});
+if (!gaps.some((g) => g.includes('openrouter.ai'))) process.exit(2);
+console.log(gaps.join('\\n'));`
+      ],
+      { encoding: "utf8", cwd: process.cwd() }
+    );
+    expect(r2.status, r2.stderr + r2.stdout).toBe(0);
+    expect(r2.stdout).toContain("openrouter.ai");
   });
 });
