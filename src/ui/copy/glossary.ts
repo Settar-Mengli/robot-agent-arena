@@ -20,8 +20,8 @@ export type GlossaryEntry = {
 export const GLOSSARY: Record<GlossaryId, GlossaryEntry> = {
   missScore: {
     id: "missScore",
-    term: "Miss score",
-    short: "How much worse than the best recorded move",
+    term: "Points vs best",
+    short: "How many points worse than the best move in this situation",
     long: "Lab only; measured against a fixed player plan—not a whole-game claim."
   },
   bestMove: {
@@ -62,9 +62,9 @@ export const GLOSSARY: Record<GlossaryId, GlossaryEntry> = {
   },
   seed: {
     id: "seed",
-    term: "Seed",
+    term: "Replay code",
     short: "Number/text that locks randomness",
-    long: "Same seed and robots → same fight."
+    long: "Same replay code and robots → same fight."
   },
   smallSample: {
     id: "smallSample",

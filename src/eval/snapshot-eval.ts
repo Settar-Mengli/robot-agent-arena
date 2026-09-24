@@ -218,6 +218,11 @@ export async function evalLlmSnapshots(
     consistency?: number;
     setRepeat?: (n: number) => void;
     /**
+     * Offset added to consistency index before setRepeat.
+     * base-repeat uses 1 so fixture keys do not collide with base (repeat 0).
+     */
+    fixtureRepeatOffset?: number;
+    /**
      * Optional additive seam: invoked once per snapshot after the primary
      * (consistency index 0) turn. Omitted by default — return shape unchanged.
      */
@@ -228,6 +233,7 @@ export async function evalLlmSnapshots(
   } = {}
 ): Promise<SnapshotEvalResult & { consistency?: ConsistencyMetrics }> {
   const consistencyN = Math.max(1, consistencyOptions.consistency ?? 1);
+  const fixtureRepeatOffset = consistencyOptions.fixtureRepeatOffset ?? 0;
   const chosen: SkillId[] = [];
   const invalidFlags: boolean[] = [];
   const decisions: SnapshotDecisionRecord[] = [];
@@ -239,26 +245,27 @@ export async function evalLlmSnapshots(
     let primaryTrace: PlayAgentTurnResult | undefined;
 
     for (let i = 0; i < consistencyN; i += 1) {
-      consistencyOptions.setRepeat?.(i);
-      const result = await playAgentTurn(
-        snap.runtime,
-        snap.playerSkillId,
-        options
-      );
-      const executed =
-        result.trace.executedSkillId ??
-        result.step.turnRecord.actions.find((a) => a.actor === "cpu")
-          ?.selectedSkillId ??
-        snap.runtime.session.cpu.skillIds[0]!;
-      picks.push(executed);
-      // Count every consistency repeat's fixture misses (same as match: per failure).
-      fixtureMissCount += countFixtureMissFailures(result.trace.failures);
-      if (i === 0) {
-        primaryTrace = result;
+      try {
+        consistencyOptions.setRepeat?.(fixtureRepeatOffset + i);
+        const result = await playAgentTurn(snap.runtime, snap.playerSkillId, {
+          ...options,
+          snapshotId: options.snapshotId ?? snap.id
+        });
+        const executed =
+          result.trace.executedSkillId ??
+          result.step.turnRecord.actions.find((a) => a.actor === "cpu")
+            ?.selectedSkillId ??
+          snap.runtime.session.cpu.skillIds[0]!;
+        picks.push(executed);
+        // Count every consistency repeat's fixture misses (same as match: per failure).
+        fixtureMissCount += countFixtureMissFailures(result.trace.failures);
+        if (i === 0) {
+          primaryTrace = result;
+        }
+      } finally {
+        consistencyOptions.setRepeat?.(0);
       }
     }
-
-    consistencyOptions.setRepeat?.(0);
 
     const primary = primaryTrace!;
     const { trace } = primary;

@@ -5,7 +5,7 @@ const TOUR_KEY = "agent-arena.tour.v1";
 const STEPS = [
   {
     title: "Play",
-    body: "Fight a simple computer foe with a ready-made or custom robot."
+    body: "Fight a simple computer opponent with a ready-made or custom robot."
   },
   {
     title: "Watch",
@@ -80,7 +80,7 @@ export function FirstVisitTour({
           {step < STEPS.length - 1 ? (
             <button
               type="button"
-              className="min-h-11 rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950"
+              className="min-h-11 rounded border border-stone-600 px-4 py-2 text-sm font-medium text-stone-200"
               onClick={() => setStep((s) => s + 1)}
               data-testid="tour-next"
             >

@@ -73,6 +73,31 @@
       ],
       "variants": [
         {
+          "id": "advctx",
+          "promptVersion": "agent-v6-advctx",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial-heldout-ext",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            }
+          ]
+        },
+        {
           "id": "base",
           "promptVersion": "agent-v1",
           "scenarioIds": [
@@ -111,6 +136,31 @@
               "scenarioIds": [],
               "snapshots": true,
               "snapshotSuite": "adversarial"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            }
+          ]
+        },
+        {
+          "id": "base-repeat",
+          "promptVersion": "agent-v6-base-repeat",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial-heldout-ext",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
             },
             {
               "provider": "groq",
@@ -199,9 +249,59 @@
           "snapshotSuite": "adversarial",
           "provider": "gemini",
           "model": "gemini-3.5-flash-lite"
+        },
+        {
+          "id": "info-partial",
+          "promptVersion": "agent-v6-info-partial",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial-heldout-ext",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            }
+          ]
+        },
+        {
+          "id": "perturb",
+          "promptVersion": "agent-v6-perturb",
+          "scenarioIds": [],
+          "snapshots": true,
+          "snapshotSuite": "adversarial-heldout-ext",
+          "provider": "gemini",
+          "model": "gemini-3.5-flash-lite",
+          "models": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.5-flash-lite",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            },
+            {
+              "provider": "groq",
+              "model": "openai/gpt-oss-20b",
+              "scenarioIds": [],
+              "snapshots": true,
+              "snapshotSuite": "adversarial-heldout-ext"
+            }
+          ]
         }
       ],
-      "snapshotSuite": "adversarial"
+      "snapshotSuite": "adversarial-heldout-ext"
     }
   }
 }

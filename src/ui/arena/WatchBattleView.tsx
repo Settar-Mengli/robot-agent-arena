@@ -115,15 +115,31 @@ export function WatchBattleView({
       ? (lastTurn.trace.validation as { reason: string }).reason
       : lastTurn?.trace?.rawText;
 
+  const playerName = match.playerConfig.displayName;
+  const cpuName = match.cpuConfig.displayName;
+
   const narration =
     lastTurn !== undefined
       ? narrateSkillExchange(
-          player.displayName,
-          cpu.displayName,
+          playerName,
+          cpuName,
           lastTurn.playerSkillId,
           lastTurn.cpuSkillId
         )
       : [];
+
+  const storyLog = match.turns
+    .slice(0, clamped)
+    .map((turn, idx) => ({
+      turn: idx + 1,
+      lines: narrateSkillExchange(
+        playerName,
+        cpuName,
+        turn.playerSkillId,
+        turn.cpuSkillId
+      )
+    }))
+    .reverse();
 
   return (
     <section aria-labelledby="watch-heading" data-testid="watch-battle-view">
@@ -196,7 +212,11 @@ export function WatchBattleView({
       </div>
 
       {lastTurn ? (
-        <div className="mt-6 space-y-2 text-sm text-stone-300" aria-live="polite">
+        <div
+          className="mt-6 space-y-2 text-sm text-stone-300"
+          aria-live="polite"
+          data-testid="watch-latest-narration"
+        >
           {narration.map((line, i) => (
             <p key={`n-${i}`}>{line}</p>
           ))}
@@ -210,6 +230,27 @@ export function WatchBattleView({
       ) : (
         <p className="mt-6 text-sm text-stone-500">Start of match.</p>
       )}
+
+      {storyLog.length > 0 ? (
+        <div className="mt-6" data-testid="watch-story-log">
+          <h2 className="text-sm font-medium text-stone-300">Battle story</h2>
+          <ol className="mt-3 space-y-3 text-sm text-stone-300">
+            {storyLog.map((entry) => (
+              <li
+                key={entry.turn}
+                className="rounded border border-stone-800 px-3 py-2"
+              >
+                <p className="font-medium text-stone-200">Turn {entry.turn}</p>
+                <ul className="mt-1 space-y-1 text-stone-400">
+                  {entry.lines.map((line, i) => (
+                    <li key={`${entry.turn}-${i}`}>{line}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
 
       {finished ? (
         <p className="mt-4 text-sm text-stone-300" data-testid="watch-outcome">

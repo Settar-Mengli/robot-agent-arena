@@ -6,6 +6,20 @@ export {
   resolvePromptVersion
 } from "./prompt";
 export type { BuildAgentMessagesInput } from "./prompt";
+export {
+  BATCH4_PROMPT_VERSIONS,
+  PROMPT_VERSIONS_ALL,
+  ADVCTX_RUMOR,
+  INFO_PARTIAL_CPU_SKILL_KEYS,
+  buildAgentMessagesBatch4,
+  resolvePromptVersionBatch4,
+  selectInfoPartialFacts
+} from "./prompt-batch4";
+export type {
+  BuildAgentMessagesBatch4Input,
+  InfoPartialFacts,
+  PromptVariant
+} from "./prompt-batch4";
 export { validateAgentResponse } from "./validate";
 export { playAgentTurn } from "./llm-turn";
 export {

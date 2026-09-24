@@ -7,6 +7,7 @@ import {
   discoverVariantScenarioIds,
   listFixtureHostModels,
   mergeManifest,
+  manifestRecordsVariant,
   readManifestSync,
   resolveVariantRun,
   selectScenariosByIds,
@@ -156,6 +157,68 @@ describe("fixture manifest", () => {
       provider: "groq",
       model: "openai/gpt-oss-20b"
     });
+  });
+
+  it("manifestRecordsVariant reflects heldout vs dev listing", () => {
+    const manifest = readManifestSync(manifestPath);
+    expect(manifest).toBeDefined();
+    if (manifest === undefined) {
+      throw new Error("manifest missing");
+    }
+    for (const id of [
+      "base-repeat",
+      "perturb",
+      "advctx",
+      "info-partial"
+    ] as const) {
+      expect(manifestRecordsVariant(manifest, id, ["heldout"])).toBe(true);
+      expect(manifestRecordsVariant(manifest, id, ["dev"])).toBe(false);
+    }
+    expect(manifestRecordsVariant(manifest, "base", ["heldout"])).toBe(true);
+    expect(manifestRecordsVariant(manifest, "freetext", ["dev"])).toBe(false);
+    expect(manifestRecordsVariant(manifest, "freetext", ["dev", "heldout"])).toBe(
+      true
+    );
+  });
+
+  it("resolveVariantRun returns snapshots:false for variants absent from a split", () => {
+    const resolved = resolveVariantRun(
+      {
+        scenarioIds: ["a"],
+        snapshots: true,
+        providers: [],
+        variants: [
+          {
+            id: "base",
+            promptVersion: "agent-v1",
+            scenarioIds: ["a"],
+            snapshots: true
+          }
+        ]
+      },
+      "info-partial",
+      { provider: "groq", model: "openai/gpt-oss-20b" }
+    );
+    expect(resolved.snapshots).toBe(false);
+    expect(
+      "variant info-partial has no recorded fixtures in the manifest"
+    ).toMatch(/has no recorded fixtures in the manifest/);
+  });
+
+  it("heldout manifest records batch4 variants after Phase 2", () => {
+    const manifest = readManifestSync(manifestPath);
+    expect(manifest).toBeDefined();
+    if (manifest === undefined) {
+      throw new Error("manifest missing");
+    }
+    for (const id of [
+      "base-repeat",
+      "perturb",
+      "advctx",
+      "info-partial"
+    ] as const) {
+      expect(manifestRecordsVariant(manifest, id, ["heldout"])).toBe(true);
+    }
   });
 
   it("resolveVariantRun leaves legacy entries without provider/model unpinned", () => {

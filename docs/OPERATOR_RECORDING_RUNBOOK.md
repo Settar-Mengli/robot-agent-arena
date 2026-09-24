@@ -105,3 +105,19 @@ node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-
 ```
 
 Then set `singleModelPending: false`, update EVAL, commit live-profile under `evals/out-committed/bench.live-profile.json`.
+
+---
+
+# Batch 4 / D-051 — Operator delays (Windows 1–2)
+
+**Branch:** `feat/batch4-robustness-live`  
+**Primary:** adversarial-heldout-ext n=35; variants `base-repeat,perturb,advctx,info-partial`; both pins; **280** calls.
+
+| Pin | `--record-delay-ms` |
+| --- | ---: |
+| Gemini (`gemini-3.5-flash-lite`) | **5000** |
+| Groq (`openai/gpt-oss-20b`) | **8000** |
+
+On HTTP **503** / transient provider gaps: **rerun the same record command** — fixture cache skips completed keys and fills misses only. Do not raise temperature; do not change variants mid-window.
+
+Window 3 (adversarial n=13) was **cut** per pre-registration — do not record it for Batch 4.

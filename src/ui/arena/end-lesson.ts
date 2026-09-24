@@ -17,7 +17,7 @@ export function endLesson(input: EndLessonInput): string {
 
   const result = input.outcome.result;
   if (result === "cpu-victory") {
-    return "Tip: defense moves can soften the foe's biggest hits. Try adding one.";
+    return "Tip: defense moves can soften the opponent's biggest hits. Try adding one.";
   }
   if (result === "draw") {
     return "Even match. Try a different pair of moves.";
@@ -37,7 +37,7 @@ export function endLesson(input: EndLessonInput): string {
 
 export const END_LESSON_STRINGS = [
   "Tip: moves cost energy. If you can't pay, your robot switches to a safe stabilize.",
-  "Tip: defense moves can soften the foe's biggest hits. Try adding one.",
+  "Tip: defense moves can soften the opponent's biggest hits. Try adding one.",
   "Close fight. Using defense earlier could have kept more HP.",
   "Clean win. Try the other opponent next.",
   "Even match. Try a different pair of moves."

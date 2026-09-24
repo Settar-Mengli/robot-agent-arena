@@ -63,6 +63,7 @@ import {
   resolveVariantRun,
   selectScenariosByIds,
   variantsFromManifestSplit,
+  manifestRecordsVariant,
   writeManifest,
   type FixtureManifest
 } from "./manifest";
@@ -1354,6 +1355,20 @@ async function runLlmMode(
 
     const snapshotResults: Record<string, SnapshotEvalResult> = {};
     if (args.snapshots) {
+      if (
+        args.mode === "replay" &&
+        existingManifest !== undefined &&
+        !manifestRecordsVariant(
+          existingManifest,
+          variant,
+          splitsFor(args.suite)
+        )
+      ) {
+        error(
+          `variant ${variant} has no recorded fixtures in the manifest`
+        );
+        return 1;
+      }
       for (const split of splitsFor(args.suite)) {
         const entry = existingManifest?.splits[split];
         const resolved =
@@ -1361,14 +1376,16 @@ async function runLlmMode(
             ? resolveVariantRun(entry, variant, activePin)
             : { snapshots: true as boolean };
         if (args.mode === "replay" && resolved.snapshots === false) {
-          log(`snapshots: ${split} skipped (variant.snapshots=false)`);
           continue;
         }
-        for (const kind of resolveSnapshotKinds(
-          args,
-          split,
-          existingManifest
-        )) {
+        const kinds =
+          args.mode === "replay" &&
+          "snapshotSuite" in resolved &&
+          resolved.snapshotSuite !== undefined &&
+          !args.snapshotSuiteExplicit
+            ? ([resolved.snapshotSuite] as SnapshotSuiteKind[])
+            : resolveSnapshotKinds(args, split, existingManifest);
+        for (const kind of kinds) {
           const key = snapshotResultKey(split, kind);
           log(`snapshots: ${key} [${variant}]`);
           const snapshots = await loadCommittedSnapshots(split, kind);
@@ -1388,6 +1405,7 @@ async function runLlmMode(
             llmPolicyIdForVariant(variant),
             {
               consistency: args.consistency,
+              fixtureRepeatOffset: variant === "base-repeat" ? 1 : 0,
               ...(setRepeat !== undefined ? { setRepeat } : {})
             }
           );
@@ -1876,6 +1894,7 @@ export async function runBenchMode(
             llmPolicyIdForVariant(variant),
             {
               consistency: args.consistency,
+              fixtureRepeatOffset: variant === "base-repeat" ? 1 : 0,
               ...(setRepeat !== undefined ? { setRepeat } : {})
             }
           );

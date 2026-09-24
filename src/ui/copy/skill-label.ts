@@ -18,10 +18,11 @@ export function skillCategoryLabel(skillId: string): string {
   return "Move";
 }
 
+/** Plain energy/category hint — no catalog flavor text. */
 export function skillHint(skillId: string): string {
   const skill = MVP_SKILL_CATALOG.skills.find(
     (s) => s.skillId === (skillId as SkillId)
   );
   if (skill === undefined) return "";
-  return `Cost ${skill.energyCost} energy · ${skillCategoryLabel(skillId)} · ${skill.summary}`;
+  return `Cost ${skill.energyCost} energy · ${skillCategoryLabel(skillId)}`;
 }

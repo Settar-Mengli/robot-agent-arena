@@ -11,9 +11,9 @@ import { summarizePlayerTendencies } from "./memory";
 import type { PlayerTendencies } from "./memory";
 import { observePostPlayerState } from "./observe";
 import {
-  buildAgentMessages,
-  resolvePromptVersion
-} from "./prompt";
+  buildAgentMessagesBatch4 as buildAgentMessages,
+  resolvePromptVersionBatch4 as resolvePromptVersion
+} from "./prompt-batch4";
 import type {
   DecisionTrace,
   PlayAgentTurnOptions,
@@ -83,7 +83,8 @@ export async function playAgentTurn(
   const promptVersion = resolvePromptVersion({
     grounding: groundedFacts,
     memory: playerTendencies,
-    responseFormat
+    responseFormat,
+    promptVariant: options.promptVariant
   });
 
   const baseTrace = (): Pick<
@@ -127,7 +128,10 @@ export async function playAgentTurn(
     catalog,
     grounding: groundedFacts,
     memory: playerTendencies,
-    responseFormat
+    responseFormat,
+    promptVariant: options.promptVariant,
+    snapshotId: options.snapshotId,
+    playerSkillIds: runtime.session.player.skillIds
   });
 
   const budgetSignal = AbortSignal.timeout(budgetMs);

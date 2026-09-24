@@ -336,6 +336,34 @@ export function variantsFromManifestSplit(
   return ids;
 }
 
+/**
+ * True when at least one requested split lists the variant (or is legacy
+ * without a variants[] array). Used by replay to fail closed when an
+ * explicitly requested arm has never been recorded.
+ */
+export function manifestRecordsVariant(
+  manifest: FixtureManifest | undefined,
+  variantId: LlmVariant,
+  splits: readonly ("dev" | "heldout")[]
+): boolean {
+  if (manifest === undefined) {
+    return false;
+  }
+  for (const split of splits) {
+    const entry = manifest.splits[split];
+    if (entry === undefined) {
+      continue;
+    }
+    if (entry.variants === undefined || entry.variants.length === 0) {
+      return true;
+    }
+    if (entry.variants.some((v) => v.id === variantId)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export type ResolveVariantPin = {
   provider: string;
   model: string;

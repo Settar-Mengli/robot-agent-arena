@@ -79,7 +79,11 @@ describe("prompt-variant ablation helpers", () => {
       "grounded-v2",
       "memory",
       "grounded+memory",
-      "freetext"
+      "freetext",
+      "base-repeat",
+      "perturb",
+      "advctx",
+      "info-partial"
     ]);
     expect(parseVariantsList("grounded-v2,base,grounded-v2", "live")).toEqual([
       "grounded-v2",

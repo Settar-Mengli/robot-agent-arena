@@ -63,12 +63,31 @@ export function ResultsView({
           <p className="mt-1 text-sm text-stone-400">Winner: {winnerName}</p>
         ) : null}
         <p className="mt-2 text-sm text-stone-300" data-testid="final-hp">
-          Final HP: you {finalPlayer.health}/{finalPlayer.maxHealth} · foe{" "}
+          Final HP: you {finalPlayer.health}/{finalPlayer.maxHealth} · opponent{" "}
           {finalCpu.health}/{finalCpu.maxHealth}
         </p>
         <p className="mt-1 text-sm text-stone-500">{turns.length} turns</p>
         <p className="mt-3 text-sm text-amber-100/90" data-testid="end-lesson">
           {lesson}
+        </p>
+      </div>
+
+      <div
+        className="mt-6 rounded border border-stone-800 px-4 py-3 text-sm text-stone-400"
+        data-testid="batch4-findings-results"
+      >
+        <p className="text-stone-300">
+          No measurable effect: rewording, a misleading rumor, and extra facts
+          did not change these models&apos; choices on this test set.
+        </p>
+        <p className="mt-2 text-stone-300">
+          The same question asked twice changed 1 of 35 answers for Groq —
+          small wobble (1 of 35), from repeat runs or provider changes over
+          time.
+        </p>
+        <p className="mt-2 text-stone-500">
+          Scoped to this robot battle, this test set, and these two models —
+          not a claim about AI systems in general. Details: Methodology.
         </p>
       </div>
 
@@ -78,7 +97,7 @@ export function ResultsView({
           <p className="mt-2 text-sm text-stone-500">No turns recorded.</p>
         ) : (
           <ol className="mt-3 space-y-3 text-sm text-stone-300">
-            {turns.map((turn) => (
+            {[...turns].reverse().map((turn) => (
               <li
                 key={turn.turn}
                 className="rounded border border-stone-800 px-3 py-2"
@@ -120,7 +139,7 @@ function formatResult(result: BattleOutcome["result"]): string {
     case "player-victory":
       return "You won";
     case "cpu-victory":
-      return "Foe won";
+      return "Opponent won";
     case "draw":
       return "Draw";
     default: {

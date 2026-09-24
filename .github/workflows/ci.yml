@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -23,10 +25,32 @@ jobs:
         env:
           VITE_BASE: /robot-agent-arena/
         run: npm run build
+      - name: Assert Pages asset prefix in dist
+        run: |
+          grep -q '/robot-agent-arena/' dist/index.html
+      - name: Protected paths and lockfile unchanged vs PR base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            echo "Comparing protected paths two-dot against PR base $BASE"
+            git diff --exit-code "$BASE"..HEAD -- \
+              src/engine \
+              src/ui/lab/pack/decision-lab.v3.json \
+              src/ui/arena/pack/arena-replay.v1.json \
+              src/ui/lab/pack/diagnostics.summary.json \
+              src/decision-lab/diagnostics.ts \
+              src/eval/lab-pack.ts \
+              package.json \
+              package-lock.json
+          else
+            echo "push event: skipping protected-path PR-base check (no pull_request.base.sha)"
+          fi
       - run: npm run coverage
       - run: npm run eval:replay -- --suite all --models gemini:gemini-3.5-flash-lite
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial --variants base,grounded,freetext --max-matches 0 --models groq:openai/gpt-oss-20b
       - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base,grounded --max-matches 0 --models groq:openai/gpt-oss-20b
+      - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base-repeat,perturb,advctx,info-partial --max-matches 0 --models gemini:gemini-3.5-flash-lite
+      - run: npm run eval:replay -- --suite heldout --snapshot-suite adversarial-heldout-ext --variants base-repeat,perturb,advctx,info-partial --max-matches 0 --models groq:openai/gpt-oss-20b
 
   # Headline regen drift (~5 min wall locally). Kept off verify so PRs stay fast.
   # Per-file steps (issue #28). Forks + maxWorkers=1 tried as root fix for vitest
@@ -70,3 +94,7 @@ jobs:
         env:
           SNAPSHOT_DRIFT: "1"
         run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 -t "drift-guard" src/__tests__/env-differential.test.ts
+      - name: Drift — batch4
+        env:
+          SNAPSHOT_DRIFT: "1"
+        run: npx vitest run --pool=forks --maxWorkers=1 --testTimeout=600000 src/__tests__/batch4-drift.test.ts

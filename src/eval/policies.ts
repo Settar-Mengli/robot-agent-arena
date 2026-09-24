@@ -1,4 +1,8 @@
-import { createGreedySelector, playAgentTurn, PROMPT_VERSIONS } from "../agent";
+import {
+  createGreedySelector,
+  playAgentTurn,
+  PROMPT_VERSIONS_ALL
+} from "../agent";
 import type {
   DecisionTrace,
   PlayAgentTurnOptions,
@@ -68,7 +72,11 @@ export const LLM_VARIANTS = [
   "grounded-v2",
   "memory",
   "grounded+memory",
-  "freetext"
+  "freetext",
+  "base-repeat",
+  "perturb",
+  "advctx",
+  "info-partial"
 ] as const;
 
 export type LlmVariant = (typeof LLM_VARIANTS)[number];
@@ -147,7 +155,10 @@ export function parseVariantsList(
 
 export function variantToPlayOptions(
   variant: LlmVariant
-): Pick<PlayAgentTurnOptions, "grounding" | "memory" | "json" | "responseFormat"> {
+): Pick<
+  PlayAgentTurnOptions,
+  "grounding" | "memory" | "json" | "responseFormat" | "promptVariant"
+> {
   switch (variant) {
     case "base":
       return { grounding: "off", memory: "off" };
@@ -166,23 +177,47 @@ export function variantToPlayOptions(
         json: false,
         responseFormat: "freetext"
       };
+    case "base-repeat":
+      return {
+        grounding: "off",
+        memory: "off",
+        promptVariant: "base-repeat"
+      };
+    case "perturb":
+      return { grounding: "off", memory: "off", promptVariant: "perturb" };
+    case "advctx":
+      return { grounding: "off", memory: "off", promptVariant: "advctx" };
+    case "info-partial":
+      return {
+        grounding: "off",
+        memory: "off",
+        promptVariant: "info-partial"
+      };
   }
 }
 
 export function variantPromptVersion(variant: LlmVariant): string {
   switch (variant) {
     case "base":
-      return PROMPT_VERSIONS.v1;
+      return PROMPT_VERSIONS_ALL.v1;
     case "grounded":
-      return PROMPT_VERSIONS.grounded;
+      return PROMPT_VERSIONS_ALL.grounded;
     case "grounded-v2":
-      return PROMPT_VERSIONS.groundedV2;
+      return PROMPT_VERSIONS_ALL.groundedV2;
     case "memory":
-      return PROMPT_VERSIONS.memory;
+      return PROMPT_VERSIONS_ALL.memory;
     case "grounded+memory":
-      return PROMPT_VERSIONS.groundedMemory;
+      return PROMPT_VERSIONS_ALL.groundedMemory;
     case "freetext":
-      return PROMPT_VERSIONS.freeText;
+      return PROMPT_VERSIONS_ALL.freeText;
+    case "base-repeat":
+      return PROMPT_VERSIONS_ALL.baseRepeat;
+    case "perturb":
+      return PROMPT_VERSIONS_ALL.perturb;
+    case "advctx":
+      return PROMPT_VERSIONS_ALL.advctx;
+    case "info-partial":
+      return PROMPT_VERSIONS_ALL.infoPartial;
   }
 }
 

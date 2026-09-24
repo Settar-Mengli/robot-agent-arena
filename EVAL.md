@@ -385,3 +385,28 @@ Quota: `models × variants × (snapshots + matches×17) × consistency` — refu
 - Free-tier model volatility can change live/record results.
 - Replay latency is not meaningful.
 - Fictional environment vocabulary only.
+
+## Batch 4 / D-051 — Robustness (heldout-ext n=35)
+
+Pre-registration: `docs/preregistration-batch4.md` (SHA `2a130a7…`; amendments `48fa3d2`, `6b08ebb`). Summary: `evals/out-committed/batch4.robustness.summary.json`.
+
+**Outcome (null result, scoped):** Rewording + option-order/format (perturb), a fixed arena rumor (advctx), and partial grounded facts (info-partial) did **not** produce separable Δregret effects vs base on either pin. Gemini: **0/35** flips on all new arms vs base. Groq: **1/35** flips on each of the four vs base (same snapshot); that single flip also appears on base-repeat (noise). Gemini C expected-degenerate. Window 3 not recorded.
+
+| id | mean Δregret | 95% CI | separable | notes |
+| --- | ---: | --- | --- | --- |
+| gemini/A-delta | 0 | [0, 0] | no | flip=0; not separable from noise |
+| gemini/A-noise-delta | 0 | [0, 0] | no (noise baseline) | |
+| gemini/B-delta | 0 | [0, 0] | no | |
+| gemini/C-vs-base | 0 | [0, 0] | no | expectedDegenerate |
+| gemini/C-vs-grounded | 0 | [0, 0] | no | expectedDegenerate |
+| gemini/A-flip-perturb | — | flip rate 0 | no | |
+| gemini/A-flip-noise | — | flip rate 0 | no | |
+| groq/A-delta | 0.0286 | [0, 0.0857] | no | flip=1/35; not separable from noise |
+| groq/A-noise-delta | 0.0286 | [0, 0.0857] | no (noise baseline) | |
+| groq/B-delta | 0.0286 | [0, 0.0857] | no | |
+| groq/C-vs-base | 0.0286 | [0, 0.0857] | no | |
+| groq/C-vs-grounded | 0.1714 | [0, 0.5143] | no | |
+| groq/A-flip-perturb | — | flip rate 1/35 | no | not separable from run-to-run noise; same 1 snap as noise |
+| groq/A-flip-noise | — | flip rate 1/35 | no (noise baseline) | |
+
+**Limitations:** two-move loadouts; T=0; single suite; no multiplicity correction; A combined surfaces; gemini C degenerate; Window 3 cut. Groq's base answers were recorded in Batch 2; the new versions were recorded later. The 1 of 35 difference may reflect changes on the provider's side over time, not only same-session wobble.
