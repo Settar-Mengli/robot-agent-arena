@@ -6,7 +6,7 @@
 **License:** MIT  
 **Version (package):** 0.1.0  
 **Record date:** 2026-09-25  
-**HEAD at record time (approx):** `ec8935d` — fix: battle leave races… (#46) on `release/final-polish`  
+**HEAD at record time (approx):** `release/final-polish` — **v0.1.0 release cut via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47) (D-055)** (builds on #46 / `ec8935d`)  
 **Branch:** `release/final-polish` — v0.1.0 portfolio cut (D-055).
 
 ---
@@ -212,7 +212,7 @@ Full text: `DECISIONS.md`.
 9 Three measurements **closed under D-051** (Batch 4 robustness); memory / full scaling curve **deferred D-055**.  
 10 BYOK/leaderboard/methodology shipped (D-051).  
 11 Second env shipped (D-052).  
-**Next (D-055):** open/merge `release/final-polish` PR; Pages check; operator BYOK smoke; optional demo video; issue #28 (SNAPSHOT_DRIFT worker noise). Screenshots intentionally skipped for this release.
+**Next (D-055):** Pages check / operator BYOK smoke after the v0.1.0 release cut ([PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47)); optional demo video; issue #28 (SNAPSHOT_DRIFT worker noise). Screenshots intentionally skipped for this release.
 
 ---
 
@@ -254,13 +254,13 @@ Optional `.env` from `.env.example` for `eval:record` / live keys — tests inje
 
 ---
 
-## 16. Notable merged PRs (recent) + pending release
+## 16. Notable merged PRs (recent)
 
-Baseline for **D-055** on `release/final-polish` is **#46** on main lineage. The final-polish PR itself is **pending** until opened/merged (not deployed yet).
+Baseline for **D-055** is **#46** on main lineage; **v0.1.0 release cut shipped via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47) (D-055)**.
 
 | PR | Title |
 |----|--------|
-| *(pending)* | `release/final-polish` — insight loop, lifecycle races, D-055 docs (not merged yet) |
+| #47 | final polish — insight loop, lifecycle races, D-055 docs (v0.1.0 release cut) |
 | #46 | battle leave races, persist guards, terminalValue (grounding V2 reverted for lab-pack fence) |
 | #45 | arena usability / responsive UI |
 | #44 | CSP + SHA-pinned actions |
@@ -290,7 +290,7 @@ Baseline for **D-055** on `release/final-polish` is **#46** on main lineage. The
 
 ## 18. Working tree at record time
 
-`release/final-polish` holds the visitor insight loop + lifecycle fixes + D-055 docs; screenshots skipped. Expect a clean tree after the fix-pass commits; PR opened against `main` (not merged/deployed until review).
+**v0.1.0 release cut shipped via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47) (D-055)** — visitor insight loop + lifecycle fixes + docs; screenshots skipped. Post-merge: Pages check and operator BYOK smoke.
 
 ---
 

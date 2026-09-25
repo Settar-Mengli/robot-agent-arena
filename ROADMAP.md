@@ -32,7 +32,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** Execution **B.2d** Decision Lab (partial diagnostic slice — not locked batch 8 / C).
 - **DONE (PR #39 / Batch 4, D-051):** Locked batch **9–10** — robustness variants + BYOK/leaderboard/methodology; primary n=35 null result.
 - **DONE (Batch 5 / D-052):** Locked batch **11** — second reference environment (Resonance Seal); `EnvironmentOf` + shared `evaluateChoices`.
-- **NEXT:** Merge `release/final-polish` (D-055); Pages check; operator BYOK smoke; optional demo video / `v0.1.0` tag; issue #28. Screenshots intentionally skipped for this release.
+- **NEXT:** Pages check / operator BYOK smoke after the v0.1.0 release cut ([PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47), D-055); optional demo video / `v0.1.0` tag; issue #28. Screenshots intentionally skipped for this release.
 - **PLANNED:** Publish polish; further environments.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 

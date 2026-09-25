@@ -2,10 +2,10 @@
 
 ## Status Snapshot
 - Date: 2026-09-25
-- Branch: `release/final-polish` (fix pass → **PR opened**)
+- Branch: `release/final-polish` — **v0.1.0 release cut shipped via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47) (D-055)**
 - HEAD: builds on [#46](https://github.com/Settar-Mengli/robot-agent-arena/pull/46) — battle leave races, persist guards, terminalValue
-- Current state: D-033 batches **8–11** closed for v0.1.0 (**D-055**); visitor insight loop + lifecycle/persist/env fixes on this branch; docs truth + race/regression tests in the fix pass. Screenshots **intentionally skipped** for this release (`docs/media/SHOT-LIST.md` kept as a future capture plan, marked not captured).
-- **NEXT:** merge the final-polish PR after CI; Pages check; operator BYOK smoke; optional demo video / `v0.1.0` tag; delete stale `ux2/redesign` when done.
+- Current state: D-033 batches **8–11** closed for v0.1.0 (**D-055**); visitor insight loop + lifecycle/persist/env fixes; docs truth + race/regression tests. Screenshots **intentionally skipped** for this release (`docs/media/SHOT-LIST.md` kept as a future capture plan, marked not captured).
+- **NEXT:** Pages check after merge; operator BYOK smoke; optional demo video / `v0.1.0` tag; delete stale `ux2/redesign` when done.
 
 ## Completed
 - Repository baseline through Batch 3 (PR #37 / D-049) + D-050 (PR #38) on main.
