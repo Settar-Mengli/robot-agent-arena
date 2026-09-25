@@ -27,3 +27,4 @@ Lab pack note: decision-lab.v3.json was frozen at Batch 3; Batch 4 extended eval
 - Screenshots deferred (operator capture plan kept privately).
 - Post-merge BYOK smoke (operator on deployed Pages): (1) open site, (2) Home → **More ways to play** → **Play a live AI with your own key**, (3) enable Live AI, (4) paste OpenRouter key, (5) pick a listed model, (6) play 3 turns, (7) confirm no console errors and keyless path when Live is off.
 - Operator-only materials (demo script, shot list, session master record) were removed from the repo after v0.1.0 and are kept privately.
+- Operator recording runbook was removed from the repo and is kept privately.

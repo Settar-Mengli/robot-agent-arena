@@ -119,7 +119,7 @@ src/
   __tests__/       # Vitest node project
 evals/             # Committed snapshot suites + fixture store + out-committed
 scripts/           # run-ts.mjs and tooling
-docs/              # Case study, recording runbook, preregistration notes
+docs/              # Case study, preregistration notes
 ```
 
 **Stack in use:** TypeScript (strict), Vite, Vitest (+ coverage), ESLint 10 flat config, React, Tailwind CSS, Zustand. One localStorage save slot (Batch 3 / B.4) — done.
