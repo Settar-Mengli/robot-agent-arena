@@ -106,6 +106,9 @@ function assertAgentConfig(value: unknown, path: string): AgentConfig {
     }
     return id;
   });
+  if (new Set(skillIds).size !== skillIds.length) {
+    throw new TypeError(`${path}: skillIds must be unique`);
+  }
   if (typeof value.agentId !== "string" || typeof value.displayName !== "string") {
     throw new TypeError(`${path}: agentId/displayName`);
   }
@@ -199,6 +202,15 @@ function assertCombatant(value: unknown, path: string): void {
     if (typeof n !== "number" || !Number.isFinite(n)) {
       throw new TypeError(`${path}: ${key}`);
     }
+    if (n < 0) {
+      throw new TypeError(`${path}: ${key} must be non-negative`);
+    }
+  }
+  if (
+    (value.health as number) > (value.maxHealth as number) ||
+    (value.energy as number) > (value.maxEnergy as number)
+  ) {
+    throw new TypeError(`${path}: resource exceeds max`);
   }
 }
 

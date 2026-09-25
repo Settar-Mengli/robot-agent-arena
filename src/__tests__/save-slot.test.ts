@@ -299,4 +299,92 @@ describe("save-slot", () => {
     clearSlot(storage);
     expect(loadSlot(storage).ok).toBe(false);
   });
+
+  it("rejects duplicate skillIds", () => {
+    expect(() =>
+      assertSaveSlotV1({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: {
+          ...sampleSlot().draft,
+          playerConfig: {
+            ...player,
+            skillIds: ["skill-logic-storm", "skill-logic-storm"]
+          }
+        },
+        mode: "free",
+        runtime: null,
+        battleOver: false
+      })
+    ).toThrow(/unique/);
+  });
+
+  it("load of duplicate skillIds returns schema without throw", () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      SAVE_SLOT_KEY,
+      JSON.stringify({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: {
+          ...sampleSlot().draft,
+          playerConfig: {
+            ...player,
+            skillIds: ["skill-logic-storm", "skill-logic-storm"]
+          }
+        },
+        mode: "free",
+        runtime: null,
+        battleOver: false
+      })
+    );
+    const loaded = loadSlot(storage);
+    expect(loaded.ok).toBe(false);
+    if (!loaded.ok) {
+      expect(loaded.reason).toBe("schema");
+    }
+    expect(storage.getItem(SAVE_SLOT_KEY)).toBeNull();
+  });
+
+  it("returns quota when setItem throws QuotaExceededError", () => {
+    const storage = memoryStorage();
+    storage.setItem = () => {
+      const err = new DOMException("quota", "QuotaExceededError");
+      throw err;
+    };
+    const result = saveSlot(sampleSlot(), { inFlight: false, storage });
+    expect(result).toEqual({ ok: false, reason: "quota" });
+  });
+
+  it("rejects negative health on runtime combatant", () => {
+    const runtime = startBattle(
+      sampleSlot().draft.playerConfig,
+      CPU_OPPONENTS[0]!,
+      "arena-1"
+    );
+    const bad = structuredClone(runtime);
+    bad.player.health = -1;
+    expect(() =>
+      assertSaveSlotV1({
+        schemaVersion: 1,
+        savedAt: "2026-01-01T00:00:00.000Z",
+        draft: sampleSlot().draft,
+        mode: "free",
+        runtime: bad,
+        battleOver: false
+      })
+    ).toThrow(/non-negative/);
+  });
+
+  it("valid schemaVersion 1 slot with null runtime still loads", () => {
+    const storage = memoryStorage();
+    const saved = saveSlot(sampleSlot(null), { inFlight: false, storage });
+    expect(saved.ok).toBe(true);
+    const loaded = loadSlot(storage);
+    expect(loaded.ok).toBe(true);
+    if (loaded.ok) {
+      expect(loaded.slot.schemaVersion).toBe(1);
+      expect(loaded.slot.runtime).toBeNull();
+    }
+  });
 });
