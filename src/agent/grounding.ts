@@ -189,11 +189,17 @@ function maxIncomingDamageVs(
   playerSkills: readonly GroundedThreatSkillFact[],
   cpu: CombatantState,
   player: CombatantState,
-  catalog: SkillCatalog
+  catalog: SkillCatalog,
+  /** When set, re-check affordability (e.g. after disrupt drain). */
+  playerNextTurnEnergyOverride?: number
 ): number {
   let max = 0;
   for (const fact of playerSkills) {
-    if (!fact.affordableNextTurn) {
+    const affordable =
+      playerNextTurnEnergyOverride !== undefined
+        ? fact.energyCost <= playerNextTurnEnergyOverride
+        : fact.affordableNextTurn;
+    if (!affordable) {
       continue;
     }
     const skill = requireSkill(catalog, fact.skillId);
@@ -300,6 +306,7 @@ export function computeGroundedFactsV2(
   catalog: SkillCatalog = MVP_SKILL_CATALOG
 ): GroundedFactsV2 {
   const { cpu, player } = observation;
+  const turnsRemaining = Math.max(0, maxTurns - turn);
 
   const playerNextTurnEnergy = Math.min(
     player.energy + TURN_ENERGY_RECOVERY,
@@ -333,18 +340,35 @@ export function computeGroundedFactsV2(
   const diesNextTurnPreAction =
     maxIncomingDamage >= cpu.health && maxIncomingDamage > 0;
 
+  function diesNextTurnAfterMove(
+    nextCpu: CombatantState,
+    energyDrained: number,
+    lethal: boolean
+  ): boolean {
+    if (lethal || turnsRemaining === 0) {
+      return false;
+    }
+    const energyAfterDrain = Math.max(0, player.energy - energyDrained);
+    const nextTurnEnergy = Math.min(
+      energyAfterDrain + TURN_ENERGY_RECOVERY,
+      player.maxEnergy
+    );
+    const incoming = maxIncomingDamageVs(
+      playerSkills,
+      nextCpu,
+      player,
+      catalog,
+      nextTurnEnergy
+    );
+    return incoming >= nextCpu.health && incoming > 0;
+  }
+
   const cpuSkills: GroundedSkillFactV2[] = cpuConfig.skillIds.map((skillId) => {
     const skill = requireSkill(catalog, skillId);
     const affordable = skill.energyCost <= cpu.energy;
 
     if (!affordable) {
       const fallback = projectFallbackStabilize(cpu);
-      const incoming = maxIncomingDamageVs(
-        playerSkills,
-        fallback.nextActor,
-        player,
-        catalog
-      );
       return {
         skillId,
         energyCost: skill.energyCost,
@@ -355,8 +379,11 @@ export function computeGroundedFactsV2(
         defenseGained: fallback.defenseGained,
         healAmount: 0,
         energyDrained: 0,
-        diesNextTurnAfterMove:
-          incoming >= fallback.nextActor.health && incoming > 0
+        diesNextTurnAfterMove: diesNextTurnAfterMove(
+          fallback.nextActor,
+          0,
+          false
+        )
       };
     }
 
@@ -372,7 +399,6 @@ export function computeGroundedFactsV2(
       health: Math.min(cpu.maxHealth, cpu.health + effects.healAmount),
       defense: Math.min(MAX_DEFENSE, cpu.defense + effects.defenseGained)
     };
-    const incoming = maxIncomingDamageVs(playerSkills, nextCpu, player, catalog);
 
     return {
       skillId,
@@ -384,14 +410,18 @@ export function computeGroundedFactsV2(
       defenseGained: effects.defenseGained,
       healAmount: effects.healAmount,
       energyDrained: effects.energyDrained,
-      diesNextTurnAfterMove: incoming >= nextCpu.health && incoming > 0
+      diesNextTurnAfterMove: diesNextTurnAfterMove(
+        nextCpu,
+        effects.energyDrained,
+        effects.lethal
+      )
     };
   });
 
   return {
     factsVersion: 2,
     turn,
-    turnsRemaining: Math.max(0, maxTurns - turn),
+    turnsRemaining,
     cpuSkills,
     threat: {
       playerNextTurnEnergy,

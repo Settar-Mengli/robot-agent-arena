@@ -57,11 +57,19 @@ export type BuilderFormProps = {
   initialConfig?: AgentConfig | null;
   /** Called only from Continue — does not re-validate. */
   onContinue?: (config: AgentConfig) => void;
+  /** Fires whenever local draft fields change (for Save sync). */
+  onDraftChange?: (draft: {
+    agentId: string;
+    displayName: string;
+    modules: ModuleFields;
+    skillIds: SkillId[];
+  }) => void;
 };
 
 export function BuilderForm({
   initialConfig = null,
-  onContinue
+  onContinue,
+  onDraftChange
 }: BuilderFormProps) {
   const [agentId] = useState(
     () => initialConfig?.agentId ?? crypto.randomUUID()
@@ -78,6 +86,17 @@ export function BuilderForm({
   const [errors, setErrors] = useState<string[]>([]);
   const [validated, setValidated] = useState<AgentConfig | null>(null);
   const profileDetails = useRef<HTMLDetailsElement>(null);
+  const onDraftChangeRef = useRef(onDraftChange);
+  onDraftChangeRef.current = onDraftChange;
+
+  useEffect(() => {
+    onDraftChangeRef.current?.({
+      agentId,
+      displayName,
+      modules,
+      skillIds
+    });
+  }, [agentId, displayName, modules, skillIds]);
 
   useEffect(() => {
     if (

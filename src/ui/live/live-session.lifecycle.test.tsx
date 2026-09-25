@@ -24,14 +24,22 @@ vi.mock("./createLivePlayTurn", () => ({
       apiKey: string;
       modelId: string;
       onNotice?: (m: string | null) => void;
+      signal?: AbortSignal;
+      isNoticeCurrent?: () => boolean;
     }): PlayTurnFn => {
       return async (runtime, playerSkillId) => {
         liveCalls.n += 1;
+        const emit = (m: string | null) => {
+          if (opts.isNoticeCurrent !== undefined && !opts.isNoticeCurrent()) {
+            return;
+          }
+          opts.onNotice?.(m);
+        };
         if (liveCalls.n === 1) {
-          opts.onNotice?.("Could not reach the live model.");
+          emit("Could not reach the live model.");
           return greedy(runtime, playerSkillId);
         }
-        opts.onNotice?.(null);
+        emit(null);
         const result = await greedy(runtime, playerSkillId);
         const withTrace: UiTurnResult = {
           step: result.step,
@@ -277,4 +285,164 @@ describe("live session lifecycle (D-053)", () => {
     });
     assertKeyAbsent(SECRET);
   });
+
+  it("late live failure after Leave does not resurrect notice", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    const { createLivePlayTurn } = await import("./createLivePlayTurn");
+    vi.mocked(createLivePlayTurn).mockImplementationOnce(
+      (opts: {
+        onNotice?: (m: string | null) => void;
+        isNoticeCurrent?: () => boolean;
+      }): PlayTurnFn => {
+        return async (runtime, playerSkillId) => {
+          await gate;
+          if (opts.isNoticeCurrent === undefined || opts.isNoticeCurrent()) {
+            opts.onNotice?.("Could not reach the live model.");
+          }
+          return greedy(runtime, playerSkillId);
+        };
+      }
+    );
+
+    render(<App />);
+    // Build + setup + enable live without using enableLiveAndStart's Start click path fully
+    fireEvent.click(screen.getByTestId("nav-build"));
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "LIVE-UNIT" }
+    });
+    fireEvent.change(screen.getByLabelText("Robot identity"), {
+      target: { value: "Steady Vanguard" }
+    });
+    fireEvent.change(screen.getByLabelText("Memory"), {
+      target: { value: "Pattern Recall" }
+    });
+    fireEvent.change(screen.getByLabelText("Sigil and Security"), {
+      target: { value: "Aegis Layer" }
+    });
+    fireEvent.change(screen.getByLabelText("Rules"), {
+      target: { value: "Never Skip Verification" }
+    });
+    fireEvent.change(screen.getByLabelText("Strategy"), {
+      target: { value: "Measured Pressure" }
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: /Override Pulse/i }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Logic Storm/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Check robot/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue to battle setup/i })
+    );
+    fireEvent.click(screen.getByTestId("reveal-live-opponent"));
+    await waitFor(() => {
+      expect(screen.getByTestId("live-opponent-panel")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("live-opponent-toggle"));
+    fireEvent.change(screen.getByTestId("live-api-key"), {
+      target: { value: SECRET }
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Start battle/i }));
+    await waitFor(() => {
+      expect(screen.getByTestId("arena-view")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Logic Storm/i })[0]!);
+    fireEvent.click(screen.getByRole("button", { name: /^Leave$/i }));
+    await waitFor(() => {
+      expect(screen.getByTestId("landing-view")).toBeInTheDocument();
+    });
+    release();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.queryByTestId("arena-live-notice")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("setup-live-notice")).not.toBeInTheDocument();
+    assertKeyAbsent(SECRET);
+  }, 20_000);
+
+  it("header Home while deferred turn pending ignores later settle", async () => {
+    const gate = deferredTurn();
+    let capturedRuntime: Parameters<PlayTurnFn>[0] | null = null;
+    const playTurn: PlayTurnFn = async (runtime, playerSkillId) => {
+      capturedRuntime = runtime;
+      void playerSkillId;
+      return gate.promise;
+    };
+
+    render(<App playTurn={playTurn} />);
+    fireEvent.click(screen.getByTestId("cta-quick-battle"));
+    expect(screen.getByTestId("arena-view")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Logic Storm/i }));
+    expect(screen.getByText(/resolving/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("brand-home"));
+    expect(screen.getByTestId("landing-view")).toBeInTheDocument();
+
+    expect(capturedRuntime).not.toBeNull();
+    const { stepBattle } = await import("../../engine");
+    gate.resolve({
+      step: stepBattle(capturedRuntime!, "skill-logic-storm")
+    });
+    await gate.promise;
+    await Promise.resolve();
+    expect(screen.queryByTestId("arena-view")).toBeNull();
+    expect(screen.getByTestId("landing-view")).toBeInTheDocument();
+  });
+  it("Start then immediate Home during live import does not open Arena", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByTestId("nav-build"));
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "LIVE-UNIT" }
+    });
+    fireEvent.change(screen.getByLabelText("Robot identity"), {
+      target: { value: "Steady Vanguard" }
+    });
+    fireEvent.change(screen.getByLabelText("Memory"), {
+      target: { value: "Pattern Recall" }
+    });
+    fireEvent.change(screen.getByLabelText("Sigil and Security"), {
+      target: { value: "Aegis Layer" }
+    });
+    fireEvent.change(screen.getByLabelText("Rules"), {
+      target: { value: "Never Skip Verification" }
+    });
+    fireEvent.change(screen.getByLabelText("Strategy"), {
+      target: { value: "Measured Pressure" }
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: /Override Pulse/i }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Logic Storm/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Check robot/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue to battle setup/i })
+    );
+    fireEvent.click(screen.getByTestId("reveal-live-opponent"));
+    await waitFor(() => {
+      expect(screen.getByTestId("live-opponent-panel")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("live-opponent-toggle"));
+    fireEvent.change(screen.getByTestId("live-api-key"), {
+      target: { value: SECRET }
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Start battle/i }));
+    fireEvent.click(screen.getByTestId("brand-home"));
+    await waitFor(() => {
+      expect(screen.getByTestId("landing-view")).toBeInTheDocument();
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(screen.queryByTestId("arena-view")).toBeNull();
+    expect(screen.getByTestId("landing-view")).toBeInTheDocument();
+    assertKeyAbsent(SECRET);
+  }, 20_000);
 });
+
+function deferredTurn(): {
+  promise: Promise<UiTurnResult>;
+  resolve: (value: UiTurnResult) => void;
+} {
+  let resolve!: (value: UiTurnResult) => void;
+  const promise = new Promise<UiTurnResult>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+}

@@ -395,4 +395,85 @@ describe("computeGroundedFacts / projectSkillEffects", () => {
     expect(afterStorm.runtime.cpu.health).toBeGreaterThan(0);
     expect(afterStorm.outcome).toBeUndefined();
   });
+
+  it("V2 diesNextTurnAfterMove false when candidate is lethal this turn", () => {
+    const cpuConfig = makeAgent("cpu-1", ["skill-logic-storm"]);
+    const playerConfig = makeAgent("player-1", ["skill-logic-storm"]);
+    const runtime = startBattle(playerConfig, cpuConfig, "v2-lethal", 10);
+    const observation = {
+      cpu: { ...runtime.cpu, health: 5, energy: 10, defense: 0 },
+      player: {
+        ...runtime.player,
+        health: 5,
+        energy: 5 - TURN_ENERGY_RECOVERY,
+        defense: 0
+      }
+    };
+    const facts = computeGroundedFactsV2(
+      observation,
+      cpuConfig,
+      playerConfig.skillIds,
+      runtime.session.turn,
+      runtime.session.maxTurns
+    );
+    const storm = facts.cpuSkills[0]!;
+    expect(storm.lethal).toBe(true);
+    expect(storm.diesNextTurnAfterMove).toBe(false);
+  });
+
+  it("V2 diesNextTurnAfterMove false on last turn", () => {
+    const cpuConfig = makeAgent("cpu-1", ["skill-sigil-rule"]);
+    const playerConfig = makeAgent("player-1", ["skill-logic-storm"]);
+    const maxTurns = 5;
+    const runtime = startBattle(playerConfig, cpuConfig, "v2-last", maxTurns);
+    const observation = {
+      cpu: { ...runtime.cpu, health: 5, energy: 10, defense: 0 },
+      player: {
+        ...runtime.player,
+        health: 30,
+        energy: 5 - TURN_ENERGY_RECOVERY,
+        defense: 0
+      }
+    };
+    const facts = computeGroundedFactsV2(
+      observation,
+      cpuConfig,
+      playerConfig.skillIds,
+      maxTurns,
+      maxTurns
+    );
+    expect(facts.turnsRemaining).toBe(0);
+    expect(facts.threat.diesNextTurnPreAction).toBe(true);
+    expect(facts.cpuSkills[0]!.diesNextTurnAfterMove).toBe(false);
+  });
+
+  it("V2 diesNextTurnAfterMove false when disrupt makes storm unaffordable", () => {
+    const cpuConfig = makeAgent("cpu-1", ["skill-signal-breach"]);
+    const playerConfig = makeAgent("player-1", ["skill-logic-storm"]);
+    const runtime = startBattle(playerConfig, cpuConfig, "v2-drain", 10);
+    // Without drain: energy 3 + regen 2 = 5 → storm OK. After drain 2: 1+2=3 → not OK.
+    const observation = {
+      cpu: { ...runtime.cpu, health: 5, energy: 10, defense: 0 },
+      player: {
+        ...runtime.player,
+        health: 30,
+        energy: 3,
+        defense: 0
+      }
+    };
+    expect(observation.player.energy + TURN_ENERGY_RECOVERY).toBe(5);
+    expect(observation.player.energy - 2 + TURN_ENERGY_RECOVERY).toBe(3);
+
+    const facts = computeGroundedFactsV2(
+      observation,
+      cpuConfig,
+      playerConfig.skillIds,
+      runtime.session.turn,
+      runtime.session.maxTurns
+    );
+    expect(facts.threat.diesNextTurnPreAction).toBe(true);
+    const breach = facts.cpuSkills[0]!;
+    expect(breach.energyDrained).toBe(2);
+    expect(breach.diesNextTurnAfterMove).toBe(false);
+  });
 });

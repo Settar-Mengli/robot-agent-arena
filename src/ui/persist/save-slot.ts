@@ -179,6 +179,27 @@ function assertCombatant(value: unknown, path: string): void {
       throw new TypeError(`${path}: missing ${key}`);
     }
   }
+  if (typeof value.side !== "string") {
+    throw new TypeError(`${path}: side`);
+  }
+  if (typeof value.agentId !== "string") {
+    throw new TypeError(`${path}: agentId`);
+  }
+  if (typeof value.displayName !== "string") {
+    throw new TypeError(`${path}: displayName`);
+  }
+  for (const key of [
+    "health",
+    "maxHealth",
+    "energy",
+    "maxEnergy",
+    "defense"
+  ] as const) {
+    const n = value[key];
+    if (typeof n !== "number" || !Number.isFinite(n)) {
+      throw new TypeError(`${path}: ${key}`);
+    }
+  }
 }
 
 function assertBattleRuntime(value: unknown): BattleRuntime {

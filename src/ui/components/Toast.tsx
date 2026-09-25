@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "./Button";
 
 export type ToastTone = "success" | "error";
@@ -16,13 +16,16 @@ export function Toast({
   tone,
   onDismiss
 }: ToastProps): React.JSX.Element | null {
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+
   useEffect(() => {
     if (message === null || tone !== "success") return;
     const id = globalThis.setTimeout(() => {
-      onDismiss();
+      onDismissRef.current();
     }, SUCCESS_MS);
     return () => globalThis.clearTimeout(id);
-  }, [message, tone, onDismiss]);
+  }, [message, tone]);
 
   if (message === null) return null;
 

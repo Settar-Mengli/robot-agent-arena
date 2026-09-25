@@ -293,4 +293,20 @@ describe("BuilderForm", () => {
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent(/at least one skill/i);
   });
+
+  it("onDraftChange fires with current fields on edit", () => {
+    const drafts: Array<{ displayName: string }> = [];
+    render(
+      <BuilderForm
+        onDraftChange={(d) => {
+          drafts.push({ displayName: d.displayName });
+        }}
+      />
+    );
+    expect(drafts.length).toBeGreaterThanOrEqual(1);
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "DRAFT-SYNC" }
+    });
+    expect(drafts.some((d) => d.displayName === "DRAFT-SYNC")).toBe(true);
+  });
 });

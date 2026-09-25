@@ -41,4 +41,30 @@ describe("Toast", () => {
     fireEvent.click(screen.getByTestId("persist-toast-dismiss"));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
+
+  it("success timer is not reset when onDismiss identity changes", () => {
+    vi.useFakeTimers();
+    const onDismiss = vi.fn();
+    const { rerender } = render(
+      <Toast
+        message="Saved to this device."
+        tone="success"
+        onDismiss={() => onDismiss()}
+      />
+    );
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    rerender(
+      <Toast
+        message="Saved to this device."
+        tone="success"
+        onDismiss={() => onDismiss()}
+      />
+    );
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
 });
