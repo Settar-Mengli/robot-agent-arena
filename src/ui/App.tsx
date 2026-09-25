@@ -41,8 +41,10 @@ import {
   buildSavePayload,
   saveAllowedForView
 } from "./persist/build-save-payload";
+import type { StoreApi } from "zustand/vanilla";
 import {
   createBattleViewStore,
+  type BattleViewStore,
   type PlayTurnFn
 } from "./store/battle-view";
 import { TOUR_KEY } from "./tour/FirstVisitTour";
@@ -92,6 +94,8 @@ const SAVE_DISABLED_TITLE =
 
 export type AppProps = {
   playTurn?: PlayTurnFn;
+  /** Test-only: exposes the battle store for race assertions (no UI effect). */
+  onBattleStore?: (store: StoreApi<BattleViewStore>) => void;
 };
 
 function hasSaveSlot(): boolean {
@@ -103,8 +107,11 @@ function hasSaveSlot(): boolean {
   }
 }
 
-export function App({ playTurn }: AppProps = {}) {
+export function App({ playTurn, onBattleStore }: AppProps = {}) {
   const [store] = useState(() => createBattleViewStore());
+  useEffect(() => {
+    onBattleStore?.(store);
+  }, [store, onBattleStore]);
   const battle = useSyncExternalStore(
     store.subscribe,
     store.getState,

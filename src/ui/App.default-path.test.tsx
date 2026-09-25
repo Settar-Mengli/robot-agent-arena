@@ -63,6 +63,10 @@ describe("forbidden-default-path matcher", () => {
     }
     expect(FORBIDDEN_DEFAULT_PATH.length).toBeGreaterThan(15);
   });
+
+  it("A8: error-boundary fallback copy is clean", () => {
+    expect(findForbiddenTechnicalText("Couldn't load this screen.")).toBeNull();
+  });
 });
 
 describe("App default path", () => {

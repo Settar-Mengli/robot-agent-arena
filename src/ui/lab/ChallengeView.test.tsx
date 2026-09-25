@@ -234,4 +234,37 @@ describe("ChallengeView", () => {
     fireEvent.click(screen.getByTestId("challenge-show-answer"));
     expect(next.disabled).toBe(false);
   });
+
+  it("A7: same skillId at two regrets renders as two groups", () => {
+    const current = pack.cases.find((c) =>
+      Object.values(c.policies).some(
+        (p) => p.status === "recorded" && p.source === "llm"
+      )
+    )!;
+    const llmKeys = Object.entries(current.policies)
+      .filter(([, p]) => p.status === "recorded" && p.source === "llm")
+      .map(([k]) => k);
+    expect(llmKeys.length).toBeGreaterThanOrEqual(4);
+    const skillId = "skill-logic-storm";
+    const policies = { ...current.policies };
+    for (let i = 0; i < 4; i += 1) {
+      const key = llmKeys[i]!;
+      const prev = policies[key]!;
+      if (prev.status !== "recorded") continue;
+      policies[key] = {
+        ...prev,
+        executedSkillId: skillId,
+        regret: i < 2 ? 5 : 1
+      };
+    }
+    const splitPack = { ...pack, cases: [{ ...current, policies }] };
+    render(<ChallengeView pack={splitPack} />);
+    fireEvent.click(screen.getAllByRole("radio")[0]!);
+    fireEvent.click(screen.getByTestId("challenge-show-answer"));
+    const groups = screen.getAllByTestId("challenge-ai-group");
+    expect(groups).toHaveLength(2);
+    const text = groups.map((g) => g.textContent ?? "").join("\n");
+    expect(text).toMatch(/5 points worse/);
+    expect(text).toMatch(/1 points worse|1\.00 points worse/);
+  });
 });
