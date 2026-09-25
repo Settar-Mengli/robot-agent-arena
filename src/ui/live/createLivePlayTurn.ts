@@ -13,6 +13,14 @@ export type CreateLivePlayTurnOptions = {
   origin?: string;
   /** Called when live fails (message) or recovers (null). */
   onNotice?: (message: string | null) => void;
+  /**
+   * External abort (App aborts on Home / Leave / Load).
+   * When aborted mid-turn, falls back to greedy without surfacing a notice
+   * if `isNoticeCurrent` is false.
+   */
+  signal?: AbortSignal;
+  /** When false, `onNotice` is skipped (stale after clear). */
+  isNoticeCurrent?: () => boolean;
 };
 
 /**
@@ -31,11 +39,17 @@ export function createLivePlayTurn(
   });
   const fetchImpl = opts.fetch ?? globalThis.fetch.bind(globalThis);
 
+  function emitNotice(message: string | null): void {
+    if (opts.isNoticeCurrent !== undefined && !opts.isNoticeCurrent()) {
+      return;
+    }
+    opts.onNotice?.(message);
+  }
+
   return async (runtime, playerSkillId): Promise<UiTurnResult> => {
-    const controller = new AbortController();
     try {
       const result = await playAgentTurn(runtime, playerSkillId, {
-        signal: controller.signal,
+        signal: opts.signal,
         inference: {
           env,
           fetch: fetchImpl,
@@ -45,12 +59,12 @@ export function createLivePlayTurn(
       });
 
       if (result.trace.source === "llm") {
-        opts.onNotice?.(null);
+        emitNotice(null);
         return { step: result.step, trace: result.trace };
       }
 
       const notice = mapLiveFailure(result.trace.failures);
-      opts.onNotice?.(notice);
+      emitNotice(notice);
       return greedy(runtime, playerSkillId);
     } catch (err) {
       const failures =
@@ -62,7 +76,7 @@ export function createLivePlayTurn(
               .failures
           : undefined;
       const notice = mapLiveFailure(failures, err);
-      opts.onNotice?.(notice);
+      emitNotice(notice);
       return greedy(runtime, playerSkillId);
     }
   };

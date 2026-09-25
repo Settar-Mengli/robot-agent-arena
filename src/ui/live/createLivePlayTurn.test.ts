@@ -176,4 +176,48 @@ describe("createLivePlayTurn", () => {
     await playTurn(next, "skill-logic-storm");
     expect(notices[notices.length - 1]).toBeNull();
   });
+
+  it("skips onNotice when isNoticeCurrent is false", async () => {
+    const runtime = runtimeFor("live-stale-notice");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ error: "rate" }), { status: 429 })
+    );
+    const notices: Array<string | null> = [];
+    let current = true;
+
+    const playTurn = createLivePlayTurn({
+      apiKey: "sk-live",
+      modelId: "openrouter/free",
+      fetch: fetchMock,
+      isNoticeCurrent: () => current,
+      onNotice: (m) => notices.push(m)
+    });
+
+    current = false;
+    await playTurn(runtime, "skill-logic-storm");
+    expect(notices).toEqual([]);
+  });
+
+  it("passes external AbortSignal to fetch", async () => {
+    const runtime = runtimeFor("live-abort-sig");
+    const controller = new AbortController();
+    const fetchMock = vi.fn().mockImplementation(
+      (_url: unknown, init?: { signal?: AbortSignal }) => {
+        expect(init?.signal).toBe(controller.signal);
+        return Promise.resolve(
+          openaiOk('{"skillId":"skill-null-pulse","reason":"ok"}')
+        );
+      }
+    );
+
+    const playTurn = createLivePlayTurn({
+      apiKey: "sk-live",
+      modelId: "openrouter/free",
+      fetch: fetchMock,
+      signal: controller.signal
+    });
+
+    await playTurn(runtime, "skill-logic-storm");
+    expect(fetchMock).toHaveBeenCalled();
+  });
 });

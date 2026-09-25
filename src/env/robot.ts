@@ -31,6 +31,11 @@ function resolveOutcome(runtime: BattleRuntime): BattleOutcome {
 }
 
 function terminalValue(runtime: BattleRuntime): number {
+  const hpDiff = runtime.cpu.health - runtime.player.health;
+  if (!isBattleOver(runtime.session)) {
+    return hpDiff;
+  }
+
   const outcome = resolveOutcome(runtime);
 
   let base = 0;
@@ -40,7 +45,7 @@ function terminalValue(runtime: BattleRuntime): number {
     base = -1000;
   }
 
-  return base + (runtime.cpu.health - runtime.player.health);
+  return base + hpDiff;
 }
 
 function memoStateKey(runtime: BattleRuntime): string {

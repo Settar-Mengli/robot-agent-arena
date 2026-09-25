@@ -272,6 +272,27 @@ describe("save-slot", () => {
     }
   });
 
+  it("rejects runtime combatant with non-finite health", () => {
+    const storage = memoryStorage();
+    const runtime = startBattle(
+      sampleSlot().draft.playerConfig,
+      CPU_OPPONENTS[0]!,
+      "arena-1"
+    );
+    const saved = saveSlot(sampleSlot(runtime), { inFlight: false, storage });
+    expect(saved.ok).toBe(true);
+    const raw = JSON.parse(storage.getItem(SAVE_SLOT_KEY)!) as {
+      runtime: { player: { health: unknown } };
+    };
+    raw.runtime.player.health = "x";
+    storage.setItem(SAVE_SLOT_KEY, JSON.stringify(raw));
+    const loaded = loadSlot(storage);
+    expect(loaded.ok).toBe(false);
+    if (!loaded.ok) {
+      expect(loaded.reason).toBe("schema");
+    }
+  });
+
   it("clearSlot removes key", () => {
     const storage = memoryStorage();
     saveSlot(sampleSlot(), { inFlight: false, storage });

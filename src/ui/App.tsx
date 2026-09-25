@@ -17,6 +17,7 @@ import { CPU_OPPONENTS } from "../data/opponents";
 import { ArenaView } from "./arena/ArenaView";
 import { ResultsView } from "./arena/ResultsView";
 import { BuilderForm } from "./builder/BuilderForm";
+import { buildAgentConfig } from "./builder/buildAgentConfig";
 import { InfoTip } from "./components/InfoTip";
 import { ViewErrorBoundary } from "./components/ViewErrorBoundary";
 import { skillLabel } from "./copy/skill-label";
@@ -112,6 +113,12 @@ export function App({ playTurn }: AppProps = {}) {
 
   const [view, setView] = useState<AppView>({ kind: "home" });
   const [playerConfig, setPlayerConfig] = useState<AgentConfig | null>(null);
+  const [builderDraft, setBuilderDraft] = useState<{
+    agentId: string;
+    displayName: string;
+    modules: AgentConfig["modules"];
+    skillIds: AgentConfig["skillIds"];
+  } | null>(null);
   const [opponent, setOpponent] = useState<AgentConfig>(CPU_OPPONENTS[0]!);
   const [seed, setSeed] = useState<string>(DEFAULT_SEED);
   const [watchMatchId, setWatchMatchId] = useState<string | undefined>(
@@ -134,12 +141,36 @@ export function App({ playTurn }: AppProps = {}) {
   );
   const [liveNotice, setLiveNotice] = useState<string | null>(null);
   const [showLivePanel, setShowLivePanel] = useState(false);
+  /** Bumped to cancel in-flight Start / Fight-again after leave/clear. */
+  const startGenRef = useRef(0);
+  /** Bumped so late live onNotice calls are ignored after clear. */
+  const noticeGenRef = useRef(0);
+  const liveAbortRef = useRef<AbortController | null>(null);
 
   function showPersistToast(message: string, tone: ToastTone) {
     setPersistToast({ message, tone });
   }
 
+  function invalidateAsyncBattleStart() {
+    startGenRef.current += 1;
+  }
+
+  function invalidateLiveTurn() {
+    noticeGenRef.current += 1;
+    liveAbortRef.current?.abort();
+    liveAbortRef.current = null;
+  }
+
+  /** Epoch-bump battle store; abort live fetch; keep liveConfig (D-053). */
+  function abandonBattle() {
+    invalidateAsyncBattleStart();
+    invalidateLiveTurn();
+    store.getState().clearBattle();
+  }
+
   function clearLiveSession() {
+    invalidateAsyncBattleStart();
+    invalidateLiveTurn();
     setLiveConfig(EMPTY_LIVE_CONFIG);
     setLivePlayTurn(undefined);
     setLiveNotice(null);
@@ -185,33 +216,54 @@ export function App({ playTurn }: AppProps = {}) {
 
   async function onStartFromSetup() {
     if (playerConfig === null) return;
+    const gen = startGenRef.current;
     let turnFn: PlayTurnFn | undefined = playTurn;
     if (liveConfig.enabled && liveConfig.apiKey.trim() !== "") {
       const { createLivePlayTurn } = await import("./live/createLivePlayTurn");
+      await Promise.resolve();
+      if (gen !== startGenRef.current) return;
+      liveAbortRef.current?.abort();
+      const controller = new AbortController();
+      liveAbortRef.current = controller;
+      const noticeAtCreate = noticeGenRef.current;
       turnFn = createLivePlayTurn({
         apiKey: liveConfig.apiKey.trim(),
         modelId: liveConfig.modelId,
+        signal: controller.signal,
+        isNoticeCurrent: () => noticeGenRef.current === noticeAtCreate,
         onNotice: (message) => setLiveNotice(message)
       });
     }
+    if (gen !== startGenRef.current) return;
     beginBattle(playerConfig, opponent, parseSeed(seed), turnFn);
   }
 
   async function onRestart() {
     if (playerConfig === null) return;
+    const gen = startGenRef.current;
     let turnFn: PlayTurnFn | undefined = playTurn;
     if (liveConfig.enabled && liveConfig.apiKey.trim() !== "") {
       const { createLivePlayTurn } = await import("./live/createLivePlayTurn");
+      await Promise.resolve();
+      if (gen !== startGenRef.current) return;
+      liveAbortRef.current?.abort();
+      const controller = new AbortController();
+      liveAbortRef.current = controller;
+      const noticeAtCreate = noticeGenRef.current;
       turnFn = createLivePlayTurn({
         apiKey: liveConfig.apiKey.trim(),
         modelId: liveConfig.modelId,
+        signal: controller.signal,
+        isNoticeCurrent: () => noticeGenRef.current === noticeAtCreate,
         onNotice: (message) => setLiveNotice(message)
       });
     }
+    if (gen !== startGenRef.current) return;
     beginBattle(playerConfig, opponent, parseSeed(seed), turnFn);
   }
 
   function goHome() {
+    abandonBattle();
     clearLiveSession();
     setView({ kind: "home" });
     setGuidedPath(false);
@@ -220,7 +272,6 @@ export function App({ playTurn }: AppProps = {}) {
   }
 
   function onLeaveToHome() {
-    store.getState().clearBattle();
     goHome();
   }
 
@@ -243,18 +294,20 @@ export function App({ playTurn }: AppProps = {}) {
 
   function onBeatAi() {
     bumpTourClose();
+    abandonBattle();
     setGuidedPath(true);
     setView({ kind: "lab" });
   }
 
   function onWatchCta() {
     bumpTourClose();
-    store.getState().clearBattle();
+    abandonBattle();
     setView({ kind: "watch" });
   }
 
   function onBuildCta() {
     bumpTourClose();
+    abandonBattle();
     setView({ kind: "builder" });
   }
 
@@ -326,32 +379,36 @@ export function App({ playTurn }: AppProps = {}) {
 
   function onSave() {
     if (!saveAllowed) return;
-    if (
-      (view.kind === "builder" ||
-        view.kind === "setup" ||
-        view.kind === "battle") &&
-      playerConfig === null
-    ) {
+
+    let draftPlayer: AgentConfig;
+
+    if (view.kind === "builder") {
+      if (builderDraft === null) {
+        setPersistToast({
+          message: "Build a robot before saving.",
+          tone: "error"
+        });
+        return;
+      }
+      const built = buildAgentConfig(builderDraft);
+      if (!built.ok) {
+        setPersistToast({
+          message: "Finish checking your robot before saving.",
+          tone: "error"
+        });
+        return;
+      }
+      draftPlayer = built.config;
+      setPlayerConfig(built.config);
+    } else if (playerConfig === null) {
       setPersistToast({
         message: "Build a robot before saving.",
         tone: "error"
       });
       return;
+    } else {
+      draftPlayer = playerConfig;
     }
-    const draftPlayer =
-      playerConfig ??
-      ({
-        agentId: "unsaved",
-        displayName: "Unsaved",
-        modules: {
-          coreIdentity: "-",
-          memory: "-",
-          sigilSecurity: "-",
-          rules: "-",
-          strategy: "-"
-        },
-        skillIds: ["skill-logic-storm", "skill-override-pulse"]
-      } satisfies AgentConfig);
 
     const payload = buildSavePayload({
       viewKind: view.kind,
@@ -383,9 +440,14 @@ export function App({ playTurn }: AppProps = {}) {
     }
     clearLiveSession();
     const slot = loaded.slot;
-    const cpu =
-      CPU_OPPONENTS.find((o) => o.agentId === slot.draft.opponentId) ??
-      CPU_OPPONENTS[0]!;
+    const cpu = CPU_OPPONENTS.find((o) => o.agentId === slot.draft.opponentId);
+    if (cpu === undefined) {
+      showPersistToast(
+        "That save references an unknown opponent. Clear save, then try again.",
+        "error"
+      );
+      return;
+    }
     setPlayerConfig(slot.draft.playerConfig);
     setOpponent(cpu);
     setSeed(slot.draft.seed);
@@ -488,6 +550,7 @@ export function App({ playTurn }: AppProps = {}) {
               type="button"
               className={navBtn(view.kind === "lab")}
               onClick={() => {
+                abandonBattle();
                 setView({ kind: "lab" });
                 setNavOpen(false);
               }}
@@ -499,7 +562,7 @@ export function App({ playTurn }: AppProps = {}) {
               type="button"
               className={navBtn(view.kind === "watch")}
               onClick={() => {
-                store.getState().clearBattle();
+                abandonBattle();
                 setView({ kind: "watch", matchId: watchMatchId });
                 setNavOpen(false);
               }}
@@ -513,6 +576,7 @@ export function App({ playTurn }: AppProps = {}) {
                 view.kind === "builder" || view.kind === "setup"
               )}
               onClick={() => {
+                abandonBattle();
                 setView({ kind: "builder" });
                 setNavOpen(false);
               }}
@@ -524,6 +588,7 @@ export function App({ playTurn }: AppProps = {}) {
               type="button"
               className={navBtn(view.kind === "leaderboard")}
               onClick={() => {
+                abandonBattle();
                 setView({ kind: "leaderboard" });
                 setNavOpen(false);
               }}
@@ -535,6 +600,7 @@ export function App({ playTurn }: AppProps = {}) {
               type="button"
               className={navBtn(view.kind === "methodology")}
               onClick={() => {
+                abandonBattle();
                 setView({ kind: "methodology" });
                 setNavOpen(false);
               }}
@@ -592,7 +658,7 @@ export function App({ playTurn }: AppProps = {}) {
                 <DecisionLabView
                   guided={guidedPath}
                   onWatch={() => {
-                    store.getState().clearBattle();
+                    abandonBattle();
                     setView({ kind: "watch" });
                   }}
                   onHome={goHome}
@@ -633,6 +699,7 @@ export function App({ playTurn }: AppProps = {}) {
             <BuilderForm
               initialConfig={playerConfig}
               onContinue={onContinueFromBuilder}
+              onDraftChange={setBuilderDraft}
             />
           ) : null}
 
