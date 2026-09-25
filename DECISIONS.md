@@ -1173,3 +1173,9 @@ Post-demo UI/UX review: chrome density, Lab naming mismatch, honesty weight, raw
 
 Consequences:
 Branch ux2/redesign; UI tests and demo-video-script labels updated; screenshots refresh after merge.
+
+### D-054 follow-up - 2026-09-25 - Decision clarity and browser verification
+
+Refine the existing presentation system with a clear recorded-challenge entry point, described alternative modes, larger shared typography, catalog-backed move facts, recorded-cost precedence in Challenge, visible resource/selection summaries, and scannable analytical results. Keep existing handlers, scoring, evidence, validation and live lifecycle intact. Builder profile fields were already required by validation; correct the optional wording and open the disclosure on existing module errors. Results actions precede the full log. On narrow screens, Challenge controls follow the choices and the accessible leaderboard table is clipped by a block wrapper to prevent intrinsic table width from causing horizontal overflow.
+
+Verification combines the existing functional suite, focused regressions, independent diff review, production builds, and real-browser desktop/mobile/keyboard/save-load/mocked-live checks. No new dependency, engine rule, data regeneration, storage change, live request or model-ranking claim is introduced.

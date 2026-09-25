@@ -29,13 +29,32 @@ export function LeaderboardChart({
       >
         {title}
       </h2>
-      <p className="mt-2 text-sm text-stone-400">
+      <p className="aa-prose mt-2 text-sm leading-relaxed text-stone-400">
         Bars show uncertainty from sample size. Overlapping bars are not a
         ranking.
       </p>
+      <ul
+        className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-300"
+        aria-label="Chart legend"
+      >
+        <li className="flex items-center gap-2">
+          <span
+            aria-hidden="true"
+            className="h-3 w-3 rounded-full bg-amber-500"
+          />
+          Dot: best-move rate
+        </li>
+        <li className="flex items-center gap-2">
+          <span aria-hidden="true" className="h-1 w-8 bg-stone-400" />
+          Line: uncertainty range
+        </li>
+      </ul>
+      <p className="mt-2 text-sm text-stone-400">
+        Further right means more best moves on this test set.
+      </p>
 
       <div
-        className="mt-4 w-full max-w-full"
+        className="mt-5 w-full max-w-full"
         data-testid="leaderboard-chart-scale"
       >
         <ScaleAxis />
@@ -76,35 +95,38 @@ export function LeaderboardChart({
         </div>
       </div>
 
-      <table className="sr-only" data-testid="leaderboard-table">
-        <caption>{title} best-move rates</caption>
-        <thead>
-          <tr>
-            <th>Model and prompt</th>
-            <th>Best-move rate</th>
-            <th>Low</th>
-            <th>High</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          {suite.rows.map((row) => (
-            <tr key={row.id}>
-              <td>{leaderboardRowDisplayName(row)}</td>
-              <td>
-                {row.rate === undefined
-                  ? "—"
-                  : `${(row.rate * 100).toFixed(1)}%`}
-              </td>
-              <td>{`${(row.wilson.low * 100).toFixed(1)}%`}</td>
-              <td>{`${(row.wilson.high * 100).toFixed(1)}%`}</td>
-              <td>
-                {row.insufficientEvidence ? "not enough evidence" : ""}
-              </td>
+      {/* Clip a block wrapper: intrinsic table width can exceed a narrow viewport. */}
+      <div className="sr-only">
+        <table data-testid="leaderboard-table">
+          <caption>{title} best-move rates</caption>
+          <thead>
+            <tr>
+              <th>Model and prompt</th>
+              <th>Best-move rate</th>
+              <th>Uncertainty range: low</th>
+              <th>Uncertainty range: high</th>
+              <th>Notes</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {suite.rows.map((row) => (
+              <tr key={row.id}>
+                <td>{leaderboardRowDisplayName(row)}</td>
+                <td>
+                  {row.rate === undefined
+                    ? "—"
+                    : `${(row.rate * 100).toFixed(1)}%`}
+                </td>
+                <td>{`${(row.wilson.low * 100).toFixed(1)}%`}</td>
+                <td>{`${(row.wilson.high * 100).toFixed(1)}%`}</td>
+                <td>
+                  {row.insufficientEvidence ? "not enough evidence" : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -163,7 +185,7 @@ function RowWhisker({ row }: { row: Row }): React.JSX.Element {
   return (
     <div className="w-full max-w-full">
       <div className="flex flex-wrap items-baseline justify-between gap-2 px-0 text-sm">
-        <span className="text-stone-100">{label}</span>
+        <span className="font-medium text-stone-100">{label}</span>
         <span className="text-stone-400">
           best-move rate {pct}
           {row.insufficientEvidence ? " · not enough evidence" : ""}

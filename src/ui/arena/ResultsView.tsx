@@ -97,6 +97,15 @@ export function ResultsView({
         </p>
       </div>
 
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Button variant="primary" onClick={onRestart}>
+          Fight again
+        </Button>
+        <Button variant="secondary" onClick={onReturnHome}>
+          Home
+        </Button>
+      </div>
+
       <details className="mt-6 rounded border aa-border px-4 py-3 text-sm text-stone-400">
         <summary className="cursor-pointer text-stone-300">
           What recorded tests found
@@ -141,14 +150,7 @@ export function ResultsView({
         )}
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Button variant="primary" onClick={onRestart}>
-          Fight again
-        </Button>
-        <Button variant="secondary" onClick={onReturnHome}>
-          Home
-        </Button>
-      </div>
+
     </section>
   );
 }

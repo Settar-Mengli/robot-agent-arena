@@ -130,7 +130,7 @@ export function DecisionLabView({
       >
         Can you beat the AI?
       </h1>
-      <p className="mt-2 text-stone-400">
+      <p className="aa-prose mt-2 text-stone-400">
         Pick a move, then show the answer. Scored from saved measurements — no
         live AI call.
       </p>
@@ -138,7 +138,7 @@ export function DecisionLabView({
         <HonestyLine honestyMode="recorded" />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-end gap-1">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
           items={tabs}
           value={subview}
@@ -149,8 +149,8 @@ export function DecisionLabView({
           type="button"
           className={
             advanced
-              ? "min-h-11 border-b-2 border-amber-500 px-3 py-2 text-sm font-medium text-amber-100"
-              : "min-h-11 border-b-2 border-transparent px-3 py-2 text-sm text-stone-400 hover:text-stone-200"
+              ? "min-h-11 shrink-0 self-start rounded-lg border border-amber-500 bg-amber-950/30 px-4 py-2 text-sm font-medium text-amber-100"
+              : "min-h-11 shrink-0 self-start rounded-lg border aa-border px-4 py-2 text-sm text-stone-300 hover:bg-stone-800 hover:text-stone-100"
           }
           aria-pressed={advanced}
           data-testid="lab-advanced-toggle"
@@ -167,10 +167,10 @@ export function DecisionLabView({
       </div>
 
       {advanced && subview !== "challenge" ? (
-        <label className="mt-4 block text-sm text-stone-400">
+        <label className="mt-5 flex flex-wrap items-center gap-2 text-sm text-stone-400">
           Test set{" "}
           <select
-            className="ml-2 rounded border aa-border bg-stone-900 px-2 py-1"
+            className="min-h-11 max-w-full rounded-lg border aa-border bg-stone-900 px-3 py-2"
             value={filters.suiteId}
             onChange={(e) =>
               setFilters((f) => ({ ...f, suiteId: e.target.value }))
@@ -289,11 +289,12 @@ function SituationsPanel(props: {
 }): React.JSX.Element {
   const { cases, arms, filters, setFilters, selected, onSelect } = props;
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-2">
+    <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
       <div>
         <div className="flex flex-wrap gap-3 text-sm">
           <input
-            className="min-h-11 rounded border aa-border bg-stone-900 px-2 py-1"
+            className="min-h-11 min-w-0 flex-1 rounded-lg border aa-border bg-stone-900 px-3 py-2"
+            aria-label="Filter situations"
             placeholder="Filter situations"
             value={filters.text}
             onChange={(e) =>
@@ -301,7 +302,8 @@ function SituationsPanel(props: {
             }
           />
           <select
-            className="min-h-11 rounded border aa-border bg-stone-900 px-2"
+            className="min-h-11 max-w-full rounded-lg border aa-border bg-stone-900 px-3"
+            aria-label="Recorded answer to filter by"
             value={filters.arm}
             onChange={(e) =>
               setFilters((f) => ({ ...f, arm: e.target.value }))
@@ -319,7 +321,12 @@ function SituationsPanel(props: {
             <li key={c.snapshotId}>
               <button
                 type="button"
-                className="min-h-11 text-left text-stone-300 hover:text-stone-100"
+                className={`min-h-11 w-full rounded-lg border px-3 py-3 text-left transition-colors ${
+                  selected?.snapshotId === c.snapshotId
+                    ? "border-amber-500 bg-amber-950/30 text-amber-100"
+                    : "aa-border text-stone-300 hover:bg-stone-800 hover:text-stone-100"
+                }`}
+                aria-pressed={selected?.snapshotId === c.snapshotId}
                 title={c.scenarioId}
                 onClick={() => onSelect(c.snapshotId)}
               >
@@ -330,12 +337,12 @@ function SituationsPanel(props: {
         </ul>
         <p className="mt-4 text-sm text-stone-400">{cases.length} situations</p>
       </div>
-      <div className="text-sm">
+      <div className="rounded-xl border aa-border bg-stone-900/40 p-4 text-sm sm:p-5">
         {selected === null ? (
           <p className="text-stone-400">No situation selected.</p>
         ) : (
           <>
-            <h3 className="text-lg text-stone-100">
+            <h3 className="text-lg font-semibold text-stone-100">
               Situation turn {selected.turn}
             </h3>
             <p className="mt-2">
@@ -349,7 +356,7 @@ function SituationsPanel(props: {
                 return (
                   <li
                     key={arm}
-                    className="rounded border aa-border px-3 py-2"
+                    className="rounded-lg border aa-border bg-stone-950/50 px-3 py-3 leading-relaxed"
                   >
                     <span className="text-stone-200">
                       {plainPolicyLabel(arm)}

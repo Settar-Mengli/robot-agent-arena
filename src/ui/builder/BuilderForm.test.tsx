@@ -39,6 +39,48 @@ function submitForm() {
 }
 
 describe("BuilderForm", () => {
+  it("opens required story notes when validation reports missing profile fields", () => {
+    render(<BuilderForm />);
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "NEEDS-PROFILE" }
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: /Null Pulse/i }));
+    const details = screen.getByText("Story notes (required robot profile)").closest("details")!;
+    expect(details).not.toHaveAttribute("open");
+
+    submitForm();
+    expect(screen.getByRole("alert")).toHaveTextContent(/modules.coreIdentity/i);
+    expect(details).toHaveAttribute("open");
+    expect(screen.queryByTestId("validated-config")).not.toBeInTheDocument();
+
+    fillModules();
+    expect(details).toHaveAttribute("open");
+    submitForm();
+    expect(screen.getByTestId("validated-config")).toHaveTextContent("NEEDS-PROFILE");
+  });
+
+  it("allows one selected move and continues only after validation", () => {
+    const selections: string[][] = [];
+    render(<BuilderForm onContinue={(config) => selections.push(config.skillIds)} />);
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "ONE-MOVE" }
+    });
+    fillModules();
+    expect(screen.getByText("0 of 2 selected")).toBeInTheDocument();
+    submitForm();
+    expect(screen.getByRole("alert")).toHaveTextContent(/at least one skill/i);
+    expect(screen.queryByTestId("validated-config")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /Null Pulse/i }));
+    expect(screen.getByText("1 of 2 selected")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Continue to battle setup/i })).toBeNull();
+    expect(selections).toEqual([]);
+    submitForm();
+    expect(screen.getByTestId("validated-config")).toHaveTextContent("Null Pulse");
+    fireEvent.click(screen.getByRole("button", { name: /Continue to battle setup/i }));
+    expect(selections).toEqual([["skill-null-pulse"]]);
+  });
+
   it("shows a validated configuration after a complete valid submission", () => {
     render(<BuilderForm />);
     fillValidForm();
@@ -205,19 +247,27 @@ describe("BuilderForm", () => {
       name: /Core Identity/i
     });
 
+    expect(screen.getByText("0 of 2 selected")).toBeInTheDocument();
     fireEvent.click(override);
+    expect(screen.getByText("1 of 2 selected")).toBeInTheDocument();
     fireEvent.click(logicStorm);
+    expect(screen.getByText("2 of 2 selected")).toBeInTheDocument();
     expect(override).toBeChecked();
     expect(logicStorm).toBeChecked();
     expect(coreIdentity).toBeDisabled();
+    fireEvent.click(coreIdentity);
+    expect(coreIdentity).not.toBeChecked();
+    expect(screen.getByText("2 of 2 selected")).toBeInTheDocument();
 
     fireEvent.click(logicStorm);
+    expect(screen.getByText("1 of 2 selected")).toBeInTheDocument();
     expect(logicStorm).not.toBeChecked();
     expect(coreIdentity).not.toBeDisabled();
 
     fireEvent.click(coreIdentity);
     expect(coreIdentity).toBeChecked();
     expect(logicStorm).toBeDisabled();
+    expect(screen.getByText("2 of 2 selected")).toBeInTheDocument();
   });
 
   it("surfaces an actionable error when display name is empty", () => {

@@ -430,18 +430,18 @@ export function App({ playTurn }: AppProps = {}) {
 
   const navBtn = (active: boolean) =>
     active
-      ? "min-h-11 text-sm font-medium text-amber-400"
-      : "min-h-11 text-sm text-stone-400 hover:text-stone-200";
+      ? "min-h-11 rounded-lg bg-amber-950/50 px-3 text-sm font-semibold text-amber-200"
+      : "min-h-11 rounded-lg px-3 text-sm text-stone-300 hover:bg-stone-900 hover:text-stone-100";
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100">
+    <div className="aa-app min-h-screen bg-stone-950 text-stone-100">
       <a
         href="#main"
         className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:left-4 focus-visible:top-4 focus-visible:z-50 focus-visible:rounded focus-visible:bg-amber-600 focus-visible:px-3 focus-visible:py-2 focus-visible:text-stone-950"
       >
         Skip to main content
       </a>
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <header className="border-b aa-border py-4 sm:py-5">
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -471,8 +471,8 @@ export function App({ playTurn }: AppProps = {}) {
             id="primary-nav"
             className={
               navOpen
-                ? "mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
-                : "mt-4 hidden flex-col gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
+                ? "mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-1"
+                : "mt-4 hidden flex-col gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-1"
             }
             aria-label="Primary"
             data-testid="primary-nav"
@@ -573,7 +573,7 @@ export function App({ playTurn }: AppProps = {}) {
         <main
           id="main"
           ref={mainHeadingRef as React.RefObject<HTMLElement>}
-          className="py-8 sm:py-10"
+          className="min-w-0 py-8 sm:py-10"
         >
           {view.kind === "home" ? (
             <LandingView

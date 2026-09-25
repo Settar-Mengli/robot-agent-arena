@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   AGENT_MODULES,
   MVP_SKILL_CATALOG,
@@ -11,6 +11,7 @@ import { skillLabel } from "../copy/skill-label";
 import { skillPlainDescription } from "../copy/skill-plain";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { MoveFacts } from "../components/MoveFacts";
 import { buildAgentConfig } from "./buildAgentConfig";
 
 const MODULE_LABELS: Record<AgentModule, string> = {
@@ -76,6 +77,16 @@ export function BuilderForm({
   );
   const [errors, setErrors] = useState<string[]>([]);
   const [validated, setValidated] = useState<AgentConfig | null>(null);
+  const profileDetails = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    if (
+      errors.some((error) => error.includes("agentConfig.modules.")) &&
+      profileDetails.current !== null
+    ) {
+      profileDetails.current.open = true;
+    }
+  }, [errors]);
 
   function invalidateResults() {
     setValidated(null);
@@ -132,8 +143,8 @@ export function BuilderForm({
         Build your own robot
       </h1>
       <p className="mt-2 text-stone-400">
-        Name your robot and pick two moves. Story notes are optional and only
-        used in recorded AI prompts; free play uses a simple computer opponent.
+        Name your robot, choose one or two moves, and complete the required story
+        notes. Free play uses a simple computer opponent.
       </p>
 
       <form className="mt-8 space-y-8" onSubmit={onSubmit} noValidate>
@@ -152,11 +163,23 @@ export function BuilderForm({
           />
         </div>
 
-        <fieldset>
-          <legend className="text-sm text-stone-300">
+        <fieldset aria-describedby="builder-move-help builder-selection-count">
+          <legend className="font-semibold text-stone-100">
             Equipped moves (max {MVP_SKILL_SLOT_LIMIT})
           </legend>
-          <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+            <p id="builder-move-help" className="max-w-xl text-sm text-stone-400">
+              Choose one or two moves. Defense absorbs attack power before HP is lost.
+            </p>
+            <p
+              id="builder-selection-count"
+              className="rounded-full border aa-border bg-stone-900 px-3 py-1 text-sm font-medium tabular-nums text-amber-300"
+              aria-live="polite"
+            >
+              {skillIds.length} of {MVP_SKILL_SLOT_LIMIT} selected
+            </p>
+          </div>
+          <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {MVP_SKILL_CATALOG.skills.map((skill) => {
               const checked = skillIds.includes(skill.skillId);
               const atLimit =
@@ -166,10 +189,10 @@ export function BuilderForm({
                   <label
                     className={
                       checked
-                        ? "flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-amber-600 bg-amber-950/40 px-3 py-3 text-amber-50"
+                        ? "flex h-full min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-amber-600 bg-amber-950/40 px-3 py-3 text-amber-50"
                         : atLimit
-                          ? "flex min-h-11 cursor-not-allowed items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-500 opacity-60"
-                          : "flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-200 hover:border-stone-500"
+                          ? "flex h-full min-h-11 cursor-not-allowed items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-500 opacity-60"
+                          : "flex h-full min-h-11 cursor-pointer items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-200 hover:border-stone-500"
                     }
                     data-selected={checked ? "true" : "false"}
                   >
@@ -180,13 +203,14 @@ export function BuilderForm({
                       checked={checked}
                       disabled={atLimit}
                       onChange={() => toggleSkill(skill.skillId)}
-                      className="mt-1"
+                      className="mt-1 accent-amber-500"
                     />
-                    <span>
+                    <span className="min-w-0">
                       <span className="font-medium">{skill.displayName}</span>
-                      <span className="block text-sm text-stone-400">
+                      <span className="mt-1 block text-sm text-stone-400">
                         {skillPlainDescription(skill.skillId)}
                       </span>
+                      <MoveFacts skillId={skill.skillId} />
                     </span>
                   </label>
                 </li>
@@ -196,13 +220,12 @@ export function BuilderForm({
         </fieldset>
 
         <Card className="p-0">
-          <details className="px-4 py-3">
+          <details ref={profileDetails} className="px-4 py-3">
             <summary className="cursor-pointer text-sm text-stone-300">
-              Story notes (used in recorded AI prompts)
+              Story notes (required robot profile)
             </summary>
-            <p className="mt-2 text-xs text-stone-400">
-              Stored on the robot for recorded AI prompts. Not used by the
-              simple computer opponent in free play.
+            <p className="mt-2 text-sm text-stone-400">
+              Complete all five fields before checking your robot.
             </p>
             <div className="mt-3 space-y-4">
               {AGENT_MODULES.map((key) => (
@@ -231,9 +254,14 @@ export function BuilderForm({
           </details>
         </Card>
 
-        <Button type="submit" variant="primary">
-          Check robot
-        </Button>
+        <div className="space-y-3">
+          <p className="text-sm text-stone-400">
+            Check your name, moves, and story notes before continuing to battle setup.
+          </p>
+          <Button type="submit" variant="primary">
+            Check robot
+          </Button>
+        </div>
       </form>
 
       {errors.length > 0 ? (

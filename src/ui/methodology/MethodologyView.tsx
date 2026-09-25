@@ -18,7 +18,7 @@ export function MethodologyView({
     <section
       aria-labelledby="methodology-heading"
       data-testid="methodology-view"
-      className="space-y-8"
+      className="aa-prose space-y-8"
     >
       <div data-testid="methodology-default">
         <h1
@@ -28,7 +28,7 @@ export function MethodologyView({
         >
           How we measure decisions
         </h1>
-        <p className="mt-2 text-stone-400">
+        <p className="mt-2 leading-relaxed text-stone-400">
           How we score AI decisions from recorded answers, and how live play
           differs.
         </p>
@@ -39,7 +39,7 @@ export function MethodologyView({
         <section
           aria-labelledby="method-tested"
           data-testid="batch4-findings"
-          className="mt-8"
+          className="mt-8 rounded-xl border aa-border bg-stone-900/40 p-5 sm:p-6"
         >
           <h2
             id="method-tested"
@@ -47,11 +47,11 @@ export function MethodologyView({
           >
             What we tested
           </h2>
-          <p className="mt-2 text-stone-300">
+          <p className="mt-2 leading-relaxed text-stone-300">
             No measurable effect: rewording, a misleading rumor, and extra facts
             did not change these models&apos; choices on this test set.
           </p>
-          <p className="mt-2 text-stone-300">
+          <p className="mt-2 leading-relaxed text-stone-300">
             The same question asked twice changed 1 of 35 answers for Groq —
             small wobble (1 of 35), from repeat runs or provider changes over
             time.
@@ -70,7 +70,7 @@ export function MethodologyView({
           >
             How scoring works
           </h2>
-          <p className="mt-2 text-stone-400">
+          <p className="mt-2 leading-relaxed text-stone-400">
             On fixed battle situations, we record which move an agent chooses
             and score it against a known best move versus a fixed player plan.
             We report points worse than the best move. The leaderboard shows
@@ -86,7 +86,7 @@ export function MethodologyView({
           >
             Recorded vs live
           </h2>
-          <p className="mt-2 text-stone-400">
+          <p className="mt-2 leading-relaxed text-stone-400">
             Watch, Beat the AI, and the Leaderboard use recorded answers. The
             Arena can also play a live AI with your own OpenRouter key: good for
             trying it yourself, but its answers aren&apos;t recorded evidence and
@@ -98,7 +98,7 @@ export function MethodologyView({
           <h2 id="method-limits" className="text-lg font-medium text-stone-200">
             Limits
           </h2>
-          <ul className="mt-2 list-disc space-y-2 pl-5 text-stone-400">
+          <ul className="mt-3 list-disc space-y-3 pl-5 leading-relaxed text-stone-400">
             <li>
               Most situations in this test set offer two legal moves, so there
               is little room for any wording change to flip a choice.
@@ -129,12 +129,12 @@ export function MethodologyView({
         </section>
       </div>
 
-      <details className="rounded border aa-border px-4 py-3 text-sm text-stone-400">
+      <details className="rounded-xl border aa-border bg-stone-900/40 px-5 py-4 text-sm leading-relaxed text-stone-400">
         <summary className="cursor-pointer text-stone-300">Advanced</summary>
         <div className="mt-3 space-y-3" data-testid="methodology-advanced">
           <p>
             Pre-registration (Batch 4):{" "}
-            <span className="font-mono text-stone-300">
+            <span className="break-words font-mono text-stone-300">
               docs/preregistration-batch4.md
             </span>
           </p>

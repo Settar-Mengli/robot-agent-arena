@@ -5,6 +5,7 @@ import {
 } from "../../decision-lab";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { MoveFacts } from "../components/MoveFacts";
 import { skillLabel } from "../copy/skill-label";
 import { plainPolicyLabel } from "./help-ranking-copy";
 
@@ -43,6 +44,35 @@ function tagSentence(tags: readonly string[] | undefined): string | null {
 export function formatPlainScore(n: number): string {
   const rounded = Math.round(n * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+function CombatResources({
+  combatant
+}: {
+  combatant: DecisionLabCaseV3["observation"]["cpu"];
+}): React.JSX.Element {
+  return (
+    <dl className="mt-3 grid grid-cols-3 gap-3">
+      <div>
+        <dt className="text-xs font-medium text-stone-400">HP</dt>
+        <dd className="mt-1 text-lg font-semibold tabular-nums text-emerald-300">
+          {combatant.health}<span className="text-sm font-normal text-stone-400">/{combatant.maxHealth}</span>
+        </dd>
+      </div>
+      <div>
+        <dt className="text-xs font-medium text-stone-400">Energy</dt>
+        <dd className="mt-1 text-lg font-semibold tabular-nums text-sky-300">
+          {combatant.energy}<span className="text-sm font-normal text-stone-400">/{combatant.maxEnergy}</span>
+        </dd>
+      </div>
+      <div>
+        <dt className="text-xs font-medium text-stone-400">Defense</dt>
+        <dd className="mt-1 text-lg font-semibold tabular-nums text-stone-100">
+          {combatant.defense}
+        </dd>
+      </div>
+    </dl>
+  );
 }
 
 export function ChallengeView({
@@ -135,35 +165,40 @@ export function ChallengeView({
 
   return (
     <section data-testid="lab-challenge" className="mt-6 space-y-3">
-      <Card className="space-y-3 bg-stone-900/40 p-3 sm:p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium text-amber-300">
+          Situation {index + 1} of {pool.length}
+        </p>
+        <p className="text-sm text-stone-400">Turn {current.turn}</p>
+      </div>
+      <Card className="space-y-6 bg-stone-900/40 p-4 sm:p-6">
         <div className="grid gap-3 text-sm sm:grid-cols-2">
-          <div data-testid="challenge-you-side">
-            <p className="font-medium text-stone-200">
+          <div className="rounded-lg border aa-border bg-stone-950/40 p-4" data-testid="challenge-you-side">
+            <p className="font-medium text-amber-300">
               You (in the AI&apos;s place)
             </p>
-            <p className="mt-1 text-stone-400">
-              HP {current.observation.cpu.health}/
-              {current.observation.cpu.maxHealth} · Energy{" "}
-              {current.observation.cpu.energy} · Defense{" "}
-              {current.observation.cpu.defense}
+            <p className="mt-1 text-lg font-semibold text-stone-100">
+              {current.observation.cpu.displayName}
             </p>
+            <CombatResources combatant={current.observation.cpu} />
           </div>
-          <div data-testid="challenge-opponent-side">
-            <p className="font-medium text-stone-200">
+          <div className="rounded-lg border aa-border bg-stone-950/40 p-4" data-testid="challenge-opponent-side">
+            <p className="font-medium text-stone-300">
               Opponent (follows a fixed plan)
             </p>
-            <p className="mt-1 text-stone-400">
-              HP {current.observation.player.health}/
-              {current.observation.player.maxHealth} · Energy{" "}
-              {current.observation.player.energy} · Defense{" "}
-              {current.observation.player.defense}
+            <p className="mt-1 text-lg font-semibold text-stone-100">
+              {current.observation.player.displayName}
             </p>
+            <CombatResources combatant={current.observation.player} />
           </div>
         </div>
 
-        <fieldset>
-          <legend className="text-sm text-stone-300">Your pick</legend>
-          <ul className="mt-2 space-y-2">
+        <fieldset aria-describedby="challenge-move-help">
+          <legend className="font-semibold text-stone-100">Your pick</legend>
+          <p id="challenge-move-help" className="mt-1 text-sm text-stone-400">
+            Choose one move, then show the answer. Defense absorbs attack power before HP is lost.
+          </p>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
             {current.equippedSkillIds.map((id) => {
               const aff = current.affordability.find((a) => a.skillId === id);
               const selected = pick === id;
@@ -172,14 +207,15 @@ export function ChallengeView({
                   <label
                     className={
                       selected
-                        ? "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-amber-600 bg-amber-950/40 px-3 py-3 text-amber-50"
-                        : "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-200 hover:border-stone-500"
+                        ? "flex h-full min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-amber-600 bg-amber-950/40 px-3 py-3 text-amber-50"
+                        : "flex h-full min-h-11 cursor-pointer items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-200 hover:border-stone-500"
                     }
                     data-selected={selected ? "true" : "false"}
                   >
                     <input
                       type="radio"
                       name="challenge-pick"
+                      className="mt-1 accent-amber-500"
                       value={id}
                       checked={selected}
                       disabled={revealed}
@@ -187,8 +223,9 @@ export function ChallengeView({
                         if (!revealed) setPick(id);
                       }}
                     />
-                    <span className="font-medium">
+                    <span className="min-w-0 font-medium">
                       {skillLabel(id)}
+                      <MoveFacts skillId={id} energyCost={aff?.energyCost} />
                       {aff && !aff.affordable ? (
                         <span className="mt-0.5 block text-sm font-normal text-stone-400">
                           Not enough energy
@@ -291,9 +328,14 @@ export function ChallengeView({
         ) : null}
 
       <div
-        className="sticky bottom-0 z-10 mt-4 w-full space-y-2 border-t aa-border bg-stone-950/95 py-3"
+        className="sm:sticky bottom-0 z-10 mt-4 w-full space-y-2 border-t aa-border bg-stone-950/95 py-3"
         data-testid="challenge-sticky-bar"
       >
+        {!revealed && pick === null ? (
+          <p className="text-sm text-stone-400">
+            Pick a move first to reveal the answer.
+          </p>
+        ) : null}
         <Button
           variant={showAnswerEnabled ? "primary" : "secondary"}
           className={
@@ -302,16 +344,22 @@ export function ChallengeView({
               : "w-full border-transparent bg-stone-800 text-stone-200 disabled:opacity-100"
           }
           disabled={!showAnswerEnabled}
-          title={showAnswerEnabled ? undefined : "Pick a move first"}
+          title={
+            revealed ? "Answer already shown" : showAnswerEnabled ? undefined : "Pick a move first"
+          }
           aria-description={
-            showAnswerEnabled ? undefined : "Pick a move first"
+            revealed ? "Answer already shown" : showAnswerEnabled ? undefined : "Pick a move first"
           }
           onClick={reveal}
           data-testid="challenge-show-answer"
         >
           Show answer
         </Button>
-        <Button variant="secondary" className="w-full sm:w-auto" onClick={next}>
+        <Button
+          variant={revealed ? "primary" : "secondary"}
+          className="w-full sm:w-auto"
+          onClick={next}
+        >
           Next situation
         </Button>
       </div>
