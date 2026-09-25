@@ -16,13 +16,13 @@
 
 | # | Time | On-screen actions | Narration (one sentence) |
 |---|------|-------------------|---------------------------|
-| 1 | 0:00–0:20 | Landing: brand + honesty line visible; do not open Live yet | "AGENT ARENA measures robot-agent decisions against an exact best answer — recorded evidence first." |
+| 1 | 0:00–0:20 | Landing: brand + honesty line; scroll **What we found** (Batch 4 scoped null); do not open Live yet | "AGENT ARENA measures robot-agent decisions against an exact best answer — recorded evidence first, including what we measured and what did not change." |
 | 2 | 0:20–0:50 | Click **Can you beat the AI?** → Challenge; pick a skill; **Show answer**; **Next situation** once | "In Challenge you guess the best move against a fixed plan — the lab already measured it." |
 | 3 | 0:50–1:20 | Nav **Watch**; step **Next turn** 2–3 times; show honesty line | "Watch replays a recorded fight — not live AI." |
 | 4 | 1:20–1:55 | Nav **Beat the AI** → **Advanced** on → **Compare** briefly, then **Diagnostics** one case | "Advanced Compare and Diagnostics show when evidence is too thin to rank." |
 | 5 | 1:55–2:25 | Nav **How it works**; scroll to Batch 4 / null-result lines | "Batch 4: on this suite, those prompt twists did not separate the models — a scoped null result, not a universal claim." |
 | 6 | 2:25–2:50 | Nav **Leaderboard**; point at overlap / "Can't be separated with this data" grouping copy | "The leaderboard groups rates whose intervals still overlap — we refuse a fake ranking." |
-| 7 | 2:50–3:25 | Home **Play a live AI with your own key →** → Setup with live panel open → enable (blur/cover the key field) → show live honesty line → **Start battle** → one turn → **Leave** | "Optional live AI uses your key in memory only; labels say it is not recorded evidence." |
+| 7 | 2:50–3:25 | Home → expand **More ways to play** → **Play a live AI with your own key →** → Setup with live panel open → enable (blur/cover the key field) → show live honesty line → **Start battle** → one turn → **Leave** | "Optional live AI lives under More ways to play — your key stays in memory only; labels say it is not recorded evidence." |
 | 8 | 3:25–3:40 | One line on How it works or README: second environment (Resonance Seal) is headless / keyless | "A second environment proves the same measurement contract without the robot battle UI." |
 | 9 | 3:40–4:00 | Back to landing; show repo URL in browser or end card | "Code and committed fixtures: github.com/Settar-Mengli/robot-agent-arena — measure, don't overclaim." |
 
@@ -62,7 +62,7 @@ Skip Live AI and Advanced in Beat the AI in the short cut unless you have time.
 
 ## Screenshot shot-list (README, 6–8)
 
-1. Landing — honesty More open  
+1. Landing — honesty + **What we found** in frame  
 2. Challenge — answer revealed on one situation  
 3. Watch — mid-match turn with recorded honesty line  
 4. Beat the AI Compare — Advanced on, two variants, insufficient-evidence or overlap visible  

@@ -996,6 +996,10 @@ Operators need inspectable per-decision evidence without waiting for full diagno
 Consequences:
 ROADMAP / PROGRESS list **B.2d** then **B.3** then **B.4**. Do not mark locked batch 8 complete. README status may be corrected to reflect shipped UI + Decision Lab.
 
+## D-043
+
+This number was not used as a standalone decision entry. See the amendment **Amend — D-043 Decision Lab (execution B.2d)** under D-042.
+
 ## D-044 Additive heldout-ext adversarial suite (scopes D-026)
 Date: 2026-09-21
 Status: Accepted
@@ -1179,3 +1183,30 @@ Branch ux2/redesign; UI tests and demo-video-script labels updated; screenshots 
 Refine the existing presentation system with a clear recorded-challenge entry point, described alternative modes, larger shared typography, catalog-backed move facts, recorded-cost precedence in Challenge, visible resource/selection summaries, and scannable analytical results. Keep existing handlers, scoring, evidence, validation and live lifecycle intact. Builder profile fields were already required by validation; correct the optional wording and open the disclosure on existing module errors. Results actions precede the full log. On narrow screens, Challenge controls follow the choices and the accessible leaderboard table is clipped by a block wrapper to prevent intrinsic table width from causing horizontal overflow.
 
 Verification combines the existing functional suite, focused regressions, independent diff review, production builds, and real-browser desktop/mobile/keyboard/save-load/mocked-live checks. No new dependency, engine rule, data regeneration, storage change, live request or model-ranking claim is introduced.
+
+## D-055 Portfolio cut v0.1.0 (final polish closure)
+Date: 2026-09-25
+Status: Accepted
+
+Decision:
+Close the D-033 **11-batch** roadmap for the **v0.1.0 portfolio cut** on branch `release/final-polish`.
+
+1. **Locked batch 9 closed under D-051.** The three pre-registered measurements (prompt-perturbation sensitivity, adversarial-context robustness, information-scaling / partial-facts curve) shipped as Batch 4 robustness variants on heldout-ext **n=35** with preregistration in `docs/preregistration-batch4.md`. Do not re-open batch 9 as a separate delivery.
+2. **Memory variants and full information-scaling curve deferred** under this entry — still unmeasured in v0.1.0; docs must not imply a completed memory ablation.
+3. **Issue #28** (vitest worker `Timeout calling onTaskUpdate` after green drift assertions on long steps): remains **open**. Keep D-049’s scoped `--dangerouslyIgnoreUnhandledErrors` on the heldout-ext and discriminate drift steps only; do not weaken drift equality assertions.
+4. **F15 demo visible-copy UI tests** (`src/ui/demo-visible-copy.test.tsx`): the Pages-only verification clause in the polish plan was conditional on verify coverage — **confirmed** via the jsdom **ui** Vitest project on CI verify; no separate Pages job is required for F15.
+5. **Protected paths:** CI compares listed engine/prompt/fixture/pack/lockfile paths with `git diff --exit-code` against the **pull_request base only**; push-to-main skips that step. Policy: protected artifacts change through reviewed PRs, not casual direct edits.
+6. **Coverage:** CI runs `npm run coverage` for signal (D-040 node + ui projects); **no enforced coverage percentage thresholds** in `vitest.config.ts`.
+7. **Documented known limitations (not fixed in v0.1.0):**
+   - Battle numeric seed **`0`** → RNG fallback constant `0x9e3779b9` in `createSeededRng` (reproducibility lock).
+   - **`legalActions` vs oracle equipped enumeration** — per D-037; CPU `legalActions` reflects pre-player energy context.
+   - **Grounding V1** facts still show projected damage for unaffordable moves; V2/threat corrections remain deferred where regen would touch protected lab-pack bytes.
+   - Env **`nextInt` modulo bias** and silent `span ≤ 0` — documented won't-fix without a new decision.
+   - **Duplicate `skillIds` in one agent:** engine validation does not dedupe duplicates; closure for v0.1.0 is **persist / save-slot and Builder paths only**, not an engine rule change.
+8. **Version:** `package.json` **0.1.0** names this portfolio cut.
+
+Rationale:
+Batches 10–11 (D-051 BYOK/leaderboard/methodology, D-052 Resonance Seal) and UX polish (D-053–D-054) already shipped; remaining work is honest documentation, demo assets, and operator smoke — not new measurement batches.
+
+Consequences:
+ROADMAP / README / PROGRESS mark batches **8–11** done; batch 9 narrative merges into D-051; NEXT = screenshots, demo video script/recording, operator BYOK smoke, issue #28 tracking — not new locked batches before v0.1.0 tag.

@@ -2,9 +2,9 @@
 
 ## Overview
 
-AGENT ARENA (repository: `robot-agent-arena`) is an educational 1v1 turn-based robot battle game. Players configure agent modules and skills; battles resolve through a pure TypeScript engine with seeded, deterministic outcomes.
+AGENT ARENA (repository: `robot-agent-arena`) is an **agent evaluation framework** that measures and diagnoses decision quality against an exact oracle. The robot battle is the first **reference environment** — a deterministic, seeded pure TypeScript game used to produce committed measurements and a static demo.
 
-**Status today:** the battle engine, environment interface (`src/env`), inference client, agent layer (LLM turn + greedy baseline), eval harness (through A3 / ES / Batch 5), and UI through Batch 3–4 (Watch, save, pack v3 diagnostics, Challenge, D-050 plain UX, Batch 4 BYOK Arena opt-in + leaderboard/methodology) are the product surface. Next: **final polish** (screenshots, demo video, issue #28).
+**Status today:** engine, `src/env` (robot + Resonance Seal), inference, agent, eval harness, Decision Lab shared types, and full UI (through D-054 + D-055 portfolio cut) are shipped on `release/final-polish`. Next: demo assets and operator smoke (screenshots, demo video, issue #28).
 
 ## Layered architecture and dependency rule
 
@@ -140,10 +140,10 @@ Player actions resolve before CPU. If the player action ends the battle, the CPU
 
 ## Testing and verification
 
-- Suite layout: `src/__tests__/**/*.test.ts` (Vitest, Node environment)
-- Includes unit coverage for constants, RNG, skills/validation, session lifecycle, combat, outcome, simulation, and **seam parity** (`parity.test.ts`): replays `resolveBattle` histories through `resolveTurn` + `isBattleOver` and asserts identical turns/outcomes, including a mandatory turn-limit scenario
+- Vitest **projects** (D-040): **node** — `src/__tests__/**/*.test.ts`; **ui** — `src/ui/**/*.test.ts(x)` with jsdom (F15 demo visible-copy, Challenge, Builder, etc.)
+- Node project includes constants, RNG, skills/validation, session lifecycle, combat, outcome, simulation, and **seam parity** (`parity.test.ts`)
 - Local commands: `npm test`, `npm run coverage`, `npm run typecheck`, `npm run lint`
-- CI (`.github/workflows/ci.yml`) runs typecheck, lint, coverage, and `npm run eval:replay -- --suite all` on every pull request and on pushes to `main`
+- CI (`.github/workflows/ci.yml`) runs typecheck, lint, coverage (no enforced percentage thresholds), and multi-step `eval:replay` on every pull request and on pushes to `main`
 
 Do not treat any checked-in coverage percentage as a permanent contract; use the latest CI / local `npm run coverage` report.
 
@@ -155,4 +155,4 @@ Do not treat any checked-in coverage percentage as a permanent contract; use the
 
 ## Where decisions live
 
-Architectural rationale and locked tradeoffs are recorded in [DECISIONS.md](DECISIONS.md) (D-001 through D-013), including engine purity (D-003), stack lock (D-005), combat ownership (D-010), status-only completion (D-011), shared `resolveTurn` (D-012), and minimum skill loadout (D-013).
+Architectural rationale and locked tradeoffs are recorded in [DECISIONS.md](DECISIONS.md) (**D-001 through D-055**), including engine purity (D-003), environment interface (D-037), eval harness (D-018–D-023), product direction (D-033), batches 3–5 (D-049–D-052), live lifecycle (D-053), UX 2 (D-054), and portfolio cut (D-055).

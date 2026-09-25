@@ -4,13 +4,13 @@ An **agent evaluation framework** that measures and **diagnoses** agent decision
 
 Configure agent design choices. Run them in a deterministic battle environment. See which decisions were suboptimal, by how much, and why — cited to an exact oracle.
 
-**Published negative result (held-out adversarial):** grounding changed **0** decisions on the historical pre-dedupe suite (D-024 falsified; D-030). Current held-out adversarial suite is **n=13** distinct states (D-035) — **insufficient evidence** to rank models (Wilson intervals too wide). Heldout-ext **n=35** (D-044) meets the evidence gate; Wilson rows and regret: see [EVAL.md](EVAL.md). Pinned gemini ablation and bench rows: see [EVAL.md](EVAL.md).
+**Published negative result (held-out adversarial):** grounding changed **0** decisions on the historical pre-dedupe suite (D-024 falsified; D-030) — that **0/20** count is **narrative-only** (pre–D-035 duplicate states). The **committed** held-out adversarial measurement set is **n=13** distinct states (D-035) — **insufficient evidence** to rank models (Wilson intervals too wide). Heldout-ext **n=35** (D-044) meets the evidence gate; Wilson rows and regret: see [EVAL.md](EVAL.md). Pinned gemini ablation and bench rows: see [EVAL.md](EVAL.md).
 
-**Status:** Engine through Evidence+Ship (ES), **Batch 3** (D-049), **D-050** ([PR #38](https://github.com/Settar-Mengli/robot-agent-arena/pull/38)), **Batch 4 / D-051** robustness + BYOK/leaderboard ([PR #39](https://github.com/Settar-Mengli/robot-agent-arena/pull/39)), and **Batch 5:** second headless reference environment (Resonance Seal) proves EnvironmentOf via a shared evaluateChoices path (keyless baselines only). **Batch 4 result (this robot battle, this test set, these two models):** rewording, a rumor, and extra facts did not change choices; Groq’s same-question-twice wobble was 1/35 — see [Methodology](src/ui/methodology/MethodologyView.tsx) / [EVAL.md](EVAL.md). Pages demo: `https://settar-mengli.github.io/robot-agent-arena/` — **static** recorded evidence; live AI is **opt-in BYOK** (OpenRouter) and never ranked. **Next:** final polish (screenshots, demo video, issue #28).
+**Status:** **Complete for the v0.1.0 portfolio cut (D-055).** Engine through Evidence+Ship (ES), **Batch 3** (D-049), **D-050** ([PR #38](https://github.com/Settar-Mengli/robot-agent-arena/pull/38)), **Batch 4 / D-051** robustness + BYOK/leaderboard ([PR #39](https://github.com/Settar-Mengli/robot-agent-arena/pull/39)), **Batch 5** (D-052 Resonance Seal), live lifecycle (D-053), UX 2 (D-054), and final polish on `release/final-polish`. Locked batches **8–11** are done; locked batch **9** closed under D-051 (memory / full information-scaling curve **deferred** — D-055). **Batch 4 result (this robot battle, this test set, these two models):** rewording, a rumor, and extra facts did not change choices; Groq’s same-question-twice wobble was 1/35 — see [Methodology](src/ui/methodology/MethodologyView.tsx) / [EVAL.md](EVAL.md). Pages demo: `https://settar-mengli.github.io/robot-agent-arena/` — **static** recorded evidence; live AI is **opt-in BYOK** (OpenRouter) and never ranked. **Next:** screenshots, demo video, operator BYOK smoke, issue #28.
 
 ## What it is
 
-AGENT ARENA measures agent decision quality in a seeded, pure TypeScript battle environment (identical setups → identical resolution). Identity, memory, tools/skills, guardrails/rules, and strategy are the design surface; the engine is the first **reference environment** behind a planned environment interface (D-033). Binding honesty: every public conclusion must trace to a measurement (D-020 / D-031 / D-033). Fictional vocabulary only; no real-world attack, jailbreak, or prompt-injection content.
+AGENT ARENA measures agent decision quality in a seeded, pure TypeScript battle environment (identical setups → identical resolution). Identity, memory, tools/skills, guardrails/rules, and strategy are the design surface; the robot battle is the first **reference environment** on the shipped `src/env` interface (D-033 / D-037; second env: Resonance Seal, D-052). Binding honesty: every public conclusion must trace to a measurement (D-020 / D-031 / D-033). Fictional vocabulary only; no real-world attack, jailbreak, or prompt-injection content.
 
 Temporary product title: **AGENT ARENA**. Repository name: `robot-agent-arena`. See [DECISIONS.md](DECISIONS.md) for naming policy.
 
@@ -73,10 +73,13 @@ CI runs `npm run eval:replay -- --suite all` after coverage (keyless fixture rep
 src/
   engine/          # Pure battle engine (types, constants, skills, validation, combat, …)
   data/            # CPU opponent catalog (FRACTURE, SENTINEL-X)
+  env/             # EnvironmentOf contract, robot adapter, Resonance Seal
   inference/       # Multi-provider OpenAI-compatible LLM client
   agent/           # LLM opponent turn, validation, decision trace, greedy baseline
   eval/            # Match/snapshot suites, oracle, metrics, CLI
-  __tests__/       # Vitest suite
+  decision-lab/    # Shared Lab pack types + diagnostics (no React, no eval import)
+  ui/              # React app: landing, builder, arena, lab, watch, live, leaderboard, methodology, persist
+  __tests__/       # Vitest node project (headless / cross-cutting)
 evals/             # Committed snapshot suites + fixture store
 scripts/           # run-ts.mjs (Vite runnerImport)
 EVAL.md            # Metric definitions + committed baseline
@@ -87,7 +90,11 @@ PROGRESS.md        # Current status
 AGENT_RULES.md     # Contributor / agent operating rules
 ```
 
-**DONE:** `src/ui` save slot (B.4); Watch-recorded LLM Arena (B.3). Measurement core uses `src/env`; Decision Lab shared types live in `src/decision-lab/`.
+**DONE:** Watch-recorded LLM Arena (B.3), one save slot (B.4), Decision Lab pack v3 + Challenge, Batch 4–5 eval artifacts, D-053 live lifecycle, D-054 UX 2.
+
+## Known limitations
+
+See [DECISIONS.md](DECISIONS.md) **D-055** and [ARCHITECTURE.md](ARCHITECTURE.md). Summary: oracle is fixed-policy (not equilibrium); small-n suites cannot rank models; memory variants unmeasured; seed `0` RNG quirk; duplicate `skillIds` only guarded at persist/Builder (not engine); issue #28 drift worker noise; live BYOK is never ranked evidence.
 
 ## Testing
 
@@ -117,10 +124,10 @@ For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 5. **Done:** Environment interface + port (A3)
 6. **Done:** UI part 1 — scaffolding + Builder (B.1)
 7. **Done:** UI part 2 — Arena + results (B.2); **B.2d** Decision Lab; **ES**; **Batch 3** (B.3 Watch / B.4 save / batch-8 diagnostics / Lab challenge) — D-049
-8. Diagnostic layer — **done** in Batch 3 (pack v3 + Lab Diagnostics); three new measurements remain batch **9**
-9. Three new measurements (pre-register before implement)
-10. BYOK + committed static leaderboard + methodology writeup
-11. Second reference environment + publish
+8. Diagnostic layer — **done** (Batch 3 / D-049)
+9. Three new measurements — **done** under Batch 4 / D-051 (memory / full scaling curve deferred — D-055)
+10. BYOK + committed static leaderboard + methodology — **done** (D-051)
+11. Second reference environment — **done** (D-052 Resonance Seal)
 
 Order locked in [D-033](DECISIONS.md); Batch 3 [D-049](DECISIONS.md); ES [D-048](DECISIONS.md).
 
