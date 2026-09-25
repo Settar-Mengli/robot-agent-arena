@@ -24,6 +24,7 @@ export const FORBIDDEN_DEFAULT_PATH: readonly RegExp[] = [
   /\d+\.\d*00\b/,
   /\bfoe\b/i,
   /\bSeed\b/,
+  /\bseed\b/i,
   /agent around its declared/i,
   /declared purpose/i
 ] as const;

@@ -65,7 +65,14 @@ export function ResultsView({
       </p>
 
       <div className="mt-3">
-        <HonestyStrip variant="compact" opponentMode={opponentMode} />
+        <HonestyStrip
+          variant="compact"
+          honestyMode={
+            opponentMode === "live" || opponentMode === "live-fallback"
+              ? "live"
+              : "cpu"
+          }
+        />
       </div>
 
       <div

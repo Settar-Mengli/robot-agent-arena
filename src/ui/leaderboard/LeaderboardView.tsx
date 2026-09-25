@@ -1,6 +1,7 @@
 import { useState } from "react";
 import pack from "../data/leaderboard.v1.json";
 import { Button } from "../components/Button";
+import { HonestyLine } from "../components/HonestyLine";
 import { LeaderboardChart } from "./LeaderboardChart";
 
 /** UI-local mirror of LeaderboardV1 (ui must not import eval). */
@@ -48,6 +49,9 @@ export function LeaderboardView({
         Recorded measurements in this robot battle only. Compared only within the
         same test set. Live AI play is never ranked here.
       </p>
+      <div className="mt-3">
+        <HonestyLine honestyMode="recorded" />
+      </div>
       <p className="mt-2 text-stone-400 text-sm">
         These numbers are for this test set and these models — not a general claim
         about every robot battle or every AI.

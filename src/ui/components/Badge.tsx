@@ -9,7 +9,7 @@ export type BadgeProps = {
 };
 
 const TONE_CLASS: Record<BadgeTone, string> = {
-  neutral: "border-stone-600 bg-stone-900 text-stone-300",
+  neutral: "border aa-border bg-stone-900 text-stone-300",
   caution: "border-amber-800/80 bg-amber-950/40 text-amber-100",
   ok: "border-emerald-800 bg-emerald-950/30 text-emerald-100"
 };

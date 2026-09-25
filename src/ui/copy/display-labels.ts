@@ -38,6 +38,20 @@ export function suiteDisplayName(
 }
 
 /**
+ * Parses scenario ids like "aegis__greedy__sentinel-x__s101"
+ * into "AEGIS vs SENTINEL-X" (UI-only; raw id stays in title attrs).
+ */
+export function scenarioDisplayName(scenarioId: string): string {
+  const parts = scenarioId.split("__");
+  if (parts.length >= 3) {
+    const robot = parts[0]!.replace(/-/g, "-").toUpperCase();
+    const opponent = parts[2]!.replace(/-/g, "-").toUpperCase();
+    return `${robot} vs ${opponent}`;
+  }
+  return scenarioId;
+}
+
+/**
  * Parses id "gemini:base" or "gemini:base:secondary"
  * into "Gemini · Basic prompt".
  */

@@ -6,6 +6,8 @@ import {
   type SkillId,
   type TurnRecord
 } from "../../engine";
+import { Button } from "../components/Button";
+import { Card } from "../components/Card";
 import { InfoTip } from "../components/InfoTip";
 import { skillLabel } from "../copy/skill-label";
 import { skillPlainDescription } from "../copy/skill-plain";
@@ -59,13 +61,9 @@ export function ArenaView({
           Arena
         </h1>
         <p className="mt-2 text-stone-400">No active battle.</p>
-        <button
-          type="button"
-          className="mt-4 min-h-11 rounded border border-stone-600 px-4 py-2"
-          onClick={onLeave}
-        >
+        <Button variant="secondary" className="mt-4" onClick={onLeave}>
           Home
-        </button>
+        </Button>
       </section>
     );
   }
@@ -121,7 +119,14 @@ export function ArenaView({
         {modeLine}
       </p>
       <div className="mt-3">
-        <HonestyStrip variant="compact" opponentMode={opponentMode} />
+        <HonestyStrip
+          variant="compact"
+          honestyMode={
+            opponentMode === "live" || opponentMode === "live-fallback"
+              ? "live"
+              : "cpu"
+          }
+        />
       </div>
       {opponentMode === "live-fallback" && liveNotice ? (
         <p
@@ -135,7 +140,7 @@ export function ArenaView({
       ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div>
+        <Card className="p-3">
           <RobotFigure side="player" motion={playerMotion} />
           <CombatantBars
             title="Your robot"
@@ -146,8 +151,8 @@ export function ArenaView({
             maxEnergy={runtime.player.maxEnergy}
             defense={runtime.player.defense}
           />
-        </div>
-        <div>
+        </Card>
+        <Card className="p-3">
           <RobotFigure side="cpu" motion={cpuMotion} />
           <CombatantBars
             title={barTitle}
@@ -158,7 +163,7 @@ export function ArenaView({
             maxEnergy={runtime.cpu.maxEnergy}
             defense={runtime.cpu.defense}
           />
-        </div>
+        </Card>
       </div>
 
       {state.lastError ? (
@@ -190,7 +195,7 @@ export function ArenaView({
                   className={
                     unaffordable
                       ? "min-h-11 rounded border border-amber-900/60 bg-stone-900/40 px-4 py-2 text-left font-medium text-stone-400 hover:bg-stone-900 disabled:cursor-not-allowed"
-                      : "min-h-11 rounded border border-stone-600 bg-stone-900 px-4 py-2 text-left font-medium text-stone-100 hover:border-stone-500 hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      : "min-h-11 rounded border aa-border bg-stone-900 px-4 py-2 text-left font-medium text-stone-100 hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
                   }
                   disabled={actionsDisabled}
                   title={hint}
@@ -239,14 +244,10 @@ export function ArenaView({
         cpuName={runtime.cpu.displayName}
       />
 
-      <div className="mt-8 sticky bottom-0 z-10 flex flex-wrap gap-3 border-t aa-border bg-stone-950/95 py-3">
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200 hover:bg-stone-900"
-          onClick={onLeave}
-        >
+      <div className="mt-8 sticky bottom-0 z-10 flex w-full flex-wrap gap-3 border-t aa-border bg-stone-950/95 py-3">
+        <Button variant="secondary" onClick={onLeave}>
           Leave
-        </button>
+        </Button>
       </div>
     </section>
   );

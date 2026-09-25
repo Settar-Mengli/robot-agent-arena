@@ -34,41 +34,46 @@ export function LeaderboardChart({
         ranking.
       </p>
 
-      <ScaleAxis />
+      <div
+        className="mt-4 w-full max-w-full"
+        data-testid="leaderboard-chart-scale"
+      >
+        <ScaleAxis />
 
-      <div className="mt-4 space-y-4">
-        {suite.groups.map((group, gi) => {
-          const multi = group.length > 1;
-          const rows = group
-            .map((id) => byId.get(id))
-            .filter((r): r is Row => r !== undefined);
-          return (
-            <Card
-              key={`${suite.suiteId}-${gi}`}
-              className={
-                multi
-                  ? "border-amber-900/40 bg-amber-950/20 px-3 py-3"
-                  : "border-transparent bg-transparent px-1 py-1 shadow-none"
-              }
-              data-testid="leaderboard-group"
-            >
-              {multi ? (
-                <div className="mb-2">
-                  <Badge tone="caution">
-                    {"Can't be separated with this data"}
-                  </Badge>
-                </div>
-              ) : null}
-              <ul className="space-y-3">
-                {rows.map((row) => (
-                  <li key={row.id} data-testid="leaderboard-row">
-                    <RowWhisker row={row} />
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          );
-        })}
+        <div className="mt-4 space-y-4">
+          {suite.groups.map((group, gi) => {
+            const multi = group.length > 1;
+            const rows = group
+              .map((id) => byId.get(id))
+              .filter((r): r is Row => r !== undefined);
+            return (
+              <Card
+                key={`${suite.suiteId}-${gi}`}
+                className={
+                  multi
+                    ? "border-amber-900/40 bg-amber-950/20 px-0 py-3"
+                    : "border-transparent bg-transparent px-0 py-1 shadow-none"
+                }
+                data-testid="leaderboard-group"
+              >
+                {multi ? (
+                  <div className="mb-2 px-3">
+                    <Badge tone="caution">
+                      {"Can't be separated with this data"}
+                    </Badge>
+                  </div>
+                ) : null}
+                <ul className="space-y-3">
+                  {rows.map((row) => (
+                    <li key={row.id} data-testid="leaderboard-row">
+                      <RowWhisker row={row} />
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       <table className="sr-only" data-testid="leaderboard-table">
@@ -106,12 +111,13 @@ export function LeaderboardChart({
 
 function ScaleAxis(): React.JSX.Element {
   return (
-    <div className="mt-4 w-full max-w-full" data-testid="leaderboard-axis">
+    <div className="w-full max-w-full" data-testid="leaderboard-axis">
       <svg
         className="aa-chart-border block h-8 w-full"
         viewBox="0 0 100 20"
         preserveAspectRatio="none"
         aria-hidden="true"
+        data-testid="leaderboard-axis-svg"
       >
         {TICKS.map((t) => (
           <line
@@ -156,7 +162,7 @@ function RowWhisker({ row }: { row: Row }): React.JSX.Element {
 
   return (
     <div className="w-full max-w-full">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 px-0 text-sm">
         <span className="text-stone-100">{label}</span>
         <span className="text-stone-400">
           best-move rate {pct}

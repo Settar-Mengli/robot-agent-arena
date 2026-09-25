@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   leaderboardRowDisplayName,
   providerDisplayName,
+  scenarioDisplayName,
   suiteDisplayName,
   variantDisplayName
 } from "./display-labels";
@@ -25,7 +26,10 @@ describe("display-labels", () => {
 
   it("formats leaderboard rows from id", () => {
     expect(
-      leaderboardRowDisplayName({ id: "gemini:base-repeat", label: "gemini base-repeat" })
+      leaderboardRowDisplayName({
+        id: "gemini:base-repeat",
+        label: "gemini base-repeat"
+      })
     ).toBe("Gemini · Asked twice");
     expect(
       leaderboardRowDisplayName({
@@ -39,5 +43,11 @@ describe("display-labels", () => {
         label: "gemini base (smaller set)"
       })
     ).toBe("Gemini · Basic prompt");
+  });
+
+  it("formats scenario ids for Situations list", () => {
+    expect(scenarioDisplayName("aegis__greedy__sentinel-x__s101")).toBe(
+      "AEGIS vs SENTINEL-X"
+    );
   });
 });

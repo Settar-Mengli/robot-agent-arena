@@ -55,7 +55,7 @@ export function InfoTip({
       <span
         id={panelId}
         hidden={!open}
-        className="absolute left-0 top-full z-20 mt-1 w-64 rounded border border-stone-600 bg-stone-900 p-3 text-left text-sm text-stone-200 shadow-lg"
+        className="absolute left-0 top-full z-20 mt-1 w-64 rounded border aa-border bg-stone-900 p-3 text-left text-sm text-stone-200 shadow-lg"
       >
         <span className="font-medium text-stone-50">{entry.term}</span>
         <span className="mt-1 block text-stone-300">{entry.short}</span>

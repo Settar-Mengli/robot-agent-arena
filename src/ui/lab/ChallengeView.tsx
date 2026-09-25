@@ -3,6 +3,7 @@ import {
   type DecisionLabCaseV3,
   type DecisionLabPackV3
 } from "../../decision-lab";
+import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { skillLabel } from "../copy/skill-label";
 import { plainPolicyLabel } from "./help-ranking-copy";
@@ -202,30 +203,7 @@ export function ChallengeView({
         </fieldset>
       </Card>
 
-      <div className="sticky bottom-0 z-10 -mx-3 space-y-2 border-t aa-border bg-stone-950/95 px-3 py-3 sm:-mx-4 sm:px-4">
-          <button
-            type="button"
-            className={
-              showAnswerEnabled
-                ? "min-h-11 w-full rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950 hover:bg-amber-500"
-                : "min-h-11 w-full cursor-not-allowed rounded border aa-border px-3 py-2 text-sm text-stone-400"
-            }
-            disabled={!showAnswerEnabled}
-            onClick={reveal}
-            data-testid="challenge-show-answer"
-          >
-            Show answer
-          </button>
-          <button
-            type="button"
-            className="min-h-11 w-full rounded border aa-border px-3 py-2 text-sm sm:w-auto"
-            onClick={next}
-          >
-            Next situation
-          </button>
-        </div>
-
-        {revealed && pick !== null ? (
+      {revealed && pick !== null ? (
           <div
             className="space-y-2 text-sm text-stone-300"
             aria-live="polite"
@@ -294,35 +272,49 @@ export function ChallengeView({
 
             {guided ? (
               <div className="flex flex-wrap gap-2 pt-2">
-                <button
-                  type="button"
-                  className="min-h-11 rounded border aa-border px-3 py-2 text-sm"
-                  onClick={next}
-                >
+                <Button variant="secondary" onClick={next}>
                   Try another
-                </button>
+                </Button>
                 {onWatch ? (
-                  <button
-                    type="button"
-                    className="min-h-11 rounded border aa-border px-3 py-2 text-sm"
-                    onClick={onWatch}
-                  >
+                  <Button variant="secondary" onClick={onWatch}>
                     Watch a recorded fight
-                  </button>
+                  </Button>
                 ) : null}
                 {onHome ? (
-                  <button
-                    type="button"
-                    className="min-h-11 rounded border aa-border px-3 py-2 text-sm"
-                    onClick={onHome}
-                  >
+                  <Button variant="secondary" onClick={onHome}>
                     Home
-                  </button>
+                  </Button>
                 ) : null}
               </div>
             ) : null}
           </div>
         ) : null}
+
+      <div
+        className="sticky bottom-0 z-10 mt-4 w-full space-y-2 border-t aa-border bg-stone-950/95 py-3"
+        data-testid="challenge-sticky-bar"
+      >
+        <Button
+          variant={showAnswerEnabled ? "primary" : "secondary"}
+          className={
+            showAnswerEnabled
+              ? "w-full"
+              : "w-full border-transparent bg-stone-800 text-stone-200 disabled:opacity-100"
+          }
+          disabled={!showAnswerEnabled}
+          title={showAnswerEnabled ? undefined : "Pick a move first"}
+          aria-description={
+            showAnswerEnabled ? undefined : "Pick a move first"
+          }
+          onClick={reveal}
+          data-testid="challenge-show-answer"
+        >
+          Show answer
+        </Button>
+        <Button variant="secondary" className="w-full sm:w-auto" onClick={next}>
+          Next situation
+        </Button>
+      </div>
 
       <div data-testid="challenge-session" className="text-sm text-stone-400">
         {history.length === 0 ? (

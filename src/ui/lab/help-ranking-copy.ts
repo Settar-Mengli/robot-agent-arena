@@ -18,7 +18,7 @@ export function formatHelpRankingCopy(input: HelpRankingCopyInput): string {
       ? "Positive means the variant did worse."
       : "Negative means the variant did better.";
   let text =
-    `Comparing ${input.variantLabel} to ${input.baselineLabel}: lower miss score on ` +
+    `Comparing ${input.variantLabel} to ${input.baselineLabel}: lower points worse than the best move on ` +
     `${input.improvedCases} of ${input.n} situations. Average change (variant minus baseline) = ` +
     `${meanText}. ${direction} Not a cause.`;
   if (input.insufficientEvidence) {

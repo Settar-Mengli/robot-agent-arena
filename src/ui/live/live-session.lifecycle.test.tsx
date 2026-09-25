@@ -87,7 +87,7 @@ async function enableLiveAndStart(secret: string) {
   fireEvent.change(screen.getByLabelText("Display name"), {
     target: { value: "LIVE-UNIT" }
   });
-  fireEvent.change(screen.getByLabelText("Core Identity"), {
+  fireEvent.change(screen.getByLabelText("Robot identity"), {
     target: { value: "Steady Vanguard" }
   });
   fireEvent.change(screen.getByLabelText("Memory"), {

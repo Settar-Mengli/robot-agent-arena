@@ -19,7 +19,7 @@ describe("DecisionLabView", () => {
     fireEvent.click(screen.getByTestId("lab-advanced-toggle"));
     fireEvent.click(screen.getByRole("tab", { name: "Compare" }));
     expect(await screen.findByTestId("lab-compare")).toBeTruthy();
-    expect(screen.getByText(/Cohort size/i)).toBeTruthy();
+    expect(screen.getByText(/Compared on \d+ situations/i)).toBeTruthy();
   });
 
   it("opens diagnostics behind Advanced and returns to Your turn", () => {

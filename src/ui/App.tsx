@@ -723,7 +723,6 @@ function BattleSetup(props: {
 }) {
   const liveIntent =
     props.liveConfig.enabled && props.liveConfig.apiKey.trim() !== "";
-  const setupOpponentMode: OpponentMode = liveIntent ? "live" : "cpu";
 
   return (
     <section aria-labelledby="setup-heading" data-testid="battle-setup">
@@ -739,19 +738,20 @@ function BattleSetup(props: {
           <>
             Player: {props.player.displayName}. Opponent: live AI (
             {props.liveConfig.modelId}). Answers are not recorded evidence and
-            can vary. Choose a standby computer and seed
-            <InfoTip termId="seed" />.
+            can vary. Choose a standby computer, then start the battle.
           </>
         ) : (
           <>
-            Player: {props.player.displayName}. Opponent: simple computer (not an
-            AI). Choose opponent and seed
-            <InfoTip termId="seed" />.
+            Player: {props.player.displayName}. Choose an opponent, then start
+            the battle.
           </>
         )}
       </p>
       <div className="mt-3">
-        <HonestyStrip variant="compact" opponentMode={setupOpponentMode} />
+        <HonestyStrip
+          variant="compact"
+          honestyMode={liveIntent ? "live" : "cpu"}
+        />
       </div>
 
       <fieldset className="mt-8">

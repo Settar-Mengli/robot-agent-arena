@@ -98,7 +98,7 @@ export function LandingView({
         </button>
       </div>
 
-      <HonestyLine />
+      <HonestyLine honestyMode="home" />
 
       <FirstVisitTour closeSignal={tourCloseSignal} />
     </section>

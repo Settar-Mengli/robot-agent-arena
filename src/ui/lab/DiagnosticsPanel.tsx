@@ -15,6 +15,17 @@ export type DiagnosticsPanelProps = {
   published: DiagnosticsSummaryV1 | null;
 };
 
+const STAKE_BANDS: Record<string, string> = {
+  zero: "Best move (0 points)",
+  low: "Up to 10 points worse",
+  mid: "More than 10, under 100 points worse",
+  high: "100+ points worse"
+};
+
+function stakeBandLabel(id: string): string {
+  return STAKE_BANDS[id] ?? id;
+}
+
 export function DiagnosticsPanel({
   pack,
   published
@@ -48,12 +59,12 @@ export function DiagnosticsPanel({
 
       <div>
         <h3 className="text-lg font-medium text-stone-100">
-          Stakes (miss score)
+          How costly the mistakes were
         </h3>
         <ul className="mt-2 space-y-1 text-sm text-stone-300">
           {d.stakes.map((s) => (
             <li key={s.id}>
-              {s.label}: {s.count}
+              {stakeBandLabel(s.id)}: {s.count}
             </li>
           ))}
         </ul>
@@ -101,7 +112,7 @@ export function DiagnosticsPanel({
             data-testid="lab-counterexample"
           >
             <p>
-              {plainPolicyLabel(d.counterexample.policyKey)} · miss score{" "}
+              {plainPolicyLabel(d.counterexample.policyKey)} · Points vs best{" "}
               {d.counterexample.regret}
             </p>
             <p>
@@ -125,7 +136,7 @@ export function DiagnosticsPanel({
           data-testid="lab-vs-published"
         >
           <h3 className="text-lg font-medium text-stone-100">
-            vs published summary
+            Matches the published results
           </h3>
           <ul className="mt-3 space-y-2 text-sm text-stone-300">
             {Object.entries(published.optimalRateByPolicy)

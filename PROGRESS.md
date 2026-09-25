@@ -2,8 +2,8 @@
 
 ## Status Snapshot
 - Date: 2026-09-24
-- Current state: UX 2 / D-054 redesign on `ux2/redesign` (UI-only; fix-pass complete; PR next).
-- NEXT: merge UX 2 after Ask audit; then operator screenshots per `docs/demo-video-script.md`, live AI smoke on Pages, demo recording.
+- Current state: UX 2 / D-054 redesign on `ux2/redesign` (UI-only; final honesty/chart/Advanced polish; PR #45).
+- NEXT: merge UX 2 after Ask audit of final follow-up; then operator screenshots per `docs/demo-video-script.md`, live AI smoke on Pages, demo recording.
 
 ## Completed
 - Repository baseline through Batch 3 (PR #37 / D-049) + D-050 (PR #38) on main.

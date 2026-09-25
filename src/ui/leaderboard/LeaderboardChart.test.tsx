@@ -59,12 +59,17 @@ describe("LeaderboardChart", () => {
     expect(table.textContent).toContain(`${highQ}%`);
   });
 
-  it("renders axis tick labels 0% through 100%", () => {
+  it("renders axis tick labels 0% through 100% and shares scale width", () => {
     render(<LeaderboardChart suite={suite} />);
     const axis = screen.getByTestId("leaderboard-axis");
     for (const t of ["0%", "25%", "50%", "75%", "100%"]) {
       expect(axis.textContent).toContain(t);
     }
+    const scale = screen.getByTestId("leaderboard-chart-scale");
+    expect(scale.contains(axis)).toBe(true);
+    expect(scale.contains(screen.getAllByTestId("leaderboard-whisker")[0]!)).toBe(
+      true
+    );
   });
 
   it("shows exact overlap badge when a group has multiple rows", () => {

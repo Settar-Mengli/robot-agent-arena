@@ -8,7 +8,7 @@ afterEach(() => {
 });
 
 function fillModules() {
-  fireEvent.change(screen.getByLabelText("Core Identity"), {
+  fireEvent.change(screen.getByLabelText("Robot identity"), {
     target: { value: "Steady Vanguard" }
   });
   fireEvent.change(screen.getByLabelText("Memory"), {

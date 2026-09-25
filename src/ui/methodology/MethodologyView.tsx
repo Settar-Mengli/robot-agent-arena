@@ -1,5 +1,6 @@
 import summary from "../data/batch4.robustness.summary.json";
 import { Button } from "../components/Button";
+import { HonestyLine } from "../components/HonestyLine";
 
 export type MethodologyViewProps = {
   onHome?: () => void;
@@ -31,6 +32,9 @@ export function MethodologyView({
           How we score AI decisions from recorded answers, and how live play
           differs.
         </p>
+        <div className="mt-3">
+          <HonestyLine honestyMode="recorded" />
+        </div>
 
         <section
           aria-labelledby="method-tested"
@@ -146,9 +150,9 @@ export function MethodologyView({
           </p>
           <p>
             Leaderboard groups are connected components of inclusive Wilson
-            interval overlap, computed per suite. Live rows are excluded by
-            construction. Primary metric is paired Δregret. Snapshots, arms, and
-            suite ids are internal labels for recorded evidence.
+            interval overlap, computed per test set. Live rows are excluded by
+            construction. Primary metric is paired Δregret. Internal recording
+            labels are not shown on the main pages.
           </p>
           <ul className="list-disc space-y-1 pl-5">
             {notes.map((n) => (

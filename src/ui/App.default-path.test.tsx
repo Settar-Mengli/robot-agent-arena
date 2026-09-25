@@ -52,6 +52,7 @@ describe("forbidden-default-path matcher", () => {
       "Your miss score: 0.00",
       "computer foe",
       "Seed",
+      "seed",
       "schema assert failed",
       "quota",
       "serialize",
@@ -75,17 +76,24 @@ describe("App default path", () => {
     );
   });
 
-  it("HonestyStrip compact on home; More reveals points", async () => {
+  it("HonestyStrip compact on home; Arena More shows CPU points", async () => {
     render(<App />);
     expect(screen.getByTestId("honesty-strip-compact")).toBeInTheDocument();
+    expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
+      /Watch, Beat the AI, and the Leaderboard use recorded answers/
+    );
 
     fireEvent.click(screen.getByTestId("cta-quick-battle"));
     await waitFor(() => {
       expect(screen.getByTestId("arena-view")).toBeInTheDocument();
     });
-    expect(screen.getByTestId("honesty-strip-compact")).toBeInTheDocument();
+    expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
+      /simple computer opponent/
+    );
     fireEvent.click(screen.getByText("More"));
-    expect(screen.getByText(/Small samples cannot rank models/i)).toBeTruthy();
+    expect(
+      screen.getByText(/The simple computer follows fixed rules/i)
+    ).toBeTruthy();
   });
 
   it("cta-live-ai opens setup with live panel revealed and live off", async () => {
@@ -199,7 +207,7 @@ describe("App default path", () => {
     fireEvent.change(screen.getByLabelText("Display name"), {
       target: { value: "LAZY-LIVE" }
     });
-    fireEvent.change(screen.getByLabelText("Core Identity"), {
+    fireEvent.change(screen.getByLabelText("Robot identity"), {
       target: { value: "Steady Vanguard" }
     });
     fireEvent.change(screen.getByLabelText("Memory"), {

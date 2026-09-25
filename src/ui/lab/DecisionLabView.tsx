@@ -13,7 +13,7 @@ import { ChallengeView } from "./ChallengeView";
 import { ComparePanel } from "./ComparePanel";
 import { DiagnosticsPanel } from "./DiagnosticsPanel";
 import { plainPolicyLabel } from "./help-ranking-copy";
-import { suiteDisplayName } from "../copy/display-labels";
+import { suiteDisplayName, scenarioDisplayName } from "../copy/display-labels";
 import { Tabs, tabId, panelId } from "../components/Tabs";
 import rawPack from "./pack/decision-lab.v3.json";
 import rawPublished from "./pack/diagnostics.summary.json";
@@ -135,7 +135,7 @@ export function DecisionLabView({
         live AI call.
       </p>
       <div className="mt-4">
-        <HonestyLine />
+        <HonestyLine honestyMode="recorded" />
       </div>
 
       <div className="mt-4 flex flex-wrap items-end gap-1">
@@ -178,7 +178,7 @@ export function DecisionLabView({
           >
             {pack.suites.map((s) => (
               <option key={s.id} value={s.id}>
-                {suiteDisplayName(s.id, s.id)} ({s.snapshotCount} situations)
+                {suiteDisplayName(s.id, s.id)}
               </option>
             ))}
           </select>
@@ -320,9 +320,10 @@ function SituationsPanel(props: {
               <button
                 type="button"
                 className="min-h-11 text-left text-stone-300 hover:text-stone-100"
+                title={c.scenarioId}
                 onClick={() => onSelect(c.snapshotId)}
               >
-                Situation {c.turn} · {c.scenarioId}
+                Situation {c.turn} · {scenarioDisplayName(c.scenarioId)}
               </button>
             </li>
           ))}
@@ -357,7 +358,7 @@ function SituationsPanel(props: {
                     {p.status === "recorded" ? (
                       <span>
                         {" "}
-                        · {skillLabel(p.executedSkillId)} · miss score{" "}
+                        · {skillLabel(p.executedSkillId)} · Points vs best{" "}
                         {p.regret}
                       </span>
                     ) : (

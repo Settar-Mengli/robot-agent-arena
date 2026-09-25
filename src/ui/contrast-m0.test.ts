@@ -258,38 +258,51 @@ describe("M0 contrast pairs (default path)", () => {
     expect(ratio).toBeLessThan(4.5);
   });
 
-  it("ChallengeView disabled Show answer has no opacity-50 on the text class", async () => {
+  it("ChallengeView disabled Show answer is muted solid without opacity-50 fade", async () => {
     const fs = await import("node:fs");
     const src = fs.readFileSync("src/ui/lab/ChallengeView.tsx", "utf8");
+    expect(src).toMatch(/challenge-show-answer/);
+    expect(src).toMatch(/Pick a move first/);
+    expect(src).toMatch(/bg-stone-800 text-stone-200/);
     expect(src).not.toMatch(
-      /challenge-show-answer[\s\S]{0,400}opacity-50/
+      /challenge-show-answer[\s\S]{0,200}opacity-50/
     );
-    expect(src).toMatch(/cursor-not-allowed[\s\S]{0,80}text-stone-400/);
   });
 
-  it("UI chrome has no border-stone-700 or border-stone-800 classes", async () => {
-    const fs = await import("node:fs");
-    const path = await import("node:path");
-    const root = "src/ui";
+  it("UI chrome has no border-stone-600/700/800 classes", async () => {
+    const { readdir, readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    async function walk(dir: string): Promise<string[]> {
+      const ents = await readdir(dir, { withFileTypes: true });
+      const out: string[] = [];
+      for (const e of ents) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) out.push(...(await walk(p)));
+        else if (/\.(tsx|css)$/.test(e.name) && !e.name.includes(".test."))
+          out.push(p);
+      }
+      return out;
+    }
+    const files = await walk("src/ui");
     const hits: string[] = [];
-    function walk(dir: string) {
-      for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-        const p = path.join(dir, ent.name);
-        if (ent.isDirectory()) {
-          if (ent.name === "pack" || ent.name === "data") continue;
-          walk(p);
-        } else if (/\.(tsx|css)$/.test(ent.name)) {
-          const text = fs.readFileSync(p, "utf8");
+    for (const f of files) {
+      const text = await readFile(f, "utf8");
+      for (const line of text.split("\n")) {
+        if (
+          text.includes("border-stone-600") ||
+          text.includes("border-stone-700") ||
+          text.includes("border-stone-800")
+        ) {
           if (
-            text.includes("border-stone-700") ||
-            text.includes("border-stone-800")
+            line.includes("border-stone-600") ||
+            line.includes("border-stone-700") ||
+            line.includes("border-stone-800")
           ) {
-            hits.push(p);
+            hits.push(`${f}: ${line.trim().slice(0, 120)}`);
           }
         }
       }
     }
-    walk(root);
-    expect(hits, hits.join(", ")).toEqual([]);
+    expect(hits, hits.join("\n")).toEqual([]);
   });
 });

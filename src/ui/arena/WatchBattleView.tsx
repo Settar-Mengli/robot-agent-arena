@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { HonestyLine } from "../components/HonestyLine";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
+import { variantDisplayName } from "../copy/display-labels";
 import rawPack from "./pack/arena-replay.v1.json";
 import {
   assertArenaReplayPackV1,
@@ -29,7 +30,7 @@ function providerLabel(provider: string): string {
 }
 
 function variantPromptLabel(variant: "base" | "grounded"): string {
-  return variant === "grounded" ? "facts prompt" : "basic prompt";
+  return variantDisplayName(variant);
 }
 
 export function matchSelectLabel(
@@ -86,13 +87,9 @@ export function WatchBattleView({
           Watch a recorded AI battle
         </h1>
         <p className="mt-2 text-stone-400">No recorded matches available.</p>
-        <button
-          type="button"
-          className="mt-4 min-h-11 rounded border border-stone-600 px-4 py-2"
-          onClick={onLeave}
-        >
+        <Button variant="secondary" className="mt-4" onClick={onLeave}>
           Home
-        </button>
+        </Button>
       </section>
     );
   }
@@ -158,9 +155,12 @@ export function WatchBattleView({
           {finished ? " · complete" : null}
         </p>
       </div>
+      <p className="mt-2 text-sm text-stone-400" data-testid="watch-gemini-note">
+        These recordings use Gemini (6 fights).
+      </p>
 
       <div className="mt-2" data-testid="watch-honesty-line">
-        <HonestyLine />
+        <HonestyLine honestyMode="recorded" />
       </div>
 
       <label className="mt-6 block text-sm text-stone-400">
@@ -229,7 +229,7 @@ export function WatchBattleView({
         <p className="mt-6 text-sm text-stone-400">Start of match.</p>
       )}
 
-      <div className="sticky bottom-0 z-10 mt-6 flex flex-wrap items-center gap-3 border-t aa-border bg-stone-950/95 py-3">
+      <div className="sticky bottom-0 z-10 mt-6 flex w-full flex-wrap items-center gap-3 border-t aa-border bg-stone-950/95 py-3">
         <Button
           variant="secondary"
           disabled={clamped === 0}

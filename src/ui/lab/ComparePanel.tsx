@@ -7,6 +7,7 @@ import {
   type DecisionLabPolicyEvidence
 } from "../../decision-lab";
 import { InfoTip } from "../components/InfoTip";
+import { variantDisplayName } from "../copy/display-labels";
 import { plainPolicyLabel } from "./help-ranking-copy";
 
 export type ComparePanelProps = {
@@ -158,13 +159,13 @@ export function ComparePanel({
                 data-testid="compare-variant-a"
               >
                 <option value="base" disabled={variantB === "base"}>
-                  basic
+                  {variantDisplayName("base")}
                 </option>
                 <option value="grounded" disabled={variantB === "grounded"}>
-                  with facts
+                  {variantDisplayName("grounded")}
                 </option>
                 <option value="freetext" disabled={variantB === "freetext"}>
-                  free-text
+                  {variantDisplayName("freetext")}
                 </option>
               </select>
             </label>
@@ -179,13 +180,13 @@ export function ComparePanel({
                 data-testid="compare-variant-b"
               >
                 <option value="base" disabled={variantA === "base"}>
-                  basic
+                  {variantDisplayName("base")}
                 </option>
                 <option value="grounded" disabled={variantA === "grounded"}>
-                  with facts
+                  {variantDisplayName("grounded")}
                 </option>
                 <option value="freetext" disabled={variantA === "freetext"}>
-                  free-text
+                  {variantDisplayName("freetext")}
                 </option>
               </select>
             </label>
@@ -201,9 +202,9 @@ export function ComparePanel({
               }
               data-testid="compare-cross-variant"
             >
-              <option value="base">basic</option>
-              <option value="grounded">with facts</option>
-              <option value="freetext">free-text</option>
+              <option value="base">{variantDisplayName("base")}</option>
+              <option value="grounded">{variantDisplayName("grounded")}</option>
+              <option value="freetext">{variantDisplayName("freetext")}</option>
             </select>
           </label>
         )}
@@ -216,8 +217,8 @@ export function ComparePanel({
       ) : (
         <>
           <p className="mt-2 text-sm text-stone-400" role="status">
-            Comparing {labelA} to {labelB}. Cohort size {n}. Excluded:{" "}
-            {excluded}. No universal rankings.
+            Comparing {labelA} to {labelB}. Compared on {n} situations.
+            Excluded: {excluded}. No universal rankings.
             {thin ? (
               <span
                 className="mt-1 block text-amber-200/90"
@@ -239,8 +240,8 @@ export function ComparePanel({
                 Decisions changed: {changed} / {n}
               </div>
               <div data-testid="compare-mean">
-                Mean miss score: {(regretA / n).toFixed(2)} →{" "}
-                {(regretB / n).toFixed(2)}
+                Average points worse than the best move:{" "}
+                {(regretA / n).toFixed(2)} → {(regretB / n).toFixed(2)}
               </div>
               <div>
                 Best-move rate: {((optimalA / n) * 100).toFixed(1)}% →{" "}

@@ -14,7 +14,7 @@ import { Card } from "../components/Card";
 import { buildAgentConfig } from "./buildAgentConfig";
 
 const MODULE_LABELS: Record<AgentModule, string> = {
-  coreIdentity: "Core Identity",
+  coreIdentity: "Robot identity",
   memory: "Memory",
   sigilSecurity: "Sigil and Security",
   rules: "Rules",
