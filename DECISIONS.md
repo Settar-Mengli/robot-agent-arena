@@ -1194,14 +1194,14 @@ Close the D-033 **11-batch** roadmap for the **v0.1.0 portfolio cut** on branch 
 1. **Locked batch 9 closed under D-051.** The three pre-registered measurements (prompt-perturbation sensitivity, adversarial-context robustness, information-scaling / partial-facts curve) shipped as Batch 4 robustness variants on heldout-ext **n=35** with preregistration in `docs/preregistration-batch4.md`. Do not re-open batch 9 as a separate delivery.
 2. **Memory variants and full information-scaling curve deferred** under this entry — still unmeasured in v0.1.0; docs must not imply a completed memory ablation.
 3. **Issue #28** (vitest worker `Timeout calling onTaskUpdate` after green drift assertions on long steps): remains **open**. Keep D-049’s scoped `--dangerouslyIgnoreUnhandledErrors` on the heldout-ext and discriminate drift steps only; do not weaken drift equality assertions.
-4. **F15 demo visible-copy UI tests** (`src/ui/demo-visible-copy.test.tsx`): the Pages-only verification clause in the polish plan was conditional on verify coverage — **confirmed** via the jsdom **ui** Vitest project on CI verify; no separate Pages job is required for F15.
+4. **GitHub Pages** deploys without an in-workflow test gate. Accepted because branch protection on `main` requires the `verify` check, so only verified commits reach `main` and deploy. (F15 demo visible-copy tests still run in the jsdom **ui** Vitest project on CI `verify`.)
 5. **Protected paths:** CI compares listed engine/prompt/fixture/pack/lockfile paths with `git diff --exit-code` against the **pull_request base only**; push-to-main skips that step. Policy: protected artifacts change through reviewed PRs, not casual direct edits.
 6. **Coverage:** CI runs `npm run coverage` for signal (D-040 node + ui projects); **no enforced coverage percentage thresholds** in `vitest.config.ts`.
-7. **Documented known limitations (not fixed in v0.1.0):**
+7. **Documented known limitations (for v0.1.0):**
    - Battle numeric seed **`0`** → RNG fallback constant `0x9e3779b9` in `createSeededRng` (reproducibility lock).
    - **`legalActions` vs oracle equipped enumeration** — per D-037; CPU `legalActions` reflects pre-player energy context.
    - **Grounding V1** facts still show projected damage for unaffordable moves; V2/threat corrections remain deferred where regen would touch protected lab-pack bytes.
-   - Env **`nextInt` modulo bias** and silent `span ≤ 0` — documented won't-fix without a new decision.
+   - Env **`nextInt`**: `span ≤ 0` now **throws** (fixed on `release/final-polish`); **modulo bias for `span ≥ 1` remains accepted** — changing it would alter committed Resonance Seal baselines.
    - **Duplicate `skillIds` in one agent:** engine validation does not dedupe duplicates; closure for v0.1.0 is **persist / save-slot and Builder paths only**, not an engine rule change.
 8. **Version:** `package.json` **0.1.0** names this portfolio cut.
 
@@ -1209,4 +1209,4 @@ Rationale:
 Batches 10–11 (D-051 BYOK/leaderboard/methodology, D-052 Resonance Seal) and UX polish (D-053–D-054) already shipped; remaining work is honest documentation, demo assets, and operator smoke — not new measurement batches.
 
 Consequences:
-ROADMAP / README / PROGRESS mark batches **8–11** done; batch 9 narrative merges into D-051; NEXT = screenshots, demo video script/recording, operator BYOK smoke, issue #28 tracking — not new locked batches before v0.1.0 tag.
+ROADMAP / README / PROGRESS mark batches **8–11** done; batch 9 narrative merges into D-051; NEXT = PR merge, Pages check, operator BYOK smoke, optional demo video / `v0.1.0` tag; screenshots intentionally skipped for this release (`docs/media/SHOT-LIST.md` kept as a future capture plan) — not new locked batches before v0.1.0 tag.

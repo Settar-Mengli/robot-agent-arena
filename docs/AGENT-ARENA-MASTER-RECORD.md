@@ -212,7 +212,7 @@ Full text: `DECISIONS.md`.
 9 Three measurements **closed under D-051** (Batch 4 robustness); memory / full scaling curve **deferred D-055**.  
 10 BYOK/leaderboard/methodology shipped (D-051).  
 11 Second env shipped (D-052).  
-**Next (D-055):** screenshots, demo video, operator BYOK smoke, issue #28 (SNAPSHOT_DRIFT worker noise).
+**Next (D-055):** open/merge `release/final-polish` PR; Pages check; operator BYOK smoke; optional demo video; issue #28 (SNAPSHOT_DRIFT worker noise). Screenshots intentionally skipped for this release.
 
 ---
 
@@ -254,12 +254,13 @@ Optional `.env` from `.env.example` for `eval:record` / live keys — tests inje
 
 ---
 
-## 16. Notable merged PRs (recent)
+## 16. Notable merged PRs (recent) + pending release
 
-Baseline for **D-055** docs PR on `release/final-polish` is **#46** on main lineage.
+Baseline for **D-055** on `release/final-polish` is **#46** on main lineage. The final-polish PR itself is **pending** until opened/merged (not deployed yet).
 
 | PR | Title |
 |----|--------|
+| *(pending)* | `release/final-polish` — insight loop, lifecycle races, D-055 docs (not merged yet) |
 | #46 | battle leave races, persist guards, terminalValue (grounding V2 reverted for lab-pack fence) |
 | #45 | arena usability / responsive UI |
 | #44 | CSP + SHA-pinned actions |
@@ -278,17 +279,18 @@ Baseline for **D-055** docs PR on `release/final-polish` is **#46** on main line
 - Duplicate agent `skillIds`: **not** deduped in engine — persist/Builder only for v0.1.0.
 - Grounding **V1** unaffordable still shows projected damage; V2 deferred (protected pack bytes).
 - `legalActions` vs oracle enumeration (D-037); CPU uses pre-player energy context.
-- Env `nextInt` modulo bias / silent span≤0.
+- Env `nextInt`: **`span ≤ 0` throws** (fixed this release); **modulo bias for `span ≥ 1` remains accepted** (Seal baselines).
 - Memory variants and full information-scaling curve **unmeasured** (D-055 defer).
 - Free-play Results cannot show true player-vs-oracle regret without new oracle + UI fence exception.
 - Small-n / seed correlation known (D-026 won’t-fix for some items); committed held-out adversarial **n=13** (historical 0/20 is narrative-only).
 - Issue #28 drift worker timeouts.
+- Screenshots intentionally **skipped** for v0.1.0; capture plan remains in `docs/media/SHOT-LIST.md` (not captured).
 
 ---
 
 ## 18. Working tree at record time
 
-Visitor insight loop UI is **merged or on `release/final-polish`** with docs; working tree expected **clean** before the D-055 docs PR (no dangling uncommitted UI-only insight work).
+`release/final-polish` holds the visitor insight loop + lifecycle fixes + D-055 docs; screenshots skipped. Expect a clean tree after the fix-pass commits; PR opened against `main` (not merged/deployed until review).
 
 ---
 
