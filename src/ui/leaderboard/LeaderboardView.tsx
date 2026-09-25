@@ -45,6 +45,12 @@ export function LeaderboardView({
       >
         Leaderboard
       </h1>
+      <p
+        className="mt-2 text-base font-medium text-amber-200"
+        data-testid="leaderboard-not-ranking"
+      >
+        Overlapping uncertainty bands are not a ranking.
+      </p>
       <p className="mt-2 text-stone-400">
         Recorded measurements in this robot battle only. Compared only within the
         same test set. Live AI play is never ranked here.

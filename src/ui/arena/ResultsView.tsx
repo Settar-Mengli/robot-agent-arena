@@ -21,6 +21,8 @@ export type ResultsViewProps = {
   finalCpu: CombatantState;
   onRestart: () => void;
   onReturnHome: () => void;
+  /** Opens the recorded decision Challenge (Beat the AI). */
+  onChallenge?: () => void;
   /** Honesty label matching the battle opponent mode. */
   opponentMode?: OpponentMode;
   liveModelId?: string;
@@ -35,6 +37,7 @@ export function ResultsView({
   finalCpu,
   onRestart,
   onReturnHome,
+  onChallenge,
   opponentMode = "cpu",
   liveModelId = ""
 }: ResultsViewProps) {
@@ -101,16 +104,26 @@ export function ResultsView({
         <Button variant="primary" onClick={onRestart}>
           Fight again
         </Button>
+        {onChallenge !== undefined ? (
+          <Button
+            variant="secondary"
+            onClick={onChallenge}
+            data-testid="results-cta-challenge"
+          >
+            Try a scored decision
+          </Button>
+        ) : null}
         <Button variant="secondary" onClick={onReturnHome}>
           Home
         </Button>
       </div>
 
-      <details className="mt-6 rounded border aa-border px-4 py-3 text-sm text-stone-400">
-        <summary className="cursor-pointer text-stone-300">
-          What recorded tests found
-        </summary>
-        <div className="mt-3 space-y-2" data-testid="batch4-findings-results">
+      <div
+        className="mt-6 rounded-xl border aa-border bg-stone-900/40 px-4 py-4 text-sm"
+        data-testid="batch4-findings-results"
+      >
+        <h2 className="font-medium text-stone-200">What recorded tests found</h2>
+        <div className="mt-3 space-y-2">
           <p className="text-stone-300">
             No measurable effect: rewording, a misleading rumor, and extra facts
             did not change these models&apos; choices on this test set.
@@ -125,7 +138,7 @@ export function ResultsView({
             not a claim about AI systems in general. Details: How it works.
           </p>
         </div>
-      </details>
+      </div>
 
       <div className="mt-8" data-testid="results-history">
         <h3 className="text-sm font-medium text-stone-300">Battle log</h3>
@@ -149,8 +162,6 @@ export function ResultsView({
           </ol>
         )}
       </div>
-
-
     </section>
   );
 }

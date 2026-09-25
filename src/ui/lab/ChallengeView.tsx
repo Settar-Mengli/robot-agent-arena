@@ -111,6 +111,7 @@ export function ChallengeView({
     userRegrets.length === 0
       ? 0
       : userRegrets.reduce((a, b) => a + b, 0) / userRegrets.length;
+  const optimalCount = userRegrets.filter((r) => r === 0).length;
 
   const modelRegrets = history.map((h) => {
     const llm = Object.values(h.case.policies).filter(
@@ -144,12 +145,13 @@ export function ChallengeView({
 
   const groups = new Map<
     string,
-    { keys: string[]; regret: number; tags?: string[] }
+    { skillId: string; keys: string[]; regret: number; tags?: string[] }
   >();
   for (const [key, pol] of llmPolicies) {
     if (pol.status !== "recorded") continue;
     const sid = pol.executedSkillId;
-    const existing = groups.get(sid);
+    const groupKey = `${sid}\0${pol.regret}`;
+    const existing = groups.get(groupKey);
     const tags =
       "failureTags" in pol
         ? (pol.failureTags as string[] | undefined)
@@ -157,7 +159,12 @@ export function ChallengeView({
     if (existing) {
       existing.keys.push(key);
     } else {
-      groups.set(sid, { keys: [key], regret: pol.regret, tags });
+      groups.set(groupKey, {
+        skillId: sid,
+        keys: [key],
+        regret: pol.regret,
+        tags
+      });
     }
   }
 
@@ -256,7 +263,8 @@ export function ChallengeView({
               </p>
             )}
 
-            {[...groups.entries()].map(([skillId, g]) => {
+            {[...groups.entries()].map(([groupKey, g]) => {
+              const skillId = g.skillId;
               const count = g.keys.length;
               const names = g.keys.map(plainPolicyLabel);
               const tag = tagSentence(g.tags);
@@ -266,7 +274,7 @@ export function ChallengeView({
                   : `${formatPlainScore(g.regret)} points worse than best`;
               if (count > 1 && groups.size === 1) {
                 return (
-                  <p key={skillId} data-testid="challenge-ai-group">
+                  <p key={groupKey} data-testid="challenge-ai-group">
                     All {count} recorded AI versions picked {skillLabel(skillId)}{" "}
                     — {worse}.{tag ? ` ${tag}` : ""}
                   </p>
@@ -274,14 +282,14 @@ export function ChallengeView({
               }
               if (count > 1) {
                 return (
-                  <p key={skillId} data-testid="challenge-ai-group">
+                  <p key={groupKey} data-testid="challenge-ai-group">
                     {names.join(", ")} all picked {skillLabel(skillId)} —{" "}
                     {worse}.{tag ? ` ${tag}` : ""}
                   </p>
                 );
               }
               return (
-                <p key={skillId}>
+                <p key={groupKey}>
                   {names[0]} picked {skillLabel(skillId)} — {worse}.
                   {tag ? ` ${tag}` : ""}
                 </p>
@@ -327,6 +335,20 @@ export function ChallengeView({
           </div>
         ) : null}
 
+      {history.length >= 3 ? (
+        <div
+          className="rounded-lg border border-amber-800/60 bg-amber-950/30 px-4 py-3 text-sm text-amber-50"
+          data-testid="challenge-session-wrap"
+          aria-live="polite"
+        >
+          <p>
+            So far: {optimalCount} best picks out of {history.length}. Average
+            gap vs best move: {formatPlainScore(meanUser)}. Best recorded AI
+            average gap: {formatPlainScore(meanModel)}.
+          </p>
+        </div>
+      ) : null}
+
       <div
         className="sm:sticky bottom-0 z-10 mt-4 w-full space-y-2 border-t aa-border bg-stone-950/95 py-3"
         data-testid="challenge-sticky-bar"
@@ -358,20 +380,32 @@ export function ChallengeView({
         <Button
           variant={revealed ? "primary" : "secondary"}
           className="w-full sm:w-auto"
+          disabled={!revealed}
+          title={revealed ? undefined : "Show the answer first"}
           onClick={next}
+          data-testid="challenge-next"
         >
           Next situation
         </Button>
       </div>
 
-      <div data-testid="challenge-session" className="text-sm text-stone-400">
+      <div
+        data-testid="challenge-session"
+        className={
+          history.length === 0
+            ? "text-sm text-stone-400"
+            : "rounded-lg border aa-border bg-stone-900/50 px-4 py-3 text-base text-stone-200"
+        }
+      >
         {history.length === 0 ? (
           <p>No answers yet.</p>
         ) : (
           <p>
-            You: {history.length} answers, {formatPlainScore(meanUser)} points
-            worse than best on average. Best recorded AI:{" "}
-            {formatPlainScore(meanModel)}.
+            <span className="font-medium text-amber-200">
+              {optimalCount} of {history.length} best picks
+            </span>
+            . Average gap vs best move: {formatPlainScore(meanUser)}. Best
+            recorded AI average gap: {formatPlainScore(meanModel)}.
           </p>
         )}
       </div>

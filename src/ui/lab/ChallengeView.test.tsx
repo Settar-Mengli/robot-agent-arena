@@ -79,7 +79,9 @@ describe("ChallengeView", () => {
     expect(radios[0]).toBeChecked();
     expect(radios[1]).not.toBeChecked();
     fireEvent.click(showAnswer);
-    expect(screen.getByTestId("challenge-session")).toHaveTextContent("You: 1 answers");
+    expect(screen.getByTestId("challenge-session")).toHaveTextContent(
+      /1 of 1 best picks|0 of 1 best picks/
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Next situation" }));
     expect(screen.queryByTestId("challenge-reveal")).not.toBeInTheDocument();
@@ -201,8 +203,35 @@ describe("ChallengeView", () => {
     fireEvent.click(screen.getAllByRole("radio")[0]!);
     fireEvent.click(screen.getByTestId("challenge-show-answer"));
     const session = screen.getByTestId("challenge-session");
-    expect(session.textContent ?? "").toMatch(/You: 1 answers/);
+    expect(session.textContent ?? "").toMatch(/\d of 1 best picks/);
+    expect(session.textContent ?? "").toMatch(/Average gap vs best move/);
     expect(session.textContent ?? "").not.toMatch(/\bn=/);
     expect(session.textContent ?? "").not.toMatch(/mean/);
+    expect(findForbiddenTechnicalText(session.textContent ?? "")).toBeNull();
+  });
+
+  it("shows session wrap after three answers", () => {
+    render(<ChallengeView pack={pack} />);
+    for (let i = 0; i < 3; i += 1) {
+      fireEvent.click(screen.getAllByRole("radio")[0]!);
+      fireEvent.click(screen.getByTestId("challenge-show-answer"));
+      if (i < 2) {
+        expect(screen.queryByTestId("challenge-session-wrap")).toBeNull();
+        fireEvent.click(screen.getByRole("button", { name: "Next situation" }));
+      }
+    }
+    const wrap = screen.getByTestId("challenge-session-wrap");
+    expect(wrap.textContent ?? "").toMatch(/So far: \d+ best picks out of 3/);
+    expect(findForbiddenTechnicalText(wrap.textContent ?? "")).toBeNull();
+  });
+
+  it("Next situation stays disabled until answer is shown", () => {
+    render(<ChallengeView pack={pack} />);
+    const next = screen.getByTestId("challenge-next") as HTMLButtonElement;
+    expect(next.disabled).toBe(true);
+    fireEvent.click(screen.getAllByRole("radio")[0]!);
+    expect(next.disabled).toBe(true);
+    fireEvent.click(screen.getByTestId("challenge-show-answer"));
+    expect(next.disabled).toBe(false);
   });
 });

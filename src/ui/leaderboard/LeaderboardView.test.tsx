@@ -21,6 +21,9 @@ describe("LeaderboardView", () => {
       0
     );
     const text = screen.getByTestId("leaderboard-view").textContent ?? "";
+    expect(screen.getByTestId("leaderboard-not-ranking")).toHaveTextContent(
+      /Overlapping uncertainty bands are not a ranking/
+    );
     expect(text).toMatch(/Hard test set/);
     expect(text).toMatch(/Gemini · Basic prompt|Gemini · Asked twice/);
     expect(text).not.toMatch(/base-repeat/);
