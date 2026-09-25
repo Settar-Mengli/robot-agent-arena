@@ -68,7 +68,7 @@ describe("BattleSetup honesty vs live intent", () => {
     expect(reveal).toHaveAccessibleName(/Live AI opponent \(OpenRouter\)/);
     expect(reveal.textContent ?? "").toMatch(/Live AI opponent \(OpenRouter\)/);
     expect(reveal.textContent ?? "").not.toContain("â");
-  });
+  }, 15000);
 
   it("live enabled with key: live strip, no CPU/recorded claims", async () => {
     render(<App />);

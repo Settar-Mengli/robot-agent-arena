@@ -30,7 +30,7 @@ Ask before installing packages, deleting files, renaming files or folders, chang
 - Avoid circular imports and excessive file splitting.
 
 ## Scope Rules
-- Keep the MVP to 4 screens, 5 modules, 8 skills, 2 CPU opponents, one save slot, max 20 turns, seeded RNG, and fictional report output.
+- Keep the MVP product surface to these views (no extra nav destinations without approval): **Home / Landing**, **Build** (Builder), **Setup**, **Arena / Results**, **Watch**, **Beat the AI / Decision Lab** (Challenge default; Advanced: Compare, Diagnostics, Browse), **Leaderboard**, **How it works / Methodology**, plus opt-in **Live AI** panel on Setup — still 5 modules, 8 skills, 2 CPU opponents, one save slot, max 20 turns, seeded RNG, and fictional report output.
 - Do not add online multiplayer, real-time battle, node graph builder, visual customization, sound, campaign, live/public PvP leaderboards, tools module, or public final branding unless explicitly approved. A committed static comparison page is in-scope under D-033 (not a live backend). **Mobile / narrow layout (~380px usable):** in scope under D-050 (amends D-007).
 - Do not run `npm audit fix`, dependency upgrades, or package installation unless explicitly approved.
 

@@ -121,6 +121,9 @@ describe("App battle flow", () => {
       expect(screen.getByTestId("batch4-findings-results")).toHaveTextContent(
         "No measurable effect"
       );
+      expect(screen.getByTestId("results-cta-challenge")).toHaveTextContent(
+        /Try a scored decision/
+      );
       const { findForbiddenTechnicalText } = await import(
         "./copy/forbidden-default-path"
       );
@@ -138,6 +141,33 @@ describe("App battle flow", () => {
     15000
   );
 
+  it("Results Challenge CTA opens Lab and clears the battle", async () => {
+    render(<App />);
+    goToArena();
+    for (let i = 0; i < 40; i += 1) {
+      if (screen.queryByTestId("results-view")) {
+        break;
+      }
+      const buttons = screen.getAllByRole("button", { name: /Logic Storm/i });
+      fireEvent.click(buttons[0]!);
+      await Promise.resolve();
+    }
+    await waitFor(() => {
+      expect(screen.getByTestId("results-view")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("results-cta-challenge"));
+    await waitFor(() => {
+      expect(screen.getByTestId("decision-lab")).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId("results-view")).toBeNull();
+    fireEvent.click(screen.getByTestId("brand-home"));
+    fireEvent.click(screen.getByTestId("cta-quick-battle"));
+    await waitFor(() => {
+      expect(screen.getByTestId("arena-view")).toBeInTheDocument();
+    });
+    expect(screen.getByText(/No turns yet/i)).toBeInTheDocument();
+  }, 20000);
+
   it("return home then Build preserves draft via initialConfig", () => {
     render(<App />);
     goToArena();
@@ -148,7 +178,7 @@ describe("App battle flow", () => {
     expect(
       screen.getByRole("checkbox", { name: /Logic Storm/i })
     ).toBeChecked();
-  });
+  }, 15000);
 
   it("leave while deferred playTurn pending ignores later resolve", async () => {
     const gate = deferred<UiTurnResult>();

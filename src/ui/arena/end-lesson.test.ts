@@ -81,7 +81,7 @@ describe("endLesson", () => {
     ).toBe(END_LESSON_STRINGS[0]);
   });
 
-  it("endLesson: player lost branch", () => {
+  it("endLesson: non-fallback points to Challenge", () => {
     expect(
       endLesson({
         outcome: outcome("cpu-victory", "cpu"),
@@ -89,36 +89,20 @@ describe("endLesson", () => {
         finalPlayer: player
       })
     ).toBe(END_LESSON_STRINGS[1]);
-  });
-
-  it("endLesson: close win HP under 40% branch", () => {
-    expect(
-      endLesson({
-        outcome: outcome("player-victory", "player"),
-        turns: [turn(false)],
-        finalPlayer: { ...player, health: 10, maxHealth: 30 }
-      })
-    ).toBe(END_LESSON_STRINGS[2]);
-  });
-
-  it("endLesson: clean win branch", () => {
     expect(
       endLesson({
         outcome: outcome("player-victory", "player"),
         turns: [turn(false)],
         finalPlayer: { ...player, health: 25, maxHealth: 30 }
       })
-    ).toBe(END_LESSON_STRINGS[3]);
-  });
-
-  it("endLesson: draw branch", () => {
+    ).toBe(END_LESSON_STRINGS[1]);
     expect(
       endLesson({
         outcome: outcome("draw"),
         turns: [turn(false)],
         finalPlayer: player
       })
-    ).toBe(END_LESSON_STRINGS[4]);
+    ).toBe(END_LESSON_STRINGS[1]);
   });
 
   it("endLesson strings pass forbidden-default-path", () => {

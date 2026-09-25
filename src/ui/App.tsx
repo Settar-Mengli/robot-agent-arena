@@ -41,8 +41,10 @@ import {
   buildSavePayload,
   saveAllowedForView
 } from "./persist/build-save-payload";
+import type { StoreApi } from "zustand/vanilla";
 import {
   createBattleViewStore,
+  type BattleViewStore,
   type PlayTurnFn
 } from "./store/battle-view";
 import { TOUR_KEY } from "./tour/FirstVisitTour";
@@ -92,6 +94,8 @@ const SAVE_DISABLED_TITLE =
 
 export type AppProps = {
   playTurn?: PlayTurnFn;
+  /** Test-only: exposes the battle store for race assertions (no UI effect). */
+  onBattleStore?: (store: StoreApi<BattleViewStore>) => void;
 };
 
 function hasSaveSlot(): boolean {
@@ -103,8 +107,11 @@ function hasSaveSlot(): boolean {
   }
 }
 
-export function App({ playTurn }: AppProps = {}) {
+export function App({ playTurn, onBattleStore }: AppProps = {}) {
   const [store] = useState(() => createBattleViewStore());
+  useEffect(() => {
+    onBattleStore?.(store);
+  }, [store, onBattleStore]);
   const battle = useSyncExternalStore(
     store.subscribe,
     store.getState,
@@ -216,6 +223,7 @@ export function App({ playTurn }: AppProps = {}) {
 
   async function onStartFromSetup() {
     if (playerConfig === null) return;
+    invalidateAsyncBattleStart();
     const gen = startGenRef.current;
     let turnFn: PlayTurnFn | undefined = playTurn;
     if (liveConfig.enabled && liveConfig.apiKey.trim() !== "") {
@@ -240,6 +248,7 @@ export function App({ playTurn }: AppProps = {}) {
 
   async function onRestart() {
     if (playerConfig === null) return;
+    invalidateAsyncBattleStart();
     const gen = startGenRef.current;
     let turnFn: PlayTurnFn | undefined = playTurn;
     if (liveConfig.enabled && liveConfig.apiKey.trim() !== "") {
@@ -313,11 +322,16 @@ export function App({ playTurn }: AppProps = {}) {
 
   function onLiveAiDiscover() {
     bumpTourClose();
+    abandonBattle();
     setPlayerConfig(QUICKSTART_ROBOT);
     setOpponent(CPU_OPPONENTS[0]!);
     setSeed(DEFAULT_SEED);
     setShowLivePanel(true);
     setView({ kind: "setup" });
+  }
+
+  function leaveLabGuided() {
+    setGuidedPath(false);
   }
 
   const runtime = battle.runtime;
@@ -551,6 +565,7 @@ export function App({ playTurn }: AppProps = {}) {
               className={navBtn(view.kind === "lab")}
               onClick={() => {
                 abandonBattle();
+                leaveLabGuided();
                 setView({ kind: "lab" });
                 setNavOpen(false);
               }}
@@ -563,6 +578,7 @@ export function App({ playTurn }: AppProps = {}) {
               className={navBtn(view.kind === "watch")}
               onClick={() => {
                 abandonBattle();
+                leaveLabGuided();
                 setView({ kind: "watch", matchId: watchMatchId });
                 setNavOpen(false);
               }}
@@ -577,6 +593,7 @@ export function App({ playTurn }: AppProps = {}) {
               )}
               onClick={() => {
                 abandonBattle();
+                leaveLabGuided();
                 setView({ kind: "builder" });
                 setNavOpen(false);
               }}
@@ -589,6 +606,7 @@ export function App({ playTurn }: AppProps = {}) {
               className={navBtn(view.kind === "leaderboard")}
               onClick={() => {
                 abandonBattle();
+                leaveLabGuided();
                 setView({ kind: "leaderboard" });
                 setNavOpen(false);
               }}
@@ -601,6 +619,7 @@ export function App({ playTurn }: AppProps = {}) {
               className={navBtn(view.kind === "methodology")}
               onClick={() => {
                 abandonBattle();
+                leaveLabGuided();
                 setView({ kind: "methodology" });
                 setNavOpen(false);
               }}
@@ -696,57 +715,73 @@ export function App({ playTurn }: AppProps = {}) {
           ) : null}
 
           {view.kind === "builder" ? (
-            <BuilderForm
-              initialConfig={playerConfig}
-              onContinue={onContinueFromBuilder}
-              onDraftChange={setBuilderDraft}
-            />
+            <ViewErrorBoundary onHome={goHome}>
+              <BuilderForm
+                initialConfig={playerConfig}
+                onContinue={onContinueFromBuilder}
+                onDraftChange={setBuilderDraft}
+              />
+            </ViewErrorBoundary>
           ) : null}
 
           {view.kind === "setup" && playerConfig !== null ? (
-            <BattleSetup
-              player={playerConfig}
-              opponent={opponent}
-              seed={seed}
-              onOpponentChange={setOpponent}
-              onSeedChange={setSeed}
-              onStart={() => {
-                void onStartFromSetup();
-              }}
-              onBack={() => setView({ kind: "builder" })}
-              showLivePanel={showLivePanel}
-              onRevealLivePanel={() => setShowLivePanel(true)}
-              liveNotice={liveNotice}
-              liveConfig={liveConfig}
-              onLiveConfigChange={setLiveConfig}
-              onHome={goHome}
-            />
+            <ViewErrorBoundary onHome={goHome}>
+              <BattleSetup
+                player={playerConfig}
+                opponent={opponent}
+                seed={seed}
+                onOpponentChange={setOpponent}
+                onSeedChange={setSeed}
+                onStart={() => {
+                  void onStartFromSetup();
+                }}
+                onBack={() => {
+                  invalidateAsyncBattleStart();
+                  setView({ kind: "builder" });
+                }}
+                showLivePanel={showLivePanel}
+                onRevealLivePanel={() => setShowLivePanel(true)}
+                liveNotice={liveNotice}
+                liveConfig={liveConfig}
+                onLiveConfigChange={setLiveConfig}
+                onHome={goHome}
+              />
+            </ViewErrorBoundary>
           ) : null}
 
           {view.kind === "battle" && (!terminal || outcome === undefined) ? (
-            <ArenaView
-              store={store}
-              onLeave={onLeaveToHome}
-              playTurn={livePlayTurn ?? playTurn}
-              liveNotice={liveNotice}
-              opponentMode={deriveOpponentMode()}
-              liveModelId={liveConfig.modelId}
-            />
+            <ViewErrorBoundary onHome={goHome}>
+              <ArenaView
+                store={store}
+                onLeave={onLeaveToHome}
+                playTurn={livePlayTurn ?? playTurn}
+                liveNotice={liveNotice}
+                opponentMode={deriveOpponentMode()}
+                liveModelId={liveConfig.modelId}
+              />
+            </ViewErrorBoundary>
           ) : null}
 
           {view.kind === "battle" && terminal && outcome !== undefined ? (
-            <ResultsView
-              outcome={outcome}
-              turns={runtime!.turns}
-              playerName={runtime!.player.displayName}
-              cpuName={runtime!.cpu.displayName}
-              finalPlayer={runtime!.player}
-              finalCpu={runtime!.cpu}
-              onRestart={onRestart}
-              onReturnHome={onLeaveToHome}
-              opponentMode={deriveOpponentMode()}
-              liveModelId={liveConfig.modelId}
-            />
+            <ViewErrorBoundary onHome={goHome}>
+              <ResultsView
+                outcome={outcome}
+                turns={runtime!.turns}
+                playerName={runtime!.player.displayName}
+                cpuName={runtime!.cpu.displayName}
+                finalPlayer={runtime!.player}
+                finalCpu={runtime!.cpu}
+                onRestart={onRestart}
+                onReturnHome={onLeaveToHome}
+                onChallenge={() => {
+                  abandonBattle();
+                  setGuidedPath(true);
+                  setView({ kind: "lab" });
+                }}
+                opponentMode={deriveOpponentMode()}
+                liveModelId={liveConfig.modelId}
+              />
+            </ViewErrorBoundary>
           ) : null}
         </main>
       </div>

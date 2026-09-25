@@ -48,7 +48,7 @@ export function createEnvRng(seed: EnvSeed): EnvRng {
     nextInt: (minInclusive, maxExclusive) => {
       const span = maxExclusive - minInclusive;
       if (span <= 0) {
-        return minInclusive;
+        throw new RangeError("nextInt span must be positive");
       }
       return minInclusive + (nextUint32() % span);
     }

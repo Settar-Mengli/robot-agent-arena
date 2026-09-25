@@ -63,6 +63,10 @@ describe("forbidden-default-path matcher", () => {
     }
     expect(FORBIDDEN_DEFAULT_PATH.length).toBeGreaterThan(15);
   });
+
+  it("A8: error-boundary fallback copy is clean", () => {
+    expect(findForbiddenTechnicalText("Couldn't load this screen.")).toBeNull();
+  });
 });
 
 describe("App default path", () => {
@@ -137,6 +141,12 @@ describe("App default path", () => {
     });
     assertClean(screen.getByTestId("first-visit-tour"));
     assertClean(screen.getByTestId("landing-view"));
+    expect(screen.getByTestId("landing-findings")).toHaveTextContent(
+      /No measurable effect/
+    );
+    expect(screen.getByTestId("landing-more-ways")).toHaveTextContent(
+      /More ways to play/
+    );
 
     fireEvent.click(screen.getByTestId("tour-dismiss"));
     fireEvent.click(screen.getByTestId("cta-quick-battle"));

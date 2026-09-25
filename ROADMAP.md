@@ -32,7 +32,7 @@ Locked stack and game shape still hold (React + Vite + TypeScript + Zustand + lo
 - **DONE (code):** Execution **B.2d** Decision Lab (partial diagnostic slice — not locked batch 8 / C).
 - **DONE (PR #39 / Batch 4, D-051):** Locked batch **9–10** — robustness variants + BYOK/leaderboard/methodology; primary n=35 null result.
 - **DONE (Batch 5 / D-052):** Locked batch **11** — second reference environment (Resonance Seal); `EnvironmentOf` + shared `evaluateChoices`.
-- **NEXT:** Final polish — screenshots, demo video, issue #28.
+- **NEXT:** Pages check / operator BYOK smoke after the v0.1.0 release cut ([PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47), D-055); optional demo video / `v0.1.0` tag; issue #28. Screenshots intentionally skipped for this release.
 - **PLANNED:** Publish polish; further environments.
 - **CUT by D-033:** post-match coach (was in D-025 M-UI part 2). First public Report is trace-driven and cites oracle regret. A coach, if ever built, must live in `src/agent` with prompts, fixtures, and evals first (D-018 / D-023).
 
@@ -94,19 +94,19 @@ Measurement core depends on `src/env` (`robotEnvironment`). `DecisionSnapshot.ru
 **DONE on main (PR #37).** Human vs recorded/oracle comparison in Decision Lab (pack-only scoring). Guided path + plain copy under D-050.
 
 #### 8. Diagnostic layer — execution batch C / Batch 3 — D-049
-**DONE on main (PR #37).** Headless diagnostics + pack v3 + Lab Diagnostics UI (incl. vs published summary). Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). Three new measurements remain batch 9. D-050 composes help text in UI (no pack regen).
+**DONE on main (PR #37).** Headless diagnostics + pack v3 + Lab Diagnostics UI (incl. vs published summary). Binding honesty: every conclusion traces to a measurement; small n → “insufficient evidence” (D-033 / D-031). D-050 composes help text in UI (no pack regen).
 
 #### 8a. UX + bugs — **D-050**
 **Shipped in [PR #38](https://github.com/Settar-Mengli/robot-agent-arena/pull/38).** Plain landing, guided Challenge, AppView, Advanced Lab Compare (n=13), battle juice, tour, lazy Lab/Watch, ~380px layout. No artifact / engine changes.
 
-#### 9. Three new measurements — execution batch C
-Prompt-perturbation sensitivity; adversarial-context robustness; information-scaling curves. Pre-register protocols before implementation (D-024 / D-034 pattern). Same metrics/reporting surface as batch 8.
+#### 9. Three new measurements — execution batch C — **DONE (D-051)**
+Shipped as Batch 4 robustness (perturb, advctx, info-partial, base-repeat) on heldout-ext n=35 with preregistration. Memory variants / full information-scaling curve **deferred** (D-055).
 
-#### 10. BYOK + committed leaderboard + methodology writeup — execution batch D
-UI default: deterministic CPU + fixture-replayed LLM (fixture path lands in **B.3**). Live BYOK: OpenRouter-only, key in memory, explicit warning. D-016 proxy deferred. Leaderboard = committed static comparison page (not a live backend — D-020 anti-scope stands). Methodology told through the failed measurement sets and the falsified hypothesis.
+#### 10. BYOK + committed leaderboard + methodology writeup — execution batch D — **DONE (D-051)**
+OpenRouter BYOK Arena opt-in; static leaderboard + methodology UI; recorded evidence only on default paths.
 
-#### 11. Second reference environment + publish — execution batch E
-Small provably solvable task proving the interface is real; then publish.
+#### 11. Second reference environment + publish — execution batch E — **DONE (D-052)**
+Resonance Seal headless environment; shared `evaluateChoices`; committed baselines — not on robot leaderboard.
 
 #### Parked / closed
 - **D-026** seed-spread correlation and greedy-suboptimal snapshot reselection — **won't-fix** under D-033 (would require suite regeneration; contradicts batch 5’s no-behavior-change gate). Remain known limitations.
