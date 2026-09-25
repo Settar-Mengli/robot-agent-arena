@@ -137,6 +137,12 @@ describe("App default path", () => {
     });
     assertClean(screen.getByTestId("first-visit-tour"));
     assertClean(screen.getByTestId("landing-view"));
+    expect(screen.getByTestId("landing-findings")).toHaveTextContent(
+      /No measurable effect/
+    );
+    expect(screen.getByTestId("landing-more-ways")).toHaveTextContent(
+      /More ways to play/
+    );
 
     fireEvent.click(screen.getByTestId("tour-dismiss"));
     fireEvent.click(screen.getByTestId("cta-quick-battle"));

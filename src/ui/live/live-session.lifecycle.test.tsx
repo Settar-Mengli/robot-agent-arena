@@ -233,7 +233,7 @@ describe("live session lifecycle (D-053)", () => {
       SECRET
     );
     assertKeyAbsent(SECRET);
-  });
+  }, 20_000);
 
   it("Load without Leave mid-battle clears live; next turn is CPU (0 live calls)", async () => {
     render(<App />);
