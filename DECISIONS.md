@@ -1160,3 +1160,16 @@ Bug hunt F1–F4: Fight again silently dropped live AI (panel unmount wipe); Lea
 
 Consequences:
 UI tests cover Fight-again continuity, Load→cpu, notice recovery, and key-absence fences. CI protected-path fences expanded.
+
+## D-054 UX 2 — UI-only redesign
+Date: 2026-09-24
+Status: Accepted
+
+Decision:
+AGENT ARENA ships a UI-only redesign (design system tokens + shared components; compact header; nav labels Beat the AI / Watch / Build / How it works; Saved game disclosure; toast for save/load feedback; compact honesty everywhere; friendly display-map labels for variants/suites; accessible SVG leaderboard whisker chart; Challenge/Watch/Builder/Setup/Results/Methodology layout polish; Home link Play a live AI with your own key → opens Setup with the live panel revealed and live off). Engine, eval, packs, fixtures, JSON artifacts, package lock, and CI workflows are unchanged. Live session lifecycle remains D-053. Honesty content remains D-033; presentation is one line + More.
+
+Rationale:
+Post-demo UI/UX review: chrome density, Lab naming mismatch, honesty weight, raw leaderboard labels, and jargon on Methodology hurt first-run clarity without changing measurement claims.
+
+Consequences:
+Branch ux2/redesign; UI tests and demo-video-script labels updated; screenshots refresh after merge.

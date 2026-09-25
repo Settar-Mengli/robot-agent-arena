@@ -2,8 +2,40 @@
 
 :root {
   --aa-bg: #0c0a09;
+  --aa-surface: #1c1917;
+  --aa-border: #78716c;
   --aa-fg: #f5f5f4;
+  --aa-muted: #a8a29e;
   --aa-accent: #d97706;
+  --aa-accent-fg: #0c0a09;
+  --aa-danger: #f87171;
+  --aa-ok: #34d399;
+}
+
+.aa-bg {
+  background-color: var(--aa-bg);
+}
+.aa-surface {
+  background-color: var(--aa-surface);
+}
+.aa-border {
+  border-color: var(--aa-border);
+}
+.aa-fg {
+  color: var(--aa-fg);
+}
+.aa-muted {
+  color: var(--aa-muted);
+}
+.aa-accent {
+  color: var(--aa-accent);
+}
+.aa-accent-bg {
+  background-color: var(--aa-accent);
+  color: var(--aa-accent-fg);
+}
+.aa-chart-border {
+  color: var(--aa-border);
 }
 
 button:focus-visible,

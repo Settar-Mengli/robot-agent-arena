@@ -66,6 +66,6 @@ describe("helpRankingCopy", () => {
   it("plainPolicyLabel maps keys", () => {
     expect(
       plainPolicyLabel("llm:gemini:gemini-3.5-flash-lite:base")
-    ).toBe("Gemini basic");
+    ).toBe("Gemini Basic prompt");
   });
 });

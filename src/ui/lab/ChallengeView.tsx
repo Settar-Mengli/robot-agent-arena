@@ -3,7 +3,7 @@ import {
   type DecisionLabCaseV3,
   type DecisionLabPackV3
 } from "../../decision-lab";
-import { InfoTip } from "../components/InfoTip";
+import { Card } from "../components/Card";
 import { skillLabel } from "../copy/skill-label";
 import { plainPolicyLabel } from "./help-ranking-copy";
 
@@ -133,14 +133,9 @@ export function ChallengeView({
   const showAnswerEnabled = pick !== null && !revealed;
 
   return (
-    <section data-testid="lab-challenge" className="mt-6 space-y-4">
-      <p className="text-sm text-stone-400">
-        Can you beat the AI? Pick a move, then show the answer. Scored from
-        saved measurements — no live AI call.
-        <InfoTip termId="missScore" />
-      </p>
-      <div className="rounded border border-stone-800 p-4">
-        <div className="mt-1 grid gap-4 text-sm sm:grid-cols-2">
+    <section data-testid="lab-challenge" className="mt-6 space-y-3">
+      <Card className="space-y-3 bg-stone-900/40 p-3 sm:p-4">
+        <div className="grid gap-3 text-sm sm:grid-cols-2">
           <div data-testid="challenge-you-side">
             <p className="font-medium text-stone-200">
               You (in the AI&apos;s place)
@@ -165,7 +160,7 @@ export function ChallengeView({
           </div>
         </div>
 
-        <fieldset className="mt-4">
+        <fieldset>
           <legend className="text-sm text-stone-300">Your pick</legend>
           <ul className="mt-2 space-y-2">
             {current.equippedSkillIds.map((id) => {
@@ -176,8 +171,8 @@ export function ChallengeView({
                   <label
                     className={
                       selected
-                        ? "flex min-h-11 items-center gap-2 rounded border border-amber-600 bg-amber-950/40 px-3 py-2 text-amber-50"
-                        : "flex min-h-11 items-center gap-2 rounded border border-transparent px-3 py-2 text-stone-200"
+                        ? "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-amber-600 bg-amber-950/40 px-3 py-3 text-amber-50"
+                        : "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-200 hover:border-stone-500"
                     }
                     data-selected={selected ? "true" : "false"}
                   >
@@ -191,9 +186,13 @@ export function ChallengeView({
                         if (!revealed) setPick(id);
                       }}
                     />
-                    <span>
+                    <span className="font-medium">
                       {skillLabel(id)}
-                      {aff && !aff.affordable ? " (not enough energy)" : ""}
+                      {aff && !aff.affordable ? (
+                        <span className="mt-0.5 block text-sm font-normal text-stone-400">
+                          Not enough energy
+                        </span>
+                      ) : null}
                     </span>
                   </label>
                 </li>
@@ -201,14 +200,15 @@ export function ChallengeView({
             })}
           </ul>
         </fieldset>
+      </Card>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+      <div className="sticky bottom-0 z-10 -mx-3 space-y-2 border-t aa-border bg-stone-950/95 px-3 py-3 sm:-mx-4 sm:px-4">
           <button
             type="button"
             className={
               showAnswerEnabled
-                ? "min-h-11 rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950 hover:bg-amber-500"
-                : "min-h-11 cursor-not-allowed rounded border border-stone-700 px-3 py-2 text-sm text-stone-400"
+                ? "min-h-11 w-full rounded bg-amber-600 px-4 py-2 text-sm font-medium text-stone-950 hover:bg-amber-500"
+                : "min-h-11 w-full cursor-not-allowed rounded border aa-border px-3 py-2 text-sm text-stone-400"
             }
             disabled={!showAnswerEnabled}
             onClick={reveal}
@@ -218,7 +218,7 @@ export function ChallengeView({
           </button>
           <button
             type="button"
-            className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+            className="min-h-11 w-full rounded border aa-border px-3 py-2 text-sm sm:w-auto"
             onClick={next}
           >
             Next situation
@@ -227,7 +227,7 @@ export function ChallengeView({
 
         {revealed && pick !== null ? (
           <div
-            className="mt-4 space-y-2 text-sm text-stone-300"
+            className="space-y-2 text-sm text-stone-300"
             aria-live="polite"
             data-testid="challenge-reveal"
           >
@@ -296,7 +296,7 @@ export function ChallengeView({
               <div className="flex flex-wrap gap-2 pt-2">
                 <button
                   type="button"
-                  className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+                  className="min-h-11 rounded border aa-border px-3 py-2 text-sm"
                   onClick={next}
                 >
                   Try another
@@ -304,7 +304,7 @@ export function ChallengeView({
                 {onWatch ? (
                   <button
                     type="button"
-                    className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+                    className="min-h-11 rounded border aa-border px-3 py-2 text-sm"
                     onClick={onWatch}
                   >
                     Watch a recorded fight
@@ -313,7 +313,7 @@ export function ChallengeView({
                 {onHome ? (
                   <button
                     type="button"
-                    className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm"
+                    className="min-h-11 rounded border aa-border px-3 py-2 text-sm"
                     onClick={onHome}
                   >
                     Home
@@ -323,7 +323,6 @@ export function ChallengeView({
             ) : null}
           </div>
         ) : null}
-      </div>
 
       <div data-testid="challenge-session" className="text-sm text-stone-400">
         {history.length === 0 ? (

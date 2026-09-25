@@ -121,7 +121,7 @@ export function DiagnosticsPanel({
 
       {published ? (
         <div
-          className="rounded border border-stone-700 bg-stone-900/40 p-4"
+          className="rounded border aa-border bg-stone-900/40 p-4"
           data-testid="lab-vs-published"
         >
           <h3 className="text-lg font-medium text-stone-100">

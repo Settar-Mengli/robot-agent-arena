@@ -12,7 +12,7 @@ const STEPS = [
     body: "Step through a recorded AI fight — not a live model call."
   },
   {
-    title: "Lab",
+    title: "Beat the AI",
     body: "Try the same decisions yourself and see where the AI missed."
   }
 ] as const;
@@ -80,7 +80,7 @@ export function FirstVisitTour({
           {step < STEPS.length - 1 ? (
             <button
               type="button"
-              className="min-h-11 rounded border border-stone-600 px-4 py-2 text-sm font-medium text-stone-200"
+              className="min-h-11 rounded border aa-border px-4 py-2 text-sm font-medium text-stone-200"
               onClick={() => setStep((s) => s + 1)}
               data-testid="tour-next"
             >
@@ -89,7 +89,7 @@ export function FirstVisitTour({
           ) : null}
           <button
             type="button"
-            className="min-h-11 rounded border border-stone-600 px-4 py-2 text-sm text-stone-200"
+            className="min-h-11 rounded border aa-border px-4 py-2 text-sm text-stone-200"
             onClick={dismiss}
             data-testid="tour-dismiss"
           >

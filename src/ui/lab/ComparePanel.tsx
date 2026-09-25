@@ -121,7 +121,7 @@ export function ComparePanel({
         <label className="text-stone-400">
           Mode{" "}
           <select
-            className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+            className="ml-1 rounded border aa-border bg-stone-900 px-2 py-1"
             value={mode}
             onChange={(e) => setMode(e.target.value as CompareMode)}
             data-testid="compare-mode"
@@ -135,7 +135,7 @@ export function ComparePanel({
             <label className="text-stone-400">
               Model{" "}
               <select
-                className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+                className="ml-1 rounded border aa-border bg-stone-900 px-2 py-1"
                 value={pinIndex}
                 onChange={(e) => setPinIndex(Number(e.target.value))}
                 data-testid="compare-model"
@@ -150,7 +150,7 @@ export function ComparePanel({
             <label className="text-stone-400">
               A{" "}
               <select
-                className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+                className="ml-1 rounded border aa-border bg-stone-900 px-2 py-1"
                 value={variantA}
                 onChange={(e) =>
                   setVariantA(e.target.value as typeof variantA)
@@ -171,7 +171,7 @@ export function ComparePanel({
             <label className="text-stone-400">
               B{" "}
               <select
-                className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+                className="ml-1 rounded border aa-border bg-stone-900 px-2 py-1"
                 value={variantB}
                 onChange={(e) =>
                   setVariantB(e.target.value as typeof variantB)
@@ -194,7 +194,7 @@ export function ComparePanel({
           <label className="text-stone-400">
             Variant{" "}
             <select
-              className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+              className="ml-1 rounded border aa-border bg-stone-900 px-2 py-1"
               value={crossVariant}
               onChange={(e) =>
                 setCrossVariant(e.target.value as typeof crossVariant)

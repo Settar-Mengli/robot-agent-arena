@@ -23,6 +23,9 @@ import { skillLabel } from "./copy/skill-label";
 import { QUICKSTART_ROBOT } from "./data/quickstart-robot";
 import { HonestyStrip } from "./HonestyStrip";
 import { LandingView } from "./landing/LandingView";
+import { Button } from "./components/Button";
+import { SavedGameMenu } from "./components/SavedGameMenu";
+import { Toast, type ToastTone } from "./components/Toast";
 import {
   clearSlot,
   loadSlot,
@@ -114,7 +117,10 @@ export function App({ playTurn }: AppProps = {}) {
   const [watchMatchId, setWatchMatchId] = useState<string | undefined>(
     undefined
   );
-  const [persistMessage, setPersistMessage] = useState<string | null>(null);
+  const [persistToast, setPersistToast] = useState<{
+    message: string;
+    tone: ToastTone;
+  } | null>(null);
   const [guidedPath, setGuidedPath] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
@@ -128,6 +134,10 @@ export function App({ playTurn }: AppProps = {}) {
   );
   const [liveNotice, setLiveNotice] = useState<string | null>(null);
   const [showLivePanel, setShowLivePanel] = useState(false);
+
+  function showPersistToast(message: string, tone: ToastTone) {
+    setPersistToast({ message, tone });
+  }
 
   function clearLiveSession() {
     setLiveConfig(EMPTY_LIVE_CONFIG);
@@ -248,6 +258,15 @@ export function App({ playTurn }: AppProps = {}) {
     setView({ kind: "builder" });
   }
 
+  function onLiveAiDiscover() {
+    bumpTourClose();
+    setPlayerConfig(QUICKSTART_ROBOT);
+    setOpponent(CPU_OPPONENTS[0]!);
+    setSeed(DEFAULT_SEED);
+    setShowLivePanel(true);
+    setView({ kind: "setup" });
+  }
+
   const runtime = battle.runtime;
   const terminal = runtime !== null && isBattleOver(runtime.session);
   const outcome =
@@ -313,7 +332,10 @@ export function App({ playTurn }: AppProps = {}) {
         view.kind === "battle") &&
       playerConfig === null
     ) {
-      setPersistMessage("Build a robot before saving.");
+      setPersistToast({
+        message: "Build a robot before saving.",
+        tone: "error"
+      });
       return;
     }
     const draftPlayer =
@@ -346,17 +368,17 @@ export function App({ playTurn }: AppProps = {}) {
       inFlight: battle.status === "inFlight"
     });
     if (!result.ok) {
-      setPersistMessage(plainSaveMessage(result));
+      showPersistToast(plainSaveMessage(result), "error");
       return;
     }
-    setPersistMessage("Saved to this device.");
+    showPersistToast("Saved to this device.", "success");
     refreshSavePresent();
   }
 
   function onLoad() {
     const loaded = loadSlot();
     if (!loaded.ok) {
-      setPersistMessage(plainLoadMessage(loaded));
+      showPersistToast(plainLoadMessage(loaded), "error");
       return;
     }
     clearLiveSession();
@@ -376,17 +398,21 @@ export function App({ playTurn }: AppProps = {}) {
       setWatchMatchId(slot.watch?.matchId);
       store.getState().clearBattle();
       setView({ kind: "watch", matchId: slot.watch?.matchId });
-      setPersistMessage(
-        "Loaded a Watch save. A free-play fight is only restored when you saved during that fight. Your robot draft is ready under Build your own robot."
+      showPersistToast(
+        "Loaded a Watch save. A free-play fight is only restored when you saved during that fight. Your robot draft is ready under Build your own robot.",
+        "success"
       );
     } else if (slot.runtime !== null) {
       store.getState().resetBattle(slot.runtime);
       setView({ kind: "battle" });
-      setPersistMessage(`Loaded your saved fight (saved ${locale}).`);
+      showPersistToast(`Loaded your saved fight (saved ${locale}).`, "success");
     } else {
       store.getState().clearBattle();
       setView({ kind: "setup" });
-      setPersistMessage(`Loaded your robot draft (saved ${locale}).`);
+      showPersistToast(
+        `Loaded your robot draft (saved ${locale}).`,
+        "success"
+      );
     }
   }
 
@@ -398,7 +424,7 @@ export function App({ playTurn }: AppProps = {}) {
   function onClearSaveConfirm() {
     clearSlot();
     setClearConfirm(false);
-    setPersistMessage("Save slot cleared.");
+    showPersistToast("Save slot cleared.", "success");
     refreshSavePresent();
   }
 
@@ -416,8 +442,8 @@ export function App({ playTurn }: AppProps = {}) {
         Skip to main content
       </a>
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
-        <header className="border-b border-stone-800 py-6 sm:py-8">
-          <div className="flex items-start justify-between gap-4">
+        <header className="border-b aa-border py-4 sm:py-5">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <button
                 type="button"
@@ -425,14 +451,14 @@ export function App({ playTurn }: AppProps = {}) {
                 onClick={goHome}
                 data-testid="brand-home"
               >
-                <p className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                <p className="text-lg font-semibold tracking-tight sm:text-xl">
                   AGENT ARENA
                 </p>
               </button>
             </div>
             <button
               type="button"
-              className="min-h-11 min-w-11 rounded border border-stone-600 px-3 text-sm sm:hidden"
+              className="min-h-11 min-w-11 rounded border aa-border px-3 text-sm sm:hidden"
               aria-expanded={navOpen}
               aria-controls="primary-nav"
               onClick={() => setNavOpen((v) => !v)}
@@ -445,8 +471,8 @@ export function App({ playTurn }: AppProps = {}) {
             id="primary-nav"
             className={
               navOpen
-                ? "mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4"
-                : "mt-4 hidden flex-col gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-4"
+                ? "mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
+                : "mt-4 hidden flex-col gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
             }
             aria-label="Primary"
             data-testid="primary-nav"
@@ -460,16 +486,14 @@ export function App({ playTurn }: AppProps = {}) {
             </button>
             <button
               type="button"
-              className={navBtn(
-                view.kind === "builder" || view.kind === "setup"
-              )}
+              className={navBtn(view.kind === "lab")}
               onClick={() => {
-                setView({ kind: "builder" });
+                setView({ kind: "lab" });
                 setNavOpen(false);
               }}
-              data-testid="nav-build"
+              data-testid="nav-lab"
             >
-              Build your own robot
+              Beat the AI
             </button>
             <button
               type="button"
@@ -481,18 +505,20 @@ export function App({ playTurn }: AppProps = {}) {
               }}
               data-testid="mode-watch"
             >
-              Watch a recorded AI battle
+              Watch
             </button>
             <button
               type="button"
-              className={navBtn(view.kind === "lab")}
+              className={navBtn(
+                view.kind === "builder" || view.kind === "setup"
+              )}
               onClick={() => {
-                setView({ kind: "lab" });
+                setView({ kind: "builder" });
                 setNavOpen(false);
               }}
-              data-testid="nav-lab"
+              data-testid="nav-build"
             >
-              Lab
+              Build
             </button>
             <button
               type="button"
@@ -514,84 +540,32 @@ export function App({ playTurn }: AppProps = {}) {
               }}
               data-testid="nav-methodology"
             >
-              Methodology
+              How it works
             </button>
 
             <div
               className={
                 navOpen
-                  ? "mt-2 flex flex-col gap-2 border-t border-stone-800 pt-2 sm:mt-0 sm:flex-row sm:flex-wrap sm:items-center sm:border-0 sm:pt-0"
-                  : "mt-0 hidden flex-col gap-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center"
+                  ? "mt-2 border-t aa-border pt-2 sm:mt-0 sm:border-0 sm:pt-0"
+                  : "mt-0 hidden sm:block"
               }
-              data-testid="save-controls"
             >
-              {saveAllowed ? (
-                <button
-                  type="button"
-                  className="min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-300"
-                  onClick={onSave}
-                  data-testid="save-slot"
-                >
-                  Save
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="min-h-11 cursor-not-allowed rounded border border-stone-800 px-3 py-2 text-sm text-stone-400 opacity-60"
-                  disabled
-                  title={SAVE_DISABLED_TITLE}
-                  data-testid="save-slot"
-                >
-                  Save
-                </button>
-              )}
-              <button
-                type="button"
-                className="min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-300"
-                onClick={onLoad}
-                data-testid="load-slot"
-              >
-                Load
-              </button>
-              {clearConfirm ? (
-                <span
-                  className="flex flex-wrap items-center gap-2 text-sm text-stone-300"
-                  data-testid="clear-slot-confirm"
-                >
-                  Clear saved game?
-                  <button
-                    type="button"
-                    className="min-h-11 rounded bg-amber-600 px-3 py-2 text-stone-950"
-                    onClick={onClearSaveConfirm}
-                    data-testid="clear-slot-yes"
-                  >
-                    Yes
-                  </button>
-                  <button
-                    type="button"
-                    className="min-h-11 rounded border border-stone-600 px-3 py-2"
-                    onClick={() => setClearConfirm(false)}
-                    data-testid="clear-slot-cancel"
-                  >
-                    Cancel
-                  </button>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  className="min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-400 disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={onClearSaveRequest}
-                  disabled={!savePresent}
-                  data-testid="clear-slot"
-                >
-                  Clear save
-                </button>
-              )}
-              {persistMessage ? (
-                <p className="text-sm text-stone-400" role="status">
-                  {persistMessage}
+              {navOpen ? (
+                <p className="mb-2 text-xs tracking-wide text-stone-500 uppercase">
+                  This device
                 </p>
               ) : null}
+              <SavedGameMenu
+                saveAllowed={saveAllowed}
+                savePresent={savePresent}
+                clearConfirm={clearConfirm}
+                saveDisabledTitle={SAVE_DISABLED_TITLE}
+                onSave={onSave}
+                onLoad={onLoad}
+                onClearRequest={onClearSaveRequest}
+                onClearConfirm={onClearSaveConfirm}
+                onClearCancel={() => setClearConfirm(false)}
+              />
             </div>
           </nav>
         </header>
@@ -607,6 +581,7 @@ export function App({ playTurn }: AppProps = {}) {
               onQuickBattle={onQuickBattle}
               onWatch={onWatchCta}
               onBuild={onBuildCta}
+              onLiveAi={onLiveAiDiscover}
               tourCloseSignal={tourCloseSignal}
             />
           ) : null}
@@ -708,6 +683,11 @@ export function App({ playTurn }: AppProps = {}) {
           ) : null}
         </main>
       </div>
+      <Toast
+        message={persistToast?.message ?? null}
+        tone={persistToast?.tone ?? "success"}
+        onDismiss={() => setPersistToast(null)}
+      />
     </div>
   );
 }
@@ -803,20 +783,25 @@ function BattleSetup(props: {
         </ul>
       </fieldset>
 
-      <div className="mt-6">
-        <label htmlFor="battle-seed" className="block text-sm text-stone-300">
-          Replay code
-          <InfoTip termId="seed" />
-        </label>
-        <input
-          id="battle-seed"
-          type="text"
-          value={props.seed}
-          onChange={(event) => props.onSeedChange(event.target.value)}
-          className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
-          autoComplete="off"
-        />
-      </div>
+      <details className="mt-6 rounded border aa-border px-4 py-3">
+        <summary className="cursor-pointer text-sm text-stone-300">
+          More options
+        </summary>
+        <div className="mt-3">
+          <label htmlFor="battle-seed" className="block text-sm text-stone-300">
+            Replay code
+            <InfoTip termId="seed" />
+          </label>
+          <input
+            id="battle-seed"
+            type="text"
+            value={props.seed}
+            onChange={(event) => props.onSeedChange(event.target.value)}
+            className="mt-2 min-h-11 w-full rounded border aa-border bg-stone-900 px-3 py-2 text-stone-100"
+            autoComplete="off"
+          />
+        </div>
+      </details>
 
       {props.showLivePanel ? (
         <ViewErrorBoundary onHome={props.onHome}>
@@ -842,20 +827,12 @@ function BattleSetup(props: {
       )}
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <button
-          type="button"
-          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
-          onClick={props.onStart}
-        >
+        <Button variant="primary" onClick={props.onStart}>
           Start battle
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200 hover:bg-stone-900"
-          onClick={props.onBack}
-        >
+        </Button>
+        <Button variant="secondary" onClick={props.onBack}>
           Back
-        </button>
+        </Button>
       </div>
     </section>
   );

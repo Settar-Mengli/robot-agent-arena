@@ -1,4 +1,5 @@
-import { HonestyStrip } from "../HonestyStrip";
+import { HonestyLine } from "../components/HonestyLine";
+import { Button } from "../components/Button";
 import { FirstVisitTour } from "../tour/FirstVisitTour";
 
 export type LandingViewProps = {
@@ -6,11 +7,12 @@ export type LandingViewProps = {
   onQuickBattle: () => void;
   onWatch: () => void;
   onBuild: () => void;
+  onLiveAi: () => void;
   tourCloseSignal?: number;
 };
 
 export const LANDING_SUPPORT =
-  "AGENT ARENA tests how well AI models make decisions. In a small robot battle, the best move in each situation can be worked out exactly, so every AI choice can be checked. See where the AI chose badly, and try the same choices yourself.";
+  "AGENT ARENA checks how AI models choose moves in a small robot battle where the best move can be worked out exactly. See where recorded AI answers missed, and try the same choices yourself.";
 
 export const LANDING_H1 = "How well do AI models choose?";
 
@@ -19,6 +21,7 @@ export function LandingView({
   onQuickBattle,
   onWatch,
   onBuild,
+  onLiveAi,
   tourCloseSignal = 0
 }: LandingViewProps): React.JSX.Element {
   return (
@@ -31,7 +34,7 @@ export function LandingView({
         <h1
           id="landing-heading"
           tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight text-stone-50 sm:text-4xl"
+          className="text-2xl font-semibold tracking-tight text-stone-50 sm:text-3xl"
         >
           {LANDING_H1}
         </h1>
@@ -44,44 +47,58 @@ export function LandingView({
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        <button
-          type="button"
-          className="min-h-11 rounded bg-amber-600 px-6 py-3 text-base font-semibold text-stone-950 hover:bg-amber-500"
+        <Button
+          variant="primary"
+          className="px-6 py-3 text-base font-semibold"
           onClick={onBeatAi}
           data-testid="cta-beat-ai"
         >
           Can you beat the AI?
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded border border-amber-800/80 bg-amber-950/40 px-5 py-3 text-base font-medium text-amber-100 hover:bg-amber-950/70"
+        </Button>
+        <Button
+          variant="secondary"
+          className="border-amber-800/80 bg-amber-950/40 px-5 py-3 text-base font-medium text-amber-100 hover:bg-amber-950/70"
           onClick={onQuickBattle}
           data-testid="cta-quick-battle"
         >
           Play a quick battle
-        </button>
+        </Button>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-base">
         <button
           type="button"
-          className="min-h-11 rounded border border-stone-600 px-5 py-3 text-base font-medium text-stone-200 hover:bg-stone-900"
+          className="min-h-11 text-amber-100 underline underline-offset-4 hover:text-amber-50"
           onClick={onWatch}
           data-testid="cta-watch"
         >
           Watch a recorded AI battle
         </button>
-      </div>
-
-      <p>
+        <span className="text-stone-500" aria-hidden="true">
+          ·
+        </span>
         <button
           type="button"
-          className="min-h-11 text-base text-amber-100 underline underline-offset-4 hover:text-amber-50"
+          className="min-h-11 text-amber-100 underline underline-offset-4 hover:text-amber-50"
           onClick={onBuild}
           data-testid="cta-build"
         >
           Build your own robot →
         </button>
-      </p>
+        <span className="text-stone-500" aria-hidden="true">
+          ·
+        </span>
+        <button
+          type="button"
+          className="min-h-11 text-amber-100 underline underline-offset-4 hover:text-amber-50"
+          onClick={onLiveAi}
+          data-testid="cta-live-ai"
+        >
+          Play a live AI with your own key →
+        </button>
+      </div>
 
-      <HonestyStrip variant="full" />
+      <HonestyLine />
 
       <FirstVisitTour closeSignal={tourCloseSignal} />
     </section>

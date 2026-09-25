@@ -4,6 +4,7 @@ import type {
   TurnRecord
 } from "../../engine";
 import { HonestyStrip } from "../HonestyStrip";
+import { Button } from "../components/Button";
 import { endLesson } from "./end-lesson";
 import {
   opponentModeLine,
@@ -70,7 +71,7 @@ export function ResultsView({
       <div
         role="status"
         aria-live="polite"
-        className="mt-6 rounded border border-stone-700 bg-stone-900/60 px-4 py-4"
+        className="mt-6 rounded border aa-border bg-stone-900/60 px-4 py-4"
         data-testid="battle-outcome"
       >
         <p className="text-lg font-medium text-stone-100">
@@ -89,24 +90,26 @@ export function ResultsView({
         </p>
       </div>
 
-      <div
-        className="mt-6 rounded border border-stone-800 px-4 py-3 text-sm text-stone-400"
-        data-testid="batch4-findings-results"
-      >
-        <p className="text-stone-300">
-          No measurable effect: rewording, a misleading rumor, and extra facts
-          did not change these models&apos; choices on this test set.
-        </p>
-        <p className="mt-2 text-stone-300">
-          The same question asked twice changed 1 of 35 answers for Groq —
-          small wobble (1 of 35), from repeat runs or provider changes over
-          time.
-        </p>
-        <p className="mt-2 text-stone-400">
-          Scoped to this robot battle, this test set, and these two models —
-          not a claim about AI systems in general. Details: Methodology.
-        </p>
-      </div>
+      <details className="mt-6 rounded border aa-border px-4 py-3 text-sm text-stone-400">
+        <summary className="cursor-pointer text-stone-300">
+          What recorded tests found
+        </summary>
+        <div className="mt-3 space-y-2" data-testid="batch4-findings-results">
+          <p className="text-stone-300">
+            No measurable effect: rewording, a misleading rumor, and extra facts
+            did not change these models&apos; choices on this test set.
+          </p>
+          <p className="text-stone-300">
+            The same question asked twice changed 1 of 35 answers for Groq —
+            small wobble (1 of 35), from repeat runs or provider changes over
+            time.
+          </p>
+          <p className="text-stone-400">
+            Scoped to this robot battle, this test set, and these two models —
+            not a claim about AI systems in general. Details: How it works.
+          </p>
+        </div>
+      </details>
 
       <div className="mt-8" data-testid="results-history">
         <h3 className="text-sm font-medium text-stone-300">Battle log</h3>
@@ -117,7 +120,7 @@ export function ResultsView({
             {[...turns].reverse().map((turn) => (
               <li
                 key={turn.turn}
-                className="rounded border border-stone-800 px-3 py-2"
+                className="rounded border aa-border px-3 py-2"
               >
                 <p className="font-medium text-stone-200">Turn {turn.turn}</p>
                 <ul className="mt-1 space-y-1 text-stone-400">
@@ -132,36 +135,20 @@ export function ResultsView({
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <button
-          type="button"
-          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
-          onClick={onRestart}
-        >
+        <Button variant="primary" onClick={onRestart}>
           Fight again
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200 hover:bg-stone-900"
-          onClick={onReturnHome}
-        >
+        </Button>
+        <Button variant="secondary" onClick={onReturnHome}>
           Home
-        </button>
+        </Button>
       </div>
     </section>
   );
 }
 
 function formatResult(result: BattleOutcome["result"]): string {
-  switch (result) {
-    case "player-victory":
-      return "You won";
-    case "cpu-victory":
-      return "Opponent won";
-    case "draw":
-      return "Draw";
-    default: {
-      const _exhaustive: never = result;
-      return _exhaustive;
-    }
-  }
+  if (result === "player-victory") return "You won";
+  if (result === "cpu-victory") return "Opponent won";
+  if (result === "draw") return "Draw";
+  return result;
 }

@@ -103,7 +103,7 @@ export function ArenaView({
       : [];
 
   return (
-    <section aria-labelledby="arena-heading" data-testid="arena-view">
+    <section aria-labelledby="arena-heading" data-testid="arena-view" className="pb-24">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <h1
           id="arena-heading"
@@ -239,7 +239,7 @@ export function ArenaView({
         cpuName={runtime.cpu.displayName}
       />
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="mt-8 sticky bottom-0 z-10 flex flex-wrap gap-3 border-t aa-border bg-stone-950/95 py-3">
         <button
           type="button"
           className="min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200 hover:bg-stone-900"
@@ -273,7 +273,7 @@ function TurnHistory(props: {
         {newestFirst.map((turn) => (
           <li
             key={turn.turn}
-            className="rounded border border-stone-800 px-3 py-2"
+            className="rounded border aa-border px-3 py-2"
           >
             <p className="font-medium text-stone-200">Turn {turn.turn}</p>
             <ul className="mt-1 space-y-1 text-stone-400">

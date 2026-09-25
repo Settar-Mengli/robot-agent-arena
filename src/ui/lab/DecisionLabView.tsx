@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useId } from "react";
 import {
   assertDecisionLabPackV3,
   llmPolicyKey,
@@ -7,12 +7,14 @@ import {
   type DecisionLabTaxonomy,
   type DiagnosticsSummaryV1
 } from "../../decision-lab";
-import { HonestyStrip } from "../HonestyStrip";
+import { HonestyLine } from "../components/HonestyLine";
 import { skillLabel } from "../copy/skill-label";
 import { ChallengeView } from "./ChallengeView";
 import { ComparePanel } from "./ComparePanel";
 import { DiagnosticsPanel } from "./DiagnosticsPanel";
 import { plainPolicyLabel } from "./help-ranking-copy";
+import { suiteDisplayName } from "../copy/display-labels";
+import { Tabs, tabId, panelId } from "../components/Tabs";
 import rawPack from "./pack/decision-lab.v3.json";
 import rawPublished from "./pack/diagnostics.summary.json";
 
@@ -91,11 +93,12 @@ export function DecisionLabView({
   const [subview, setSubview] = useState<LabSubview>("challenge");
   const [filters, setFilters] = useState<LabBrowseFilters>(DEFAULT_LAB_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const reactId = useId();
 
   if (!loaded.ok) {
     return (
       <div className="p-6 text-red-300" role="alert">
-        Couldn't load the Lab.
+        Couldn&apos;t load Beat the AI.
       </div>
     );
   }
@@ -116,39 +119,39 @@ export function DecisionLabView({
       ]
     : [{ id: "challenge", label: "Your turn" }];
 
+  const tabsPrefix = `lab-${reactId.replace(/:/g, "")}`;
+
   return (
-    <div className="text-stone-200" data-testid="decision-lab">
-      <HonestyStrip />
+    <div className="text-stone-200 pb-24" data-testid="decision-lab">
       <h1
         id="lab-heading"
         tabIndex={-1}
-        className="mt-4 text-2xl font-semibold text-stone-50"
+        className="text-2xl font-semibold text-stone-50"
       >
         Can you beat the AI?
       </h1>
       <p className="mt-2 text-stone-400">
-        Try the same recorded situations yourself. Answers are saved
-        measurements — not live AI.
+        Pick a move, then show the answer. Scored from saved measurements — no
+        live AI call.
       </p>
+      <div className="mt-4">
+        <HonestyLine />
+      </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={
-              subview === t.id
-                ? "min-h-11 rounded bg-stone-100 px-3 py-2 text-sm text-stone-900"
-                : "min-h-11 rounded border border-stone-700 px-3 py-2 text-sm text-stone-300"
-            }
-            onClick={() => setSubview(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="mt-4 flex flex-wrap items-end gap-1">
+        <Tabs
+          items={tabs}
+          value={subview}
+          onChange={(id) => setSubview(id as LabSubview)}
+          idPrefix={tabsPrefix}
+        />
         <button
           type="button"
-          className="min-h-11 rounded border border-stone-600 px-3 py-2 text-sm text-stone-400"
+          className={
+            advanced
+              ? "min-h-11 border-b-2 border-amber-500 px-3 py-2 text-sm font-medium text-amber-100"
+              : "min-h-11 border-b-2 border-transparent px-3 py-2 text-sm text-stone-400 hover:text-stone-200"
+          }
           aria-pressed={advanced}
           data-testid="lab-advanced-toggle"
           onClick={() => {
@@ -165,9 +168,9 @@ export function DecisionLabView({
 
       {advanced && subview !== "challenge" ? (
         <label className="mt-4 block text-sm text-stone-400">
-          Suite{" "}
+          Test set{" "}
           <select
-            className="ml-2 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+            className="ml-2 rounded border aa-border bg-stone-900 px-2 py-1"
             value={filters.suiteId}
             onChange={(e) =>
               setFilters((f) => ({ ...f, suiteId: e.target.value }))
@@ -175,37 +178,69 @@ export function DecisionLabView({
           >
             {pack.suites.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.id} ({s.snapshotCount} situations)
+                {suiteDisplayName(s.id, s.id)} ({s.snapshotCount} situations)
               </option>
             ))}
           </select>
         </label>
       ) : null}
 
-      {subview === "challenge" ? (
-        <ChallengeView
-          pack={pack}
-          guided={guided}
-          advanced={advanced}
-          onWatch={onWatch}
-          onHome={onHome}
-        />
-      ) : null}
-      {advanced && subview === "diagnostics" ? (
-        <DiagnosticsPanel pack={pack} published={published} />
-      ) : null}
-      {advanced && subview === "situations" ? (
-        <SituationsPanel
-          cases={filtered}
-          arms={arms}
-          filters={filters}
-          setFilters={setFilters}
-          selected={selected}
-          onSelect={setSelectedId}
-        />
-      ) : null}
-      {advanced && subview === "compare" ? (
-        <ComparePanel pack={pack} suiteId={filters.suiteId} />
+      <div
+        role="tabpanel"
+        id={panelId(tabsPrefix, "challenge")}
+        aria-labelledby={tabId(tabsPrefix, "challenge")}
+        hidden={subview !== "challenge"}
+      >
+        {subview === "challenge" ? (
+          <ChallengeView
+            pack={pack}
+            guided={guided}
+            advanced={advanced}
+            onWatch={onWatch}
+            onHome={onHome}
+          />
+        ) : null}
+      </div>
+      {advanced ? (
+        <>
+          <div
+            role="tabpanel"
+            id={panelId(tabsPrefix, "diagnostics")}
+            aria-labelledby={tabId(tabsPrefix, "diagnostics")}
+            hidden={subview !== "diagnostics"}
+          >
+            {subview === "diagnostics" ? (
+              <DiagnosticsPanel pack={pack} published={published} />
+            ) : null}
+          </div>
+          <div
+            role="tabpanel"
+            id={panelId(tabsPrefix, "situations")}
+            aria-labelledby={tabId(tabsPrefix, "situations")}
+            hidden={subview !== "situations"}
+          >
+            {subview === "situations" ? (
+              <SituationsPanel
+                cases={filtered}
+                arms={arms}
+                filters={filters}
+                setFilters={setFilters}
+                selected={selected}
+                onSelect={setSelectedId}
+              />
+            ) : null}
+          </div>
+          <div
+            role="tabpanel"
+            id={panelId(tabsPrefix, "compare")}
+            aria-labelledby={tabId(tabsPrefix, "compare")}
+            hidden={subview !== "compare"}
+          >
+            {subview === "compare" ? (
+              <ComparePanel pack={pack} suiteId={filters.suiteId} />
+            ) : null}
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -258,7 +293,7 @@ function SituationsPanel(props: {
       <div>
         <div className="flex flex-wrap gap-3 text-sm">
           <input
-            className="min-h-11 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+            className="min-h-11 rounded border aa-border bg-stone-900 px-2 py-1"
             placeholder="Filter situations"
             value={filters.text}
             onChange={(e) =>
@@ -266,7 +301,7 @@ function SituationsPanel(props: {
             }
           />
           <select
-            className="min-h-11 rounded border border-stone-700 bg-stone-900 px-2"
+            className="min-h-11 rounded border aa-border bg-stone-900 px-2"
             value={filters.arm}
             onChange={(e) =>
               setFilters((f) => ({ ...f, arm: e.target.value }))
@@ -313,7 +348,7 @@ function SituationsPanel(props: {
                 return (
                   <li
                     key={arm}
-                    className="rounded border border-stone-800 px-3 py-2"
+                    className="rounded border aa-border px-3 py-2"
                   >
                     <span className="text-stone-200">
                       {plainPolicyLabel(arm)}

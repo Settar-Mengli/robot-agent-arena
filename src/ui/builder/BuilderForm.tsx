@@ -9,6 +9,8 @@ import {
 } from "../../engine";
 import { skillLabel } from "../copy/skill-label";
 import { skillPlainDescription } from "../copy/skill-plain";
+import { Button } from "../components/Button";
+import { Card } from "../components/Card";
 import { buildAgentConfig } from "./buildAgentConfig";
 
 const MODULE_LABELS: Record<AgentModule, string> = {
@@ -17,6 +19,14 @@ const MODULE_LABELS: Record<AgentModule, string> = {
   sigilSecurity: "Sigil and Security",
   rules: "Rules",
   strategy: "Strategy"
+};
+
+const MODULE_HELP: Record<AgentModule, string> = {
+  coreIdentity: "Who this robot is.",
+  memory: "What it remembers between fights.",
+  sigilSecurity: "Its protective sigil and guard habits.",
+  rules: "Rules it refuses to break.",
+  strategy: "How it chooses pressure in a fight."
 };
 
 type ModuleFields = Record<AgentModule, string>;
@@ -122,8 +132,8 @@ export function BuilderForm({
         Build your own robot
       </h1>
       <p className="mt-2 text-stone-400">
-        Name your robot, fill its modules, and pick two moves. Module text is
-        stored for recorded AI prompts; free play uses a simple computer opponent.
+        Name your robot and pick two moves. Story notes are optional and only
+        used in recorded AI prompts; free play uses a simple computer opponent.
       </p>
 
       <form className="mt-8 space-y-8" onSubmit={onSubmit} noValidate>
@@ -137,52 +147,32 @@ export function BuilderForm({
             type="text"
             value={displayName}
             onChange={(event) => updateDisplayName(event.target.value)}
-            className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+            className="mt-2 min-h-11 w-full rounded border aa-border bg-stone-900 px-3 py-2 text-stone-100"
             autoComplete="off"
           />
         </div>
 
         <fieldset>
-          <legend className="text-sm text-stone-300">Modules</legend>
-          <p className="mt-1 text-xs text-stone-400">
-            Stored on the robot for recorded AI prompts. Not used by the
-            simple computer opponent in free play.
-          </p>
-          <div className="mt-3 space-y-4">
-            {AGENT_MODULES.map((key) => (
-              <div key={key}>
-                <label
-                  htmlFor={`module-${key}`}
-                  className="block text-sm text-stone-400"
-                >
-                  {MODULE_LABELS[key]}
-                </label>
-                <input
-                  id={`module-${key}`}
-                  name={`module-${key}`}
-                  type="text"
-                  value={modules[key]}
-                  onChange={(event) => updateModule(key, event.target.value)}
-                  className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
-                  autoComplete="off"
-                />
-              </div>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset>
           <legend className="text-sm text-stone-300">
             Equipped moves (max {MVP_SKILL_SLOT_LIMIT})
           </legend>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {MVP_SKILL_CATALOG.skills.map((skill) => {
               const checked = skillIds.includes(skill.skillId);
               const atLimit =
                 !checked && skillIds.length >= MVP_SKILL_SLOT_LIMIT;
               return (
                 <li key={skill.skillId}>
-                  <label className="flex items-start gap-3 text-stone-200">
+                  <label
+                    className={
+                      checked
+                        ? "flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-amber-600 bg-amber-950/40 px-3 py-3 text-amber-50"
+                        : atLimit
+                          ? "flex min-h-11 cursor-not-allowed items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-500 opacity-60"
+                          : "flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border aa-border bg-stone-950/40 px-3 py-3 text-stone-200 hover:border-stone-500"
+                    }
+                    data-selected={checked ? "true" : "false"}
+                  >
                     <input
                       type="checkbox"
                       name="skillIds"
@@ -205,12 +195,45 @@ export function BuilderForm({
           </ul>
         </fieldset>
 
-        <button
-          type="submit"
-          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500"
-        >
+        <Card className="p-0">
+          <details className="px-4 py-3">
+            <summary className="cursor-pointer text-sm text-stone-300">
+              Story notes (used in recorded AI prompts)
+            </summary>
+            <p className="mt-2 text-xs text-stone-400">
+              Stored on the robot for recorded AI prompts. Not used by the
+              simple computer opponent in free play.
+            </p>
+            <div className="mt-3 space-y-4">
+              {AGENT_MODULES.map((key) => (
+                <div key={key}>
+                  <label
+                    htmlFor={`module-${key}`}
+                    className="block text-sm text-stone-400"
+                  >
+                    {MODULE_LABELS[key]}
+                  </label>
+                  <p className="mt-0.5 text-xs text-stone-500">
+                    {MODULE_HELP[key]}
+                  </p>
+                  <input
+                    id={`module-${key}`}
+                    name={`module-${key}`}
+                    type="text"
+                    value={modules[key]}
+                    onChange={(event) => updateModule(key, event.target.value)}
+                    className="mt-2 min-h-11 w-full rounded border aa-border bg-stone-900 px-3 py-2 text-stone-100"
+                    autoComplete="off"
+                  />
+                </div>
+              ))}
+            </div>
+          </details>
+        </Card>
+
+        <Button type="submit" variant="primary">
           Check robot
-        </button>
+        </Button>
       </form>
 
       {errors.length > 0 ? (
@@ -245,13 +268,13 @@ export function BuilderForm({
             </div>
           </dl>
           {onContinue ? (
-            <button
-              type="button"
-              className="mt-4 min-h-11 rounded bg-emerald-600 px-4 py-2 font-medium text-stone-950 hover:bg-emerald-500"
+            <Button
+              variant="primary"
+              className="mt-4 bg-emerald-600 hover:bg-emerald-500"
               onClick={() => onContinue(validated)}
             >
               Continue to battle setup
-            </button>
+            </Button>
           ) : null}
         </div>
       ) : null}
