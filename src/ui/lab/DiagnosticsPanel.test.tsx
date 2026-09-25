@@ -14,7 +14,7 @@ describe("ComparePanel via DecisionLabView", () => {
   it("groq base→grounded: 13 matched, 1 changed, 2.15→2.00", async () => {
     render(<DecisionLabView />);
     fireEvent.click(screen.getByTestId("lab-advanced-toggle"));
-    fireEvent.click(screen.getByRole("button", { name: "Compare" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Compare" }));
     await screen.findByTestId("lab-compare");
     fireEvent.change(screen.getByTestId("compare-model"), {
       target: { value: "1" }
@@ -31,12 +31,14 @@ describe("ComparePanel via DecisionLabView", () => {
   it("gemini base vs groq base: 13 matched, 2.00→2.15", async () => {
     render(<DecisionLabView />);
     fireEvent.click(screen.getByTestId("lab-advanced-toggle"));
-    fireEvent.click(screen.getByRole("button", { name: "Compare" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Compare" }));
     await screen.findByTestId("lab-compare");
     fireEvent.change(screen.getByTestId("compare-mode"), {
       target: { value: "cross-model" }
     });
-    expect(screen.getByText(/Comparing Gemini basic to Groq basic/i)).toBeTruthy();
+    expect(
+      screen.getByText(/Comparing Gemini Basic prompt to Groq Basic prompt/i)
+    ).toBeTruthy();
     expect(screen.getByTestId("compare-matched")).toHaveTextContent(
       "Situations matched: 13"
     );
@@ -75,8 +77,9 @@ describe("DiagnosticsPanel via DecisionLabView", () => {
   it("DiagnosticsPanel does not render pack wording substring", () => {
     render(<DecisionLabView />);
     fireEvent.click(screen.getByTestId("lab-advanced-toggle"));
-    fireEvent.click(screen.getByRole("button", { name: "Diagnostics" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Diagnostics" }));
     expect(screen.getByTestId("lab-diagnostics")).toBeTruthy();
+
     expect(document.body.textContent ?? "").not.toMatch(
       /coincided with lower regret/
     );

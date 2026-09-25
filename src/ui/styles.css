@@ -2,8 +2,40 @@
 
 :root {
   --aa-bg: #0c0a09;
+  --aa-surface: #1c1917;
+  --aa-border: #78716c;
   --aa-fg: #f5f5f4;
+  --aa-muted: #a8a29e;
   --aa-accent: #d97706;
+  --aa-accent-fg: #0c0a09;
+  --aa-danger: #f87171;
+  --aa-ok: #34d399;
+}
+
+.aa-bg {
+  background-color: var(--aa-bg);
+}
+.aa-surface {
+  background-color: var(--aa-surface);
+}
+.aa-border {
+  border-color: var(--aa-border);
+}
+.aa-fg {
+  color: var(--aa-fg);
+}
+.aa-muted {
+  color: var(--aa-muted);
+}
+.aa-accent {
+  color: var(--aa-accent);
+}
+.aa-accent-bg {
+  background-color: var(--aa-accent);
+  color: var(--aa-accent-fg);
+}
+.aa-chart-border {
+  color: var(--aa-border);
 }
 
 button:focus-visible,
@@ -93,4 +125,64 @@ summary:focus-visible {
   overflow: visible;
   clip: auto;
   white-space: normal;
+}
+
+/* Presentation only: keep state, action order, and measurement logic in their owners. */
+.aa-app {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.aa-app h1 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.aa-app [data-testid="landing-view"] h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  max-width: 20ch;
+}
+.aa-app .text-sm {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.aa-app .text-xs {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.aa-app input[type="checkbox"],
+.aa-app input[type="radio"] {
+  accent-color: #f59e0b;
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+.aa-app select {
+  max-width: 100%;
+  min-height: 2.75rem;
+}
+.aa-app :where(button, input, select, summary) {
+  scroll-margin-block: 1rem;
+}
+.aa-app :where(p, dd, li) {
+  overflow-wrap: anywhere;
+}
+.aa-prose {
+  max-width: 75ch;
+}
+.aa-metric {
+  min-width: 0;
+  border: 1px solid var(--aa-border);
+  border-radius: 0.75rem;
+  background: var(--aa-surface);
+  padding: 1rem 1.25rem;
+}
+.aa-mode-card {
+  min-width: 0;
+  border: 1px solid var(--aa-border);
+  border-radius: 0.75rem;
+  background: var(--aa-surface);
+  padding: 1.25rem;
+}
+.aa-mode-card p {
+  margin-bottom: 1rem;
 }

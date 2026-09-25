@@ -15,6 +15,17 @@ export type DiagnosticsPanelProps = {
   published: DiagnosticsSummaryV1 | null;
 };
 
+const STAKE_BANDS: Record<string, string> = {
+  zero: "Best move (0 points)",
+  low: "Up to 10 points worse",
+  mid: "More than 10, under 100 points worse",
+  high: "100+ points worse"
+};
+
+function stakeBandLabel(id: string): string {
+  return STAKE_BANDS[id] ?? id;
+}
+
 export function DiagnosticsPanel({
   pack,
   published
@@ -23,40 +34,60 @@ export function DiagnosticsPanel({
 
   return (
     <section data-testid="lab-diagnostics" className="mt-6 space-y-6">
-      <p className="text-sm text-stone-400">
+      <p className="aa-prose text-sm leading-relaxed text-stone-400">
         Labels describe measured mistakes on recorded answers — not causes.
         Small samples cannot rank models.
         <InfoTip termId="smallSample" />
       </p>
 
-      <div>
-        <h3 className="text-lg font-medium text-stone-100">Mistake labels</h3>
-        <p className="mt-2 text-sm text-stone-300" data-testid="cluster-honesty">
-          On this recorded set, all 68 labeled mistakes match &quot;spent more
-          energy than a cheaper best move.&quot; Other labels (missed finishing
-          blow, ignored incoming threat, over-defending) matched 0 times. Labels
-          describe what was measured—not why the model chose it.
-        </p>
-        <ul className="mt-2 space-y-1 text-sm text-stone-400">
-          {d.clusters.map((c) => (
-            <li key={c.tag}>
-              {plainTag(c.tag)}: {c.count}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <div className="grid items-start gap-5 lg:grid-cols-2">
+        <div className="rounded-xl border aa-border bg-stone-900/40 p-5">
+          <h3 className="text-lg font-medium text-stone-100">Mistake labels</h3>
+          <p
+            className="aa-prose mt-2 text-sm leading-relaxed text-stone-300"
+            data-testid="cluster-honesty"
+          >
+            On this recorded set, all 68 labeled mistakes match &quot;spent more
+            energy than a cheaper best move.&quot; Other labels (missed finishing
+            blow, ignored incoming threat, over-defending) matched 0 times. Labels
+            describe what was measured—not why the model chose it.
+          </p>
+          <dl className="mt-4 divide-y divide-stone-500/40 text-sm">
+            {d.clusters.map((c) => (
+              <div
+                key={c.tag}
+                className="flex items-baseline justify-between gap-4 py-3"
+              >
+                <dt className="text-stone-300">{plainTag(c.tag)}</dt>
+                <dd className="shrink-0 text-lg font-semibold tabular-nums text-stone-100">
+                  {c.count}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
 
-      <div>
-        <h3 className="text-lg font-medium text-stone-100">
-          Stakes (miss score)
-        </h3>
-        <ul className="mt-2 space-y-1 text-sm text-stone-300">
-          {d.stakes.map((s) => (
-            <li key={s.id}>
-              {s.label}: {s.count}
-            </li>
-          ))}
-        </ul>
+        <div className="rounded-xl border aa-border bg-stone-900/40 p-5">
+          <h3 className="text-lg font-medium text-stone-100">
+            How costly the mistakes were
+          </h3>
+          <p className="mt-2 text-sm text-stone-400">
+            Recorded answers, grouped by points worse than the best move.
+          </p>
+          <dl className="mt-4 divide-y divide-stone-500/40 text-sm">
+            {d.stakes.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-baseline justify-between gap-4 py-3"
+              >
+                <dt className="text-stone-300">{stakeBandLabel(s.id)}</dt>
+                <dd className="shrink-0 text-lg font-semibold tabular-nums text-stone-100">
+                  {s.count}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
 
       <div>
@@ -80,8 +111,13 @@ export function DiagnosticsPanel({
                 insufficientEvidence: insuff
               });
               return (
-                <li key={`${h.policyKey}:${h.baselineKey}`}>
-                  <p data-testid="help-ranking-row">{text}</p>
+                <li
+                  key={`${h.policyKey}:${h.baselineKey}`}
+                  className="rounded-lg border aa-border bg-stone-900/40 p-4"
+                >
+                  <p className="aa-prose leading-relaxed" data-testid="help-ranking-row">
+                    {text}
+                  </p>
                 </li>
               );
             })}
@@ -97,11 +133,11 @@ export function DiagnosticsPanel({
           <p className="mt-2 text-sm text-stone-400">None.</p>
         ) : (
           <div
-            className="mt-2 text-sm text-stone-300"
+            className="aa-prose mt-3 space-y-3 rounded-xl border aa-border bg-stone-900/40 p-5 text-sm leading-relaxed text-stone-300"
             data-testid="lab-counterexample"
           >
             <p>
-              {plainPolicyLabel(d.counterexample.policyKey)} · miss score{" "}
+              {plainPolicyLabel(d.counterexample.policyKey)} · Points vs best{" "}
               {d.counterexample.regret}
             </p>
             <p>
@@ -121,13 +157,13 @@ export function DiagnosticsPanel({
 
       {published ? (
         <div
-          className="rounded border border-stone-700 bg-stone-900/40 p-4"
+          className="rounded-xl border aa-border bg-stone-900/40 p-5"
           data-testid="lab-vs-published"
         >
           <h3 className="text-lg font-medium text-stone-100">
-            vs published summary
+            Matches the published results
           </h3>
-          <ul className="mt-3 space-y-2 text-sm text-stone-300">
+          <ul className="mt-3 divide-y divide-stone-500/40 text-sm leading-relaxed text-stone-300">
             {Object.entries(published.optimalRateByPolicy)
               .slice(0, 6)
               .map(([key, row]) => {
@@ -135,8 +171,10 @@ export function DiagnosticsPanel({
                 const delta =
                   packRow === null ? null : packRow.rate - row.rate;
                 return (
-                  <li key={key}>
-                    {plainPolicyLabel(key)}: published best-move rate{" "}
+                  <li key={key} className="py-3">
+                    <span className="font-medium text-stone-100">
+                      {plainPolicyLabel(key)}
+                    </span>: published best-move rate{" "}
                     {(row.rate * 100).toFixed(1)}%
                     {delta !== null
                       ? ` · change ${(delta * 100).toFixed(1)} points`
@@ -152,7 +190,7 @@ export function DiagnosticsPanel({
         </div>
       ) : null}
 
-      <ul className="text-xs text-stone-400">
+      <ul className="aa-prose space-y-2 text-sm leading-relaxed text-stone-400">
         <li>
           Best move is measured against a fixed player plan — not a full-game
           equilibrium.

@@ -32,7 +32,7 @@ export function LiveOpponentPanel({
 
   return (
     <fieldset
-      className="mt-8 rounded border border-stone-700 px-4 py-3"
+      className="mt-8 rounded border aa-border px-4 py-3"
       data-testid="live-opponent-panel"
     >
       <legend className="px-1 text-sm text-stone-300">{TITLE}</legend>
@@ -74,7 +74,7 @@ export function LiveOpponentPanel({
               onChange={(e) =>
                 onConfigChange({ ...config, apiKey: e.target.value })
               }
-              className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+              className="mt-2 min-h-11 w-full rounded border aa-border bg-stone-900 px-3 py-2 text-stone-100"
               data-testid="live-api-key"
             />
             <p className="mt-2 text-sm text-stone-400" role="note">
@@ -99,7 +99,7 @@ export function LiveOpponentPanel({
                   modelId: e.target.value as LiveModelId
                 })
               }
-              className="mt-2 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+              className="mt-2 min-h-11 w-full rounded border aa-border bg-stone-900 px-3 py-2 text-stone-100"
               data-testid="live-model-select"
             >
               {LIVE_MODEL_IDS.map((id) => (

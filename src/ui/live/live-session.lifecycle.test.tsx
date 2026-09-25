@@ -87,7 +87,7 @@ async function enableLiveAndStart(secret: string) {
   fireEvent.change(screen.getByLabelText("Display name"), {
     target: { value: "LIVE-UNIT" }
   });
-  fireEvent.change(screen.getByLabelText("Core Identity"), {
+  fireEvent.change(screen.getByLabelText("Robot identity"), {
     target: { value: "Steady Vanguard" }
   });
   fireEvent.change(screen.getByLabelText("Memory"), {
@@ -200,6 +200,12 @@ describe("live session lifecycle (D-053)", () => {
     assertKeyAbsent(SECRET);
 
     liveCalls.n = 0;
+    {
+      const trigger = screen.getByTestId("saved-game-trigger");
+      if (trigger.getAttribute("aria-expanded") !== "true") {
+        fireEvent.click(trigger);
+      }
+    }
     fireEvent.click(screen.getByTestId("load-slot"));
     await waitFor(() => {
       expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
@@ -231,6 +237,7 @@ describe("live session lifecycle (D-053)", () => {
     await waitFor(() => expect(liveCalls.n).toBeGreaterThan(0));
     assertKeyAbsent(SECRET);
 
+    fireEvent.click(screen.getByTestId("saved-game-trigger"));
     const saveBtn = screen
       .getAllByTestId("save-slot")
       .find((el) => !(el as HTMLButtonElement).disabled);

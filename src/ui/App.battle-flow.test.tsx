@@ -19,6 +19,13 @@ import {
 } from "./persist/save-slot";
 import type { PlayTurnFn, UiTurnResult } from "./store/battle-view";
 
+function openSavedGame() {
+  const trigger = screen.getByTestId("saved-game-trigger");
+  if (trigger.getAttribute("aria-expanded") !== "true") {
+    fireEvent.click(trigger);
+  }
+}
+
 afterEach(() => {
   cleanup();
   window.localStorage.clear();
@@ -33,7 +40,7 @@ function fillValidBuilder() {
   fireEvent.change(screen.getByLabelText("Display name"), {
     target: { value: "FLOW-UNIT" }
   });
-  fireEvent.change(screen.getByLabelText("Core Identity"), {
+  fireEvent.change(screen.getByLabelText("Robot identity"), {
     target: { value: "Steady Vanguard" }
   });
   fireEvent.change(screen.getByLabelText("Memory"), {
@@ -183,6 +190,7 @@ describe("App battle flow", () => {
     fireEvent.click(screen.getByTestId("cta-quick-battle"));
     expect(screen.getByTestId("arena-view")).toBeInTheDocument();
 
+    openSavedGame();
     fireEvent.click(screen.getByTestId("save-slot"));
     const raw = window.localStorage.getItem(SAVE_SLOT_KEY);
     expect(raw).toBeTruthy();
@@ -191,6 +199,7 @@ describe("App battle flow", () => {
     expect(slot.runtime).not.toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /^Leave$/i }));
+    openSavedGame();
     fireEvent.click(screen.getByTestId("load-slot"));
     expect(screen.getByTestId("arena-view")).toBeInTheDocument();
     expect(screen.queryByTestId("watch-battle-view")).toBeNull();
@@ -213,6 +222,7 @@ describe("App battle flow", () => {
     );
 
     render(<App />);
+    openSavedGame();
     fireEvent.click(screen.getByTestId("load-slot"));
     await waitFor(() => {
       expect(screen.getByTestId("watch-battle-view")).toBeInTheDocument();
@@ -244,6 +254,7 @@ describe("App battle flow", () => {
     fireEvent.click(screen.getByTestId("cta-quick-battle"));
     expect(screen.getByTestId("arena-view")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("nav-build"));
+    openSavedGame();
     fireEvent.click(screen.getByTestId("save-slot"));
     const loaded = loadSlot();
     expect(loaded.ok).toBe(true);
@@ -263,6 +274,7 @@ describe("App battle flow", () => {
       screen.getByRole("button", { name: /Continue to battle setup/i })
     );
     expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
+    openSavedGame();
     fireEvent.click(screen.getByTestId("save-slot"));
     const loaded = loadSlot();
     expect(loaded.ok).toBe(true);
@@ -274,6 +286,7 @@ describe("App battle flow", () => {
   it("save from battle persists runtime and mode free", () => {
     render(<App />);
     fireEvent.click(screen.getByTestId("cta-quick-battle"));
+    openSavedGame();
     fireEvent.click(screen.getByTestId("save-slot"));
     const loaded = loadSlot();
     expect(loaded.ok).toBe(true);
@@ -290,6 +303,7 @@ describe("App battle flow", () => {
     await waitFor(() => {
       expect(screen.getByTestId("watch-battle-view")).toBeInTheDocument();
     });
+    openSavedGame();
     fireEvent.click(screen.getByTestId("save-slot"));
     const loaded = loadSlot();
     expect(loaded.ok).toBe(true);
@@ -303,6 +317,7 @@ describe("App battle flow", () => {
   it("save control disabled on home with plain title reason", () => {
     render(<App />);
     expect(screen.getByTestId("landing-view")).toBeInTheDocument();
+    openSavedGame();
     const save = screen.getByTestId("save-slot") as HTMLButtonElement;
     expect(save.disabled).toBe(true);
     expect(save.title).toMatch(/Save is available during Build/i);
@@ -314,6 +329,7 @@ describe("App battle flow", () => {
     await waitFor(() => {
       expect(screen.getByTestId("decision-lab")).toBeInTheDocument();
     });
+    openSavedGame();
     const save = screen.getByTestId("save-slot") as HTMLButtonElement;
     expect(save.disabled).toBe(true);
     expect(save.title).toMatch(/Save is available during Build/i);

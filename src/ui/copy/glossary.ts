@@ -22,13 +22,13 @@ export const GLOSSARY: Record<GlossaryId, GlossaryEntry> = {
     id: "missScore",
     term: "Points vs best",
     short: "How many points worse than the best move in this situation",
-    long: "Lab only; measured against a fixed player plan—not a whole-game claim."
+    long: "Beat the AI only; measured against a fixed player plan—not a whole-game claim."
   },
   bestMove: {
     id: "bestMove",
     term: "Best move",
     short: "Highest-scoring legal move in that situation",
-    long: "Lab/Challenge only; free play has no best-move judge."
+    long: "Beat the AI only; free play has no best-move judge."
   },
   recordedAi: {
     id: "recordedAi",

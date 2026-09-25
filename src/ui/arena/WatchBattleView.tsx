@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { HONESTY_ONE_LINE } from "../HonestyStrip";
+import { HonestyLine } from "../components/HonestyLine";
+import { Button } from "../components/Button";
+import { Card } from "../components/Card";
+import { variantDisplayName } from "../copy/display-labels";
 import rawPack from "./pack/arena-replay.v1.json";
 import {
   assertArenaReplayPackV1,
@@ -27,7 +30,7 @@ function providerLabel(provider: string): string {
 }
 
 function variantPromptLabel(variant: "base" | "grounded"): string {
-  return variant === "grounded" ? "facts prompt" : "basic prompt";
+  return variantDisplayName(variant);
 }
 
 export function matchSelectLabel(
@@ -84,13 +87,9 @@ export function WatchBattleView({
           Watch a recorded AI battle
         </h1>
         <p className="mt-2 text-stone-400">No recorded matches available.</p>
-        <button
-          type="button"
-          className="mt-4 min-h-11 rounded border border-stone-600 px-4 py-2"
-          onClick={onLeave}
-        >
+        <Button variant="secondary" className="mt-4" onClick={onLeave}>
           Home
-        </button>
+        </Button>
       </section>
     );
   }
@@ -142,7 +141,7 @@ export function WatchBattleView({
     .reverse();
 
   return (
-    <section aria-labelledby="watch-heading" data-testid="watch-battle-view">
+    <section aria-labelledby="watch-heading" data-testid="watch-battle-view" className="pb-24">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <h1
           id="watch-heading"
@@ -156,19 +155,18 @@ export function WatchBattleView({
           {finished ? " · complete" : null}
         </p>
       </div>
-
-      <p
-        className="mt-2 text-sm text-stone-400"
-        role="status"
-        data-testid="watch-honesty-line"
-      >
-        {HONESTY_ONE_LINE}
+      <p className="mt-2 text-sm text-stone-400" data-testid="watch-gemini-note">
+        These recordings use Gemini (6 fights).
       </p>
+
+      <div className="mt-2" data-testid="watch-honesty-line">
+        <HonestyLine honestyMode="recorded" />
+      </div>
 
       <label className="mt-6 block text-sm text-stone-400">
         Match
         <select
-          className="mt-1 min-h-11 w-full rounded border border-stone-700 bg-stone-900 px-3 py-2 text-stone-100"
+          className="mt-1 min-h-11 w-full rounded border aa-border bg-stone-900 px-3 py-2 text-stone-100"
           value={matchId}
           onChange={(e) => {
             setMatchId(e.target.value);
@@ -184,8 +182,8 @@ export function WatchBattleView({
         </select>
       </label>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
-        <div>
+      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        <Card className="p-3">
           <RobotFigure side="player" />
           <CombatantBars
             title="Player (recorded plan)"
@@ -196,8 +194,8 @@ export function WatchBattleView({
             maxEnergy={player.maxEnergy}
             defense={player.defense}
           />
-        </div>
-        <div>
+        </Card>
+        <Card className="p-3">
           <RobotFigure side="cpu" />
           <CombatantBars
             title="Recorded AI"
@@ -208,7 +206,7 @@ export function WatchBattleView({
             maxEnergy={cpu.maxEnergy}
             defense={cpu.defense}
           />
-        </div>
+        </Card>
       </div>
 
       {lastTurn ? (
@@ -231,14 +229,50 @@ export function WatchBattleView({
         <p className="mt-6 text-sm text-stone-400">Start of match.</p>
       )}
 
+      <div className="sticky bottom-0 z-10 mt-6 flex w-full flex-wrap items-center gap-3 border-t aa-border bg-stone-950/95 py-3">
+        <Button
+          variant="secondary"
+          disabled={clamped === 0}
+          onClick={() => setFrameIndex((i) => Math.max(0, i - 1))}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="primary"
+          disabled={clamped >= maxFrame}
+          onClick={() => setFrameIndex((i) => Math.min(maxFrame, i + 1))}
+          data-testid="watch-next"
+        >
+          Next turn
+        </Button>
+        <Button variant="secondary" onClick={() => setFrameIndex(0)}>
+          Reset
+        </Button>
+        <Button
+          variant="ghost"
+          className="ml-auto"
+          onClick={onLeave}
+          data-testid="watch-leave"
+        >
+          Leave
+        </Button>
+      </div>
+
       {storyLog.length > 0 ? (
-        <div className="mt-6" data-testid="watch-story-log">
-          <h2 className="text-sm font-medium text-stone-300">Battle story</h2>
+        <details className="mt-6" data-testid="watch-story-log" open>
+          <summary className="cursor-pointer text-sm font-medium text-stone-300">
+            Battle story
+          </summary>
           <ol className="mt-3 space-y-3 text-sm text-stone-300">
             {storyLog.map((entry) => (
               <li
                 key={entry.turn}
-                className="rounded border border-stone-800 px-3 py-2"
+                className={
+                  entry.turn === clamped
+                    ? "rounded border border-amber-700 bg-amber-950/30 px-3 py-2"
+                    : "rounded border aa-border px-3 py-2"
+                }
+                data-current={entry.turn === clamped ? "true" : "false"}
               >
                 <p className="font-medium text-stone-200">Turn {entry.turn}</p>
                 <ul className="mt-1 space-y-1 text-stone-400">
@@ -249,7 +283,7 @@ export function WatchBattleView({
               </li>
             ))}
           </ol>
-        </div>
+        </details>
       ) : null}
 
       {finished ? (
@@ -257,40 +291,6 @@ export function WatchBattleView({
           Outcome: {formatOutcome(match.outcome.result)}
         </p>
       ) : null}
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2 disabled:opacity-40"
-          disabled={clamped === 0}
-          onClick={() => setFrameIndex((i) => Math.max(0, i - 1))}
-        >
-          Previous
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded bg-amber-600 px-4 py-2 font-medium text-stone-950 hover:bg-amber-500 disabled:opacity-40"
-          disabled={clamped >= maxFrame}
-          onClick={() => setFrameIndex((i) => Math.min(maxFrame, i + 1))}
-          data-testid="watch-next"
-        >
-          Next turn
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2"
-          onClick={() => setFrameIndex(0)}
-        >
-          Reset
-        </button>
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2"
-          onClick={onLeave}
-        >
-          Leave
-        </button>
-      </div>
     </section>
   );
 }

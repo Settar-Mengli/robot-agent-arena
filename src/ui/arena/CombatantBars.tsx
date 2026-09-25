@@ -50,7 +50,7 @@ export function CombatantBars(props: CombatantBarsProps): React.JSX.Element {
       : Math.max(0, Math.min(100, (props.energy / props.maxEnergy) * 100));
 
   return (
-    <div className="rounded border border-stone-800 bg-stone-900/50 px-4 py-4">
+    <div className="px-1 py-1">
       <p className="text-xs tracking-wide text-stone-400 uppercase">
         {props.title}
       </p>

@@ -52,6 +52,7 @@ describe("forbidden-default-path matcher", () => {
       "Your miss score: 0.00",
       "computer foe",
       "Seed",
+      "seed",
       "schema assert failed",
       "quota",
       "serialize",
@@ -75,17 +76,55 @@ describe("App default path", () => {
     );
   });
 
-  it("HonestyStrip full on home; compact More elsewhere", async () => {
+  it("HonestyStrip compact on home; Arena More shows CPU points", async () => {
     render(<App />);
-    expect(screen.getByTestId("honesty-strip")).toBeInTheDocument();
+    expect(screen.getByTestId("honesty-strip-compact")).toBeInTheDocument();
+    expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
+      /Watch, Beat the AI, and the Leaderboard use recorded answers/
+    );
 
     fireEvent.click(screen.getByTestId("cta-quick-battle"));
     await waitFor(() => {
       expect(screen.getByTestId("arena-view")).toBeInTheDocument();
     });
-    expect(screen.getByTestId("honesty-strip-compact")).toBeInTheDocument();
+    expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
+      /simple computer opponent/
+    );
     fireEvent.click(screen.getByText("More"));
-    expect(screen.getByText(/Small samples cannot rank models/i)).toBeTruthy();
+    expect(
+      screen.getByText(/The simple computer follows fixed rules/i)
+    ).toBeTruthy();
+  });
+
+  it("cta-live-ai opens setup with live panel revealed and live off", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByTestId("cta-live-ai"));
+    await waitFor(() => {
+      expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
+    });
+    expect(await screen.findByTestId("live-opponent-panel")).toBeInTheDocument();
+    const toggle = screen.getByTestId("live-opponent-toggle") as HTMLInputElement;
+    expect(toggle.checked).toBe(false);
+    expect(screen.queryByTestId("live-api-key")).toBeNull();
+    expect(globalThis.localStorage?.getItem("OPENROUTER_API_KEY")).toBeNull();
+    expect(globalThis.sessionStorage?.length ?? 0).toBe(0);
+    expect(window.location.href).not.toMatch(/sk-/);
+  });
+
+  it("enabling live on setup shows an empty key field", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByTestId("cta-live-ai"));
+    await waitFor(() => {
+      expect(screen.getByTestId("battle-setup")).toBeInTheDocument();
+    });
+    await screen.findByTestId("live-opponent-panel");
+    const toggle = screen.getByTestId("live-opponent-toggle") as HTMLInputElement;
+    expect(toggle.checked).toBe(false);
+    fireEvent.click(toggle);
+    expect(toggle.checked).toBe(true);
+    expect((screen.getByTestId("live-api-key") as HTMLInputElement).value).toBe(
+      ""
+    );
   });
 
   it(
@@ -168,7 +207,7 @@ describe("App default path", () => {
     fireEvent.change(screen.getByLabelText("Display name"), {
       target: { value: "LAZY-LIVE" }
     });
-    fireEvent.change(screen.getByLabelText("Core Identity"), {
+    fireEvent.change(screen.getByLabelText("Robot identity"), {
       target: { value: "Steady Vanguard" }
     });
     fireEvent.change(screen.getByLabelText("Memory"), {
@@ -240,11 +279,19 @@ describe("FirstVisitTour", () => {
 
 describe("Clear save + mobile menu", () => {
   it("Clear-save confirm flow; disabled when empty", () => {
+    function openSavedGame() {
+      const trigger = screen.getByTestId("saved-game-trigger");
+      if (trigger.getAttribute("aria-expanded") !== "true") {
+        fireEvent.click(trigger);
+      }
+    }
     render(<App />);
+    openSavedGame();
     const clear = screen.getByTestId("clear-slot") as HTMLButtonElement;
     expect(clear.disabled).toBe(true);
 
     fireEvent.click(screen.getByTestId("cta-quick-battle"));
+    openSavedGame();
     fireEvent.click(screen.getByTestId("save-slot"));
     expect(
       (screen.getByTestId("clear-slot") as HTMLButtonElement).disabled
@@ -282,6 +329,7 @@ describe("Clear save + mobile menu", () => {
     const nav = screen.getByTestId("primary-nav");
     expect(nav.contains(screen.getByTestId("save-controls"))).toBe(true);
     fireEvent.click(screen.getByTestId("nav-menu"));
+    fireEvent.click(screen.getByTestId("saved-game-trigger"));
     expect(screen.getByTestId("save-slot")).toBeInTheDocument();
     expect(screen.getByTestId("load-slot")).toBeInTheDocument();
   });

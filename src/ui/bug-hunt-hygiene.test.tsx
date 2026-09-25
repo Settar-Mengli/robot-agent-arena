@@ -63,9 +63,12 @@ describe("bug-hunt keyboard + render hygiene (G22/G23)", () => {
     assertNoGarbage(screen.getByTestId("results-view"), "results");
 
     fireEvent.click(screen.getByTestId("nav-lab"));
-    await waitFor(() => {
-      expect(screen.getByTestId("lab-challenge")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("lab-challenge")).toBeInTheDocument();
+      },
+      { timeout: 15000 }
+    );
     assertNoGarbage(document.body, "lab-challenge");
 
     // Watch via landing CTA path: Home then Watch

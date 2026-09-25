@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { assertDecisionLabPackV3 } from "../../decision-lab";
 import { findForbiddenTechnicalText } from "../copy/forbidden-default-path";
@@ -25,6 +25,104 @@ describe("ChallengeView", () => {
     expect(screen.getByTestId("challenge-opponent-side")).toHaveTextContent(
       /Opponent \(follows a fixed plan\)/
     );
+  });
+
+  it("shows recorded costs without changing move order or affordability behavior", () => {
+    const current = pack.cases.find(
+      (c) => c.equippedSkillIds.length > 0 && Object.values(c.policies).some(
+        (p) => p.status === "recorded" && p.source === "llm"
+      )
+    )!;
+    const firstId = current.equippedSkillIds[0]!;
+    const recordedPack = {
+      ...pack,
+      cases: [{
+        ...current,
+        affordability: [
+          { skillId: firstId, energyCost: 99, affordable: false },
+          ...current.affordability.filter((a) => a.skillId !== firstId)
+        ]
+      }]
+    };
+    render(<ChallengeView pack={recordedPack} />);
+    const radios = screen.getAllByRole("radio") as HTMLInputElement[];
+    expect(radios.map((radio) => radio.value)).toEqual(current.equippedSkillIds);
+    const firstCard = radios[0]!.closest("label")!;
+    expect(within(firstCard).getByText("Cost: 99 energy")).toBeInTheDocument();
+    expect(within(firstCard).getByText("Not enough energy")).toBeInTheDocument();
+    expect(radios[0]).not.toBeDisabled();
+    fireEvent.click(radios[0]!);
+    expect(radios[0]).toBeChecked();
+    expect(screen.getByTestId("challenge-show-answer")).toBeEnabled();
+    expect(screen.queryByTestId("challenge-reveal")).not.toBeInTheDocument();
+  });
+
+  it("keeps the answer hidden until reveal, then locks the pick until the next situation", () => {
+    render(<ChallengeView pack={pack} />);
+    const radios = screen.getAllByRole("radio");
+    const showAnswer = screen.getByTestId("challenge-show-answer");
+    expect(radios.length).toBeGreaterThan(1);
+    expect(screen.queryByTestId("challenge-reveal")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("challenge-ai-group")).not.toBeInTheDocument();
+    fireEvent.click(showAnswer);
+    expect(screen.queryByTestId("challenge-reveal")).not.toBeInTheDocument();
+
+    fireEvent.click(radios[0]!);
+    expect(screen.queryByTestId("challenge-reveal")).not.toBeInTheDocument();
+    expect(screen.getByTestId("challenge-session")).toHaveTextContent("No answers yet.");
+
+    fireEvent.click(showAnswer);
+    expect(screen.getByTestId("challenge-reveal")).toBeInTheDocument();
+    expect(showAnswer).toBeDisabled();
+    for (const radio of radios) expect(radio).toBeDisabled();
+    fireEvent.click(radios[1]!);
+    expect(radios[0]).toBeChecked();
+    expect(radios[1]).not.toBeChecked();
+    fireEvent.click(showAnswer);
+    expect(screen.getByTestId("challenge-session")).toHaveTextContent("You: 1 answers");
+
+    fireEvent.click(screen.getByRole("button", { name: "Next situation" }));
+    expect(screen.queryByTestId("challenge-reveal")).not.toBeInTheDocument();
+    expect(showAnswer).toBeDisabled();
+    for (const radio of screen.getAllByRole("radio")) {
+      expect(radio).not.toBeDisabled();
+      expect(radio).not.toBeChecked();
+    }
+  });
+
+  it("shows the CPU observation as your resources and the player as the opponent", () => {
+    const current = pack.cases.find(
+      (c) => c.equippedSkillIds.length > 0 && Object.values(c.policies).some(
+        (p) => p.status === "recorded" && p.source === "llm"
+      )
+    )!;
+    const resourcePack = {
+      ...pack,
+      cases: [{
+        ...current,
+        observation: {
+          cpu: { ...current.observation.cpu, health: 7, energy: 4, defense: 2 },
+          player: { ...current.observation.player, health: 21, energy: 3, defense: 5 }
+        }
+      }]
+    };
+    render(<ChallengeView pack={resourcePack} />);
+    const yours = within(screen.getByTestId("challenge-you-side"));
+    const opponent = within(screen.getByTestId("challenge-opponent-side"));
+    expect(yours.getByText("HP").nextElementSibling).toHaveTextContent(
+      `7/${current.observation.cpu.maxHealth}`
+    );
+    expect(yours.getByText("Energy").nextElementSibling).toHaveTextContent(
+      `4/${current.observation.cpu.maxEnergy}`
+    );
+    expect(yours.getByText("Defense").nextElementSibling).toHaveTextContent("2");
+    expect(opponent.getByText("HP").nextElementSibling).toHaveTextContent(
+      `21/${current.observation.player.maxHealth}`
+    );
+    expect(opponent.getByText("Energy").nextElementSibling).toHaveTextContent(
+      `3/${current.observation.player.maxEnergy}`
+    );
+    expect(opponent.getByText("Defense").nextElementSibling).toHaveTextContent("5");
   });
 
   it("Show answer is enabled after a pick", () => {

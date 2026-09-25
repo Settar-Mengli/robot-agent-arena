@@ -36,9 +36,15 @@ function blendOver(fg: string, bg: string, t: number): string {
 }
 
 describe("M0 contrast pairs (default path)", () => {
-  const bg = "#0c0a09"; // stone-950
-  const bgElevated = "#1c1917"; // stone-900
-  const stone400 = "#a8a29e";
+  const bg = "#0c0a09"; // stone-950 / --aa-bg
+  const bgElevated = "#1c1917"; // stone-900 / --aa-surface
+  const stone400 = "#a8a29e"; // --aa-muted
+  const fg = "#f5f5f4"; // --aa-fg
+  const accent = "#d97706"; // --aa-accent
+  const accentFg = "#0c0a09"; // --aa-accent-fg
+  const danger = "#f87171"; // --aa-danger
+  const ok = "#34d399"; // --aa-ok
+  const border = "#78716c"; // --aa-border (WCAG 3:1 large chrome)
 
   it("lists changed pairs at WCAG thresholds", () => {
     const pairs: Array<{
@@ -49,6 +55,62 @@ describe("M0 contrast pairs (default path)", () => {
       min: number;
       ratio: number;
     }> = [
+      {
+        name: "token aa-fg on aa-bg",
+        fg,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-muted on aa-bg",
+        fg: stone400,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-muted on aa-surface",
+        fg: stone400,
+        bg: bgElevated,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-accent-fg on aa-accent",
+        fg: accentFg,
+        bg: accent,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-danger on aa-bg",
+        fg: danger,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-ok on aa-bg",
+        fg: ok,
+        bg,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-fg on aa-surface",
+        fg,
+        bg: bgElevated,
+        min: 4.5,
+        ratio: 0
+      },
+      {
+        name: "token aa-border on aa-bg (UI chrome, large)",
+        fg: border,
+        bg,
+        min: 3,
+        ratio: 0
+      },
       {
         name: "unaffordable hint stone-400 on stone-950",
         fg: stone400,
@@ -196,12 +258,51 @@ describe("M0 contrast pairs (default path)", () => {
     expect(ratio).toBeLessThan(4.5);
   });
 
-  it("ChallengeView disabled Show answer has no opacity-50 on the text class", async () => {
+  it("ChallengeView disabled Show answer is muted solid without opacity-50 fade", async () => {
     const fs = await import("node:fs");
     const src = fs.readFileSync("src/ui/lab/ChallengeView.tsx", "utf8");
+    expect(src).toMatch(/challenge-show-answer/);
+    expect(src).toMatch(/Pick a move first/);
+    expect(src).toMatch(/bg-stone-800 text-stone-200/);
     expect(src).not.toMatch(
-      /challenge-show-answer[\s\S]{0,400}opacity-50/
+      /challenge-show-answer[\s\S]{0,200}opacity-50/
     );
-    expect(src).toMatch(/cursor-not-allowed[\s\S]{0,80}text-stone-400/);
+  });
+
+  it("UI chrome has no border-stone-600/700/800 classes", async () => {
+    const { readdir, readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    async function walk(dir: string): Promise<string[]> {
+      const ents = await readdir(dir, { withFileTypes: true });
+      const out: string[] = [];
+      for (const e of ents) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) out.push(...(await walk(p)));
+        else if (/\.(tsx|css)$/.test(e.name) && !e.name.includes(".test."))
+          out.push(p);
+      }
+      return out;
+    }
+    const files = await walk("src/ui");
+    const hits: string[] = [];
+    for (const f of files) {
+      const text = await readFile(f, "utf8");
+      for (const line of text.split("\n")) {
+        if (
+          text.includes("border-stone-600") ||
+          text.includes("border-stone-700") ||
+          text.includes("border-stone-800")
+        ) {
+          if (
+            line.includes("border-stone-600") ||
+            line.includes("border-stone-700") ||
+            line.includes("border-stone-800")
+          ) {
+            hits.push(`${f}: ${line.trim().slice(0, 120)}`);
+          }
+        }
+      }
+    }
+    expect(hits, hits.join("\n")).toEqual([]);
   });
 });

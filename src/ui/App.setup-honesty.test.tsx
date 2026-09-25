@@ -10,8 +10,10 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { App } from "./App";
 import {
-  HONESTY_ONE_LINE,
-  LIVE_HONESTY_ONE_LINE
+  CPU_HONESTY_ONE_LINE,
+  HOME_HONESTY_ONE_LINE,
+  LIVE_HONESTY_ONE_LINE,
+  POINTS
 } from "./HonestyStrip";
 import { TOUR_KEY } from "./tour/FirstVisitTour";
 
@@ -29,7 +31,7 @@ function fillValidBuilder() {
   fireEvent.change(screen.getByLabelText("Display name"), {
     target: { value: "FLOW-UNIT" }
   });
-  fireEvent.change(screen.getByLabelText("Core Identity"), {
+  fireEvent.change(screen.getByLabelText("Robot identity"), {
     target: { value: "Steady Vanguard" }
   });
   fireEvent.change(screen.getByLabelText("Memory"), {
@@ -84,25 +86,32 @@ describe("BattleSetup honesty vs live intent", () => {
       LIVE_HONESTY_ONE_LINE
     );
     expect(text).not.toMatch(/Recorded examples, not live AI/);
-    expect(text).not.toMatch(/Opponent: simple computer \(not an AI\)/);
+    expect(text).not.toMatch(/You're playing a simple computer/);
     expect(screen.getByTestId("setup-opponent-blurb").textContent).toMatch(
       /Opponent: live AI/
     );
+    expect(screen.getByTestId("setup-opponent-blurb").textContent).not.toMatch(
+      /seed/i
+    );
   });
 
-  it("live disabled: recorded strip and CPU copy", async () => {
+  it("live disabled: CPU honesty, not recorded strip", async () => {
     render(<App />);
     await goToSetup();
     const setup = screen.getByTestId("battle-setup");
     expect(within(setup).getByTestId("honesty-one-line")).toHaveTextContent(
-      HONESTY_ONE_LINE
+      CPU_HONESTY_ONE_LINE
     );
+    expect(setup.textContent ?? "").not.toMatch(/Recorded examples, not live AI/);
     expect(screen.getByTestId("setup-opponent-blurb").textContent).toMatch(
-      /Opponent: simple computer \(not an AI\)/
+      /Choose an opponent, then start the battle/
+    );
+    expect(screen.getByTestId("setup-opponent-blurb").textContent).not.toMatch(
+      /seed/i
     );
   });
 
-  it("live toggle on then off restores CPU copy", async () => {
+  it("live toggle on then off restores CPU honesty", async () => {
     render(<App />);
     await goToSetup();
     fireEvent.click(screen.getByTestId("reveal-live-opponent"));
@@ -119,11 +128,22 @@ describe("BattleSetup honesty vs live intent", () => {
     fireEvent.click(within(panel).getByTestId("live-opponent-toggle"));
     await waitFor(() => {
       expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
-        HONESTY_ONE_LINE
+        CPU_HONESTY_ONE_LINE
       );
     });
     expect(screen.getByTestId("setup-opponent-blurb").textContent).toMatch(
-      /Opponent: simple computer \(not an AI\)/
+      /Choose an opponent, then start the battle/
     );
+  });
+
+  it("Home uses home honesty one-liner and recorded More points", () => {
+    render(<App />);
+    expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
+      HOME_HONESTY_ONE_LINE
+    );
+    fireEvent.click(screen.getByText("More"));
+    for (const p of POINTS) {
+      expect(screen.getByText(p)).toBeTruthy();
+    }
   });
 });

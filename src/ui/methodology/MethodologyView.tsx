@@ -1,4 +1,6 @@
 import summary from "../data/batch4.robustness.summary.json";
+import { Button } from "../components/Button";
+import { HonestyLine } from "../components/HonestyLine";
 
 export type MethodologyViewProps = {
   onHome?: () => void;
@@ -16,7 +18,7 @@ export function MethodologyView({
     <section
       aria-labelledby="methodology-heading"
       data-testid="methodology-view"
-      className="space-y-8"
+      className="aa-prose space-y-8"
     >
       <div data-testid="methodology-default">
         <h1
@@ -26,86 +28,54 @@ export function MethodologyView({
         >
           How we measure decisions
         </h1>
-        <p className="mt-2 text-stone-400">
-          How Agent Arena measures decisions from recorded evidence — and what
-          live play is not.
+        <p className="mt-2 leading-relaxed text-stone-400">
+          How we score AI decisions from recorded answers, and how live play
+          differs.
         </p>
+        <div className="mt-3">
+          <HonestyLine honestyMode="recorded" />
+        </div>
 
         <section
-          aria-labelledby="method-findings"
+          aria-labelledby="method-tested"
           data-testid="batch4-findings"
-          className="mt-8"
+          className="mt-8 rounded-xl border aa-border bg-stone-900/40 p-5 sm:p-6"
         >
           <h2
-            id="method-findings"
+            id="method-tested"
             className="text-lg font-medium text-stone-200"
           >
-            Robustness results (this robot battle)
+            What we tested
           </h2>
-          <p className="mt-2 text-stone-300">
+          <p className="mt-2 leading-relaxed text-stone-300">
             No measurable effect: rewording, a misleading rumor, and extra facts
             did not change these models&apos; choices on this test set.
           </p>
-          <p className="mt-2 text-stone-300">
+          <p className="mt-2 leading-relaxed text-stone-300">
             The same question asked twice changed 1 of 35 answers for Groq —
             small wobble (1 of 35), from repeat runs or provider changes over
             time.
           </p>
           <p className="mt-2 text-stone-400 text-sm">
-            Scoped to this robot battle, this test set, and these two models —
-            not a claim about AI systems in general.
+            Scoped to this robot battle, the hard test set (35 situations) and
+            small check set, and these two models — not a claim about AI systems
+            in general.
           </p>
         </section>
 
-        <section aria-labelledby="method-measured" className="mt-8">
+        <section aria-labelledby="method-scoring" className="mt-8">
           <h2
-            id="method-measured"
+            id="method-scoring"
             className="text-lg font-medium text-stone-200"
           >
-            What we measure
+            How scoring works
           </h2>
-          <p className="mt-2 text-stone-400">
-            On fixed battle moments, we record which skill an agent chooses and
-            score it against a known best move. Main comparisons use paired
-            score differences with a confidence interval — not a live chat
-            scoreboard.
-          </p>
-        </section>
-
-        <section aria-labelledby="method-best" className="mt-8">
-          <h2 id="method-best" className="text-lg font-medium text-stone-200">
-            Best-move reference
-          </h2>
-          <p className="mt-2 text-stone-400">
-            Each snapshot has a fixed ranking of legal moves. &quot;Best
-            move&quot; means best against that fixed player plan — not a claim
-            about all possible games.
-          </p>
-        </section>
-
-        <section aria-labelledby="method-suites" className="mt-8">
-          <h2 id="method-suites" className="text-lg font-medium text-stone-200">
-            Test sets
-          </h2>
-          <p className="mt-2 text-stone-400">
-            Primary evidence uses a held-out adversarial test set large enough
-            for the evidence gate. A smaller secondary arm is always labeled not
-            enough evidence. Test sets are never mixed when ranking or grouping
-            models.
-          </p>
-        </section>
-
-        <section aria-labelledby="method-metrics" className="mt-8">
-          <h2
-            id="method-metrics"
-            className="text-lg font-medium text-stone-200"
-          >
-            Metrics
-          </h2>
-          <p className="mt-2 text-stone-400">
-            Decision claims use average score change with a 95% confidence
-            interval. Leaderboard groupings use a separate display interval —
-            they are not the primary decision rule.
+          <p className="mt-2 leading-relaxed text-stone-400">
+            On fixed battle situations, we record which move an agent chooses
+            and score it against a known best move versus a fixed player plan.
+            We report points worse than the best move. The leaderboard shows
+            bands of uncertainty from sample size — overlapping bands are not a
+            ranking.
           </p>
         </section>
 
@@ -116,26 +86,27 @@ export function MethodologyView({
           >
             Recorded vs live
           </h2>
-          <p className="mt-2 text-stone-400">
-            Watch and Lab show committed, replayable recordings. Opt-in live play
-            (bring your own key) is entertainment only: not recorded evidence,
-            not on the leaderboard, and answers can change.
+          <p className="mt-2 leading-relaxed text-stone-400">
+            Watch, Beat the AI, and the Leaderboard use recorded answers. The
+            Arena can also play a live AI with your own OpenRouter key: good for
+            trying it yourself, but its answers aren&apos;t recorded evidence and
+            can vary.
           </p>
         </section>
 
         <section aria-labelledby="method-limits" className="mt-8">
           <h2 id="method-limits" className="text-lg font-medium text-stone-200">
-            Limitations
+            Limits
           </h2>
-          <ul className="mt-2 list-disc space-y-2 pl-5 text-stone-400">
+          <ul className="mt-3 list-disc space-y-3 pl-5 leading-relaxed text-stone-400">
             <li>
-              Most situations in this suite offer two legal moves, so there is
-              little room for any manipulation to change a choice.
+              Most situations in this test set offer two legal moves, so there
+              is little room for any wording change to flip a choice.
             </li>
             <li>
               Answers were recorded with no random sampling (fixed decoding).
             </li>
-            <li>Evidence comes from a single test suite.</li>
+            <li>Evidence comes from a single primary test set.</li>
             <li>
               We do not correct for looking at many comparisons at once.
             </li>
@@ -148,22 +119,22 @@ export function MethodologyView({
               plain and fully-informed prompts already matched.
             </li>
             <li>
-              Groq&apos;s base answers were recorded in Batch 2; the new
-              versions were recorded later. The 1 of 35 difference may reflect
-              changes on the provider&apos;s side over time, not only
-              same-session wobble.
+              Groq&apos;s base answers were recorded earlier than some retests.
+              The 1 of 35 difference may reflect changes on the provider&apos;s
+              side over time, not only same-session wobble.
             </li>
+            <li>A smaller 13-situation check set is labeled not enough evidence for ranking.</li>
             <li>Window 3 (13-situation set) was not recorded.</li>
           </ul>
         </section>
       </div>
 
-      <details className="rounded border border-stone-800 px-4 py-3 text-sm text-stone-400">
+      <details className="rounded-xl border aa-border bg-stone-900/40 px-5 py-4 text-sm leading-relaxed text-stone-400">
         <summary className="cursor-pointer text-stone-300">Advanced</summary>
         <div className="mt-3 space-y-3" data-testid="methodology-advanced">
           <p>
             Pre-registration (Batch 4):{" "}
-            <span className="font-mono text-stone-300">
+            <span className="break-words font-mono text-stone-300">
               docs/preregistration-batch4.md
             </span>
           </p>
@@ -179,8 +150,9 @@ export function MethodologyView({
           </p>
           <p>
             Leaderboard groups are connected components of inclusive Wilson
-            interval overlap, computed per suite. Live rows are excluded by
-            construction. Primary metric is paired Δregret.
+            interval overlap, computed per test set. Live rows are excluded by
+            construction. Primary metric is paired Δregret. Internal recording
+            labels are not shown on the main pages.
           </p>
           <ul className="list-disc space-y-1 pl-5">
             {notes.map((n) => (
@@ -191,13 +163,9 @@ export function MethodologyView({
       </details>
 
       {onHome ? (
-        <button
-          type="button"
-          className="min-h-11 rounded border border-stone-600 px-4 py-2 text-stone-200"
-          onClick={onHome}
-        >
+        <Button variant="secondary" onClick={onHome}>
           Home
-        </button>
+        </Button>
       ) : null}
     </section>
   );

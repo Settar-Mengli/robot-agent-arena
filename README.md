@@ -132,6 +132,8 @@ All robots, skills, and lore are original. Security-related gameplay uses safe f
 
 **Pages security:** the demo ships a Content-Security-Policy meta (scripts/styles from `'self'`; `connect-src` limited to `'self'` and `https://openrouter.ai`) and `referrer: strict-origin-when-cross-origin`. OpenRouter still receives an explicit `HTTP-Referer` header from the live client (not the browser’s default referrer). GitHub Pages cannot set `frame-ancestors` via HTTP headers or CSP meta — residual clickjacking risk is low for this static demo.
 
+**Screenshots:** refresh the README shot list after the UX 2 (D-054) redesign merges (nav labels, compact honesty, leaderboard chart, Home live link).
+
 ## License
 
 [MIT](LICENSE)

@@ -9,7 +9,7 @@ import { ArenaView } from "./ArenaView";
 import { ResultsView } from "./ResultsView";
 import { opponentModeLine } from "./opponent-mode";
 import {
-  HONESTY_ONE_LINE,
+  CPU_HONESTY_ONE_LINE,
   LIVE_HONESTY_ONE_LINE
 } from "../HonestyStrip";
 import { findForbiddenTechnicalText } from "../copy/forbidden-default-path";
@@ -30,7 +30,7 @@ describe("opponentMode honesty labels", () => {
     expect(findForbiddenTechnicalText(root.textContent ?? "")).toBeNull();
   }
 
-  it("cpu mode shows simple computer and recorded HonestyStrip", () => {
+  it("cpu mode shows simple computer and CPU HonestyStrip", () => {
     const store = createBattleViewStore();
     store.getState().resetBattle(runtime);
     render(
@@ -40,9 +40,10 @@ describe("opponentMode honesty labels", () => {
       "Opponent: simple computer (not an AI)"
     );
     expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
-      HONESTY_ONE_LINE
+      CPU_HONESTY_ONE_LINE
     );
-    expect(screen.getByTestId("arena-view").textContent).toMatch(/not live/);
+    const text = screen.getByTestId("arena-view").textContent ?? "";
+    expect(text).not.toMatch(/Recorded examples, not live AI/);
     assertClean(screen.getByTestId("arena-view"));
   });
 
@@ -131,7 +132,7 @@ describe("opponentMode honesty labels", () => {
     assertClean(screen.getByTestId("results-view"));
   });
 
-  it("ResultsView cpu keeps recorded HonestyStrip", () => {
+  it("ResultsView cpu uses CPU HonestyStrip, not recorded", () => {
     const outcome = {
       result: "draw" as const,
       reason: "turn-limit" as const
@@ -150,7 +151,10 @@ describe("opponentMode honesty labels", () => {
       />
     );
     expect(screen.getByTestId("honesty-one-line")).toHaveTextContent(
-      HONESTY_ONE_LINE
+      CPU_HONESTY_ONE_LINE
+    );
+    expect(screen.getByTestId("results-view").textContent).not.toMatch(
+      /Recorded examples, not live AI/
     );
     assertClean(screen.getByTestId("results-view"));
   });

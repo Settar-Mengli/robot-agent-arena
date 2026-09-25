@@ -7,6 +7,7 @@ import {
   type DecisionLabPolicyEvidence
 } from "../../decision-lab";
 import { InfoTip } from "../components/InfoTip";
+import { variantDisplayName } from "../copy/display-labels";
 import { plainPolicyLabel } from "./help-ranking-copy";
 
 export type ComparePanelProps = {
@@ -117,11 +118,11 @@ export function ComparePanel({
       <h3 className="text-lg font-medium text-stone-100">
         Compare recorded answers
       </h3>
-      <div className="mt-3 flex flex-wrap gap-3 text-sm">
-        <label className="text-stone-400">
+      <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <label className="grid content-start gap-2 text-stone-400">
           Mode{" "}
           <select
-            className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+            className="min-h-11 w-full min-w-0 rounded-lg border aa-border bg-stone-900 px-3 py-2"
             value={mode}
             onChange={(e) => setMode(e.target.value as CompareMode)}
             data-testid="compare-mode"
@@ -132,10 +133,10 @@ export function ComparePanel({
         </label>
         {mode === "same-model" ? (
           <>
-            <label className="text-stone-400">
+            <label className="grid content-start gap-2 text-stone-400">
               Model{" "}
               <select
-                className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+                className="min-h-11 w-full min-w-0 rounded-lg border aa-border bg-stone-900 px-3 py-2"
                 value={pinIndex}
                 onChange={(e) => setPinIndex(Number(e.target.value))}
                 data-testid="compare-model"
@@ -147,10 +148,10 @@ export function ComparePanel({
                 ))}
               </select>
             </label>
-            <label className="text-stone-400">
-              A{" "}
+            <label className="grid content-start gap-2 text-stone-400">
+              First prompt (A){" "}
               <select
-                className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+                className="min-h-11 w-full min-w-0 rounded-lg border aa-border bg-stone-900 px-3 py-2"
                 value={variantA}
                 onChange={(e) =>
                   setVariantA(e.target.value as typeof variantA)
@@ -158,20 +159,20 @@ export function ComparePanel({
                 data-testid="compare-variant-a"
               >
                 <option value="base" disabled={variantB === "base"}>
-                  basic
+                  {variantDisplayName("base")}
                 </option>
                 <option value="grounded" disabled={variantB === "grounded"}>
-                  with facts
+                  {variantDisplayName("grounded")}
                 </option>
                 <option value="freetext" disabled={variantB === "freetext"}>
-                  free-text
+                  {variantDisplayName("freetext")}
                 </option>
               </select>
             </label>
-            <label className="text-stone-400">
-              B{" "}
+            <label className="grid content-start gap-2 text-stone-400">
+              Second prompt (B){" "}
               <select
-                className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+                className="min-h-11 w-full min-w-0 rounded-lg border aa-border bg-stone-900 px-3 py-2"
                 value={variantB}
                 onChange={(e) =>
                   setVariantB(e.target.value as typeof variantB)
@@ -179,31 +180,31 @@ export function ComparePanel({
                 data-testid="compare-variant-b"
               >
                 <option value="base" disabled={variantA === "base"}>
-                  basic
+                  {variantDisplayName("base")}
                 </option>
                 <option value="grounded" disabled={variantA === "grounded"}>
-                  with facts
+                  {variantDisplayName("grounded")}
                 </option>
                 <option value="freetext" disabled={variantA === "freetext"}>
-                  free-text
+                  {variantDisplayName("freetext")}
                 </option>
               </select>
             </label>
           </>
         ) : (
-          <label className="text-stone-400">
+          <label className="grid content-start gap-2 text-stone-400">
             Variant{" "}
             <select
-              className="ml-1 rounded border border-stone-700 bg-stone-900 px-2 py-1"
+              className="min-h-11 w-full min-w-0 rounded-lg border aa-border bg-stone-900 px-3 py-2"
               value={crossVariant}
               onChange={(e) =>
                 setCrossVariant(e.target.value as typeof crossVariant)
               }
               data-testid="compare-cross-variant"
             >
-              <option value="base">basic</option>
-              <option value="grounded">with facts</option>
-              <option value="freetext">free-text</option>
+              <option value="base">{variantDisplayName("base")}</option>
+              <option value="grounded">{variantDisplayName("grounded")}</option>
+              <option value="freetext">{variantDisplayName("freetext")}</option>
             </select>
           </label>
         )}
@@ -215,9 +216,12 @@ export function ComparePanel({
         </p>
       ) : (
         <>
-          <p className="mt-2 text-sm text-stone-400" role="status">
-            Comparing {labelA} to {labelB}. Cohort size {n}. Excluded:{" "}
-            {excluded}. No universal rankings.
+          <p
+            className="aa-prose mt-5 text-sm leading-relaxed text-stone-400"
+            role="status"
+          >
+            Comparing {labelA} to {labelB}. Compared on {n} situations.
+            Excluded: {excluded}. No universal rankings.
             {thin ? (
               <span
                 className="mt-1 block text-amber-200/90"
@@ -231,20 +235,45 @@ export function ComparePanel({
           {n === 0 ? (
             <p className="mt-4 text-stone-400">No comparable recorded pairs.</p>
           ) : (
-            <dl className="mt-4 grid gap-2 text-sm text-stone-300 sm:grid-cols-2">
-              <div data-testid="compare-matched">
-                Situations matched: {n}
+            <dl className="mt-5 grid gap-4 text-sm text-stone-300 sm:grid-cols-2">
+              <div className="aa-metric" data-testid="compare-matched">
+                <dt className="text-stone-400">Situations matched:</dt>{" "}
+                <dd className="mt-2 text-2xl font-semibold tabular-nums text-stone-100">
+                  {n}
+                </dd>
+                <dd className="mt-2 text-stone-400">
+                  Recorded answers available on both sides.
+                </dd>
               </div>
-              <div data-testid="compare-changed">
-                Decisions changed: {changed} / {n}
+              <div className="aa-metric" data-testid="compare-changed">
+                <dt className="text-stone-400">Decisions changed:</dt>{" "}
+                <dd className="mt-2 text-2xl font-semibold tabular-nums text-stone-100">
+                  {changed} / {n}
+                </dd>
+                <dd className="mt-2 text-stone-400">
+                  Different choices do not necessarily mean better choices.
+                </dd>
               </div>
-              <div data-testid="compare-mean">
-                Mean miss score: {(regretA / n).toFixed(2)} →{" "}
-                {(regretB / n).toFixed(2)}
+              <div className="aa-metric" data-testid="compare-mean">
+                <dt className="text-stone-400">
+                  Average points worse than the best move:
+                </dt>{" "}
+                <dd className="mt-2 text-2xl font-semibold tabular-nums text-stone-100">
+                  {(regretA / n).toFixed(2)} → {(regretB / n).toFixed(2)}
+                </dd>
+                <dd className="mt-2 text-stone-400">
+                  Lower is better. Values follow the comparison order above.
+                </dd>
               </div>
-              <div>
-                Best-move rate: {((optimalA / n) * 100).toFixed(1)}% →{" "}
-                {((optimalB / n) * 100).toFixed(1)}%
+              <div className="aa-metric">
+                <dt className="text-stone-400">Best-move rate:</dt>{" "}
+                <dd className="mt-2 text-2xl font-semibold tabular-nums text-stone-100">
+                  {((optimalA / n) * 100).toFixed(1)}% →{" "}
+                  {((optimalB / n) * 100).toFixed(1)}%
+                </dd>
+                <dd className="mt-2 text-stone-400">
+                  Higher is better. Values follow the comparison order above.
+                </dd>
               </div>
             </dl>
           )}
