@@ -4,7 +4,7 @@
 
 AGENT ARENA (repository: `robot-agent-arena`) is an **agent evaluation framework** that measures and diagnoses decision quality against an exact oracle. The robot battle is the first **reference environment** — a deterministic, seeded pure TypeScript game used to produce committed measurements and a static demo.
 
-**Status today:** engine, `src/env` (robot + Resonance Seal), inference, agent, eval harness, Decision Lab shared types, and full UI (through D-054 + D-055 portfolio cut) ship as the **v0.1.0 release cut via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47)**. Next: Pages check, operator BYOK smoke; screenshots intentionally skipped for v0.1.0; optional demo video; issue #28.
+**Status today:** engine, `src/env` (robot + Resonance Seal), inference, agent, eval harness, Decision Lab shared types, and full UI (through D-054 + D-055 portfolio cut) ship as the **v0.1.0 release cut via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47)**. Next: Pages check, operator BYOK smoke; screenshots intentionally skipped for v0.1.0; issue #28.
 
 ## Layered architecture and dependency rule
 

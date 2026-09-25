@@ -1,5 +1,5 @@
 /**
- * UNVERIFIED catalog candidates (operator may promote after runbook verify).
+ * UNVERIFIED catalog candidates (operator may promote after local BYOK verify).
  * Catalog churns; do not claim these work.
  */
 export const LIVE_MODEL_CANDIDATES_UNVERIFIED = [
@@ -11,10 +11,9 @@ export const LIVE_MODEL_CANDIDATES_UNVERIFIED = [
 
 /**
  * Active Arena allowlist (UI dropdown).
- * Every id here is still UNVERIFIED until the operator completes
- * docs/OPERATOR_RECORDING_RUNBOOK.md § BYOK model verification — including
- * the default `openrouter/free` placeholder. Do not treat allowlist membership
- * as proof the model works.
+ * Every id here is still UNVERIFIED until the operator completes local BYOK
+ * model verification — including the default `openrouter/free` placeholder.
+ * Do not treat allowlist membership as proof the model works.
  */
 export const LIVE_MODEL_IDS = ["openrouter/free"] as const;
 

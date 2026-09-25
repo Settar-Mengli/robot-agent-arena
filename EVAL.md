@@ -22,7 +22,7 @@ node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-
 
 ### Evidence+Ship (ES) — record then bench
 
-**Order:** run all `eval:record` first (operator, local keys). Only after fixtures exist, run `--mode bench` (keyless replay; never live). See [OPERATOR_RECORDING_RUNBOOK.md](docs/OPERATOR_RECORDING_RUNBOOK.md).
+**Order:** run all `eval:record` first (operator, local keys). Only after fixtures exist, run `--mode bench` (keyless replay; never live).
 
 - Additive suite: `--snapshot-suite adversarial-heldout-ext` (D-044; honest n after widen-once seeds 201–280).
 - Second pin: `groq:openai/gpt-oss-20b` beside `gemini:gemini-3.5-flash-lite` (D-046).
@@ -353,7 +353,7 @@ node scripts/run-ts.mjs src/eval/cli.ts --mode replay --suite heldout --variants
 ### Operator multi-model command
 
 ```bash
-# Local record (keys required), then keyless bench — see docs/OPERATOR_RECORDING_RUNBOOK.md
+# Local record (keys required), then keyless bench
 npm run eval:record -- --suite heldout --variants base,grounded --snapshot-suite adversarial --max-matches 0 --models groq:openai/gpt-oss-20b
 node scripts/run-ts.mjs src/eval/cli.ts --mode bench --models gemini:gemini-3.5-flash-lite,groq:openai/gpt-oss-20b --variants base,grounded --snapshot-suite adversarial,adversarial-heldout-ext --max-matches 0
 ```

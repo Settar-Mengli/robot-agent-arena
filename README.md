@@ -119,7 +119,7 @@ src/
   __tests__/       # Vitest node project
 evals/             # Committed snapshot suites + fixture store + out-committed
 scripts/           # run-ts.mjs and tooling
-docs/              # Master record, demo script, media shot list
+docs/              # Case study, preregistration notes
 ```
 
 **Stack in use:** TypeScript (strict), Vite, Vitest (+ coverage), ESLint 10 flat config, React, Tailwind CSS, Zustand. One localStorage save slot (Batch 3 / B.4) — done.
@@ -139,8 +139,6 @@ docs/              # Master record, demo script, media shot list
 | [ROADMAP.md](ROADMAP.md) | MVP scope and locked batches |
 | [PROGRESS.md](PROGRESS.md) | Current branch / NEXT |
 | [AGENT_RULES.md](AGENT_RULES.md) | Contributor / agent operating rules |
-| [docs/AGENT-ARENA-MASTER-RECORD.md](docs/AGENT-ARENA-MASTER-RECORD.md) | Consolidated operator A→Z record |
-| [docs/demo-video-script.md](docs/demo-video-script.md) | Voice-over + recording checklist |
 
 ---
 
