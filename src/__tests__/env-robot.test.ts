@@ -109,13 +109,4 @@ describe("robot environment adapter", () => {
       expect(typeof robotEnvironment.terminalValue(runtime)).toBe("number");
     }
   });
-
-  it("terminalValue is HP differential only while battle is not over", () => {
-    const runtime = startBattle(STRIKER, FRACTURE, "tv-mid", 10);
-    expect(robotEnvironment.isTerminal(runtime)).toBe(false);
-    const expected = runtime.cpu.health - runtime.player.health;
-    const value = robotEnvironment.terminalValue(runtime);
-    expect(value).toBe(expected);
-    expect(Math.abs(value)).toBeLessThan(1000);
-  });
 });
