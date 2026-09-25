@@ -4,8 +4,8 @@
 - Date: 2026-09-25
 - Branch: `release/final-polish` — **v0.1.0 release cut shipped via [PR #47](https://github.com/Settar-Mengli/robot-agent-arena/pull/47) (D-055)**
 - HEAD: builds on [#46](https://github.com/Settar-Mengli/robot-agent-arena/pull/46) — battle leave races, persist guards, terminalValue
-- Current state: D-033 batches **8–11** closed for v0.1.0 (**D-055**); visitor insight loop + lifecycle/persist/env fixes; docs truth + race/regression tests. Screenshots **intentionally skipped** for this release (`docs/media/SHOT-LIST.md` kept as a future capture plan, marked not captured).
-- **NEXT:** Pages check after merge; operator BYOK smoke; optional demo video / `v0.1.0` tag; delete stale `ux2/redesign` when done.
+- Current state: D-033 batches **8–11** closed for v0.1.0 (**D-055**); visitor insight loop + lifecycle/persist/env fixes; docs truth + race/regression tests. Screenshots **intentionally skipped** for this release.
+- **NEXT:** Pages check after merge; operator BYOK smoke; delete stale `ux2/redesign` when done.
 
 ## Completed
 - Repository baseline through Batch 3 (PR #37 / D-049) + D-050 (PR #38) on main.
@@ -24,5 +24,6 @@ Lab pack note: decision-lab.v3.json was frozen at Batch 3; Batch 4 extended eval
 - Memory variants unmeasured (D-055 defer).
 - Heldout-ext freetext deferred (D-047).
 - Issue #28 vitest worker noise on long drift steps (assertions still green). Local tip: do not leave `SNAPSHOT_DRIFT=1` in the shell when running plain `npm test`.
-- Demo video optional (see `docs/demo-video-script.md`); screenshots deferred (see `docs/media/SHOT-LIST.md`).
+- Screenshots deferred (operator capture plan kept privately).
 - Post-merge BYOK smoke (operator on deployed Pages): (1) open site, (2) Home → **More ways to play** → **Play a live AI with your own key**, (3) enable Live AI, (4) paste OpenRouter key, (5) pick a listed model, (6) play 3 turns, (7) confirm no console errors and keyless path when Live is off.
+- Operator-only materials (demo script, shot list, session master record) were removed from the repo after v0.1.0 and are kept privately.
